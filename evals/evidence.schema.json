@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/skill-godot/evidence.schema.json",
+  "title": "Godot skill evaluation evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "case_id", "gates", "scores"],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/gate"
+      }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/dimension"
+      }
+    },
+    "run_metadata": {
+      "type": "object"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "evidence_list": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence"],
+      "properties": {
+        "status": {
+          "enum": ["pass", "fail", "not_tested"]
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence_list"
+        }
+      }
+    },
+    "dimension": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "evidence"],
+          "properties": {
+            "status": {
+              "const": "scored"
+            },
+            "score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "const": "not_applicable"
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

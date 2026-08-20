@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "score_scale": {
+    "min": 0,
+    "max": 4,
+    "labels": {
+      "0": "missing or broken",
+      "1": "major failures",
+      "2": "partially acceptable",
+      "3": "solid with minor issues",
+      "4": "fully meets the case"
+    }
+  },
+  "thresholds": {
+    "pass": 85,
+    "conditional": 70
+  },
+  "blocking_gates": [
+    {
+      "id": "engine_clean",
+      "description": "The supported Godot version imports and runs the evaluated state without relevant errors."
+    },
+    {
+      "id": "core_loop_reachable",
+      "description": "The requested core interaction and completion/progression state can be reached."
+    },
+    {
+      "id": "restart_or_recovery",
+      "description": "The evaluated flow has the required restart, retry, recovery, or repeat path without a soft lock."
+    },
+    {
+      "id": "scene_authored",
+      "description": "Ordinary persistent composition is saved as editable Godot scenes/resources rather than hidden in runtime construction."
+    },
+    {
+      "id": "rights_clear",
+      "description": "External/generated assets used in the evaluated result have sufficient provenance and rights status for the intended test."
+    },
+    {
+      "id": "interactive_onboarding",
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-3d-asset-pack", "constrained-mobile-web"],
+      "description": "From a clean first-use state, an uncoached player performs the taught core action and reaches the normal loop; static hints or tutorial fields alone do not pass."
+    },
+    {
+      "id": "clean_shipping_state",
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-3d-asset-pack", "constrained-mobile-web"],
+      "description": "A release-like clean profile proves shipping-default progress/settings/onboarding separately from seeded or previously played QA state, with state provenance recorded."
+    },
+    {
+      "id": "independent_ux_review",
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-3d-asset-pack", "constrained-mobile-web"],
+      "description": "A person or genuinely independent evaluation context that did not build the flow reviews first-use playability and raw representative visual evidence; self-review alone does not pass."
+    },
+    {
+      "id": "responsive_layout_evidence",
+      "cases": ["constrained-mobile-web"],
+      "description": "The supported viewport matrix includes reference, near-square/short-height, extreme-narrow, and wide states as applicable, with no blocking overlap, detachment, clipping, or image distortion."
+    },
+    {
+      "id": "input_modality_ui_evidence",
+      "cases": ["constrained-mobile-web"],
+      "description": "Required pointer/touch and keyboard/gamepad UI entry paths are exercised separately; initial focus is truthful; pointer-focus cleanup does not cancel BaseButton release/pressed behavior in the target Web build; and every required overflowing touch surface proves drag-induced scroll movement rather than relying on node presence."
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "intent_and_scope",
+      "weight": 8,
+      "description": "Preserves the brief, platform, genre-specific intent, constraints, and requested scope."
+    },
+    {
+      "id": "scene_resource_authorship",
+      "weight": 15,
+      "description": "Uses maintainable scenes, instances, resources, wrappers, ownership, and focused scripts."
+    },
+    {
+      "id": "gameplay_correctness",
+      "weight": 18,
+      "description": "Core behavior, collisions, state transitions, objectives, failure, and restart work correctly."
+    },
+    {
+      "id": "playability_and_ux",
+      "weight": 15,
+      "description": "Controls, input-modality-aware focus, feedback, camera, interactive onboarding, semantic progression/navigation UI, explained accessibility settings, readable compound controls, and recovery make the loop understandable."
+    },
+    {
+      "id": "visual_coherence",
+      "weight": 6,
+      "description": "Art direction, composition, motion, lighting, effects, and UI form a coherent game presentation."
+    },
+    {
+      "id": "responsive_visual_integrity",
+      "weight": 3,
+      "allow_not_applicable": true,
+      "description": "Across the supported viewport matrix, composition remains attached, content fits or scrolls intentionally, focus/hover/scrollbar states remain visible without layout shift, image-bearing controls preserve intended aspect ratios under real Container layout, and localized compound/icon-only button visuals remain centered as complete groups inside their hit targets."
+    },
+    {
+      "id": "audio_direction_quality",
+      "weight": 6,
+      "allow_not_applicable": true,
+      "description": "The sonic direction, SFX, music/ambience, mix, controls, provenance, repetition handling, and target-build behavior are intentional and verified rather than generic placeholder audio."
+    },
+    {
+      "id": "asset_pipeline",
+      "weight": 9,
+      "allow_not_applicable": true,
+      "description": "Asset sourcing/generation, provenance, cleanup, import, wrapper scenes, and reimport behavior are production-appropriate."
+    },
+    {
+      "id": "technical_quality",
+      "weight": 8,
+      "description": "Code/resources are focused, compatible, maintainable, and free from relevant errors or brittle shortcuts."
+    },
+    {
+      "id": "performance_and_size",
+      "weight": 7,
+      "allow_not_applicable": true,
+      "description": "Measured performance, memory/loading behavior, and build size meet the case's explicit target budgets."
+    },
+    {
+      "id": "evidence_and_reproducibility",
+      "weight": 5,
+      "description": "Commands, captures, reports, versions, seeds, clean-versus-seeded state provenance, independent reviewer context, and unverified limits are recorded reproducibly."
+    }
+  ],
+  "cases": [
+    {
+      "id": "new-2d-provided-assets",
+      "brief": "Create a complete small 2D slice from a fixed licensed sprite/audio fixture without replacing its art direction.",
+      "focus": ["scene authorship", "sprite/audio integration", "core loop", "camera and UI", "restart"],
+      "minimum_scores": {"playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-2d-generated-assets",
+      "brief": "Create a complete small 2D slice whose production sprites require generation/editing and deterministic sheet cleanup.",
+      "focus": ["style anchor", "frame consistency", "provenance", "Godot animation", "visual/audio review"],
+      "minimum_scores": {"playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-3d-asset-pack",
+      "brief": "Create a complete small 3D slice from a licensed pack using intentional import settings, materials, collisions, and wrapper scenes.",
+      "focus": ["scale", "lighting", "wrapper scenes", "collision/navigation", "audio", "performance"],
+      "minimum_scores": {"playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-3d-generated-prop",
+      "brief": "Integrate a generated static 3D hero prop into a small playable scene and prove the source-to-GLB-to-Godot pipeline.",
+      "focus": ["topology and UV review", "materials", "pivot/scale", "collision", "provenance"]
+    },
+    {
+      "id": "existing-project-feature",
+      "brief": "Add a requested feature to a convention-heavy existing project without migrations or unrelated architectural rewrites.",
+      "focus": ["inspection", "convention preservation", "minimal diff", "regression coverage", "integration"]
+    },
+    {
+      "id": "constrained-mobile-web",
+      "brief": "Produce or optimize a small slice for an explicit mobile/web performance, memory, loading, and package-size budget.",
+      "focus": ["measured budgets", "renderer/platform constraints", "input/UI", "audio unlock/compression", "export", "baseline delta"],
+      "minimum_scores": {
+        "playability_and_ux": 3,
+        "responsive_visual_integrity": 3,
+        "audio_direction_quality": 3
+      }
+    }
+  ]
+}

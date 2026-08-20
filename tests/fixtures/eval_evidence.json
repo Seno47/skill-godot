@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "case_id": "existing-project-feature",
+  "gates": {
+    "engine_clean": {
+      "status": "pass",
+      "evidence": ["fixture: engine report"]
+    },
+    "core_loop_reachable": {
+      "status": "pass",
+      "evidence": ["fixture: deterministic state trace"]
+    },
+    "restart_or_recovery": {
+      "status": "pass",
+      "evidence": ["fixture: restart trace"]
+    },
+    "scene_authored": {
+      "status": "pass",
+      "evidence": ["fixture: scene graph audit"]
+    },
+    "rights_clear": {
+      "status": "pass",
+      "evidence": ["fixture: no external assets introduced"]
+    },
+    "interactive_onboarding": {
+      "status": "pass",
+      "evidence": ["fixture: clean first-use action trace and uncoached playtest"]
+    },
+    "clean_shipping_state": {
+      "status": "pass",
+      "evidence": ["fixture: clean profile capture separated from seeded QA state"]
+    },
+    "independent_ux_review": {
+      "status": "pass",
+      "evidence": ["fixture: independent reviewer raw findings"]
+    },
+    "responsive_layout_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: reference, near-square, extreme-narrow, and wide captures"]
+    },
+    "input_modality_ui_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: pointer/keyboard dialog entry and touch-drag scroll trace"]
+    }
+  },
+  "scores": {
+    "intent_and_scope": {
+      "score": 4,
+      "evidence": ["fixture: brief comparison"]
+    },
+    "scene_resource_authorship": {
+      "score": 4,
+      "evidence": ["fixture: scene report"]
+    },
+    "gameplay_correctness": {
+      "score": 4,
+      "evidence": ["fixture: behavior trace"]
+    },
+    "playability_and_ux": {
+      "score": 4,
+      "evidence": ["fixture: playtest notes"]
+    },
+    "visual_coherence": {
+      "score": 4,
+      "evidence": ["fixture: capture review"]
+    },
+    "responsive_visual_integrity": {
+      "score": 4,
+      "evidence": ["fixture: independent viewport matrix and aspect-ratio review"]
+    },
+    "audio_direction_quality": {
+      "status": "not_applicable",
+      "notes": "fixture feature does not affect presentation or audio"
+    },
+    "asset_pipeline": {
+      "status": "not_applicable"
+    },
+    "technical_quality": {
+      "score": 4,
+      "evidence": ["fixture: code and resource audit"]
+    },
+    "performance_and_size": {
+      "status": "not_applicable"
+    },
+    "evidence_and_reproducibility": {
+      "score": 4,
+      "evidence": ["fixture: recorded commands and versions"]
+    }
+  },
+  "run_metadata": {
+    "purpose": "scorecard smoke fixture"
+  },
+  "limitations": []
+}

@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "build": {
+    "id": "unrecorded",
+    "artifact": "unrecorded",
+    "godot_version": "unrecorded",
+    "export_preset": "unrecorded",
+    "source_revision_or_hash": "unrecorded"
+  },
+  "support_contract": {
+    "orientation": "unrecorded",
+    "input_modes": [],
+    "languages": [],
+    "declared_minimum_viewport": null,
+    "matrix_basis": "canonical fallback; replace or extend with declared platform limits"
+  },
+  "viewport_matrix": [
+    {
+      "id": "extreme_narrow",
+      "width": 336,
+      "height": 629,
+      "role": "narrow portrait stress"
+    },
+    {
+      "id": "near_square",
+      "width": 760,
+      "height": 701,
+      "role": "near-square composition and attached footer stress"
+    },
+    {
+      "id": "short_height_landscape",
+      "width": 844,
+      "height": 390,
+      "role": "short-height overlay and action-bar stress"
+    },
+    {
+      "id": "wide",
+      "width": 1280,
+      "height": 720,
+      "role": "wide reference"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "clean_shipping",
+      "provenance": "release-like build after explicit browser storage and Godot user data reset",
+      "storage_reset_method": "unrecorded",
+      "seed_method": null,
+      "expected_defaults": {},
+      "verified_defaults": {},
+      "result": "not_tested"
+    },
+    {
+      "id": "seeded_qa",
+      "provenance": "separate profile containing only documented QA progress",
+      "storage_reset_method": "unrecorded",
+      "seed_method": "unrecorded",
+      "expected_defaults": null,
+      "verified_defaults": null,
+      "result": "not_tested"
+    }
+  ],
+  "capture_requirements": [
+    {
+      "id": "clean_menu",
+      "profile": "clean_shipping",
+      "states": ["first boot or menu"],
+      "viewport_ids": ["extreme_narrow", "near_square", "short_height_landscape", "wide"],
+      "checks": ["shipping defaults", "primary action emits pressed after a full pointer press/release", "localized icon-plus-label visual group is centered inside the hit target", "icon-only visuals are centered inside their hit targets", "attached helper/footer", "no clipping"],
+      "artifacts": [],
+      "result": "not_tested"
+    },
+    {
+      "id": "interactive_onboarding",
+      "profile": "clean_shipping",
+      "states": ["before taught action", "action transition", "feedback after action", "normal loop"],
+      "viewport_ids": ["extreme_narrow", "near_square", "short_height_landscape", "wide"],
+      "checks": ["highlighted target visible", "required control visible", "overlay does not cover either", "uncoached action succeeds"],
+      "artifacts": [],
+      "result": "not_tested"
+    },
+    {
+      "id": "settings_and_overflow",
+      "profile": "clean_shipping",
+      "states": ["pointer-open settings", "keyboard/gamepad-open settings", "settings top", "settings scrolled", "mute and accessibility descriptions"],
+      "viewport_ids": ["extreme_narrow", "near_square", "short_height_landscape", "wide"],
+      "checks": ["pointer-open has no false selection", "keyboard/gamepad-open has visible meaningful focus", "focus art is not clipped", "scrollbar is visibly thick and contrasted at real overflow", "touch/drag probe changes scroll position", "compound rows remain readable", "long localization", "no detached controls"],
+      "artifacts": [],
+      "result": "not_tested"
+    },
+    {
+      "id": "seeded_progression",
+      "profile": "seeded_qa",
+      "states": ["progression selector", "record/result", "locked and unlocked content"],
+      "viewport_ids": ["extreme_narrow", "near_square", "short_height_landscape", "wide"],
+      "checks": ["semantic names/status", "navigation model matches content volume", "previous/next or scroll reaches all content and returns deterministically", "natural numbering unless leading zeros are justified", "long localized titles remain distinguishable", "singular and plural copy", "seed provenance visible in report"],
+      "artifacts": [],
+      "result": "not_tested"
+    }
+  ],
+  "runtime_probes": [
+    {
+      "id": "touch_scroll",
+      "fixture_scene": "unrecorded",
+      "target_node": "unrecorded",
+      "viewport": "336x629",
+      "before": null,
+      "after": null,
+      "artifact": "unrecorded",
+      "result": "not_tested"
+    },
+    {
+      "id": "hover_focus_geometry",
+      "controls": [],
+      "center_delta": null,
+      "neighbor_rect_changes": null,
+      "artifact": "unrecorded",
+      "result": "not_tested"
+    },
+    {
+      "id": "button_composition_and_click",
+      "fixture_scene": "unrecorded",
+      "locales": [],
+      "viewports": [],
+      "compound_controls": [],
+      "compound_group_center_deltas": {},
+      "icon_only_controls": [],
+      "icon_center_deltas": {},
+      "click_targets": [],
+      "pressed_results": {},
+      "target_web_click_artifact": "unrecorded",
+      "artifact": "unrecorded",
+      "result": "not_tested"
+    }
+  ],
+  "browser_console": {
+    "profiles_checked": [],
+    "errors": null,
+    "warnings": null,
+    "artifact": "unrecorded",
+    "result": "not_tested"
+  },
+  "independent_reviewer": {
+    "context": "unrecorded",
+    "did_not_build_flow": null,
+    "raw_review_artifact": "unrecorded",
+    "result": "not_tested"
+  },
+  "limitations": []
+}

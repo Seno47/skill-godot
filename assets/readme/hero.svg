@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">skill-godot — production Godot game development for Codex</title>
+  <desc id="desc">A project-native hero showing an editable Godot scene flowing through resources and deterministic probes into verified evidence.</desc>
+
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111B31"/>
+      <stop offset="1" stop-color="#0B1020"/>
+    </linearGradient>
+    <linearGradient id="tile-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#70C9FF"/>
+      <stop offset="1" stop-color="#3F91CF"/>
+    </linearGradient>
+    <linearGradient id="tile-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE39A"/>
+      <stop offset="1" stop-color="#E6A936"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="420" rx="28" fill="#080D19"/>
+  <rect x="1" y="1" width="1198" height="418" rx="27" fill="none" stroke="#23324B" stroke-width="2"/>
+  <path d="M734 0V420" stroke="#1B2940"/>
+  <path d="M760 357H1144" stroke="#1B2940"/>
+
+  <g id="title-block" transform="translate(64 54)">
+    <text x="0" y="0" fill="#70C9FF" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="700" letter-spacing="2">CODEX SKILL · GODOT 4</text>
+    <text x="0" y="82" fill="#F5F8FF" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="68" font-weight="760" letter-spacing="-2">skill-godot</text>
+    <text x="0" y="132" fill="#B9C7D8" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="25">From a playable brief to a verified, editable game.</text>
+
+    <g transform="translate(0 174)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="650">
+      <rect width="74" height="38" rx="10" fill="#15243A" stroke="#31506F"/>
+      <text x="37" y="25" text-anchor="middle" fill="#D8E9F7">2D</text>
+      <rect x="86" width="74" height="38" rx="10" fill="#15243A" stroke="#31506F"/>
+      <text x="123" y="25" text-anchor="middle" fill="#D8E9F7">3D</text>
+      <rect x="172" width="92" height="38" rx="10" fill="#15243A" stroke="#31506F"/>
+      <text x="218" y="25" text-anchor="middle" fill="#D8E9F7">2.5D</text>
+      <rect x="276" width="142" height="38" rx="10" fill="#15243A" stroke="#31506F"/>
+      <text x="347" y="25" text-anchor="middle" fill="#D8E9F7">ISOMETRIC</text>
+      <rect x="430" width="102" height="38" rx="10" fill="#15243A" stroke="#31506F"/>
+      <text x="481" y="25" text-anchor="middle" fill="#D8E9F7">WEB</text>
+    </g>
+
+    <g transform="translate(0 268)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+      <text x="0" y="0" fill="#F5F8FF" font-size="22" font-weight="700">20</text>
+      <text x="34" y="0" fill="#8396AC" font-size="18">production guides</text>
+      <text x="234" y="0" fill="#F5F8FF" font-size="22" font-weight="700">12</text>
+      <text x="268" y="0" fill="#8396AC" font-size="18">audit helpers</text>
+      <text x="438" y="0" fill="#F5F8FF" font-size="22" font-weight="700">4</text>
+      <text x="458" y="0" fill="#8396AC" font-size="18">Godot probes</text>
+    </g>
+  </g>
+
+  <g id="scene-pipeline" transform="translate(762 32)">
+    <text x="0" y="20" fill="#8396AC" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" letter-spacing="1.5">SCENE-FIRST PRODUCTION LOOP</text>
+
+    <path d="M191 113V172" stroke="#57718D" stroke-width="3" stroke-dasharray="7 7"/>
+    <path d="M191 241V298" stroke="#57718D" stroke-width="3" stroke-dasharray="7 7"/>
+    <path d="M184 291L191 301L198 291" fill="none" stroke="#57718D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <g transform="translate(38 54)">
+      <path d="M153 0L306 52L153 104L0 52Z" fill="url(#tile-blue)"/>
+      <path d="M0 52L153 104V126L0 74Z" fill="#286C9D"/>
+      <path d="M306 52L153 104V126L306 74Z" fill="#1F587F"/>
+      <text x="153" y="52" text-anchor="middle" fill="#07101C" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="23" font-weight="800">SCENES</text>
+      <text x="153" y="80" text-anchor="middle" fill="#18344B" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">.tscn · .tres</text>
+    </g>
+
+    <g transform="translate(14 177)">
+      <path d="M105 0L210 36L105 72L0 36Z" fill="#223653" stroke="#4E7195" stroke-width="2"/>
+      <path d="M0 36L105 72V89L0 53Z" fill="#172942"/>
+      <path d="M210 36L105 72V89L210 53Z" fill="#132238"/>
+      <text x="105" y="43" text-anchor="middle" fill="#C8D7E7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="700">RESOURCES</text>
+    </g>
+
+    <g transform="translate(229 177)">
+      <path d="M105 0L210 36L105 72L0 36Z" fill="url(#tile-gold)"/>
+      <path d="M0 36L105 72V89L0 53Z" fill="#B87B20"/>
+      <path d="M210 36L105 72V89L210 53Z" fill="#8E5E17"/>
+      <text x="105" y="43" text-anchor="middle" fill="#362300" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="800">PROBES</text>
+    </g>
+
+    <g transform="translate(82 302)">
+      <rect width="218" height="50" rx="13" fill="url(#panel)" stroke="#31506F" stroke-width="2"/>
+      <circle cx="26" cy="25" r="8" fill="#67D49A"/>
+      <text x="48" y="32" fill="#EAF2FA" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" font-weight="700">VERIFIED EVIDENCE</text>
+    </g>
+  </g>
+</svg>
+
