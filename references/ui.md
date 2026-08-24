@@ -44,6 +44,7 @@ Absolute offsets are appropriate for deliberate fixed-size elements, fine art-di
 - Inspect focus/hover/pressed styles inside every clipping ancestor. Focus outlines that rely on `StyleBox.expand_margin_*` may be cut by a `ScrollContainer`; keep the state legible inside the allocated rect or provide intentional internal clearance.
 - Keep hit targets appropriate to the target device and avoid hover-only information on touch.
 - Separate UI actions from gameplay actions when simultaneous input would cause conflicts.
+- For captured third-person mouse-look, review the real full-screen HUD's event routing. `Node._unhandled_input()` runs only after GUI handling, so a covering `Control` can consume `InputEventMouseMotion` even when the HUD looks non-modal. Either make passive HUD regions ignore/propagate the motion intentionally or receive captured look at an earlier suitable stage and gate it explicitly by gameplay/modal state. A direct controller-method call and an `InputMap` entry do not prove the production scene receives mouse motion.
 - Do not clear focus or pressed state in `_input`/`_gui_input` on pointer release before `BaseButton` finishes its release action. If pointer-focus cleanup is required, let `pressed` emit first and release focus afterward (commonly deferred). Prove the target Web build emits `pressed`; hover feedback alone is not click evidence.
 - Do not claim touch scrolling because a `ScrollContainer` exists. When overflowing content is touch-accessible, inject or perform a real `InputEventScreenTouch` plus `InputEventScreenDrag`, assert that scroll position changes, and still verify the exported browser/device gesture path.
 
@@ -57,6 +58,8 @@ Absolute offsets are appropriate for deliberate fixed-size elements, fine art-di
 - Explain accessibility settings in player language. A label such as “Reduced motion” is not enough when its effect is ambiguous; add a concise description or preview of what changes while preserving the player's choice.
 - Ensure text is real text when it needs localization, accessibility, or dynamic content; do not bake arbitrary UI copy into generated images.
 - Test interpolated counts and records with locale-representative values for zero, singular, plural, and larger numbers. Do not ship English shortcuts such as `pulse(s)` or slash-separated word forms; use the project's localization/plural rules and inspect the result at the narrowest supported width.
+
+For camera-driven 3D play, budget persistent HUD in screen space before styling it. Record the intended maximum top/bottom/side band occupancy and a central gameplay sightline corridor for each supported aspect ratio; count opaque and strongly translucent backplates, not just label bounds. Measure runtime `Control` rects and review the same frame with representative world content. A project-specific budget is preferable to a universal percentage, but it must preserve the route, interaction target, horizon, and near-player hazards rather than merely justify an already oversized panel. Modal menus may cover the world intentionally; ordinary gameplay HUD may not.
 
 Review content semantics as well as localization and layout. Repeated selection cards must communicate a meaningful identity or distinction appropriate to the game—such as a short localized name, objective, mechanic, thumbnail, region, or other authored cue—plus availability/progress when useful. A grid of numbers with only generic statuses such as “New”, “Locked”, or a record value can be technically localized yet still read as placeholder content. Do not invent decorative prose where a deliberately number-driven design is clearer; document that choice and test comprehension.
 
@@ -80,7 +83,9 @@ Inspect at minimum:
 - long localization strings and dynamic values;
 - localized numeric forms and placeholder substitution, including singular/plural records and result copy;
 - UI over both quiet and busy gameplay backgrounds;
+- persistent HUD runtime occupancy against its recorded budget, plus unobstructed central/route sightlines in representative 3D gameplay views;
 - pause/resume, scene transitions, and focus restoration.
+- captured mouse-look through the production HUD: inject `InputEventMouseMotion` with `Input.parse_input_event()`, require both yaw and pitch change, then assess sensitivity hands-on in the target build;
 - real overflow with a raw screenshot proving scrollbar thickness, contrast, gutter, grabber, and clipped-content boundary; serialized theme overrides or a theme constant alone do not pass;
 - touch-drag movement of every required scroll surface, preferably with the reusable probe in `assets/godot-tests/touch_scroll_probe.gd` plus target-build interaction;
 - before/hover/focus geometry for animated controls: the visual center stays stable within a justified tolerance and sibling/container allocations do not move unless reflow is intentional. Scale around a deliberate pivot after layout rather than changing minimum size or margins as an incidental hover effect.
@@ -88,7 +93,7 @@ Inspect at minimum:
 
 For guided onboarding overlays, verify the instruction panel, pointer/highlight, highlighted world target, and required control together at every compact matrix point. The target and required control must remain visible and tappable; a translucent card or glow does not excuse a blocking bounds intersection. Reflow or move the card to another region instead of merely shrinking critical text.
 
-Reject the pass if controls overlap, images distort, a localized icon-plus-label group is visually off-center, an icon-only visual drifts from its hit target, related helper/footer content visually detaches, pointer-open creates a false selected/focused value, keyboard focus disappears, focus cleanup cancels the pending click, hover works without `pressed`, focus/hover art is clipped, an overflowing scrollbar is effectively invisible, touch drag does not move required content, compound rows lose ownership, list navigation hides or strands content, semantic cards look like placeholders, accessibility controls are unexplained, hover shifts neighbors, theme variants drift, default styling remains accidentally, or runtime scripts rebuild a hierarchy that belongs in a scene.
+Reject the pass if controls overlap, images distort, a localized icon-plus-label group is visually off-center, an icon-only visual drifts from its hit target, related helper/footer content visually detaches, persistent HUD exceeds its recorded occupancy or blocks ordinary 3D sightlines, pointer-open creates a false selected/focused value, keyboard focus disappears, focus cleanup cancels the pending click, hover works without `pressed`, focus/hover art is clipped, an overflowing scrollbar is effectively invisible, touch drag does not move required content, compound rows lose ownership, list navigation hides or strands content, semantic cards look like placeholders, accessibility controls are unexplained, hover shifts neighbors, theme variants drift, default styling remains accidentally, or runtime scripts rebuild a hierarchy that belongs in a scene.
 
 Useful official references:
 

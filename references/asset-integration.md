@@ -87,6 +87,7 @@ These are patterns, not mandatory trees. Include only nodes needed by the concep
 - Keep imported model scenes as generated inputs; add gameplay children and overrides in wrapper/inherited scenes.
 - Use external resources for shared materials, themes, curves, gradients, audio, stats, and configuration.
 - Add collisions shaped for gameplay rather than tracing artwork/render meshes by default.
+- Treat render, gameplay-collision, navigation, and camera-only visibility shells as related but distinct authored contracts. Simplification is expected, but preserve camera-relevant openings and silhouette boundaries; a broad box over a doorway, arch, gate, railing, or window needs an explicit reason and an open-hole negative test.
 - Add navigation, sockets, markers, occluders, effect anchors, and animation events deliberately.
 - Instance the wrapper scene in levels; do not repeatedly place raw models/sprites and rebuild their behavior elsewhere.
 - For non-placeable textures, icons, fonts, and audio, reference them through the relevant material/theme/resource/component instead of inventing empty wrapper scenes.
@@ -116,6 +117,7 @@ Move an asset to `integrated` when paths/import settings/resources/scenes are co
 - representative gameplay framing and motion;
 - lighting/material response or UI/background contrast;
 - collision, interaction, navigation, animation, audio, and effects as applicable;
+- render/collision/camera-proxy agreement at representative openings and occlusion-sensitive viewpoints;
 - supported aspect ratios and target renderer/platform;
 - performance at realistic instance counts;
 - reimport stability and absence of missing dependencies;

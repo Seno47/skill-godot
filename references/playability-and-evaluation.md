@@ -30,18 +30,22 @@ List the representative states before polishing:
 | Clean first use | shipping-default state is visible; the player performs the taught core action without developer narration |
 | First control | input produces expected motion/action plus visual and audible feedback |
 | Core interaction | collision/raycast/state change, coherent feedback, no soft lock |
-| Pressure/failure | failure can occur and is communicated visually and audibly when appropriate |
+| Pressure/failure | failure can occur and is communicated visually and audibly when appropriate; clean first use is not punished before the required action is taught |
 | Success/progression | goal can be completed, state advances, and result feedback is distinct |
 | Restart/transition | clean reset, no duplicate state or leaked nodes |
 | Edge case | relevant boundary, empty/full, pause, or device change |
 
 Keep the matrix proportional. A one-screen toy may need five states; a save/load feature needs persistence and corrupted/missing-data cases.
 
+For a complete game, the boot/menu evidence also includes the exported app icon and primary menu mark at their actual display sizes. Have an independent reviewer describe what the mark depicts before receiving the intended explanation; a coherent palette or clean arrangement of primitives is not evidence of game-specific identity. Record the result with `assets/semantic-identity-review.template.md`.
+
 ## Prove onboarding through action
 
 For a complete game or vertical slice with a non-obvious mechanic, onboarding must advance through an observable player action. Highlight or constrain the relevant target/control, wait for the player to perform the intended input, confirm the result, and then release the player into the normal loop. A paragraph, static hint, tutorial data field, localized string, or “How to play” page can support this sequence but cannot replace it.
 
 Test from the clean shipping profile with a person or independent evaluator who has not been coached on the mechanic. Evidence should show the prompt/state before the action, the actual input/state transition, feedback after success, and entry into the core loop. If the game's core action is genuinely self-evident and no tutorial is intended, document that decision and still verify first-action success without narration.
+
+Do not let a pressure/failure timer undermine the teaching state. By default, freeze or substantially relax time pressure until the required onboarding action succeeds and its feedback is readable, then start or ramp normal pressure explicitly. Starting the shipping timer at scene entry is acceptable only when time pressure itself is the taught mechanic and an uncoached first-use test proves the player has enough time to understand, act, recover from one reasonable mistake, and enter the normal loop. A developer who already knows the controls is not evidence for this exception.
 
 Review content-bearing progression UI during the same first-use test. Level/chapter/mission selectors should help a player form a useful expectation and distinguish choices; localization completeness and numeric ordering alone do not prove authored content. Generic status-only cards require an explicit minimalist rationale plus comprehension evidence or should gain meaningful localized identity/cues.
 
@@ -69,7 +73,7 @@ The runner does not inject keyboard, mouse, or controller input. Use a project t
 1. **Static:** scene graph, paths, resources, asset formats, and obvious omissions.
 2. **Engine:** import, parse, load, bounded runtime, and error log.
 3. **Behavior:** each state in the playable contract is actually reached.
-4. **Visual/audio:** representative captures are inspected at final framing and motion; audio is actually listened to in context, not inferred from file presence or node paths.
+4. **Visual/audio:** representative captures are inspected at final framing and motion; audio is actually listened to in context by a human listener, not inferred from file presence, node paths, buses, waveforms, or automated metrics.
 5. **Independent human/evaluator playtest:** someone who did not build the flow can understand the goal, complete the onboarding action, and close the loop without developer narration.
 
 Do not let a high structural score hide a broken game. Treat unreachable success/failure, static-text-only onboarding for a non-obvious core action, unclear controls, a soft lock, or a nonfunctional restart as completion blockers.
@@ -82,10 +86,15 @@ When changing this skill materially, test it on isolated projects representing a
 
 - new 2D slice with provided sprites;
 - new 2D slice requiring generated/edited sprites;
+- complete local 2D fighting slice with fixed-tick replay/input/frame evidence;
+- complete metroidvania slice with modeled and physically played gate/escape/save paths;
+- complete idle/clicker slice with economy/offline/save evidence;
+- complete quest-driven slice with duplicate-event and exactly-once reward evidence;
 - new 3D slice using a ready-made asset pack;
 - new 3D slice with a generated static prop and authored collision/wrapper;
 - feature added to an existing convention-heavy project;
 - constrained mobile/web build with performance and package-size budgets.
+- approved UI-reference integration with native scene authorship and raw parity artifacts.
 
 For each case record: brief, fixture/license, initial project hash, tools available, final project, validation commands, captures, audio listening notes, errors/warnings, human playability result, elapsed time, and token/tool-call usage. Compare regressions on structure, completion, visual coherence, audio quality, performance, and cost; do not tune only to one demo.
 

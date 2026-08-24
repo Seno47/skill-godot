@@ -1,0 +1,46 @@
+{
+  "duration_seconds": "3600",
+  "initial_currency": "0",
+  "manual_rate": "1",
+  "strategy": "best_payback",
+  "max_purchases": 10000,
+  "offline_cap_seconds": "28800",
+  "offline_absence_samples": ["60", "3600", "28800", "86400"],
+  "offline_includes_manual": false,
+  "generators": [
+    {
+      "id": "helper",
+      "base_cost": "10",
+      "cost_growth": "1.15",
+      "base_rate": "1",
+      "rate_growth": "1",
+      "initial_level": 0,
+      "offline_level": 10,
+      "max_level": 1000
+    },
+    {
+      "id": "workshop",
+      "base_cost": "100",
+      "cost_growth": "1.17",
+      "base_rate": "8",
+      "rate_growth": "1",
+      "initial_level": 0,
+      "offline_level": 2,
+      "max_level": 1000
+    }
+  ],
+  "milestones": [
+    {
+      "seconds": "30",
+      "min_purchases": 1
+    },
+    {
+      "seconds": "300",
+      "min_total_rate": "2"
+    },
+    {
+      "seconds": "3600",
+      "min_purchases": 5
+    }
+  ]
+}

@@ -22,6 +22,8 @@ Derive a compact sonic direction from the game's world, material language, scale
 - reference qualities and explicit exclusions without requesting imitation of a copyrighted track or identifiable performer;
 - whether generative audio is permitted; absent explicit permission, treat it as opt-in and prefer human-recorded, human-composed, or manually designed sources.
 
+Do not infer a synthetic/electronic vocabulary merely because the game contains computers, force fields, magnets, robots, or science-fiction props. Anchor each event in the accepted material and emotional language; harsh tonal UI/ability layers need an intentional role and listening approval, not just thematic naming.
+
 Create a small sound-event map for the slice: event/state, gameplay priority, intended source/material, variation need, spatial behavior, bus, and implementation owner. Cover must-hear feedback first—core action, impact/collection, danger, success/failure, and essential UI confirmation as applicable. Do not sonify every event merely to make the project seem polished.
 
 ## Reject audio slop and placeholders
@@ -94,7 +96,7 @@ For a complete game or vertical slice, do not mark audio verified without all ap
 - the exported target was checked for startup unlock, latency, compression damage, missing streams, clipping/masking, and correct pause/resume behavior;
 - remaining placeholders, unlicensed candidates, unreviewed cues, and unavailable-device checks are reported explicitly.
 
-An independent listener or human playtest should score the audio. The building agent must not infer quality from filenames, waveform existence, node configuration, or its own implementation intent.
+An independent human listener must sign off audio for a claimed-complete game or vertical slice. Record who listened (a stable reviewer label is sufficient), target build, playback device(s), approximate duration, representative states heard, defects found, and final PASS/FAIL. If no human can listen, audio remains `NOT TESTED` and the complete-game audio gate cannot pass. The building agent must not infer quality from filenames, waveform existence, streams, bus configuration, loudness metrics, spectral plots, provenance, or its own implementation intent; those are supporting evidence only.
 
 ## VFX as reusable Godot scenes
 

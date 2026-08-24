@@ -65,6 +65,31 @@ Post-processing is a finishing layer. Do not use bloom, fog, SSAO, outlines, or 
 - Use orthographic cameras deliberately; adjust asset shapes and depth cues to match, rather than treating them as perspective cameras with no convergence.
 - Test near walls, tight interiors, vertical changes, large effects, and target aspect ratios.
 
+For a player-controlled character with an independently orbiting perspective camera, define the locomotion reference frame explicitly. Unless the brief deliberately calls for tank, actor-relative, rail-relative, or fixed world-axis controls, project the active gameplay camera's forward/right directions onto the movement plane and derive movement from that basis. A correct result must keep `forward` visually forward after camera yaw, not merely at the spawn angle. Prove it after at least 45° and 90° yaw on a flat deterministic fixture; record world-axis control as a conscious exception rather than an implementation default.
+
+Treat an orbit camera as an input and recovery contract, not just a `Camera3D` node:
+
+- exercise mouse horizontal and vertical orbit plus right-stick horizontal and vertical orbit separately, with intentional sensitivity, deadzone, inversion, and pitch limits;
+- provide zoom and recenter for a freely orbiting exploration/action camera unless the brief explicitly excludes them; verify recenter against the actor's current facing, not the original world direction;
+- validate the collision solution, commonly a `SpringArm3D` or equivalent, when clear, behind a wall, in a corner, near vertical/overhead geometry, and after leaving the obstruction; the camera should shorten and restore without entering geometry or snapping through the player;
+- after pause, menu entry, focus loss, device change, and return to gameplay, restore the intended mouse mode/capture exactly once, discard stale look delta, and prove the first click/motion does not rotate or fire unexpectedly.
+- prove captured mouse motion through the production fixture with its real full-screen HUD visible. Because GUI handling precedes `_unhandled_input()`, a covering `Control` can consume `InputEventMouseMotion`; inject a real event through `Input.parse_input_event()` and assert both yaw and pitch rather than calling a look method directly. Route passive HUD motion intentionally and gate earlier-stage look handling by active gameplay/modal state so menus still block camera motion.
+
+Camera collision and player visibility are separate systems and require separate evidence. A `SpringArm3D` shortening correctly proves only that the camera avoids selected physics geometry; it does not prove that the character's render shell is visible from the resulting camera, that multiple occluders are handled, or that simplified camera proxy volumes respect visible openings.
+
+For third-person player visibility:
+
+- sample rays or equivalent visibility checks from the desired unobstructed camera position toward several authored character heights/regions, such as feet, torso, shoulders, and head; one center ray is too fragile;
+- iterate past the first hit and collect every relevant occluder between camera and player. A nearer faded object must not hide a second opaque object behind it;
+- distinguish render geometry, gameplay collision, and camera-only visibility/collision proxies by authored groups/layers/metadata. Simplified shells are valid, but openings that matter to the camera—doors, arches, gates, railings—must agree closely enough to avoid false positives;
+- author cutaway/fade policy by semantic strength or scope rather than applying one room-wide fade to everything. Preserve route walls/floors that provide orientation while resolving the actual camera-player blockers;
+- treat large, high-detail, or single-mesh room shells as a distinct high-structure case. A nonzero fade and a visible player silhouette do not pass if the shell becomes a bright veil/grid or still destroys route contrast. Prefer semantically split shells where practical; otherwise author a stronger shell tier and verify the exact highest/elevation or previously reported failure view with matched final-camera captures;
+- use a restrained player silhouette/depth fallback when cutaway cannot safely preserve both player and route. It must not turn normal play into permanent x-ray vision;
+- snapshot and fully restore every mutated visual state when clear: visibility, per-instance transparency, material/shader parameters, render layers, shadows, and any shared-resource override. Test repeated blocked/clear cycles and scene/reset transitions for leaked state;
+- include an explicit negative case through the open center of an authored doorway/gate and a positive multi-occluder case. Test more than one real route location because one tuned room is not a visibility system.
+
+For a complete third-person/free-orbit slice, adapt `assets/godot-tests/third_person_controller_probe.gd`, `assets/godot-tests/third_person_hud_mouse_probe.gd`, and `assets/godot-tests/third_person_visibility_probe.gd` to project fixtures using the production rig, real HUD, and occlusion system, then complete the rendered/target-build matrix in `assets/third-person-3d-review.template.md`. Deterministic probes supplement rather than replace hands-on camera comfort/sensitivity, silhouette quality, route readability, and capture recovery.
+
 ## Physics and navigation
 
 - Choose simple primitives/convex shapes for moving bodies. Use concave/trimesh collision only where appropriate for static geometry.
@@ -90,6 +115,11 @@ Inspect representative gameplay views and motion. Reject the pass if:
 - lighting flattens important forms or makes gameplay objects unreadable;
 - materials only look coherent under one accidental angle;
 - camera clipping/occlusion harms ordinary play;
+- camera collision passes but the player remains hidden, a second occluder is ignored, open-hole proxy geometry causes false cutaway, or blocked state leaks after clearing;
+- a faded high-structure/single-mesh shell leaves a bright grid/veil across the exact reported or highest-elevation route view, even if the player silhouette remains visible;
+- movement direction stops matching the camera after ordinary orbit, a declared camera input axis is missing, or pause/re-entry leaves capture/look in the wrong state;
+- mouse-look was proved only by a direct method call or a fixture without the production HUD, so real GUI event consumption can still suppress yaw/pitch;
+- persistent HUD or bright world geometry blocks ordinary route sightlines from the real gameplay camera;
 - render meshes are used as expensive/unstable dynamic collision without reason;
 - imported assets were changed in a way that reimport will erase.
 

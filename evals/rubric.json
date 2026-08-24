@@ -38,18 +38,63 @@
     },
     {
       "id": "interactive_onboarding",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-3d-asset-pack", "constrained-mobile-web"],
-      "description": "From a clean first-use state, an uncoached player performs the taught core action and reaches the normal loop; static hints or tutorial fields alone do not pass."
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "constrained-mobile-web"],
+      "description": "From a clean first-use state, an uncoached player performs the taught core action and reaches the normal loop; static hints or tutorial fields alone do not pass, and ordinary pressure/failure timing is frozen or forgiving until the taught action succeeds unless an uncoached test proves pressure itself is safely taught."
     },
     {
       "id": "clean_shipping_state",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-3d-asset-pack", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "constrained-mobile-web"],
       "description": "A release-like clean profile proves shipping-default progress/settings/onboarding separately from seeded or previously played QA state, with state provenance recorded."
     },
     {
+      "id": "semantic_identity_review",
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "constrained-mobile-web"],
+      "description": "The app/export icon and main-menu mark receive a blind independent semantic review from raw captures at actual final sizes: the reviewer can describe a game-specific subject, relationship, or core-loop cue without designer narration; palette consistency, initials, symmetry, or tidy primitive geometry alone do not pass."
+    },
+    {
       "id": "independent_ux_review",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-3d-asset-pack", "constrained-mobile-web"],
-      "description": "A person or genuinely independent evaluation context that did not build the flow reviews first-use playability and raw representative visual evidence; self-review alone does not pass."
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "constrained-mobile-web"],
+      "description": "A person or genuinely independent evaluation context that did not build the flow reviews first-use playability and case-relevant raw representative visual evidence, including player occlusion/restoration for third-person work; self-review alone does not pass."
+    },
+    {
+      "id": "human_audio_listening",
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "constrained-mobile-web"],
+      "description": "A human listener signs off several minutes of representative target-build gameplay audio, overlaps/repetition, UI, pressure/result, transitions, pause/focus, and mixer settings; structural nodes, streams, buses, waveforms, metrics, provenance, or builder intent alone do not pass."
+    },
+    {
+      "id": "fighting_simulation_evidence",
+      "cases": ["new-2d-fighting-complete"],
+      "description": "A fixed-tick fighting simulation proves repeated seeded input scripts produce identical per-frame state, authoritative move phases align with authored hit/hurt boxes, buffered command boundaries and near-miss rejection work on supported devices, and applicable hit/block/whiff/trade/cancel/hitstop/round-reset cases resolve exactly once; render FPS caps, framework presence, and data files alone do not pass."
+    },
+    {
+      "id": "metroidvania_progression_evidence",
+      "cases": ["new-2d-metroidvania-complete"],
+      "description": "A recorded world/progression graph and real room playthrough prove required ability-gated routes, one-way escape states, save/respawn on both sides of gates, persistent collectibles/bosses/shortcuts, and return traversal without a soft lock; a passing abstract graph cannot substitute for authored collision/spawn/transition tests."
+    },
+    {
+      "id": "idle_economy_evidence",
+      "cases": ["new-idle-clicker-complete"],
+      "description": "Decimal/integer curve evidence and target-build play prove the earn-purchase-production loop, declared short/long milestones, exact displayed/debited costs, bounded offline awards, duplicate-load idempotence, clock manipulation policy, numeric extremes, and save migration; per-frame label updates or a mathematically passing model alone do not pass."
+    },
+    {
+      "id": "quest_transaction_evidence",
+      "cases": ["new-quest-driven-complete"],
+      "description": "Quest definitions, runtime state, and UI ownership are separated, and target-build tests prove accept/progress/complete/fail/branch/reload behavior, duplicate event rejection, exactly-once rewards including failure recovery, stable IDs/migration, and localized objective copy; signal connections or Resource presence alone do not pass."
+    },
+    {
+      "id": "reference_parity_evidence",
+      "cases": ["ui-reference-integration"],
+      "description": "The approved reference file/state/capture conditions and named deviations are recorded; the formal hierarchy is editor-visible in Godot scenes; same-resolution raw side-by-side, overlay, and diff artifacts plus representative locale/input/responsive captures receive region-level review. A low global pixel error or baked screenshot background alone does not pass."
+    },
+    {
+      "id": "third_person_control_contract",
+      "cases": ["new-3d-third-person-complete"],
+      "description": "A free-orbit third-person target proves camera-relative locomotion after 45-90 degree yaw, right-stick X/Y, declared zoom/recenter, camera-collision shortening/restoration, and pause/menu/focus-loss mouse-capture recovery; real InputEventMouseMotion must change yaw and pitch through a fixture containing the visible production HUD, plus target-build sensitivity review. Input-map presence or direct method calls do not pass, and this gate does not substitute for player-visibility evidence."
+    },
+    {
+      "id": "gameplay_visibility_evidence",
+      "cases": ["new-3d-third-person-complete"],
+      "description": "Measured HUD occupancy and rendered start/route views stay within a recorded gameplay-visibility budget; multi-height checks resolve all simultaneous camera-player occluders, camera-only proxies preserve open holes, cutaway/silhouette policy keeps both player and route readable, render/collision shells agree at tested openings, every mutated visual state fully restores, and the exact reported/highest-structure elevation view retains route contrast without a bright transparent veil/grid."
     },
     {
       "id": "responsive_layout_evidence",
@@ -76,17 +121,17 @@
     {
       "id": "gameplay_correctness",
       "weight": 18,
-      "description": "Core behavior, collisions, state transitions, objectives, failure, and restart work correctly."
+      "description": "Core behavior, movement reference frame, collisions, state transitions, objectives, failure, and restart work correctly."
     },
     {
       "id": "playability_and_ux",
       "weight": 15,
-      "description": "Controls, input-modality-aware focus, feedback, camera, interactive onboarding, semantic progression/navigation UI, explained accessibility settings, readable compound controls, and recovery make the loop understandable."
+      "description": "Controls, input-modality-aware focus, camera axes/collision/capture recovery, feedback, pressure-safe interactive onboarding, semantic progression/navigation UI, explained accessibility settings, readable compound controls, and recovery make the loop understandable."
     },
     {
       "id": "visual_coherence",
       "weight": 6,
-      "description": "Art direction, composition, motion, lighting, effects, and UI form a coherent game presentation."
+      "description": "Art direction, semantic app/menu identity, composition, player and route visibility, cutaway/silhouette behavior and restoration, screen-space HUD occupancy, perspective-sensitive world geometry, motion, lighting, effects, and UI form a coherent game presentation."
     },
     {
       "id": "responsive_visual_integrity",
@@ -98,7 +143,7 @@
       "id": "audio_direction_quality",
       "weight": 6,
       "allow_not_applicable": true,
-      "description": "The sonic direction, SFX, music/ambience, mix, controls, provenance, repetition handling, and target-build behavior are intentional and verified rather than generic placeholder audio."
+      "description": "The sonic direction, SFX, music/ambience, mix, controls, provenance, repetition handling, target-build behavior, and human listening result are intentional and verified rather than generic placeholder audio."
     },
     {
       "id": "asset_pipeline",
@@ -137,10 +182,40 @@
       "minimum_scores": {"playability_and_ux": 3, "audio_direction_quality": 3}
     },
     {
+      "id": "new-2d-fighting-complete",
+      "brief": "Create a complete small local 2D fighting slice with authored fighters, fixed-tick frame-defined combat, buffered inputs, a full round/reset loop, and production presentation.",
+      "focus": ["deterministic simulation", "frame data and authored boxes", "input history and command rejection", "hit/block/trade/cancel ordering", "round flow", "hands-on controller feel", "audio/visual impact"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-2d-metroidvania-complete",
+      "brief": "Create a complete small 2D ability-gated exploration slice with interconnected authored rooms, persistent world state, save/respawn, a return shortcut, and no modeled or physical soft lock.",
+      "focus": ["world/progression graph", "ability teaching and gate", "one-way escape", "persistent room state", "save/respawn", "map/landmarks", "backtracking change"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-idle-clicker-complete",
+      "brief": "Create a complete small idle/clicker game with an authored primary action, automation choices, exact data-driven economy, versioned saves, bounded offline progress, and verified numeric UI.",
+      "focus": ["earn-purchase-production loop", "decimal/integer curves", "milestone pacing", "offline cap and clock policy", "idempotent save/load", "large localized numbers", "authored feedback"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-quest-driven-complete",
+      "brief": "Create a complete small quest-driven slice with Resource-authored definitions, event-driven objectives, a branch/failure path, versioned persistence, exactly-once rewards, and readable localized tracking.",
+      "focus": ["definition/runtime/UI separation", "stable IDs", "event idempotence", "branch and failure", "save migration", "reward transaction", "localized tracker/journal"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
       "id": "new-3d-asset-pack",
       "brief": "Create a complete small 3D slice from a licensed pack using intentional import settings, materials, collisions, and wrapper scenes.",
       "focus": ["scale", "lighting", "wrapper scenes", "collision/navigation", "audio", "performance"],
       "minimum_scores": {"playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-3d-third-person-complete",
+      "brief": "Create a complete small third-person 3D slice with a freely orbiting camera and target-build desktop/controller evidence.",
+      "focus": ["camera-relative locomotion", "production-HUD mouse routing and right-stick orbit", "zoom/recenter", "camera collision and capture recovery", "multi-occluder player visibility", "render/collision shell openings", "high-structure cutaway route contrast", "cutaway restoration", "HUD/world sightlines", "semantic app/menu identity", "pressure-safe onboarding", "human audio listening"],
+      "minimum_scores": {"playability_and_ux": 3, "visual_coherence": 3, "audio_direction_quality": 3}
     },
     {
       "id": "new-3d-generated-prop",
@@ -151,6 +226,12 @@
       "id": "existing-project-feature",
       "brief": "Add a requested feature to a convention-heavy existing project without migrations or unrelated architectural rewrites.",
       "focus": ["inspection", "convention preservation", "minimal diff", "regression coverage", "integration"]
+    },
+    {
+      "id": "ui-reference-integration",
+      "brief": "Reproduce an approved UI reference as editable native Godot scenes/resources while preserving localization, accessibility, input states, and declared responsive behavior.",
+      "focus": ["reference contract", "editor-visible hierarchy", "native text and controls", "same-resolution artifacts", "named deviations", "locale/input/responsive states", "independent region review"],
+      "minimum_scores": {"scene_resource_authorship": 3, "visual_coherence": 3, "responsive_visual_integrity": 3}
     },
     {
       "id": "constrained-mobile-web",

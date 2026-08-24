@@ -15,6 +15,7 @@ Turn the user's design into an editable Godot project, not a scripted imitation 
 - Construct substantial runtime node trees only for genuinely procedural, data-driven, transient, streamed, or performance-driven content.
 - Do not hide ordinary authored composition in `_ready()`, giant controllers, factory scripts, or long `Node.new()` chains.
 - Never present raw primitives, default controls, mismatched assets, or unreviewed placeholders as finished design.
+- For a complete game or vertical slice, give the app/export icon and main menu identity a semantically legible relationship to the game and obtain an independent final-size review; palette consistency cannot turn arbitrary primitive geometry into a meaningful mark.
 - For a complete game or vertical slice, deliver coherent, licensed, integrated music/SFX and mixer controls unless the user explicitly requests a silent experience or non-production prototype. Code-synthesized beeps and generic tracks are placeholders, not finished audio.
 - For a complete game or vertical slice, prove the clean-profile first-use path through an interactive onboarding action, then obtain independent UX/visual review across representative viewport extremes. Static tutorial text, seeded QA state, and the building agent's own screenshot approval are insufficient completion evidence.
 - Do not claim polish, performance, memory, or size improvements without testing the relevant built/rendered result.
@@ -42,6 +43,12 @@ Core construction:
 - 3D world/gameplay: [references/production-3d.md](references/production-3d.md)
 - Isometric, dimetric, orthographic, or mixed 2D/3D world/gameplay: [references/isometric-and-2-5d.md](references/isometric-and-2-5d.md), plus the 2D or 3D guide for the selected primary architecture
 - UI/HUD/menus: [references/ui.md](references/ui.md)
+- Gameplay HUDs, contextual prompts, notifications, or diegetic/world-space UI: [references/game-ui-patterns.md](references/game-ui-patterns.md), plus the base UI guide
+- Approved screenshot/mockup-to-Godot parity work: [references/ui-reference-integration.md](references/ui-reference-integration.md), plus the base UI and visual-validation guides
+- Traditional/platform fighting or frame-defined buffered combat: [references/genre-fighting.md](references/genre-fighting.md)
+- Ability-gated interconnected exploration/metroidvania: [references/genre-metroidvania.md](references/genre-metroidvania.md)
+- Idle, clicker, incremental, automation, or prestige economies: [references/genre-idle-clicker.md](references/genre-idle-clicker.md)
+- Quests, missions, branching objectives, or persistent event-driven progression: [references/quest-and-progression.md](references/quest-and-progression.md)
 - Complete game/vertical slice or autonomous build: [references/playability-and-evaluation.md](references/playability-and-evaluation.md) and [references/audio-vfx-fonts.md](references/audio-vfx-fonts.md)
 - Live editor automation, bridge, or MCP: [references/editor-bridge-mcp.md](references/editor-bridge-mcp.md)
 
@@ -49,6 +56,8 @@ Assets and presentation:
 
 - Art direction/coherence: [references/assets-and-art-direction.md](references/assets-and-art-direction.md)
 - Search, provenance, licensing, downloads: [references/asset-sourcing.md](references/asset-sourcing.md)
+- Concrete source selection for 2D, 3D, UI, audio, fonts, shaders, or animation assets: [references/asset-source-catalog.md](references/asset-source-catalog.md), plus the sourcing guide
+- Choosing a community addon/template/framework/theme/shader or interpreting the reviewed source catalogue: [references/evaluated-ecosystem.md](references/evaluated-ecosystem.md)
 - Generation/editing: [references/asset-generation.md](references/asset-generation.md)
 - Import/adaptation/wrapper scenes: [references/asset-integration.md](references/asset-integration.md)
 - Audio, VFX, shaders, fonts: [references/audio-vfx-fonts.md](references/audio-vfx-fonts.md)
@@ -70,8 +79,14 @@ Validation:
 - Performance/memory optimization: validation section in the relevant optimization reference
 - Export/build-size work: validation section in the export reference
 - Complete mobile/web evidence setup or rubric migration: generate fresh evidence files with `scripts/evidence_helper.py` instead of reconstructing gates, profiles, and the viewport matrix from memory
+- Complete-game app icon/menu identity: complete `assets/semantic-identity-review.template.md` with raw final-size captures and an independent verdict
 - Required touch-scroll behavior: adapt `assets/godot-tests/touch_scroll_probe.gd` into a deterministic project test scene; node presence alone is not proof
 - Localized compound/icon-only button alignment or pointer-click cleanup: adapt `assets/godot-tests/button_composition_probe.gd` and retain a release-like Web click check
+- Strict/adapted UI-reference integration: fill `assets/ui-reference-parity.template.md` and create same-resolution comparison artifacts with `scripts/image_compare.py`; pixel metrics do not replace region-level human review
+- Third-party code/addon adoption: fill `assets/addon-adoption-record.template.md`; a repository link, aggregator summary, clean import, or compatible license alone does not prove ownership/architecture fit
+- Metroidvania or quest dependency/escape topology: start from `assets/progression-graph.template.json` and run `scripts/progression_graph_audit.py`, then prove the modeled paths in the actual authored rooms/flows
+- Idle/clicker economy work: export a project-specific model from `assets/idle-economy.template.json`, run `scripts/idle_economy_probe.py`, then verify actual transactions, save/offline idempotence, numeric UI, and human pacing in the target build
+- Free-orbit third-person locomotion/camera/visibility work: adapt `assets/godot-tests/third_person_controller_probe.gd`, `assets/godot-tests/third_person_hud_mouse_probe.gd`, and `assets/godot-tests/third_person_visibility_probe.gd`, then complete the target-build matrix in `assets/third-person-3d-review.template.md`
 - Isometric projection, picking, grid navigation, height transitions, depth sorting, or occlusion: apply the conditional validation in [references/isometric-and-2-5d.md](references/isometric-and-2-5d.md); adapt `assets/godot-tests/isometric_projection_probe.gd` and `assets/godot-tests/isometric_navigation_probe.gd` where their contracts fit
 
 Hybrid tasks may require several references. Do not read unrelated references preemptively.

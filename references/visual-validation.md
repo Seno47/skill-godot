@@ -7,6 +7,7 @@ Read this only when the task changes presentation, composition, UI, animation, e
 Use a real renderer and capture screenshots or short recordings at the intended viewport/aspect. Include the states relevant to the feature:
 
 - spawn/idle and normal traversal;
+- complete-game app/export icon at actual smallest/representative platform sizes plus the main-menu mark at runtime size, supplied raw for blind semantic review;
 - primary interaction/combat/action;
 - failure/damage and success/transition when applicable;
 - quiet and visually dense scenes;
@@ -15,9 +16,13 @@ Use a real renderer and capture screenshots or short recordings at the intended 
 - localized icon-plus-label and icon-only buttons at representative short/long locales in narrow and wide layouts;
 - scrollable UI at real overflow, including top/bottom positions and a visible scrollbar/grabber rather than an empty-state screenshot;
 - target aspect/resolution extremes and busy gameplay behind UI;
+- the real start camera and representative route/corner/elevation views for long emissive meshes, ceiling strips, beams, rails, cables, and other perspective-sensitive geometry;
+- matched third-person blocked/clear captures at multiple route locations, including one multi-occluder stack, one open doorway/gate center, one cutaway-strength comparison, one silhouette fallback, the fully restored state, and the exact reported/highest-structure elevation view rather than only an easier generic room;
 - first-time effects/materials likely to expose stutter or shader issues.
 
 Use consistent camera, resolution, renderer, quality preset, and scene state when comparing revisions.
+
+When an approved UI screenshot/mockup is the target, follow [ui-reference-integration.md](ui-reference-integration.md): capture the same state and dimensions, create side-by-side/overlay/diff artifacts with `scripts/image_compare.py`, and review named regions. Do not convert a global pixel metric into a parity verdict without inspecting the raw captures and recorded deviations.
 
 For responsive UI or complete mobile/web builds, use a viewport matrix derived from the declared support range rather than only the reference aspect ratio. Include at least:
 
@@ -33,6 +38,7 @@ Choose actual platform minima when known. If a constrained browser/mobile brief 
 Compare against the user's brief and accepted references:
 
 - composition, focal hierarchy, silhouette, spacing, scale, camera framing, and depth separation;
+- whether the app icon/main-menu mark communicates a game-specific subject or core-loop relationship before the intended meaning is explained; palette consistency and tidy primitive geometry alone are insufficient;
 - palette/value structure, texture density, material response, lighting, shadows, and atmosphere;
 - consistency across generated, sourced, and engine-native assets;
 - UI hierarchy, theme, typography, contrast, focus, clipping, and localization/overflow;
@@ -42,11 +48,16 @@ Compare against the user's brief and accepted references:
 - the center of the complete icon-plus-label visual group relative to its button/hit target, not just text alignment and the icon's individual rect; compare representative locales because text length can change the apparent drift;
 - whether helper text, footers, legends, and secondary actions remain compositionally attached to the panel/flow they explain at every viewport;
 - whether a tutorial card, pointer, or scrim intersects the highlighted target or required control in near-square and short-height layouts;
+- persistent 3D HUD screen-space occupancy against the project's recorded top/bottom/side and central-sightline budget; inspect opaque/translucent backplates over real play rather than only each `Control` rect;
+- perspective projection of long, thin, emissive world geometry from the actual gameplay camera: reject bright bands that cross the route, hide targets, collapse depth, or dominate exposure/bloom even when the mesh placement looks harmless in the editor's free camera;
+- player visibility from the resulting camera, not merely camera collision: compare several character heights/regions, verify every simultaneous occluder is resolved, keep the route/environment readable, and confirm that open holes remain clear without false cutaway;
+- high-structure cutaway quality at the exact failure/elevation framing: compare route/target contrast and retained spatial cues, not only transparency values, faded-object counts, or silhouette presence. Reject a white veil/grid or route-filling shell even when technically transparent;
+- blocked-to-clear restoration of all affected render state. Look for lingering transparency, hidden meshes, missing shadows, shader parameters, render-layer changes, or a silhouette that stays enabled after the obstruction is gone;
 - animation timing, transitions, effects, feedback, and motion comfort;
 - hover/focus motion geometry: compare the control's visual center and neighboring `Control` rects before/after; incidental layout shift is a defect even when each still looks individually plausible;
 - seams, halos, missing textures, z-fighting, sorting, clipping, debug visuals, defaults, and placeholders.
 
-Inspect motion in motion; a still cannot validate animation, camera comfort, effect overlap, or temporal feedback. Inspect assets inside the actual game, not only their source-tool preview.
+Inspect motion in motion; a still cannot validate animation, camera-relative control, both orbit axes, zoom/recenter, camera collision recovery, multi-occluder transitions, cutaway restoration, silhouette fallback behavior, mouse-capture recovery, effect overlap, or temporal feedback. Inspect assets inside the actual game, not only their source-tool preview.
 
 ## Iterate and report
 

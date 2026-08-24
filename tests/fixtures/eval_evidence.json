@@ -30,9 +30,25 @@
       "status": "pass",
       "evidence": ["fixture: clean profile capture separated from seeded QA state"]
     },
+    "semantic_identity_review": {
+      "status": "pass",
+      "evidence": ["fixture: blind independent app-icon and main-menu mark reading at actual final sizes"]
+    },
     "independent_ux_review": {
       "status": "pass",
       "evidence": ["fixture: independent reviewer raw findings"]
+    },
+    "human_audio_listening": {
+      "status": "pass",
+      "evidence": ["fixture: independent human target-build listening signoff"]
+    },
+    "third_person_control_contract": {
+      "status": "pass",
+      "evidence": ["fixture: camera-relative yaw matrix, production-HUD InputEventMouseMotion yaw/pitch, target-build sensitivity, input axes, collision, and capture recovery"]
+    },
+    "gameplay_visibility_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: measured HUD budget, multi-height multi-occluder/open-hole/restoration visibility probe, render/collision shell review, and exact high-structure elevation route-contrast capture"]
     },
     "responsive_layout_evidence": {
       "status": "pass",

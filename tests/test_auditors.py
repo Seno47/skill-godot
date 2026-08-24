@@ -131,6 +131,84 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("--script res://tests/touch_scroll_probe.gd", completed.stdout)
         self.assertIn("scene=res://main.tscn", completed.stdout)
 
+    def test_third_person_probe_command_dry_run(self) -> None:
+        completed = run_script(
+            "godot_capture.py",
+            "--project",
+            str(FIXTURE),
+            "--mode",
+            "run",
+            "--script",
+            "res://tests/third_person_controller_probe.gd",
+            "--user-arg",
+            "scene=res://tests/third_person_controller_fixture.tscn",
+            "--user-arg",
+            "player=Player",
+            "--user-arg",
+            "yaw_pivot=Player/CameraRig/Yaw",
+            "--user-arg",
+            "pitch_pivot=Player/CameraRig/Yaw/Pitch",
+            "--user-arg",
+            "camera=Player/CameraRig/Yaw/Pitch/SpringArm3D/Camera3D",
+            "--user-arg",
+            "yaw_degrees=45;90",
+            "--dry-run",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("--script res://tests/third_person_controller_probe.gd", completed.stdout)
+        self.assertIn("yaw_degrees=45;90", completed.stdout)
+
+    def test_third_person_visibility_probe_command_dry_run(self) -> None:
+        completed = run_script(
+            "godot_capture.py",
+            "--project",
+            str(FIXTURE),
+            "--mode",
+            "run",
+            "--script",
+            "res://tests/third_person_visibility_probe.gd",
+            "--user-arg",
+            "scene=res://tests/third_person_visibility_fixture.tscn",
+            "--user-arg",
+            "adapter=OcclusionProbeAdapter",
+            "--user-arg",
+            "desired_camera=DesiredCamera",
+            "--user-arg",
+            "sample_points=Player/VisibilityPoints/Feet;Player/VisibilityPoints/Torso;Player/VisibilityPoints/Head",
+            "--user-arg",
+            "cases=single:1:cutaway;multi:2:cutaway;open_hole:0:clear;restored:0:clear",
+            "--dry-run",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("--script res://tests/third_person_visibility_probe.gd", completed.stdout)
+        self.assertIn("multi:2:cutaway", completed.stdout)
+        self.assertIn("open_hole:0:clear", completed.stdout)
+
+    def test_third_person_hud_mouse_probe_command_dry_run(self) -> None:
+        completed = run_script(
+            "godot_capture.py",
+            "--project",
+            str(FIXTURE),
+            "--mode",
+            "run",
+            "--script",
+            "res://tests/third_person_hud_mouse_probe.gd",
+            "--user-arg",
+            "scene=res://tests/third_person_production_hud_fixture.tscn",
+            "--user-arg",
+            "yaw_pivot=Player/CameraRig/Yaw",
+            "--user-arg",
+            "pitch_pivot=Player/CameraRig/Yaw/Pitch",
+            "--user-arg",
+            "hud_root=HUD/FullScreenRoot",
+            "--user-arg",
+            "mouse_delta=30:20",
+            "--dry-run",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("--script res://tests/third_person_hud_mouse_probe.gd", completed.stdout)
+        self.assertIn("hud_root=HUD/FullScreenRoot", completed.stdout)
+
     def test_project_snapshot(self) -> None:
         completed = run_script("project_snapshot.py", "--project", str(FIXTURE), "--no-git")
         self.assertEqual(completed.returncode, 0, completed.stdout)
@@ -159,7 +237,9 @@ class AuditorSmokeTests(unittest.TestCase):
         for gate_id in (
             "interactive_onboarding",
             "clean_shipping_state",
+            "semantic_identity_review",
             "independent_ux_review",
+            "human_audio_listening",
             "responsive_layout_evidence",
             "input_modality_ui_evidence",
         ):
@@ -205,6 +285,8 @@ class AuditorSmokeTests(unittest.TestCase):
                 "--summary",
             )
         self.assertEqual(migrated["gates"]["interactive_onboarding"]["status"], "not_tested")
+        self.assertEqual(migrated["gates"]["semantic_identity_review"]["status"], "not_tested")
+        self.assertEqual(migrated["gates"]["human_audio_listening"]["status"], "not_tested")
         self.assertEqual(migrated["gates"]["engine_clean"]["status"], "pass")
         self.assertEqual(
             [(item["width"], item["height"]) for item in manifest["viewport_matrix"]],
@@ -247,6 +329,34 @@ class AuditorSmokeTests(unittest.TestCase):
         source["gates"]["independent_ux_review"] = {
             "status": "not_tested",
             "evidence": ["fixture: only the building agent reviewed screenshots"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(evidence_path),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("verdict=blocked", completed.stdout)
+        self.assertIn("blocking_gates=1", completed.stdout)
+
+    def test_eval_complete_slice_requires_semantic_identity_review(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed audio and independent target-build listening"],
+        }
+        source["gates"]["semantic_identity_review"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: palette reviewed, but no blind final-size reading of the app/menu mark"],
         }
         with tempfile.TemporaryDirectory() as directory:
             evidence_path = Path(directory) / "evidence.json"
@@ -367,6 +477,106 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertIn("verdict=blocked", completed.stdout)
         self.assertIn("quality_floor_failures=1", completed.stdout)
+
+    def test_eval_complete_slice_requires_human_audio_listening(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: structural audio checks and builder review only"],
+        }
+        source["gates"]["human_audio_listening"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: no independent human listened to the target build"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(evidence_path),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("verdict=blocked", completed.stdout)
+        self.assertIn("blocking_gates=1", completed.stdout)
+
+    def test_eval_third_person_case_requires_control_and_visibility(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "new-3d-third-person-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human listening signoff"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed 3D asset manifest"],
+        }
+        source["scores"]["performance_and_size"] = {
+            "score": 3,
+            "evidence": ["fixture: desktop target profile and build audit"],
+        }
+        source["gates"]["third_person_control_contract"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: movement tested only at spawn yaw"],
+        }
+        source["gates"]["gameplay_visibility_evidence"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: no start-camera HUD/emissive route review"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-3d-third-person-complete",
+                "--evidence",
+                str(evidence_path),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("verdict=blocked", completed.stdout)
+        self.assertIn("blocking_gates=2", completed.stdout)
+
+    def test_eval_third_person_case_accepts_complete_evidence(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "new-3d-third-person-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: independent human target-build listening signoff"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed 3D asset manifest"],
+        }
+        source["scores"]["performance_and_size"] = {
+            "score": 3,
+            "evidence": ["fixture: desktop target profile and build audit"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-3d-third-person-complete",
+                "--evidence",
+                str(evidence_path),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("verdict=pass", completed.stdout)
+        self.assertIn("blocking_gates=0", completed.stdout)
 
     def test_eval_complete_slice_accepts_solid_audio(self) -> None:
         source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))

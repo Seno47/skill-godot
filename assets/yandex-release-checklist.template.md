@@ -18,6 +18,7 @@ Do not change `NOT TESTED` to `PASS` without an artifact or named manual observa
 | Ads | Calls match the recorded policy; rewarded is voluntary; fullscreen occurs only at safe breaks | NOT TESTED | Unrecorded |
 | Sticky banner | Console API mode and show/hide surfaces match; banner is absent from active gameplay when declared | NOT TESTED | Unrecorded |
 | Audio | Startup ad, fullscreen/rewarded, focus loss, pause, mute, and resume do not leak or duplicate audio | NOT TESTED | Unrecorded |
+| Human audio review | A human listener reviewed several minutes of representative target-build gameplay, overlap/repetition, UI, transitions, pause/focus, and settings | NOT TESTED | Unrecorded |
 | Profiles | Clean shipping and seeded QA profiles are separate and provenance is recorded | NOT TESTED | Unrecorded |
 | Responsive | Declared orientation plus extreme-narrow, near-square/short-height, and wide matrix pass | NOT TESTED | Unrecorded |
 | Focus modality | Pointer/touch opening creates no false selected state; keyboard/gamepad opening has visible meaningful focus | NOT TESTED | Unrecorded |

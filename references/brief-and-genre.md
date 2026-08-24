@@ -6,17 +6,22 @@ Use this guide when the user's description is open-ended, genre-heavy, or visual
 
 Capture what the user has actually specified:
 
-- player fantasy and core repeated action;
+- player promise/fantasy in one sentence and the target feeling during ordinary play;
+- primary verb and core repeated action;
 - 2D, 3D, or hybrid presentation;
 - camera/projection and how the player reads space;
 - target platform, input devices, orientation, and performance class;
 - solo/local/online structure if relevant;
 - world topology: rooms, scrolling levels, arenas, tracks, open regions, boards, or generated spaces;
 - important actors, interactables, hazards, objectives, progression, and failure/recovery;
+- immediate/core loop (roughly seconds), longer progression loop (roughly minutes), and fast retry/recovery loop;
+- player decisions and pressure, what a more skilled player does differently, and how the next decision stays readable;
+- first representative level/encounter: start, first decision, first reward, first threat, landmark, escalation, and recovery beat;
 - for a finite selector with many levels/missions/items, the navigation model (`scroll`, `pages`, `chapters`, search/filter, or a deliberate combination), chosen from content volume, comparison needs, resume position, and mobile reachability rather than habit;
 - visual references, exclusions, mood, palette, density, and animation character;
 - sonic references and exclusions, music/ambience role, important audible feedback, voice needs, and whether generative audio is allowed;
 - requested deliverable: experiment, vertical slice, level, system, content pass, polish pass, or finished build.
+- explicit non-goals that prevent the slice from quietly expanding into unrelated systems.
 
 For a portal/web release where advertising is available, record `ads: none | conservative | aggressive-but-compliant` before designing the flow. If the brief does not decide and ads would change menus, pauses, rewards, or progression, ask once rather than inferring a policy. Record where game-initiated interstitials and banners may appear and what voluntary reward, if any, justifies rewarded video. Platform-controlled advertising is distinct from game-initiated calls.
 
@@ -52,6 +57,8 @@ A useful slice contains a narrow amount of every layer needed to judge the exper
 - enough content variation to expose whether the architecture generalizes.
 
 Avoid implementing ten invisible systems before the first representative scene exists. Also avoid creating a beautiful diorama that cannot demonstrate the requested interaction.
+
+Before investing in final art, greybox the representative space and reject the design if the first playable section has no real decision, the main mechanic can be ignored, the objective/failure is understandable only from developer narration, or the space is decorative rather than decision-shaping. Introduce one new concept at a time, combine understood concepts, and include recovery after high-pressure beats unless the brief deliberately rejects that pacing.
 
 ## Adapt without genre assumptions
 

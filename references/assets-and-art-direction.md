@@ -25,6 +25,19 @@ Define enough constraints to make rejection possible:
 
 Do not invent a fashionable style to fill ambiguity. A coherent simple direction is better than an assortment of individually impressive assets.
 
+## Give the shipped identity semantic content
+
+For a complete game or vertical slice, treat the app/export icon and primary menu brand mark as hero assets, not as leftover decoration. Before finalizing them, record:
+
+- the core loop or central fantasy in one sentence;
+- what an uncoached viewer is expected to see in the mark;
+- which visual element maps to which game-specific object, action, relationship, or world motif;
+- which final contexts and pixel sizes must remain legible, including the actual exported app/window/taskbar or platform tile where applicable.
+
+Simple geometry and abstraction are valid when the reading is deliberate. Reject a mark whose only defense is a shared palette, symmetry, polish, a letter-like arrangement, or the developer's explanation after the fact. Rectangles, a circle, a plus, generic sparkles, initials, and engine-default shapes do not become meaningful identity merely because they are neatly composed. Prefer a game-specific silhouette, interaction, object pairing, spatial rule, or recognizable consequence of the core verb.
+
+Capture the mark raw at its actual final display sizes and inside the main menu/exported build; do not judge only a zoomed source file. Have a person or independent evaluation context that did not design it state what it appears to depict before seeing the intended explanation, then record PASS/FAIL and any ambiguity with `assets/semantic-identity-review.template.md`. A coherent palette supports identity but cannot substitute for semantic recognition.
+
 ## Plan assets by role
 
 Before bulk generation, identify the minimum representative set:
@@ -52,6 +65,7 @@ Review representative screenshots, not isolated files. Check:
 - effects reinforce gameplay without obscuring it;
 - UI belongs to the same visual world without harming legibility;
 - no default icons, fonts, primitives, checkerboards, debug shapes, or accidental placeholders remain in claimed-finished states.
+- the app icon and main menu mark communicate a game-specific identity at final size rather than a generic or AI/default-looking arrangement of shapes.
 
 If an asset does not fit, revise or reject it. Do not hide incoherence with post-processing, bloom, fog, vignette, or color grading.
 

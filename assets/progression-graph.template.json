@@ -1,0 +1,52 @@
+{
+  "start": "start",
+  "initial_flags": [],
+  "safe_nodes": ["start", "save_room"],
+  "required_nodes": ["ending"],
+  "required_flags": ["dash"],
+  "nodes": [
+    {
+      "id": "start",
+      "safe": true
+    },
+    {
+      "id": "dash_shrine",
+      "grants": ["dash"],
+      "must_escape": true
+    },
+    {
+      "id": "save_room",
+      "safe": true
+    },
+    {
+      "id": "ending",
+      "requires": ["dash"],
+      "terminal": true
+    }
+  ],
+  "edges": [
+    {
+      "id": "start_to_shrine",
+      "from": "start",
+      "to": "dash_shrine"
+    },
+    {
+      "id": "shrine_return",
+      "from": "dash_shrine",
+      "to": "start",
+      "requires": ["dash"]
+    },
+    {
+      "id": "start_to_save",
+      "from": "start",
+      "to": "save_room",
+      "requires": ["dash"]
+    },
+    {
+      "id": "save_to_ending",
+      "from": "save_room",
+      "to": "ending",
+      "requires": ["dash"]
+    }
+  ]
+}

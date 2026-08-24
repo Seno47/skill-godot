@@ -31,9 +31,9 @@ Codex can also select the skill automatically when a request clearly matches its
 
 | Included | What it gives you |
 | --- | --- |
-| 20 focused production guides | Scene architecture, 2D/3D/2.5D, UI, art, audio, performance, loading, exports, and platform release work |
-| 12 deterministic Python helpers | Project snapshots, scene and asset audits, capture support, performance budgets, evidence scorecards, and build-size checks |
-| 4 reusable Godot probes | Touch scrolling, button composition, isometric projection, and isometric navigation checks |
+| 28 focused production guides | Scene architecture, 2D/3D/2.5D, UI, genre systems, asset-source discovery, art, audio, performance, loading, exports, and platform release work |
+| 15 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, progression/economy probes, capture support, budgets, scorecards, and build-size checks |
+| 7 reusable Godot probes | Touch scrolling, button composition, third-person controls/HUD mouse routing/visibility, isometric projection, and isometric navigation checks |
 | Scene-first authoring rules | Persistent composition stays in `.tscn` scenes and Godot resources instead of disappearing into large runtime scripts |
 | Evidence-based completion | The skill runs the project, checks representative viewports, and avoids claiming polish or optimization without proof |
 
@@ -56,10 +56,16 @@ The main [`SKILL.md`](./SKILL.md) is a compact router. It sends Codex only to th
 - **Game production:** gameplay, levels, camera, lighting, collision, navigation, UI, onboarding, audio, VFX, and asset integration.
 - **2D and 3D:** native Godot scene patterns with focused guidance for each dimension.
 - **2.5D and isometric:** explicit spatial contracts for projection, picking, sorting, elevation, occlusion, pathfinding, and hybrid 2D/3D presentation.
-- **Input:** keyboard, mouse, controller, touch, drag gestures, and mobile viewport checks.
+- **Input:** keyboard, mouse, controller, camera-relative locomotion, orbit/capture recovery, touch, drag gestures, and mobile viewport checks.
 - **Optimization:** measured FPS, CPU/GPU/physics investigation, memory and loading analysis, and export-size budgets.
 - **Web and Yandex Games:** SDK lifecycle, advertisements, rewarded flows, saves, leaderboards, localization, moderation, and archive QA.
 - **Validation:** headless checks, deterministic probes, automated captures, interactive onboarding verification, and independent UX review.
+
+The genre layer now adds conditional production contracts for fighting games, metroidvanias, idle/clicker economies, and quest systems without turning their community examples into universal architecture. A reviewed ecosystem catalogue records when menu/settings frameworks, UI themes, portal bridges, combat addons, shaders, and component libraries are useful, experimental, obsolete, license-restricted, or likely to conflict with an existing project's ownership.
+
+Asset discovery has its own source router for 2D, 3D, UI, recorded audio, music, fonts, shaders, and animation. It distinguishes broad CC0 libraries from mixed-license community catalogues and custom marketplace EULAs, then requires exact-item provenance, a bounded shortlist, style-fit review, and Godot integration checks before an asset is accepted.
+
+Approved UI references get a native parity workflow: formal screens remain editor-visible scenes, while [`image_compare.py`](./scripts/image_compare.py) creates same-resolution side-by-side, overlay, and diff artifacts. Progression topology and idle curves have reusable JSON models and deterministic probes; their numerical PASS still requires target-build play and human UX review.
 
 ## Isometric and 2.5D workflow
 
@@ -72,6 +78,12 @@ The skill does not treat “isometric” as an art style alone. It establishes o
 5. Adapt the projection and navigation probes to catch round-trip, height-transition, and route regressions.
 
 The full decision guide lives in [`references/isometric-and-2-5d.md`](./references/isometric-and-2-5d.md).
+
+## Third-person 3D verification
+
+For a freely orbiting camera, the skill verifies camera-relative movement after yaw, real mouse motion through the visible production HUD, right-stick X/Y, zoom/recenter, camera collision restoration, player visibility through multiple occluders and real openings, exact high-structure route contrast, cutaway restoration, pause/focus capture recovery, HUD/world sightlines, pressure-safe onboarding, and human audio listening. Adapt [`third_person_controller_probe.gd`](./assets/godot-tests/third_person_controller_probe.gd), [`third_person_hud_mouse_probe.gd`](./assets/godot-tests/third_person_hud_mouse_probe.gd), and [`third_person_visibility_probe.gd`](./assets/godot-tests/third_person_visibility_probe.gd), then complete [`third-person-3d-review.template.md`](./assets/third-person-3d-review.template.md); code inspection, direct look-method calls, or SpringArm success alone cannot pass these gates.
+
+Complete games also use [`semantic-identity-review.template.md`](./assets/semantic-identity-review.template.md): the exported app icon and main-menu mark must communicate a game-specific idea at their real display sizes in a blind independent review. A coordinated palette or tidy primitive geometry alone is not semantic identity.
 
 ## Installation options
 
@@ -139,6 +151,8 @@ Most tests require only Python 3:
 python -m unittest discover -s tests -p "test_*.py"
 ```
 
+`scripts/image_compare.py` additionally uses Pillow; its tests skip cleanly when Pillow is unavailable, and the helper reports the missing dependency instead of weakening a parity claim.
+
 The isometric smoke tests run against Godot 4 when `godot4`/`godot` is on `PATH`, or when `GODOT_BIN` points to the editor executable.
 
 PowerShell example:
@@ -155,4 +169,3 @@ Issues and focused pull requests are welcome. Please keep the skill scene-first,
 ## License and status
 
 No license has been selected yet. Public availability does not grant a general reuse or redistribution license. This is an independent community project and is not an official Godot Engine or OpenAI project.
-

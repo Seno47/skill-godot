@@ -64,6 +64,30 @@ python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode run -
 
 Use every canonical viewport in the project's final layout test even if the reusable probe command is split into several bounded runs. A headless synthetic click proves the Godot input path and catches premature focus cleanup; still repeat the action in the release-like Web build because browser event forwarding and overlays can differ.
 
+For a freely orbiting third-person controller, copy/adapt `assets/godot-tests/third_person_controller_probe.gd` into a flat deterministic fixture that instances the real player and camera rig. The fixture must expose the actual production input actions and nodes rather than a second test-only movement implementation. Exercise camera-relative forward movement after 45° and 90° yaw plus the supported right-stick axes, zoom, and recenter:
+
+```bash
+python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode run --script res://tests/third_person_controller_probe.gd --frames 600 --user-arg scene=res://tests/third_person_controller_fixture.tscn --user-arg player=Player --user-arg yaw_pivot=Player/CameraRig/Yaw --user-arg pitch_pivot=Player/CameraRig/Yaw/Pitch --user-arg camera=Player/CameraRig/Yaw/Pitch/SpringArm3D/Camera3D --user-arg spring_arm=Player/CameraRig/Yaw/Pitch/SpringArm3D --user-arg move_forward=move_forward --user-arg look_right=look_right --user-arg look_up=look_up --user-arg zoom_out=zoom_out --user-arg recenter=camera_recenter --user-arg pause_action=pause --user-arg "yaw_degrees=45;90" --summary --json-output reports/third-person-controller.json
+```
+
+The generic controller probe proves direction, observable control response, and optional camera-collision shortening/restoration; it deliberately does **not** prove player visibility. Run it windowed when supplying `pause_action`, because a headless display may not enter `MOUSE_MODE_CAPTURED`; a headless run may omit that argument and report the capture check as skipped. Mark unsupported or deliberately excluded controls in the brief before implementation; silently omitting an axis does not pass.
+
+The flat controller fixture does not prove that the production HUD allows captured mouse motion to reach the camera. Copy/adapt `assets/godot-tests/third_person_hud_mouse_probe.gd` into a fixture that instances the production controller/camera and the real visible full-screen gameplay HUD. The probe injects `InputEventMouseMotion` through `Input.parse_input_event()` at the viewport center and requires both yaw and pitch; do not replace this with a direct method call:
+
+```bash
+python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode run --headless --script res://tests/third_person_hud_mouse_probe.gd --frames 180 --user-arg scene=res://tests/third_person_production_hud_fixture.tscn --user-arg yaw_pivot=Player/CameraRig/Yaw --user-arg pitch_pivot=Player/CameraRig/Yaw/Pitch --user-arg hud_root=HUD/FullScreenRoot --user-arg mouse_delta=30:20 --summary --json-output reports/third-person-hud-mouse.json
+```
+
+The fixture must use the production HUD hierarchy and mouse filters, not an empty substitute. If the event is consumed before `_unhandled_input()`, fix routing deliberately: passive HUD can ignore/propagate motion, or captured look can run at an earlier suitable input stage with explicit gameplay/modal gating. A passing synthetic event catches routing regressions but cannot judge sensitivity, acceleration, comfort, or native event forwarding; add a hands-on target-build note for those.
+
+For third-person visibility/occlusion, copy/adapt `assets/godot-tests/third_person_visibility_probe.gd` into a fixture that instances the production occlusion system. Its small adapter surface changes deterministic authored cases but the probe itself performs multi-height iterative physics collection. Include at least a single blocker, two simultaneous blockers, an open-hole negative case, a silhouette fallback case when used, and a final clear/restoration case:
+
+```bash
+python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode run --headless --script res://tests/third_person_visibility_probe.gd --frames 360 --user-arg scene=res://tests/third_person_visibility_fixture.tscn --user-arg adapter=OcclusionProbeAdapter --user-arg desired_camera=DesiredCamera --user-arg "sample_points=Player/VisibilityPoints/Feet;Player/VisibilityPoints/Torso;Player/VisibilityPoints/Head" --user-arg "exclude_nodes=Player" --user-arg "cases=single:1:cutaway;multi:2:cutaway;fallback:1:silhouette;open_hole:0:clear;restored:0:clear" --user-arg collision_mask=8 --summary --json-output reports/third-person-visibility.json
+```
+
+The adapter must call the real production state transitions and expose `probe_set_case(name)`, `probe_is_occluder_resolved(collider)`, `probe_active_cutaway_count()`, `probe_is_silhouette_visible()`, `probe_restoration_issues()`, and `probe_shell_issues(case_name)`. Do not implement a second fake occlusion algorithm solely for the fixture. A PASS proves the declared ray/cutaway invariants and adapter-reported shell checks, not rendered quality or full render/collision-shell fidelity. Complete `assets/third-person-3d-review.template.md` with raw target-build blocked/clear captures from several locations, collision/debug overlay for the open-hole case, and restoration evidence.
+
 For isometric/2.5D coordinate work, copy/adapt `assets/godot-tests/isometric_projection_probe.gd` and point it at the project-owned projection resource or adapter. Include origin, negative, positive, and elevated cells:
 
 ```bash
@@ -114,7 +138,7 @@ For `run` and `capture`, it performs a Godot version check and headless import p
 
 ## Completion gate
 
-Do not claim completion with engine errors, missing resources, broken inheritance, unreachable core flow, relevant collision/focus/camera failure, unsaved editor output, accidental placeholders in a claimed-finished state, a missing clean-profile proof for persistent games, or required conditional validation not performed.
+Do not claim completion with engine errors, missing resources, broken inheritance, unreachable core flow, relevant collision/focus/camera failure, camera-relative movement or capture recovery unproved where applicable, production-HUD mouse routing proved only by input maps/direct calls, camera collision mistaken for player-visibility proof, unresolved multi-occluders, false camera proxies over open holes, incomplete cutaway restoration, high-structure cutaway that leaves the route veiled, unsafe first-use pressure, gameplay sightlines blocked by HUD/emissive geometry, complete-game audio lacking human listening signoff, a complete-game app/menu mark lacking semantic final-size review, unsaved editor output, accidental placeholders in a claimed-finished state, a missing clean-profile proof for persistent games, or required conditional validation not performed.
 
 At handoff, name commands/tests run, states exercised, storage/profile provenance for captured progress, remaining limitations, and anything not verified.
 

@@ -2,6 +2,8 @@
 
 Read this before searching for, comparing, downloading, purchasing, or licensing third-party assets. A search result or preview is not a usable asset until its exact source, rights, files, and technical fit are verified.
 
+When the task needs concrete places to search, read [asset-source-catalog.md](asset-source-catalog.md) and select only the routes relevant to the missing asset role. That catalogue provides source-specific license/account cautions and example source stacks; it is not an allowlist.
+
 ## Write an asset brief before searching
 
 Derive a compact search brief from the game and art direction:
@@ -24,6 +26,7 @@ Do not search for a generic noun when perspective, style, format, or gameplay us
 - Browsing and comparison do not authorize purchases, paid subscriptions, accepting new legal terms, publishing, or enabling third-party code.
 - Download only candidates needed for inspection or integration. Avoid bulk-downloading a catalog.
 - Never execute an installer or enable a Godot addon merely to preview its art.
+- For code-bearing addons, templates, themes, shaders, or frameworks, read [evaluated-ecosystem.md](evaluated-ecosystem.md) and complete `assets/addon-adoption-record.template.md` before production adoption. A clean import does not prove compatible ownership, removal, license, target export, or project settings.
 
 ## Search and shortlist
 
@@ -32,6 +35,8 @@ Do not search for a generic noun when perspective, style, format, or gameplay us
 3. Confirm that downloadable files exist in useful formats and the displayed preview represents those files.
 4. Build a shortlist of the strongest candidates. Record source page, author/publisher, price, license, attribution, formats, dependencies, update/version notes, and why each fits.
 5. Compare candidates using the acceptance gate below.
+
+Keep the shortlist bounded: normally three to five serious candidates per role after hard rejections. Stop once one candidate clears every gate unless a concrete unresolved requirement justifies more searching.
 
 Ask the user to choose when the decision costs money, requires an account/legal acceptance, or materially changes the game's artistic identity. When constraints clearly determine a free and compatible choice, select it and document why.
 

@@ -146,5 +146,16 @@
     "raw_review_artifact": "unrecorded",
     "result": "not_tested"
   },
+  "human_audio_listener": {
+    "listener_label": "unrecorded",
+    "did_not_build_audio_system": null,
+    "target_build": "unrecorded",
+    "playback_devices": [],
+    "approximate_minutes": null,
+    "states_heard": [],
+    "defects_and_disposition": "unrecorded",
+    "raw_listening_artifact": "unrecorded",
+    "result": "not_tested"
+  },
   "limitations": []
 }
