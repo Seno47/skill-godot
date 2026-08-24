@@ -49,7 +49,9 @@ Before bulk generation, identify the minimum representative set:
 - UI, icons, effects, audio, and typography;
 - temporary assets whose replacement status is explicit.
 
-Validate one hero asset and one representative environment composition before scaling the style to dozens of files.
+For a fixed-camera, isometric, or orthographic complete game, a loose asset sample is not enough. Before bulk level authoring, render an early representative gameplay slice at the final camera distance and target framing. It must contain the hero, one mechanism in default and changed states, the objective/beacon, representative structural and dressing decor, near-final lighting/material response, and gameplay UI/tutorial feedback. Have an independent reviewer judge the raw frame at gameplay size. Do not scale the level count while the hero is lost against the floor, the mechanism change is unclear, the world reads as sparse rows of tiles, or the composition is still defended as “temporary.” Record the decision in `assets/isometric-complete-review.template.md` when that case applies.
+
+For other game types, still validate one hero asset and one representative environment composition before scaling the style to dozens of files.
 
 Track provenance when external or generated assets enter a real project: source URL/tool, license or ownership, author when required, original source file, and modifications. Never imply that an unverified internet asset is safe to ship.
 
@@ -59,6 +61,7 @@ Review representative screenshots, not isolated files. Check:
 
 - focal hierarchy: the important actor/action reads first;
 - silhouette separation and contrast against the actual background;
+- actual gameplay-scale character size and local edge separation, not only an isolated turnaround or enlarged asset preview;
 - consistent scale, perspective, outline, texture density, and material response;
 - lighting and shadows agree across authored and generated assets;
 - repeated assets have controlled variation;

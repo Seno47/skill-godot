@@ -102,6 +102,14 @@ python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode run -
 
 These probes establish logical round-trips and path invariants. They do not prove rendered depth, cursor behavior near cell boundaries, roof/wall occlusion, or camera/input synchronization. Exercise those in a deterministic rendered fixture and the target build as required by [isometric-and-2-5d.md](isometric-and-2-5d.md).
 
+For fixed-camera character readability, render a normal raw gameplay screenshot and a hero-only mask at the exact same camera, frame, resolution, animation pose, and world state. Declare thresholds in the project review before evaluating the final captures, then measure at least one mean separation metric, one local-edge separation metric, and one screen-space size metric:
+
+```bash
+python <skill-dir>/scripts/isometric_readability_audit.py --screenshot reports/isometric-dense.png --mask reports/isometric-dense-hero-mask.png --require-thresholds --min-mean-luminance-delta <project-value> --min-edge-luminance-delta <project-value> --min-bbox-height-ratio <project-value> --summary --json-output reports/isometric-dense-readability.json
+```
+
+Repeat for quiet/default, dense mechanism/decor, height/lift, and route-changing/occlusion stress states. A mask generated from a different frame, a diagnostic-only run without thresholds, or one convenient capture cannot pass. Complete `assets/isometric-complete-review.template.md`; raw independent review remains authoritative for silhouette meaning, route composition, state readability, and sparse/default-looking art.
+
 ## Separate shipping defaults from QA state
 
 For games with persistence, perform two explicitly labeled runs:
@@ -135,10 +143,11 @@ For `run` and `capture`, it performs a Godot version check and headless import p
 - Editor-generated nodes have correct ownership and saved output.
 - Imported assets are customized through wrappers/inheritance/resources, not cache edits.
 - Isometric/2.5D work has one documented authoritative spatial model, projection/picking owner, pivot/sort convention, navigation contract, and multi-level occlusion strategy.
+- Complete fixed-camera isometric work has an independently approved gameplay-size art slice before bulk authoring, a same-frame character-readability matrix, a player-performed onboarding transition ledger, a density/composition matrix, and a content-duration contract matching the claimed scope.
 
 ## Completion gate
 
-Do not claim completion with engine errors, missing resources, broken inheritance, unreachable core flow, relevant collision/focus/camera failure, camera-relative movement or capture recovery unproved where applicable, production-HUD mouse routing proved only by input maps/direct calls, camera collision mistaken for player-visibility proof, unresolved multi-occluders, false camera proxies over open holes, incomplete cutaway restoration, high-structure cutaway that leaves the route veiled, unsafe first-use pressure, gameplay sightlines blocked by HUD/emissive geometry, complete-game audio lacking human listening signoff, a complete-game app/menu mark lacking semantic final-size review, unsaved editor output, accidental placeholders in a claimed-finished state, a missing clean-profile proof for persistent games, or required conditional validation not performed.
+Do not claim completion with engine errors, missing resources, broken inheritance, unreachable core flow, relevant collision/focus/camera failure, camera-relative movement or capture recovery unproved where applicable, production-HUD mouse routing proved only by input maps/direct calls, camera collision mistaken for player-visibility proof, unresolved multi-occluders, false camera proxies over open holes, incomplete cutaway restoration, high-structure cutaway that leaves the route veiled, unsafe or partial first-use teaching, gameplay sightlines blocked by HUD/emissive geometry, complete-game audio lacking human listening signoff, a complete-game app/menu mark lacking semantic final-size review, fixed-camera isometric art scaled before a gameplay-size slice passes, missing same-frame character/route readability evidence, sparse/default-looking composition, a duration/content claim unsupported by authored depth and uncoached playtime, unsaved editor output, accidental placeholders in a claimed-finished state, a missing clean-profile proof for persistent games, or required conditional validation not performed.
 
 At handoff, name commands/tests run, states exercised, storage/profile provenance for captured progress, remaining limitations, and anything not verified.
 

@@ -23,6 +23,10 @@ Capture what the user has actually specified:
 - requested deliverable: experiment, vertical slice, level, system, content pass, polish pass, or finished build.
 - explicit non-goals that prevent the slice from quietly expanding into unrelated systems.
 
+If the requested deliverable includes a duration, finite level/chapter count, or “complete game” claim, make the scope measurable before bulk authoring. Instantiate `assets/content-duration-contract.template.md` and map the claim to authored puzzle/objective count, mechanic introductions and meaningful permutations, estimated first-solve time, and later uncoached playtest evidence. Keep tutorial, menus, retries, grind, replay, and procedural/unbuilt assumptions separate. Never let a strong short slice silently inherit the duration claim of the intended future game.
+
+For fixed-camera isometric/orthographic complete work, also schedule the early rendered art gate from `assets/isometric-complete-review.template.md` before multiplying levels. This is a production decision: hero, mechanism states, objective, representative decor, lighting, and UI must coexist readably at the actual gameplay camera first.
+
 For a portal/web release where advertising is available, record `ads: none | conservative | aggressive-but-compliant` before designing the flow. If the brief does not decide and ads would change menus, pauses, rewards, or progression, ask once rather than inferring a policy. Record where game-initiated interstitials and banners may appear and what voluntary reward, if any, justifies rewarded video. Platform-controlled advertising is distinct from game-initiated calls.
 
 Do not interrogate the user for fields that are irrelevant to the requested slice. If no target resolution or input scheme is given, choose a reversible project default appropriate to the described platform and state it briefly.

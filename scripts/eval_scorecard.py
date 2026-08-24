@@ -95,12 +95,13 @@ def main() -> int:
                 }
             )
 
+        gate_results = {item["id"]: item for item in gates}
+
         scale = rubric.get("score_scale", {})
         minimum, maximum = scale.get("min", 0), scale.get("max", 4)
         if not isinstance(minimum, (int, float)) or not isinstance(maximum, (int, float)) or maximum <= minimum:
             raise ScorecardError("Invalid rubric score scale")
         dimensions: list[dict[str, Any]] = []
-        weighted_points = 0.0
         active_weight = 0.0
         warnings: list[str] = []
         for definition in rubric.get("dimensions", []):
@@ -125,15 +126,14 @@ def main() -> int:
             artifacts = evidence_items(value.get("evidence", []), f"dimension {dimension_id}.evidence")
             if not artifacts:
                 warnings.append(f"Dimension {dimension_id} has no evidence artifacts")
-            weighted_points += ((float(score) - minimum) / (maximum - minimum)) * float(weight)
             active_weight += float(weight)
             dimensions.append(
                 {
                     "id": dimension_id,
                     "status": "scored",
                     "score": score,
+                    "submitted_score": score,
                     "weight": weight,
-                    "weighted_points": round(((float(score) - minimum) / (maximum - minimum)) * float(weight), 3),
                     "evidence": artifacts,
                     "notes": value.get("notes"),
                 }
@@ -141,11 +141,71 @@ def main() -> int:
         if active_weight <= 0:
             raise ScorecardError("No active scored dimensions")
 
+        dimension_results = {item["id"]: item for item in dimensions}
+        score_caps_applied: list[dict[str, Any]] = []
+        cap_rules = rubric.get("score_caps", [])
+        if not isinstance(cap_rules, list):
+            raise ScorecardError("rubric.score_caps must be a list")
+        for index, rule in enumerate(cap_rules):
+            if not isinstance(rule, dict):
+                raise ScorecardError(f"score_caps[{index}] must be an object")
+            gate_id = rule.get("gate")
+            statuses = rule.get("statuses", ["fail", "not_tested"])
+            caps = rule.get("dimensions")
+            if not isinstance(gate_id, str) or not gate_id:
+                raise ScorecardError(f"score_caps[{index}].gate must be a non-empty string")
+            if (
+                not isinstance(statuses, list)
+                or not statuses
+                or any(status not in {"pass", "fail", "not_tested"} for status in statuses)
+            ):
+                raise ScorecardError(f"score_caps[{index}].statuses contains an invalid gate status")
+            if not isinstance(caps, dict) or not caps:
+                raise ScorecardError(f"score_caps[{index}].dimensions must be a non-empty object")
+            gate_result = gate_results.get(gate_id)
+            if gate_result is None or gate_result["status"] not in statuses:
+                continue
+            for dimension_id, cap in caps.items():
+                result = dimension_results.get(dimension_id)
+                if result is None:
+                    raise ScorecardError(f"score cap for {gate_id} references unknown dimension: {dimension_id}")
+                if isinstance(cap, bool) or not isinstance(cap, (int, float)) or not minimum <= cap <= maximum:
+                    raise ScorecardError(
+                        f"score cap for {gate_id}.{dimension_id} must be between {minimum} and {maximum}"
+                    )
+                if result.get("status") != "scored" or float(result["score"]) <= float(cap):
+                    continue
+                before = result["score"]
+                result["score"] = cap
+                score_caps_applied.append(
+                    {
+                        "gate": gate_id,
+                        "gate_status": gate_result["status"],
+                        "dimension": dimension_id,
+                        "before": before,
+                        "after": cap,
+                    }
+                )
+
+        submitted_weighted_points = 0.0
+        weighted_points = 0.0
+        for result in dimensions:
+            if result.get("status") != "scored":
+                continue
+            submitted_points = (
+                (float(result["submitted_score"]) - minimum) / (maximum - minimum)
+            ) * float(result["weight"])
+            adjusted_points = (
+                (float(result["score"]) - minimum) / (maximum - minimum)
+            ) * float(result["weight"])
+            submitted_weighted_points += submitted_points
+            weighted_points += adjusted_points
+            result["weighted_points"] = round(adjusted_points, 3)
+
         quality_floor_failures: list[dict[str, Any]] = []
         minimum_scores = cases[args.case_id].get("minimum_scores", {})
         if not isinstance(minimum_scores, dict):
             raise ScorecardError(f"Case {args.case_id}.minimum_scores must be an object")
-        dimension_results = {item["id"]: item for item in dimensions}
         for dimension_id, required_score in minimum_scores.items():
             if dimension_id not in dimension_results:
                 raise ScorecardError(
@@ -173,6 +233,7 @@ def main() -> int:
                 )
         blocking = blocking or bool(quality_floor_failures)
 
+        submitted_score_100 = round(submitted_weighted_points / active_weight * 100.0, 2)
         score_100 = round(weighted_points / active_weight * 100.0, 2)
         thresholds = rubric.get("thresholds", {})
         if blocking:
@@ -197,6 +258,8 @@ def main() -> int:
             "case": cases[args.case_id],
             "verdict": verdict,
             "score_100": score_100,
+            "submitted_score_100": submitted_score_100,
+            "score_caps_applied": score_caps_applied,
             "baseline_score_100": baseline_score,
             "delta": round(score_100 - baseline_score, 2) if baseline_score is not None else None,
             "blocking_gate_count": sum(gate["status"] != "pass" for gate in gates),
@@ -214,6 +277,7 @@ def main() -> int:
             output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(
             f"[RESULT] case={args.case_id} verdict={verdict} score={score_100:.2f}/100 "
+            f"submitted={submitted_score_100:.2f}/100 caps={len(score_caps_applied)} "
             f"blocking_gates={report['blocking_gate_count']} "
             f"quality_floor_failures={report['quality_floor_failure_count']}"
         )
@@ -222,9 +286,19 @@ def main() -> int:
                 print(f"[GATE {gate['status'].upper()}] {gate['id']}")
             for dimension in dimensions:
                 if dimension["status"] == "scored":
-                    print(f"[SCORE] {dimension['id']}={dimension['score']}/{maximum} weight={dimension['weight']}")
+                    submitted = dimension["submitted_score"]
+                    suffix = f" submitted={submitted}" if submitted != dimension["score"] else ""
+                    print(
+                        f"[SCORE] {dimension['id']}={dimension['score']}/{maximum} "
+                        f"weight={dimension['weight']}{suffix}"
+                    )
                 else:
                     print(f"[N/A] {dimension['id']}")
+            for cap in score_caps_applied:
+                print(
+                    f"[CAP] gate={cap['gate']} status={cap['gate_status']} "
+                    f"dimension={cap['dimension']} {cap['before']}->{cap['after']}"
+                )
             for failure in quality_floor_failures:
                 print(
                     f"[FLOOR FAIL] {failure['id']} actual={failure['actual_score']} "

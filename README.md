@@ -32,7 +32,7 @@ Codex can also select the skill automatically when a request clearly matches its
 | Included | What it gives you |
 | --- | --- |
 | 28 focused production guides | Scene architecture, 2D/3D/2.5D, UI, genre systems, asset-source discovery, art, audio, performance, loading, exports, and platform release work |
-| 15 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, progression/economy probes, capture support, budgets, scorecards, and build-size checks |
+| 16 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, fixed-camera readability, progression/economy probes, capture support, budgets, scorecards, and build-size checks |
 | 7 reusable Godot probes | Touch scrolling, button composition, third-person controls/HUD mouse routing/visibility, isometric projection, and isometric navigation checks |
 | Scene-first authoring rules | Persistent composition stays in `.tscn` scenes and Godot resources instead of disappearing into large runtime scripts |
 | Evidence-based completion | The skill runs the project, checks representative viewports, and avoids claiming polish or optimization without proof |
@@ -76,6 +76,8 @@ The skill does not treat “isometric” as an art style alone. It establishes o
 3. Store the contract using [`isometric-spatial-contract.template.md`](./assets/isometric-spatial-contract.template.md).
 4. Reuse [`isometric_projection.gd`](./assets/godot-components/isometric_projection.gd) where its contract fits.
 5. Adapt the projection and navigation probes to catch round-trip, height-transition, and route regressions.
+6. Before bulk level authoring, pass the gameplay-size hero/mechanism/objective/decor/lighting/UI gate in [`isometric-complete-review.template.md`](./assets/isometric-complete-review.template.md).
+7. Measure same-frame hero/background separation with [`isometric_readability_audit.py`](./scripts/isometric_readability_audit.py), review route/density composition independently, and support release-duration claims with [`content-duration-contract.template.md`](./assets/content-duration-contract.template.md).
 
 The full decision guide lives in [`references/isometric-and-2-5d.md`](./references/isometric-and-2-5d.md).
 

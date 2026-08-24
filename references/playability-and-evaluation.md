@@ -19,6 +19,12 @@ Before implementation, reduce the brief to an observable contract:
 
 For a sandbox without victory, define a meaningful repeatable activity and reset/recovery instead of inventing a win screen. For narrative/exploration work, define the reachable endpoint or evidence of progression.
 
+## Make duration and content depth falsifiable
+
+When the brief, store copy, or handoff claims a duration, chapter count, level count, or complete game, create `assets/content-duration-contract.template.md` before bulk authoring. Break the claim into authored objectives/puzzles, mechanic introductions, meaningful permutations/combinations, estimated uncoached first-solve time, and observed playtest time. Report tutorial time, menus, retries, grind, replay, and procedural/unbuilt assumptions separately.
+
+Separate level IDs do not prove depth when they repeat the same layout, only change a parameter, mirror a route, or swap presentation. A short vertical slice may be excellent and pass as a slice, but it must not substantiate multi-hour release scope. A duration claim passes only when the authored-content arithmetic and uncoached playtest provenance support it; otherwise revise the label/scope or author and test the missing content.
+
 ## Build an observable state matrix
 
 List the representative states before polishing:
@@ -42,6 +48,8 @@ For a complete game, the boot/menu evidence also includes the exported app icon 
 ## Prove onboarding through action
 
 For a complete game or vertical slice with a non-obvious mechanic, onboarding must advance through an observable player action. Highlight or constrain the relevant target/control, wait for the player to perform the intended input, confirm the result, and then release the player into the normal loop. A paragraph, static hint, tutorial data field, localized string, or “How to play” page can support this sequence but cannot replace it.
+
+Do not compress a multi-step core loop into one generic “interact” proof. Model onboarding as explicit states and transitions. For each brief-required verb or world consequence, record the target/cue, actual player input, immediate feedback, resulting gameplay/route state, failure-pressure policy, target visibility, and uncoached evidence. In the complete fixed-camera isometric case this ledger covers movement, pickup, context interaction, mechanism state change, traversal of the changed route, height/lift use, beacon/objective delivery, and restart/recovery. The player must cause every transition; narration, a scripted demonstration, or one final completion trace cannot stand in for the intermediate states. Use `assets/isometric-complete-review.template.md` for that canonical flow.
 
 Test from the clean shipping profile with a person or independent evaluator who has not been coached on the mechanic. Evidence should show the prompt/state before the action, the actual input/state transition, feedback after success, and entry into the core loop. If the game's core action is genuinely self-evident and no tutorial is intended, document that decision and still verify first-action success without narration.
 
@@ -74,7 +82,7 @@ The runner does not inject keyboard, mouse, or controller input. Use a project t
 2. **Engine:** import, parse, load, bounded runtime, and error log.
 3. **Behavior:** each state in the playable contract is actually reached.
 4. **Visual/audio:** representative captures are inspected at final framing and motion; audio is actually listened to in context by a human listener, not inferred from file presence, node paths, buses, waveforms, or automated metrics.
-5. **Independent human/evaluator playtest:** someone who did not build the flow can understand the goal, complete the onboarding action, and close the loop without developer narration.
+5. **Independent human/evaluator playtest:** someone who did not build the flow can understand the goal, complete every required onboarding transition, and close the loop without developer narration.
 
 Do not let a high structural score hide a broken game. Treat unreachable success/failure, static-text-only onboarding for a non-obvious core action, unclear controls, a soft lock, or a nonfunctional restart as completion blockers.
 
@@ -91,6 +99,7 @@ When changing this skill materially, test it on isolated projects representing a
 - complete idle/clicker slice with economy/offline/save evidence;
 - complete quest-driven slice with duplicate-event and exactly-once reward evidence;
 - new 3D slice using a ready-made asset pack;
+- complete fixed-camera isometric game with an early rendered art gate, measured character/route readability, full onboarding state machine, density/composition matrix, and content-duration evidence;
 - new 3D slice with a generated static prop and authored collision/wrapper;
 - feature added to an existing convention-heavy project;
 - constrained mobile/web build with performance and package-size budgets.
@@ -113,7 +122,7 @@ The helper never turns generated placeholders into passing evidence. Fill the ge
 python <skill-dir>/scripts/eval_scorecard.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --evidence <evidence.json> --summary --json-output <scorecard.json>
 ```
 
-The scorecard normalizes applicable weighted dimensions, but a failed or untested blocking gate overrides the numeric score. Keep fixture, brief, rubric, and evaluation protocol stable when comparing skill revisions.
+The scorecard normalizes applicable weighted dimensions, blocks completion on every failed/untested blocking gate, and applies rubric-defined dimension caps when missing independent evidence makes a high builder-submitted visual/UX/scope score indefensible. Compare both `submitted_score_100` and adjusted `score_100`; a blocked case with optimistic self-scores is not near-perfect evidence. Keep fixture, brief, rubric, and evaluation protocol stable when comparing skill revisions.
 
 ## Completion evidence
 

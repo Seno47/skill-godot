@@ -103,6 +103,7 @@ class GenreRubricTests(unittest.TestCase):
             "new-2d-metroidvania-complete": "metroidvania_progression_evidence",
             "new-idle-clicker-complete": "idle_economy_evidence",
             "new-quest-driven-complete": "quest_transaction_evidence",
+            "new-isometric-fixed-camera-complete": "isometric_vertical_slice_art_review",
             "ui-reference-integration": "reference_parity_evidence",
         }
         with tempfile.TemporaryDirectory() as directory:
@@ -173,6 +174,67 @@ class ImageCompareTests(unittest.TestCase):
             )
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertIn("[FAIL]", completed.stdout)
+
+
+@unittest.skipUnless(importlib.util.find_spec("PIL"), "Pillow is not installed")
+class IsometricReadabilityTests(unittest.TestCase):
+    @staticmethod
+    def make_capture(directory: Path, background: int, hero: int) -> tuple[Path, Path]:
+        from PIL import Image, ImageDraw
+
+        screenshot = directory / "frame.png"
+        mask = directory / "hero-mask.png"
+        frame_image = Image.new("RGB", (100, 100), (background, background, background))
+        ImageDraw.Draw(frame_image).rectangle((40, 30, 59, 69), fill=(hero, hero, hero))
+        frame_image.save(screenshot)
+        mask_image = Image.new("RGBA", (100, 100), (0, 0, 0, 0))
+        ImageDraw.Draw(mask_image).rectangle((40, 30, 59, 69), fill=(255, 255, 255, 255))
+        mask_image.save(mask)
+        return screenshot, mask
+
+    def test_high_separation_same_frame_mask_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            screenshot, mask = self.make_capture(temp, background=20, hero=245)
+            completed = run_script(
+                "isometric_readability_audit.py",
+                "--screenshot",
+                str(screenshot),
+                "--mask",
+                str(mask),
+                "--require-thresholds",
+                "--min-mean-luminance-delta",
+                "0.5",
+                "--min-edge-luminance-delta",
+                "0.5",
+                "--min-bbox-height-ratio",
+                "0.3",
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("status=pass", completed.stdout)
+
+    def test_white_on_white_character_fails_declared_budget(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            screenshot, mask = self.make_capture(temp, background=240, hero=250)
+            completed = run_script(
+                "isometric_readability_audit.py",
+                "--screenshot",
+                str(screenshot),
+                "--mask",
+                str(mask),
+                "--require-thresholds",
+                "--min-mean-luminance-delta",
+                "0.2",
+                "--min-edge-luminance-delta",
+                "0.2",
+                "--min-bbox-height-ratio",
+                "0.3",
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("status=fail", completed.stdout)
 
 
 if __name__ == "__main__":

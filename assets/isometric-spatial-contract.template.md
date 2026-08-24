@@ -49,6 +49,16 @@ Decision owner/date: `[owner] / [date]`
 - Zoom range and pixel-snap policy: `[values]`
 - Limits/smoothing/input synchronization: `[rule]`
 
+## Gameplay-size art and readability budget
+
+- Early art-slice review path/revision: `[hero + mechanism states + objective + decor + lighting + HUD]`
+- Bulk level authoring blocked until: `[independent PASS condition]`
+- Hero minimum bounding-box height or area: `[project-owned threshold]`
+- Mean character/background separation: `[metric and threshold]`
+- Local-edge separation: `[metric and threshold]`
+- Readability capture states: `[quiet | dense | height/lift | route-changing/occlusion]`
+- Density/composition capture states: `[start | typical puzzle | densest | highest | objective/result]`
+
 ## Validation matrix
 
 - Projection cells: `[negative/origin/positive/elevated samples]`
@@ -57,6 +67,8 @@ Decision owner/date: `[owner] / [date]`
 - Navigation and height routes: `[cases]`
 - Viewports/zoom/rotations: `[cases]`
 - Persistence restore cases: `[cases]`
+- Same-frame screenshot/hero-mask reports: `[cases and artifact paths]`
+- Independent density/route/silhouette review: `[review path]`
 
 ## Performance budgets
 

@@ -240,6 +240,7 @@ class AuditorSmokeTests(unittest.TestCase):
             "semantic_identity_review",
             "independent_ux_review",
             "human_audio_listening",
+            "content_duration_evidence",
             "responsive_layout_evidence",
             "input_modality_ui_evidence",
         ):
@@ -287,6 +288,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(migrated["gates"]["interactive_onboarding"]["status"], "not_tested")
         self.assertEqual(migrated["gates"]["semantic_identity_review"]["status"], "not_tested")
         self.assertEqual(migrated["gates"]["human_audio_listening"]["status"], "not_tested")
+        self.assertEqual(migrated["gates"]["content_duration_evidence"]["status"], "not_tested")
         self.assertEqual(migrated["gates"]["engine_clean"]["status"], "pass")
         self.assertEqual(
             [(item["width"], item["height"]) for item in manifest["viewport_matrix"]],
@@ -346,6 +348,42 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertIn("verdict=blocked", completed.stdout)
         self.assertIn("blocking_gates=1", completed.stdout)
+
+    def test_eval_unverified_independent_review_caps_submitted_scores(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: independent target-build listening"],
+        }
+        source["gates"]["independent_ux_review"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: builder self-review only"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertGreater(report["submitted_score_100"], report["score_100"])
+        self.assertTrue(
+            any(cap["gate"] == "independent_ux_review" for cap in report["score_caps_applied"])
+        )
+        self.assertEqual(report["verdict"], "blocked")
 
     def test_eval_complete_slice_requires_semantic_identity_review(self) -> None:
         source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
@@ -570,6 +608,82 @@ class AuditorSmokeTests(unittest.TestCase):
                 str(ROOT / "evals" / "rubric.json"),
                 "--case",
                 "new-3d-third-person-complete",
+                "--evidence",
+                str(evidence_path),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("verdict=pass", completed.stdout)
+        self.assertIn("blocking_gates=0", completed.stdout)
+
+    def test_eval_isometric_case_caps_missing_art_onboarding_and_readability(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "new-isometric-fixed-camera-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: independent target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 4,
+            "evidence": ["fixture: imported asset manifest"],
+        }
+        for gate_id in (
+            "isometric_vertical_slice_art_review",
+            "isometric_character_readability_evidence",
+            "isometric_onboarding_state_machine",
+            "isometric_visual_composition_evidence",
+        ):
+            source["gates"][gate_id] = {
+                "status": "not_tested",
+                "evidence": [f"fixture: {gate_id} was inferred from structure only"],
+            }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-isometric-fixed-camera-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(report["blocking_gate_count"], 4)
+        self.assertGreater(report["submitted_score_100"], report["score_100"])
+        self.assertLessEqual(
+            next(item["score"] for item in report["dimensions"] if item["id"] == "visual_coherence"),
+            1,
+        )
+        self.assertEqual(report["verdict"], "blocked")
+
+    def test_eval_isometric_case_accepts_complete_evidence(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "new-isometric-fixed-camera-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: independent target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: production art manifest and gameplay-size review"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-isometric-fixed-camera-complete",
                 "--evidence",
                 str(evidence_path),
                 "--summary",

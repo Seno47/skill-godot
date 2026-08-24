@@ -16,6 +16,12 @@ For hybrid work, name the authoritative simulation space. Convert into presentat
 
 Do not silently change architecture after a representative slice exists. A change between these models affects assets, collisions, navigation, camera, sorting, tools, and save data; surface the migration and its cost to the user.
 
+## Block bulk authoring on a rendered art slice
+
+For a fixed-camera isometric/orthographic complete game, pass an early gameplay-size art gate before authoring the level count. One representative rendered slice must show the hero, one mechanism in both relevant states, the beacon/objective, structural and dressing decor, final-direction lighting/material response, and the gameplay HUD/tutorial treatment together. Review the raw target-camera frame, not isolated source assets, editor thumbnails, or an asset-count report.
+
+Reject the slice if the character is visually absorbed by the floor, the mechanism/objective cannot be distinguished at normal zoom, the scene reads as sparse repeated rows, or decoration has no deliberate relationship to route and interaction readability. Asset import success, palette consistency, and a valid scene graph cannot pass this gate. Record the independent verdict with `assets/isometric-complete-review.template.md`; do not multiply an unapproved slice into many levels.
+
 ## Define the spatial contract
 
 Record at least:
@@ -106,6 +112,18 @@ A 2:1 tile ratio is common, not mandatory. Do not force existing dimetric art in
 
 Test the smallest and largest supported viewport, zoom extremes, every allowed camera rotation, dense intersections, and the highest supported elevation. Keep the active cell, character contact point, path preview, and interaction affordances readable without relying only on color.
 
+For a fixed camera, declare a gameplay-size readability budget before final review. For the quiet floor, densest representative decor/mechanism state, height transition, and route-changing/occlusion stress state, capture:
+
+- one raw target-build screenshot;
+- one hero-only silhouette mask from the exact same camera and frame;
+- the declared minimum screen-space character size;
+- at least one mean character/background separation threshold and one local-edge separation threshold;
+- an independent reading of the hero silhouette, actionable route, mechanism state, and objective.
+
+Run `scripts/isometric_readability_audit.py --require-thresholds` to measure the same-frame mask. The report is regression evidence, not an art critic: a number cannot approve a generic white hero, a noisy silhouette, a misleading route, or a composition that only works with tutorial highlighting. Thresholds are project-owned, must be recorded before final evaluation, and must not be relaxed after failure without rationale and a full state re-review.
+
+Review visual density as composition rather than asset quantity. At gameplay scale, capture the start/teaching area, a typical puzzle, the densest mechanism/decor area, the highest elevation transition, and the objective/result state. Check focal hierarchy, purposeful foreground/midground/background structure, landmarks, negative-space rhythm, route continuity, controlled repetition, and HUD/world competition. Sparse tile rows are acceptable only when their negative space serves navigation and the independent reviewer can state that purpose.
+
 For pixel art, choose integer-compatible asset scale and camera zoom; inspect motion for shimmer at diagonal speeds. For smooth art, avoid snapping that causes visible stepping. Camera smoothing must not make cursor-to-cell picking lag behind the rendered world.
 
 ## Performance priorities
@@ -132,6 +150,10 @@ Validate in addition to ordinary engine, gameplay, and visual checks:
 6. **Camera:** zoom, limits, aspect extremes, smoothing, and each allowed rotation preserve input mapping and readability.
 7. **Occlusion:** roofs/walls reveal the actor and restore correctly during entry, exit, pause, reload, and scene transition.
 8. **Persistence:** saved cell/floor/object identities restore to the same logical position independently of viewport size.
+9. **Early art slice:** hero, mechanism states, objective, decor, lighting, and UI pass independent rendered review before bulk level authoring.
+10. **Character/route readability:** same-frame screenshot/mask reports meet the declared size, mean-separation, and edge-separation thresholds in quiet, dense, height, and route-changing states, while raw review confirms silhouette and route meaning.
+11. **Onboarding state machine:** the shipping first-use flow makes the player perform every brief-required transition, including movement, pickup, context interaction, mechanism change, route traversal, height/lift, objective delivery, and recovery where applicable; feedback is distinct and overlays never cover the target.
+12. **Composition and duration:** the fixed-camera capture matrix rejects sparse/default-looking presentation, and the declared game duration is supported by authored puzzle/permutation counts plus uncoached playtest evidence.
 
 Copy/adapt these deterministic probes into the project test suite:
 
@@ -139,6 +161,8 @@ Copy/adapt these deterministic probes into the project test suite:
 - `assets/godot-tests/isometric_navigation_probe.gd` for path endpoints, adjacency, walkability, and height transitions.
 
 The probes validate project contracts, not visual depth. Keep rendered crossing captures or a deterministic visual fixture for sorting, occlusion, and camera review.
+
+For the complete fixed-camera case, use `assets/isometric-complete-review.template.md` together with `assets/content-duration-contract.template.md`. A short polished slice can be delivered truthfully as a slice; it cannot pass as a multi-hour complete game.
 
 Useful official references:
 

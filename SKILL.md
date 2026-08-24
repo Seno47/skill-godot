@@ -17,7 +17,9 @@ Turn the user's design into an editable Godot project, not a scripted imitation 
 - Never present raw primitives, default controls, mismatched assets, or unreviewed placeholders as finished design.
 - For a complete game or vertical slice, give the app/export icon and main menu identity a semantically legible relationship to the game and obtain an independent final-size review; palette consistency cannot turn arbitrary primitive geometry into a meaningful mark.
 - For a complete game or vertical slice, deliver coherent, licensed, integrated music/SFX and mixer controls unless the user explicitly requests a silent experience or non-production prototype. Code-synthesized beeps and generic tracks are placeholders, not finished audio.
-- For a complete game or vertical slice, prove the clean-profile first-use path through an interactive onboarding action, then obtain independent UX/visual review across representative viewport extremes. Static tutorial text, seeded QA state, and the building agent's own screenshot approval are insufficient completion evidence.
+- For a complete game or vertical slice, prove the clean-profile first-use path through every required onboarding state transition, then obtain independent UX/visual review across representative viewport extremes. Static tutorial text, one generic action, seeded QA state, and the building agent's own screenshot approval are insufficient completion evidence.
+- Make complete-game duration/content claims auditable: map them to authored objectives, mechanic permutations/combinations, estimated solve time, and uncoached playtest evidence. A short slice must be labeled as a slice rather than scored as unbuilt hours.
+- For fixed-camera isometric/orthographic complete work, block bulk level authoring until a rendered gameplay-size slice—hero, mechanism states, objective, decor, lighting, and UI—passes independent review; later prove character/background separation, route readability, and density/composition in the target camera.
 - Do not claim polish, performance, memory, or size improvements without testing the relevant built/rendered result.
 - Keep the result maintainable and editable after the agent finishes.
 
@@ -88,6 +90,7 @@ Validation:
 - Idle/clicker economy work: export a project-specific model from `assets/idle-economy.template.json`, run `scripts/idle_economy_probe.py`, then verify actual transactions, save/offline idempotence, numeric UI, and human pacing in the target build
 - Free-orbit third-person locomotion/camera/visibility work: adapt `assets/godot-tests/third_person_controller_probe.gd`, `assets/godot-tests/third_person_hud_mouse_probe.gd`, and `assets/godot-tests/third_person_visibility_probe.gd`, then complete the target-build matrix in `assets/third-person-3d-review.template.md`
 - Isometric projection, picking, grid navigation, height transitions, depth sorting, or occlusion: apply the conditional validation in [references/isometric-and-2-5d.md](references/isometric-and-2-5d.md); adapt `assets/godot-tests/isometric_projection_probe.gd` and `assets/godot-tests/isometric_navigation_probe.gd` where their contracts fit
+- Complete fixed-camera isometric/orthographic game: before bulk content, fill `assets/isometric-complete-review.template.md`; measure same-frame character/background separation with `scripts/isometric_readability_audit.py --require-thresholds`; and support the claimed scope with `assets/content-duration-contract.template.md`
 
 Hybrid tasks may require several references. Do not read unrelated references preemptively.
 
@@ -100,7 +103,7 @@ Hybrid tasks may require several references. Do not read unrelated references pr
 
 ## Execute in authored slices
 
-Build the smallest complete slice that demonstrates the requested experience: establish scale/camera/input plus visual and sonic language, create reusable scenes/resources, compose the playable scene, add focused behavior, integrate representative production assets including audio, run it, inspect representative states, and iterate. Do not postpone all sound until after the gameplay and presentation are otherwise declared complete.
+Build the smallest complete slice that demonstrates the requested experience: establish scale/camera/input plus visual and sonic language, create reusable scenes/resources, compose the playable scene, add focused behavior, integrate representative production assets including audio, run it, inspect representative states, and iterate. For fixed-camera isometric/orthographic work, do not multiply levels until the representative gameplay-size art/readability gate passes. Do not postpone all sound until after the gameplay and presentation are otherwise declared complete.
 
 Use direct `.tscn`/`.tres` edits for small understood structures; use the Godot editor for visual placement and fragile serialization; use `EditorScript`/`@tool` for repeatable bulk authoring; use appropriate content tools for source assets. Generated output must remain normal Godot scenes/resources. Never edit `.godot/` cache contents as source or invent UIDs when safer editor/path workflows exist.
 

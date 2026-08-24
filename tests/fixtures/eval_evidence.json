@@ -42,6 +42,10 @@
       "status": "pass",
       "evidence": ["fixture: independent human target-build listening signoff"]
     },
+    "content_duration_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: authored content-duration table and uncoached playtest timing"]
+    },
     "third_person_control_contract": {
       "status": "pass",
       "evidence": ["fixture: camera-relative yaw matrix, production-HUD InputEventMouseMotion yaw/pitch, target-build sensitivity, input axes, collision, and capture recovery"]
@@ -49,6 +53,22 @@
     "gameplay_visibility_evidence": {
       "status": "pass",
       "evidence": ["fixture: measured HUD budget, multi-height multi-occluder/open-hole/restoration visibility probe, render/collision shell review, and exact high-structure elevation route-contrast capture"]
+    },
+    "isometric_vertical_slice_art_review": {
+      "status": "pass",
+      "evidence": ["fixture: independent gameplay-size hero, mechanism, beacon, decor, lighting, and HUD slice review before bulk authoring"]
+    },
+    "isometric_character_readability_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: same-frame quiet, dense, height, and route-changing screenshot/mask reports plus independent silhouette review"]
+    },
+    "isometric_onboarding_state_machine": {
+      "status": "pass",
+      "evidence": ["fixture: clean uncoached movement, pickup, context, mechanism, route, lift, delivery, and recovery action trace"]
+    },
+    "isometric_visual_composition_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: independent start, typical, dense, elevation, and objective composition matrix"]
     },
     "responsive_layout_evidence": {
       "status": "pass",

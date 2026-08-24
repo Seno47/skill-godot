@@ -18,6 +18,7 @@ Use a real renderer and capture screenshots or short recordings at the intended 
 - target aspect/resolution extremes and busy gameplay behind UI;
 - the real start camera and representative route/corner/elevation views for long emissive meshes, ceiling strips, beams, rails, cables, and other perspective-sensitive geometry;
 - matched third-person blocked/clear captures at multiple route locations, including one multi-occluder stack, one open doorway/gate center, one cutaway-strength comparison, one silhouette fallback, the fully restored state, and the exact reported/highest-structure elevation view rather than only an easier generic room;
+- for fixed-camera isometric/orthographic work, the early art slice and matched gameplay-size quiet, dense, height-transition, and route-changing captures; pair each character-readability frame with a hero-only mask from the exact same camera/frame;
 - first-time effects/materials likely to expose stutter or shader issues.
 
 Use consistent camera, resolution, renderer, quality preset, and scene state when comparing revisions.
@@ -53,6 +54,8 @@ Compare against the user's brief and accepted references:
 - player visibility from the resulting camera, not merely camera collision: compare several character heights/regions, verify every simultaneous occluder is resolved, keep the route/environment readable, and confirm that open holes remain clear without false cutaway;
 - high-structure cutaway quality at the exact failure/elevation framing: compare route/target contrast and retained spatial cues, not only transparency values, faded-object counts, or silhouette presence. Reject a white veil/grid or route-filling shell even when technically transparent;
 - blocked-to-clear restoration of all affected render state. Look for lingering transparency, hidden meshes, missing shadows, shader parameters, render-layer changes, or a silhouette that stays enabled after the obstruction is gone;
+- fixed-camera isometric character separation at actual gameplay size: review the silhouette and local edge against the quiet floor, dominant/lightest background values, dense decor, mechanism state, elevation transition, and route-changing stress state. Use `scripts/isometric_readability_audit.py` with predeclared project thresholds, but reject a semantically generic or route-obscuring result even when the measurements pass;
+- fixed-camera density and composition: compare start/teaching, typical puzzle, densest decor/mechanism, highest elevation, and objective/result frames for focal hierarchy, foreground/midground/background structure, landmarks, purposeful negative space, route rhythm, controlled repetition, and HUD/world competition. Asset count and import success do not excuse sparse rows or a default-looking hero;
 - animation timing, transitions, effects, feedback, and motion comfort;
 - hover/focus motion geometry: compare the control's visual center and neighboring `Control` rects before/after; incidental layout shift is a defect even when each still looks individually plausible;
 - seams, halos, missing textures, z-fighting, sorting, clipping, debug visuals, defaults, and placeholders.
@@ -66,5 +69,7 @@ Fix the most visible mismatch, recapture the same representative state, and comp
 If no available tool can display the rendered game, complete structural/engine checks and state precisely that visual quality remains unverified. Do not call the result polished.
 
 The building agent may capture and triage its own work, but it must not award near-perfect visual/UX scores from self-review alone. A complete game or vertical slice needs a screenshot/motion review by a person or genuinely independent evaluation context that did not author the layout. Provide the reviewer the brief and raw representative captures, not the builder's desired verdict. Record who/what reviewed it, which viewport/state matrix was covered, and the defects found or absence thereof.
+
+For a complete fixed-camera isometric case, use `assets/isometric-complete-review.template.md`; the early rendered art verdict must precede bulk level authoring, and the final review must include the density/composition matrix rather than only the best-looking frame.
 
 At handoff, identify the states and resolutions inspected, the independent reviewer/context, and any visual state not reached.

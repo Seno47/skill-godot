@@ -13,6 +13,8 @@
 |---|---|---|
 | Clean first-use comprehension | NOT TESTED | Unrecorded |
 | Interactive onboarding action | NOT TESTED | Unrecorded |
+| Complete onboarding state-machine coverage | NOT TESTED | Unrecorded |
+| Content-duration claim versus authored/playtested depth | NOT TESTED | Unrecorded |
 | App icon/main-menu semantic identity at final size | NOT TESTED | Unrecorded |
 | Responsive integrity | NOT TESTED | Unrecorded |
 | Camera-relative movement after orbit | NOT TESTED | Unrecorded |
@@ -33,6 +35,19 @@
 | Audio/visual feedback in context | NOT TESTED | Unrecorded |
 | First-use pressure begins only after safe teaching | NOT TESTED | Unrecorded |
 | Human audio listening signoff (not structural inference) | NOT TESTED | Unrecorded |
+| Fixed-camera isometric early art slice at gameplay size | NOT TESTED | Unrecorded |
+| Fixed-camera character silhouette and local contrast | NOT TESTED | Unrecorded |
+| Fixed-camera route readability and density/composition | NOT TESTED | Unrecorded |
+
+## Onboarding action trace
+
+For a multi-step loop, list every required player-caused transition rather than approving one generic interaction.
+
+| Action/state | Actual player input | Feedback and resulting state | Target unobstructed | Uncoached evidence | PASS / FAIL / NOT TESTED |
+|---|---|---|---|---|---|
+| | | | | | |
+
+For the canonical fixed-camera isometric case, include movement, pickup, context interaction, mechanism change, traversal of the changed route, height/lift, beacon/objective delivery, and restart/recovery.
 
 ## Defects
 
