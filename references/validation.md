@@ -64,6 +64,20 @@ python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode run -
 
 Use every canonical viewport in the project's final layout test even if the reusable probe command is split into several bounded runs. A headless synthetic click proves the Godot input path and catches premature focus cleanup; still repeat the action in the release-like Web build because browser event forwarding and overlays can differ.
 
+## Prove production character motion before release
+
+When a production character is expected to move, instantiate `assets/production-character-motion.template.md` and treat it as builder-owned acceptance rather than an optional human checklist. The project-specific deterministic contract should prove:
+
+- required idle, locomotion, and brief-required context clips/states resolve on the production visual owner;
+- ordinary idle/locomotion are not the imported bind/rest/T-pose and sampled production pose features vary over time;
+- real movement/interaction paths dispatch the expected state instead of a test-only direct animation call;
+- retarget/root policy, source-mannequin visibility, and action reset/interruption are intentional;
+- required held props/effects/sockets follow the animated bone or authored marker through representative poses.
+
+For skeletal 3D, sample several stable non-root bones or equivalent pose features because in-place motion may keep the root still. For 2D, sample animation/frame progression, pivots, and attachment markers. Choose project-owned tolerances that distinguish real motion from numerical jitter; do not universalize one bone list, arm angle, or delta across rigs.
+
+Then capture and inspect raw target-build motion at the actual gameplay camera: idle, locomotion, and required context actions, normally for several seconds at a fixed frame rate. Preserve a contact sheet when it helps compare poses, but do not replace the recording with stills. The builder must reject a frozen character, bind/T-pose leakage, missing state dispatch, duplicate/source mannequin, loop/contact failure, or detached attachment before asking the user for preference feedback. Human comments about motion style remain optional unless the brief explicitly makes them an acceptance requirement.
+
 For a freely orbiting third-person controller, copy/adapt `assets/godot-tests/third_person_controller_probe.gd` into a flat deterministic fixture that instances the real player and camera rig. The fixture must expose the actual production input actions and nodes rather than a second test-only movement implementation. Exercise camera-relative forward movement after 45° and 90° yaw plus the supported right-stick axes, zoom, and recenter:
 
 ```bash
@@ -142,12 +156,13 @@ For `run` and `capture`, it performs a Godot version check and headless import p
 - Runtime generation has a real procedural/transient/streaming/performance reason.
 - Editor-generated nodes have correct ownership and saved output.
 - Imported assets are customized through wrappers/inheritance/resources, not cache edits.
+- Production characters expected to move have a builder-owned motion contract covering required states, bind/rest/T-pose rejection, real dispatch, target-build motion, and attachments.
 - Isometric/2.5D work has one documented authoritative spatial model, projection/picking owner, pivot/sort convention, navigation contract, and multi-level occlusion strategy.
 - Complete fixed-camera isometric work has an independently approved gameplay-size art slice before bulk authoring, a same-frame character-readability matrix, a player-performed onboarding transition ledger, a density/composition matrix, and a content-duration contract matching the claimed scope.
 
 ## Completion gate
 
-Do not claim completion with engine errors, missing resources, broken inheritance, unreachable core flow, relevant collision/focus/camera failure, camera-relative movement or capture recovery unproved where applicable, production-HUD mouse routing proved only by input maps/direct calls, camera collision mistaken for player-visibility proof, unresolved multi-occluders, false camera proxies over open holes, incomplete cutaway restoration, high-structure cutaway that leaves the route veiled, unsafe or partial first-use teaching, gameplay sightlines blocked by HUD/emissive geometry, complete-game audio lacking human listening signoff, a complete-game app/menu mark lacking semantic final-size review, fixed-camera isometric art scaled before a gameplay-size slice passes, missing same-frame character/route readability evidence, sparse/default-looking composition, a duration/content claim unsupported by authored depth and uncoached playtime, unsaved editor output, accidental placeholders in a claimed-finished state, a missing clean-profile proof for persistent games, or required conditional validation not performed.
+Do not claim completion with engine errors, missing resources, broken inheritance, unreachable core flow, a production character frozen in bind/rest/T-pose or missing required idle/locomotion/context motion, test-only animation dispatch, a visible source mannequin, detached animated attachments, relevant collision/focus/camera failure, camera-relative movement or capture recovery unproved where applicable, production-HUD mouse routing proved only by input maps/direct calls, camera collision mistaken for player-visibility proof, unresolved multi-occluders, false camera proxies over open holes, incomplete cutaway restoration, high-structure cutaway that leaves the route veiled, unsafe or partial first-use teaching, gameplay sightlines blocked by HUD/emissive geometry, complete-game audio lacking human listening signoff, a complete-game app/menu mark lacking semantic final-size review, fixed-camera isometric art scaled before a gameplay-size slice passes, missing same-frame character/route readability evidence, sparse/default-looking composition, a duration/content claim unsupported by authored depth and uncoached playtime, unsaved editor output, accidental placeholders in a claimed-finished state, a missing clean-profile proof for persistent games, or required conditional validation not performed.
 
 At handoff, name commands/tests run, states exercised, storage/profile provenance for captured progress, remaining limitations, and anything not verified.
 

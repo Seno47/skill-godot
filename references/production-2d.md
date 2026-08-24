@@ -46,6 +46,8 @@ Keep the composed node tree visible in the scene. A player scene should expose i
 - Make gameplay timing authoritative in gameplay logic when animation playback can vary. Synchronize through explicit events rather than fragile frame guesses.
 - Layer anticipation, impact, recovery, particles, camera response, sound, and hit-stop only to the degree appropriate to the user's motion direction.
 
+For a production character expected to move, fill `assets/production-character-motion.template.md` as builder-owned routine QA. Prove idle/locomotion and brief-required context states on the production `AnimatedSprite2D`/`AnimationPlayer`, exercise dispatch through real gameplay, verify frame progression and loop boundaries, and confirm held/effect attachments follow stable authored markers. Inspect raw target-build motion at gameplay scale; a correct sprite sheet, first frame, or static contact sheet does not pass a character frozen on one frame. Optional user feedback may refine timing/personality after this baseline passes, but the user is not responsible for finding missing playback, wrong pivots, or stale action states.
+
 ## Lighting and materials
 
 - Use 2D lights, occluders, normal maps, canvas modulation, particles, and shaders as a coherent lighting system.
@@ -71,7 +73,7 @@ Inspect screenshots and motion at representative states:
 - foreground/background overlap and camera limits;
 - effects at full action intensity.
 
-Reject the pass if sprites clash in pixel density or perspective, actors disappear into backgrounds, collisions visibly disagree with art, tiles repeat mechanically without intent, or default shapes remain in a state described as final.
+Reject the pass if sprites clash in pixel density or perspective, actors disappear into backgrounds, collisions visibly disagree with art, a production character expected to move is frozen or lacks required states, tiles repeat mechanically without intent, or default shapes remain in a state described as final.
 
 Useful official references:
 

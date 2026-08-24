@@ -584,6 +584,77 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("verdict=blocked", completed.stdout)
         self.assertIn("blocking_gates=2", completed.stdout)
 
+    def test_eval_production_character_motion_is_builder_owned_and_blocking(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "new-isometric-fixed-camera-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 4,
+            "evidence": ["fixture: imported production character and animation library"],
+        }
+        source["gates"]["production_character_motion_evidence"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: clips exist but no production pose or target-build motion proof"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-isometric-fixed-camera-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        motion_gate = next(
+            item for item in report["gates"] if item["id"] == "production_character_motion_evidence"
+        )
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(report["blocking_gate_count"], 1)
+        self.assertEqual(motion_gate["acceptance_owner"], "builder")
+        self.assertEqual(scores["visual_coherence"]["score"], 1)
+        self.assertEqual(scores["playability_and_ux"]["score"], 2)
+        self.assertEqual(scores["asset_pipeline"]["score"], 2)
+        self.assertEqual(report["verdict"], "blocked")
+
+    def test_evidence_helper_labels_character_motion_as_builder_owned(self) -> None:
+        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source["case_id"] = "new-isometric-fixed-camera-complete"
+        del source["gates"]["production_character_motion_evidence"]
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            old_path = temp / "old.json"
+            output_path = temp / "migrated.json"
+            old_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-isometric-fixed-camera-complete",
+                "--from-existing",
+                str(old_path),
+                "--output",
+                str(output_path),
+            )
+            migrated = json.loads(output_path.read_text(encoding="utf-8"))
+        self.assert_passes(completed)
+        motion = migrated["gates"]["production_character_motion_evidence"]
+        self.assertEqual(motion["status"], "not_tested")
+        self.assertIn("[builder-owned]", motion["evidence"][0])
+
     def test_eval_third_person_case_accepts_complete_evidence(self) -> None:
         source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
         source["case_id"] = "new-3d-third-person-complete"

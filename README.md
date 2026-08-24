@@ -85,6 +85,8 @@ The full decision guide lives in [`references/isometric-and-2-5d.md`](./referenc
 
 For a freely orbiting camera, the skill verifies camera-relative movement after yaw, real mouse motion through the visible production HUD, right-stick X/Y, zoom/recenter, camera collision restoration, player visibility through multiple occluders and real openings, exact high-structure route contrast, cutaway restoration, pause/focus capture recovery, HUD/world sightlines, pressure-safe onboarding, and human audio listening. Adapt [`third_person_controller_probe.gd`](./assets/godot-tests/third_person_controller_probe.gd), [`third_person_hud_mouse_probe.gd`](./assets/godot-tests/third_person_hud_mouse_probe.gd), and [`third_person_visibility_probe.gd`](./assets/godot-tests/third_person_visibility_probe.gd), then complete [`third-person-3d-review.template.md`](./assets/third-person-3d-review.template.md); code inspection, direct look-method calls, or SpringArm success alone cannot pass these gates.
 
+Animated production characters also have a separate builder-owned [`production-character-motion.template.md`](./assets/production-character-motion.template.md) gate. It requires real idle/locomotion/context dispatch, bind/rest/T-pose rejection, animated attachment following, and raw target-build motion before optional user preference feedback. The user is not treated as the routine QA detector for a frozen character.
+
 Complete games also use [`semantic-identity-review.template.md`](./assets/semantic-identity-review.template.md): the exported app icon and main-menu mark must communicate a game-specific idea at their real display sizes in a blind independent review. A coordinated palette or tidy primitive geometry alone is not semantic identity.
 
 ## Installation options

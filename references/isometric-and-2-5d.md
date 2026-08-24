@@ -22,6 +22,8 @@ For a fixed-camera isometric/orthographic complete game, pass an early gameplay-
 
 Reject the slice if the character is visually absorbed by the floor, the mechanism/objective cannot be distinguished at normal zoom, the scene reads as sparse repeated rows, or decoration has no deliberate relationship to route and interaction readability. Asset import success, palette consistency, and a valid scene graph cannot pass this gate. Record the independent verdict with `assets/isometric-complete-review.template.md`; do not multiply an unapproved slice into many levels.
 
+If the production hero is expected to move, it must also pass the separate builder-owned `assets/production-character-motion.template.md` contract before release. Readability screenshots and hero masks can pass while a skeleton remains frozen in bind/T-pose, so require raw target-build idle, locomotion, and brief-required action motion plus real dispatch and attachment evidence; do not delegate that baseline defect search to the independent art reviewer or user.
+
 ## Define the spatial contract
 
 Record at least:
@@ -151,9 +153,10 @@ Validate in addition to ordinary engine, gameplay, and visual checks:
 7. **Occlusion:** roofs/walls reveal the actor and restore correctly during entry, exit, pause, reload, and scene transition.
 8. **Persistence:** saved cell/floor/object identities restore to the same logical position independently of viewport size.
 9. **Early art slice:** hero, mechanism states, objective, decor, lighting, and UI pass independent rendered review before bulk level authoring.
-10. **Character/route readability:** same-frame screenshot/mask reports meet the declared size, mean-separation, and edge-separation thresholds in quiet, dense, height, and route-changing states, while raw review confirms silhouette and route meaning.
-11. **Onboarding state machine:** the shipping first-use flow makes the player perform every brief-required transition, including movement, pickup, context interaction, mechanism change, route traversal, height/lift, objective delivery, and recovery where applicable; feedback is distinct and overlays never cover the target.
-12. **Composition and duration:** the fixed-camera capture matrix rejects sparse/default-looking presentation, and the declared game duration is supported by authored puzzle/permutation counts plus uncoached playtest evidence.
+10. **Production character motion:** when the hero is expected to animate, builder-owned evidence rejects bind/rest/T-pose, missing state playback, test-only dispatch, and detached attachments in the target build.
+11. **Character/route readability:** same-frame screenshot/mask reports meet the declared size, mean-separation, and edge-separation thresholds in quiet, dense, height, and route-changing states, while raw review confirms silhouette and route meaning.
+12. **Onboarding state machine:** the shipping first-use flow makes the player perform every brief-required transition, including movement, pickup, context interaction, mechanism change, route traversal, height/lift, objective delivery, and recovery where applicable; feedback is distinct and overlays never cover the target.
+13. **Composition and duration:** the fixed-camera capture matrix rejects sparse/default-looking presentation, and the declared game duration is supported by authored puzzle/permutation counts plus uncoached playtest evidence.
 
 Copy/adapt these deterministic probes into the project test suite:
 

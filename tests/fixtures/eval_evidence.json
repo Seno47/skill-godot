@@ -22,6 +22,10 @@
       "status": "pass",
       "evidence": ["fixture: no external assets introduced"]
     },
+    "production_character_motion_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: builder-owned idle/locomotion/action pose contract, real dispatch, attachment following, and target-build motion capture"]
+    },
     "interactive_onboarding": {
       "status": "pass",
       "evidence": ["fixture: clean first-use action trace and uncoached playtest"]

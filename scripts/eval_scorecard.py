@@ -62,6 +62,17 @@ def main() -> int:
         if not isinstance(gate_evidence, dict) or not isinstance(score_evidence, dict):
             raise ScorecardError("evidence.gates and evidence.scores must be objects")
 
+        owner_default = rubric.get("acceptance_owner_default", "builder")
+        owner_definitions = rubric.get(
+            "acceptance_owner_definitions",
+            {"builder": "", "independent": "", "human": ""},
+        )
+        if not isinstance(owner_definitions, dict) or not owner_definitions:
+            raise ScorecardError("rubric.acceptance_owner_definitions must be a non-empty object")
+        allowed_owners = set(owner_definitions)
+        if owner_default not in allowed_owners:
+            raise ScorecardError("rubric.acceptance_owner_default must name a defined acceptance owner")
+
         gates: list[dict[str, Any]] = []
         blocking = False
         for definition in rubric.get("blocking_gates", []):
@@ -85,11 +96,17 @@ def main() -> int:
             artifacts = evidence_items(value.get("evidence", []), f"gate {gate_id}.evidence")
             if not artifacts:
                 raise ScorecardError(f"Gate {gate_id} requires at least one evidence artifact or limitation record")
+            acceptance_owner = definition.get("acceptance_owner", owner_default)
+            if acceptance_owner not in allowed_owners:
+                raise ScorecardError(
+                    f"Gate {gate_id}.acceptance_owner must name a defined acceptance owner"
+                )
             blocking = blocking or status != "pass"
             gates.append(
                 {
                     "id": gate_id,
                     "status": status,
+                    "acceptance_owner": acceptance_owner,
                     "evidence": artifacts,
                     "description": definition.get("description"),
                 }
@@ -270,6 +287,8 @@ def main() -> int:
             "warnings": warnings,
             "run_metadata": evidence.get("run_metadata", {}),
             "limitations": evidence.get("limitations", []),
+            "acceptance_owner_definitions": owner_definitions,
+            "optional_user_preference_policy": rubric.get("optional_user_preference_policy"),
         }
         if args.json_output:
             output = Path(args.json_output).expanduser().resolve()
@@ -283,7 +302,10 @@ def main() -> int:
         )
         if not args.summary:
             for gate in gates:
-                print(f"[GATE {gate['status'].upper()}] {gate['id']}")
+                print(
+                    f"[GATE {gate['status'].upper()}] {gate['id']} "
+                    f"owner={gate['acceptance_owner']}"
+                )
             for dimension in dimensions:
                 if dimension["status"] == "scored":
                     submitted = dimension["submitted_score"]

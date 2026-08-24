@@ -19,6 +19,7 @@ Capture what the user has actually specified:
 - first representative level/encounter: start, first decision, first reward, first threat, landmark, escalation, and recovery beat;
 - for a finite selector with many levels/missions/items, the navigation model (`scroll`, `pages`, `chapters`, search/filter, or a deliberate combination), chosen from content volume, comparison needs, resume position, and mobile reachability rather than habit;
 - visual references, exclusions, mood, palette, density, and animation character;
+- production characters expected to move and their smallest required idle/locomotion/context-action state set; do not infer that a rigged/imported character is acceptably animated;
 - sonic references and exclusions, music/ambience role, important audible feedback, voice needs, and whether generative audio is allowed;
 - requested deliverable: experiment, vertical slice, level, system, content pass, polish pass, or finished build.
 - explicit non-goals that prevent the slice from quietly expanding into unrelated systems.
@@ -26,6 +27,8 @@ Capture what the user has actually specified:
 If the requested deliverable includes a duration, finite level/chapter count, or “complete game” claim, make the scope measurable before bulk authoring. Instantiate `assets/content-duration-contract.template.md` and map the claim to authored puzzle/objective count, mechanic introductions and meaningful permutations, estimated first-solve time, and later uncoached playtest evidence. Keep tutorial, menus, retries, grind, replay, and procedural/unbuilt assumptions separate. Never let a strong short slice silently inherit the duration claim of the intended future game.
 
 For fixed-camera isometric/orthographic complete work, also schedule the early rendered art gate from `assets/isometric-complete-review.template.md` before multiplying levels. This is a production decision: hero, mechanism states, objective, representative decor, lighting, and UI must coexist readably at the actual gameplay camera first.
+
+When a focal production character is expected to move, schedule the builder-owned `assets/production-character-motion.template.md` contract before release. This is routine implementation acceptance, not a preference question for the user: idle, locomotion, required actions, real dispatch, bind/rest-pose rejection, and animated attachments must be proved in the target build.
 
 For a portal/web release where advertising is available, record `ads: none | conservative | aggressive-but-compliant` before designing the flow. If the brief does not decide and ads would change menus, pauses, rewards, or progression, ask once rather than inferring a policy. Record where game-initiated interstitials and banners may appear and what voluntary reward, if any, justifies rewarded video. Platform-controlled advertising is distinct from game-initiated calls.
 

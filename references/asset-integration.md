@@ -89,6 +89,7 @@ These are patterns, not mandatory trees. Include only nodes needed by the concep
 - Add collisions shaped for gameplay rather than tracing artwork/render meshes by default.
 - Treat render, gameplay-collision, navigation, and camera-only visibility shells as related but distinct authored contracts. Simplification is expected, but preserve camera-relevant openings and silhouette boundaries; a broad box over a doorway, arch, gate, railing, or window needs an explicit reason and an open-hole negative test.
 - Add navigation, sockets, markers, occluders, effect anchors, and animation events deliberately.
+- When borrowing or retargeting animation from another asset, keep the production visual/skeleton as the rendered owner, record the source rig/profile mapping, hide the source mannequin, and verify required bone/socket attachments against the animated production pose rather than the preview rig.
 - Instance the wrapper scene in levels; do not repeatedly place raw models/sprites and rebuild their behavior elsewhere.
 - For non-placeable textures, icons, fonts, and audio, reference them through the relevant material/theme/resource/component instead of inventing empty wrapper scenes.
 
@@ -115,6 +116,7 @@ Do not integrate the entire pack before discovering that its scale, rig, materia
 Move an asset to `integrated` when paths/import settings/resources/scenes are complete. Move it to `verified` only after checking:
 
 - representative gameplay framing and motion;
+- production character idle/locomotion/context playback, bind/rest/T-pose rejection, real gameplay dispatch, source-mannequin absence, and attachment following when that asset is expected to animate;
 - lighting/material response or UI/background contrast;
 - collision, interaction, navigation, animation, audio, and effects as applicable;
 - render/collision/camera-proxy agreement at representative openings and occlusion-sensitive viewpoints;

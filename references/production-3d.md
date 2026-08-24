@@ -106,6 +106,26 @@ For a complete third-person/free-orbit slice, adapt `assets/godot-tests/third_pe
 - Keep gameplay events explicit and test animation-driven callbacks after reimport.
 - Inspect particles, trails, decals, transparency sorting, and shader effects from the gameplay camera, not only in isolation.
 
+## Treat production character motion as a release contract
+
+When a focal production character is expected to stand, move, or perform visible actions, animation is not optional polish. Fill `assets/production-character-motion.template.md` and pass it as builder-owned routine QA before requesting independent or user preference feedback. A clean import, valid skeleton, readable silhouette, successful navigation trace, or attractive still cannot pass a character that remains frozen in its bind/rest/T-pose.
+
+Define the smallest brief-required state set. A moving character normally needs idle and locomotion plus the context actions that ordinary play visibly attributes to the character, such as pickup, interact, attack, lift use, damage, or success. An intentionally static, hovering, board-piece, or deliberately limited-animation actor may use a smaller contract, but record that art-direction decision instead of silently omitting motion.
+
+For imported or retargeted skeletal motion:
+
+- drive the production mesh and `Skeleton3D`, not only the source animation-library mannequin or editor preview rig;
+- verify the retarget profile/root, rest orientation, scale, named clips, loop boundaries, and required root-motion policy;
+- hide or remove the source mannequin/preview mesh from the shipping scene;
+- sample stable non-root bones or pose features across time for idle and locomotion, because an in-place clip may leave the root transform unchanged;
+- exercise actions through real gameplay events/state transitions, not only direct `AnimationPlayer.play()` calls in a test;
+- attach carried props, weapons, lanterns, effects, or markers through `BoneAttachment3D`/authored sockets and prove their world transforms follow representative animated poses;
+- test interruption, restart, pause, and scene transition so a one-shot action cannot leave a stale/frozen pose.
+
+Keep a deterministic project-owned contract for clip/state presence, time-varying production poses, real dispatch, source-preview visibility, and attachment following. Then capture a short raw target-build recording at the real gameplay camera covering idle, locomotion, and required context actions, plus a contact sheet when it helps compare poses. Inspect normal-speed motion for bind/T-pose leakage, frozen tracks, duplicate mannequins, loop pops, foot sliding, contact mismatch, detached attachments, retarget distortion, and movement-speed disagreement. A contact sheet alone cannot prove playback or state dispatch; an automated pose delta alone cannot judge motion quality.
+
+The builder must autonomously fix objective failures in this contract. Final human feedback about weight, personality, exaggeration, or taste is useful but optional unless the brief makes it an acceptance requirement; it is not a substitute for baseline QA and must not make the user responsible for discovering a frozen production character.
+
 ## 3D visual completion gate
 
 Inspect representative gameplay views and motion. Reject the pass if:
@@ -119,6 +139,7 @@ Inspect representative gameplay views and motion. Reject the pass if:
 - a faded high-structure/single-mesh shell leaves a bright grid/veil across the exact reported or highest-elevation route view, even if the player silhouette remains visible;
 - movement direction stops matching the camera after ordinary orbit, a declared camera input axis is missing, or pause/re-entry leaves capture/look in the wrong state;
 - mouse-look was proved only by a direct method call or a fixture without the production HUD, so real GUI event consumption can still suppress yaw/pitch;
+- a production character expected to move stays in bind/rest/T-pose, lacks required idle/locomotion/context states, dispatches them only in a test path, shows a source mannequin, freezes after interruption, or leaves required attachments behind;
 - persistent HUD or bright world geometry blocks ordinary route sightlines from the real gameplay camera;
 - render meshes are used as expensive/unstable dynamic collision without reason;
 - imported assets were changed in a way that reimport will erase.

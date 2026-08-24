@@ -67,11 +67,13 @@ def gate_applies(definition: dict[str, Any], case_id: str) -> bool:
     return cases is None or (isinstance(cases, list) and case_id in cases)
 
 
-def unresolved_gate(description: Any) -> dict[str, Any]:
+def unresolved_gate(description: Any, acceptance_owner: str) -> dict[str, Any]:
     suffix = str(description).strip() if isinstance(description, str) else "current rubric gate"
     return {
         "status": "not_tested",
-        "evidence": [f"UNRESOLVED: supply an artifact or limitation for {suffix}"],
+        "evidence": [
+            f"UNRESOLVED [{acceptance_owner}-owned]: supply an artifact or limitation for {suffix}"
+        ],
     }
 
 
@@ -80,8 +82,12 @@ def unresolved_dimension(description: Any) -> dict[str, Any]:
     return {
         "status": "scored",
         "score": 0,
-        "evidence": [f"UNRESOLVED: independent reviewer must score and cite evidence for {suffix}"],
-        "notes": "Generated unresolved value; replace with observed evidence or an allowed not_applicable status.",
+        "evidence": [f"UNRESOLVED: score and cite observed evidence for {suffix}"],
+        "notes": (
+            "Generated unresolved value; replace with observed evidence or an allowed not_applicable status. "
+            "Builder evidence is valid for routine objective checks; only rubric gates explicitly owned by "
+            "independent or human contexts require those reviewers."
+        ),
     }
 
 
@@ -131,14 +137,24 @@ def prepare_evidence(
         raise EvidenceHelperError("limitations must be an array of strings")
 
     added: list[str] = []
+    owner_default = rubric.get("acceptance_owner_default", "builder")
+    owner_definitions = rubric.get(
+        "acceptance_owner_definitions",
+        {"builder": "", "independent": "", "human": ""},
+    )
+    if not isinstance(owner_definitions, dict) or owner_default not in owner_definitions:
+        raise EvidenceHelperError("Rubric acceptance owner definitions/default are invalid")
     for definition in rubric.get("blocking_gates", []):
         if not isinstance(definition, dict) or not gate_applies(definition, case_id):
             continue
         gate_id = definition.get("id")
         if not isinstance(gate_id, str) or not gate_id:
             raise EvidenceHelperError("Every applicable blocking gate needs an ID")
+        acceptance_owner = definition.get("acceptance_owner", owner_default)
+        if acceptance_owner not in owner_definitions:
+            raise EvidenceHelperError(f"Gate {gate_id} names an unknown acceptance owner")
         if gate_id not in gates:
-            gates[gate_id] = unresolved_gate(definition.get("description"))
+            gates[gate_id] = unresolved_gate(definition.get("description"), acceptance_owner)
             added.append(f"gate:{gate_id}")
 
     for definition in rubric.get("dimensions", []):

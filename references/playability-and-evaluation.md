@@ -76,12 +76,22 @@ python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode captu
 
 The runner does not inject keyboard, mouse, or controller input. Use a project test driver or an approved UI automation layer for input-dependent flows.
 
+## Assign acceptance ownership without outsourcing routine QA
+
+Use the `acceptance_owner` attached to an applicable rubric gate:
+
+- **builder:** objective routine acceptance that the implementing agent must autonomously exercise, inspect, and fix before handoff. Deterministic contracts, target-build runs, recordings, logs, and builder observations are valid evidence. Examples include clean import, restart, production character motion, input routing, collision, and attachment following.
+- **independent:** comprehension, semantic reading, or visual/UX judgment that explicitly needs a person or genuinely separate evaluation context that did not build the flow. The builder still performs its own QA first; independence is a second acceptance layer, not a substitute for it.
+- **human:** irreducibly perceptual signoff explicitly named by the rubric, such as representative audio listening. Automation and builder triage prepare the evidence but cannot promote the gate.
+
+Optional user preference feedback is outside these blocking ownership classes unless the brief explicitly elevates it into acceptance. Ask for it to refine taste—animation weight/personality, tone, pacing preference—not to discover a bind/T-pose, missing locomotion, broken attachment, clipped UI, or other routine production defect. When a separate evaluator is available, use that evaluation context for required independent gates rather than making the user execute a QA checklist.
+
 ## Evaluate in layers
 
 1. **Static:** scene graph, paths, resources, asset formats, and obvious omissions.
 2. **Engine:** import, parse, load, bounded runtime, and error log.
 3. **Behavior:** each state in the playable contract is actually reached.
-4. **Visual/audio:** representative captures are inspected at final framing and motion; audio is actually listened to in context by a human listener, not inferred from file presence, node paths, buses, waveforms, or automated metrics.
+4. **Visual/audio:** the builder inspects representative captures at final framing and motion and fixes routine defects; audio is actually listened to in context by a human listener, not inferred from file presence, node paths, buses, waveforms, or automated metrics.
 5. **Independent human/evaluator playtest:** someone who did not build the flow can understand the goal, complete every required onboarding transition, and close the loop without developer narration.
 
 Do not let a high structural score hide a broken game. Treat unreachable success/failure, static-text-only onboarding for a non-obvious core action, unclear controls, a soft lock, or a nonfunctional restart as completion blockers.
@@ -107,7 +117,7 @@ When changing this skill materially, test it on isolated projects representing a
 
 For each case record: brief, fixture/license, initial project hash, tools available, final project, validation commands, captures, audio listening notes, errors/warnings, human playability result, elapsed time, and token/tool-call usage. Compare regressions on structure, completion, visual coherence, audio quality, performance, and cost; do not tune only to one demo.
 
-Use the stable machine-readable rubric in `evals/rubric.json` and author evidence against `evals/evidence.schema.json`. Have a human or an independent evaluation context produce evidence; the building agent must not award itself high scores from intent, file presence, or its own screenshots alone. Record the builder and reviewer contexts and keep the reviewer's raw findings, including defects. Every blocking gate needs an artifact, command result, trace, capture review, or explicit rights record.
+Use the stable machine-readable rubric in `evals/rubric.json` and author evidence against `evals/evidence.schema.json`. Respect each gate's `acceptance_owner`: the builder supplies and fixes builder-owned routine evidence; a human or independent evaluation context supplies only gates explicitly assigned to it. The building agent must not award itself high independent/perceptual scores from intent, file presence, or its own screenshots, but it also must not defer ordinary QA to the user. Record the builder and reviewer contexts and keep raw findings, including defects. Every blocking gate needs an artifact, command result, trace, capture review, or explicit rights record.
 
 Create or migrate the case evidence instead of hand-copying the current rubric. Missing gates and dimensions are added as visibly unresolved values while existing evidence is preserved:
 
@@ -116,21 +126,23 @@ python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.
 python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --from-existing <old-evidence.json> --output <migrated-evidence.json>
 ```
 
-The helper never turns generated placeholders into passing evidence. Fill the generated files with real artifacts, clean/seeded provenance, and the independent review. Use `assets/yandex-release-checklist.template.md` as the PASS/FAIL/NOT TESTED gate sheet for a Yandex release.
+The helper never turns generated placeholders into passing evidence. It labels unresolved gates with their acceptance owner so builder-owned work is not accidentally pushed into the independent review. Fill the generated files with real artifacts, clean/seeded provenance, and only the independent/human evidence actually required. Use `assets/yandex-release-checklist.template.md` as the PASS/FAIL/NOT TESTED gate sheet for a Yandex release.
 
 ```bash
 python <skill-dir>/scripts/eval_scorecard.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --evidence <evidence.json> --summary --json-output <scorecard.json>
 ```
 
-The scorecard normalizes applicable weighted dimensions, blocks completion on every failed/untested blocking gate, and applies rubric-defined dimension caps when missing independent evidence makes a high builder-submitted visual/UX/scope score indefensible. Compare both `submitted_score_100` and adjusted `score_100`; a blocked case with optimistic self-scores is not near-perfect evidence. Keep fixture, brief, rubric, and evaluation protocol stable when comparing skill revisions.
+The scorecard normalizes applicable weighted dimensions, reports each gate's acceptance owner, blocks completion on every failed/untested blocking gate, and applies rubric-defined dimension caps when missing evidence makes a high submitted score indefensible. Compare both `submitted_score_100` and adjusted `score_100`; a blocked case with optimistic scores is not near-perfect evidence. Keep fixture, brief, rubric, and evaluation protocol stable when comparing skill revisions.
 
 ## Completion evidence
 
 At handoff, distinguish:
 
 - checked automatically;
-- observed in runtime/capture;
+- observed and accepted by the builder in runtime/capture;
 - confirmed by a human playtest;
+- reviewed by an independent evaluation context;
+- optional user preference feedback;
 - not tested or dependent on unavailable hardware/tools.
 
 Never convert “not tested” into “works” because the scene or script looks plausible.

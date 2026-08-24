@@ -10,7 +10,18 @@ Use this with the `new-isometric-fixed-camera-complete` rubric case. Preserve ra
 - Gameplay-safe frame and HUD occupancy budget:
 - Spatial contract:
 - Content-duration contract:
+- Builder-owned production character motion contract:
 - Reviewer/context independent from builder:
+
+## Builder-owned character motion prerequisite
+
+This prerequisite is separate from independent still-frame art/readability review. Fill `assets/production-character-motion.template.md` when the production hero is expected to animate.
+
+- Required idle/locomotion/context states:
+- Deterministic pose/dispatch/attachment artifact:
+- Raw target-build motion/contact-sheet artifact:
+- Bind/rest/T-pose and source-mannequin result:
+- Builder-owned motion verdict: PASS / FAIL / NOT TESTED
 
 ## Early vertical-slice art gate
 
@@ -85,6 +96,7 @@ Reject default-white heroes lost on bright floors, long sparse tile rows without
 ## Scope and independent verdict
 
 - Content-duration verdict from `content-duration-contract.template.md`: PASS / FAIL / NOT TESTED
+- Production character motion: PASS / FAIL / NOT TESTED
 - Early art gate: PASS / FAIL / NOT TESTED
 - Character/route readability: PASS / FAIL / NOT TESTED
 - Onboarding state machine: PASS / FAIL / NOT TESTED

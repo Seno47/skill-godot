@@ -15,6 +15,13 @@
     "pass": 85,
     "conditional": 70
   },
+  "acceptance_owner_default": "builder",
+  "acceptance_owner_definitions": {
+    "builder": "The implementing agent owns objective routine acceptance, fixes failures before handoff, and may pass the gate with deterministic and target-build evidence.",
+    "independent": "A person or genuinely separate evaluation context that did not build the flow must supply the final gate verdict after builder-owned QA passes.",
+    "human": "A human perceptual signoff explicitly required by the gate is necessary; automated or structural evidence is supporting only."
+  },
+  "optional_user_preference_policy": "User preference feedback may refine taste after blocking acceptance passes, but routine defects must not be deferred to the user unless the brief explicitly makes that preference an acceptance requirement.",
   "blocking_gates": [
     {
       "id": "engine_clean",
@@ -37,7 +44,13 @@
       "description": "External/generated assets used in the evaluated result have sufficient provenance and rights status for the intended test."
     },
     {
+      "id": "production_character_motion_evidence",
+      "cases": ["new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete"],
+      "description": "For every production character expected to move in the case, builder-owned deterministic and target-build evidence proves required idle, locomotion, and brief-required context states on the production visual; ordinary play does not remain in bind/rest/T-pose; real gameplay dispatches the states; source mannequins are absent; and required bone/socket/marker attachments follow. Static screenshots, clip presence, preview-rig playback, test-only direct calls, or waiting for the user to notice frozen motion do not pass."
+    },
+    {
       "id": "interactive_onboarding",
+      "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "constrained-mobile-web"],
       "description": "From a clean first-use state, an uncoached player performs every brief-required onboarding transition and reaches the normal loop; static hints, tutorial fields, narration, or one generic action do not substitute for intermediate verbs/world consequences, and ordinary pressure/failure timing is frozen or forgiving until the relevant teaching succeeds unless an uncoached test proves pressure itself is safely taught."
     },
@@ -48,21 +61,25 @@
     },
     {
       "id": "semantic_identity_review",
+      "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "constrained-mobile-web"],
       "description": "The app/export icon and main-menu mark receive a blind independent semantic review from raw captures at actual final sizes: the reviewer can describe a game-specific subject, relationship, or core-loop cue without designer narration; palette consistency, initials, symmetry, or tidy primitive geometry alone do not pass."
     },
     {
       "id": "independent_ux_review",
+      "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "constrained-mobile-web"],
       "description": "A person or genuinely independent evaluation context that did not build the flow reviews first-use playability and case-relevant raw representative visual evidence, including player occlusion/restoration for third-person work and gameplay-size art/readability/density states for fixed-camera isometric work; self-review alone does not pass."
     },
     {
       "id": "human_audio_listening",
+      "acceptance_owner": "human",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "constrained-mobile-web"],
       "description": "A human listener signs off several minutes of representative target-build gameplay audio, overlaps/repetition, UI, pressure/result, transitions, pause/focus, and mixer settings; structural nodes, streams, buses, waveforms, metrics, provenance, or builder intent alone do not pass."
     },
     {
       "id": "content_duration_evidence",
+      "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "constrained-mobile-web"],
       "description": "Any complete-game/duration/content-volume claim is decomposed into authored objectives or puzzles, mechanic introductions and meaningful permutations/combinations, estimated uncoached solve time, and observed playtest time with tutorial/menus/retries/grind/replay/unbuilt assumptions separated; a short slice is labeled as a slice and cannot substantiate unbuilt hours."
     },
@@ -88,6 +105,7 @@
     },
     {
       "id": "reference_parity_evidence",
+      "acceptance_owner": "independent",
       "cases": ["ui-reference-integration"],
       "description": "The approved reference file/state/capture conditions and named deviations are recorded; the formal hierarchy is editor-visible in Godot scenes; same-resolution raw side-by-side, overlay, and diff artifacts plus representative locale/input/responsive captures receive region-level review. A low global pixel error or baked screenshot background alone does not pass."
     },
@@ -103,21 +121,25 @@
     },
     {
       "id": "isometric_vertical_slice_art_review",
+      "acceptance_owner": "independent",
       "cases": ["new-isometric-fixed-camera-complete"],
       "description": "Before bulk level authoring, an independent gameplay-size rendered review passes one representative slice containing the hero, a mechanism in default/changed states, beacon/objective, structural and dressing decor, final-direction lighting/material response, and gameplay UI/tutorial feedback; asset counts, imports, isolated previews, sparse repeated rows, and temporary/default-looking art do not pass."
     },
     {
       "id": "isometric_character_readability_evidence",
+      "acceptance_owner": "independent",
       "cases": ["new-isometric-fixed-camera-complete"],
       "description": "Quiet, dense, height/lift, and route-changing/occlusion states provide raw screenshots and same-frame hero-only masks that meet predeclared project thresholds for screen size, mean character/background separation, and local-edge separation, while independent review confirms a recognizable silhouette, readable mechanism/objective, and actionable route without tutorial-only highlighting."
     },
     {
       "id": "isometric_onboarding_state_machine",
+      "acceptance_owner": "independent",
       "cases": ["new-isometric-fixed-camera-complete"],
       "description": "A clean uncoached first-use trace proves the player causes movement, pickup, context interaction, mechanism state change, traversal of the changed route, height/lift use, beacon delivery, and restart/recovery; each transition has distinct feedback, safe pressure, and an unobstructed target/route. Text, narration, scripted demonstrations, or final completion alone do not pass."
     },
     {
       "id": "isometric_visual_composition_evidence",
+      "acceptance_owner": "independent",
       "cases": ["new-isometric-fixed-camera-complete"],
       "description": "Independent raw target-build review of start/teaching, typical puzzle, densest mechanism/decor, highest elevation, and objective/result frames confirms focal hierarchy, purposeful foreground/midground/background structure, landmarks, route rhythm, controlled repetition, intentional negative space, and HUD/world balance; sparse tile rows, default-white lost characters, and nominal asset variety do not pass."
     },
@@ -133,6 +155,10 @@
     }
   ],
   "score_caps": [
+    {
+      "gate": "production_character_motion_evidence",
+      "dimensions": {"visual_coherence": 1, "asset_pipeline": 2, "playability_and_ux": 2}
+    },
     {
       "gate": "interactive_onboarding",
       "dimensions": {"playability_and_ux": 1}
@@ -247,13 +273,13 @@
     {
       "id": "new-2d-fighting-complete",
       "brief": "Create a complete small local 2D fighting slice with authored fighters, fixed-tick frame-defined combat, buffered inputs, a full round/reset loop, and production presentation.",
-      "focus": ["deterministic simulation", "frame data and authored boxes", "input history and command rejection", "hit/block/trade/cancel ordering", "round flow", "hands-on controller feel", "audio/visual impact"],
+      "focus": ["deterministic simulation", "production character motion", "frame data and authored boxes", "input history and command rejection", "hit/block/trade/cancel ordering", "round flow", "hands-on controller feel", "audio/visual impact"],
       "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "audio_direction_quality": 3}
     },
     {
       "id": "new-2d-metroidvania-complete",
       "brief": "Create a complete small 2D ability-gated exploration slice with interconnected authored rooms, persistent world state, save/respawn, a return shortcut, and no modeled or physical soft lock.",
-      "focus": ["world/progression graph", "ability teaching and gate", "one-way escape", "persistent room state", "save/respawn", "map/landmarks", "backtracking change"],
+      "focus": ["production character motion", "world/progression graph", "ability teaching and gate", "one-way escape", "persistent room state", "save/respawn", "map/landmarks", "backtracking change"],
       "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "audio_direction_quality": 3}
     },
     {
@@ -277,13 +303,13 @@
     {
       "id": "new-3d-third-person-complete",
       "brief": "Create a complete small third-person 3D slice with a freely orbiting camera and target-build desktop/controller evidence.",
-      "focus": ["camera-relative locomotion", "production-HUD mouse routing and right-stick orbit", "zoom/recenter", "camera collision and capture recovery", "multi-occluder player visibility", "render/collision shell openings", "high-structure cutaway route contrast", "cutaway restoration", "HUD/world sightlines", "semantic app/menu identity", "pressure-safe onboarding", "human audio listening"],
+      "focus": ["production character motion", "camera-relative locomotion", "production-HUD mouse routing and right-stick orbit", "zoom/recenter", "camera collision and capture recovery", "multi-occluder player visibility", "render/collision shell openings", "high-structure cutaway route contrast", "cutaway restoration", "HUD/world sightlines", "semantic app/menu identity", "pressure-safe onboarding", "human audio listening"],
       "minimum_scores": {"playability_and_ux": 3, "visual_coherence": 3, "audio_direction_quality": 3}
     },
     {
       "id": "new-isometric-fixed-camera-complete",
       "brief": "Create a complete fixed-camera isometric/orthographic game whose player moves, picks up and delivers a light/object, changes a context mechanism and route, traverses a height/lift transition, and can restart/recover, with the declared content duration supported by authored puzzles and uncoached play evidence.",
-      "focus": ["early gameplay-size art slice", "hero/background separation", "silhouette and route readability", "multi-step interactive onboarding", "mechanism and height-state feedback", "fixed-camera density/composition", "authored puzzle permutations", "content-duration evidence", "human audio listening"],
+      "focus": ["production character motion", "early gameplay-size art slice", "hero/background separation", "silhouette and route readability", "multi-step interactive onboarding", "mechanism and height-state feedback", "fixed-camera density/composition", "authored puzzle permutations", "content-duration evidence", "human audio listening"],
       "minimum_scores": {"intent_and_scope": 3, "gameplay_correctness": 3, "playability_and_ux": 3, "visual_coherence": 3, "audio_direction_quality": 3, "asset_pipeline": 3}
     },
     {

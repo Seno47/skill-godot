@@ -9,9 +9,12 @@
 - Controller probe artifact: unrecorded
 - Production-HUD mouse probe artifact: unrecorded
 - Visibility probe artifact: unrecorded
+- Builder-owned production character motion contract: unrecorded
 - Raw screenshot/video folder: unrecorded
 
 Do not change `NOT TESTED` to `PASS` from scene structure, code inspection, input-map entries, or builder narration alone.
+
+Before this independent review, the builder must complete `assets/production-character-motion.template.md` for an animated production player. Idle, locomotion, brief-required actions, bind/rest/T-pose rejection, real gameplay dispatch, source-mannequin absence, and attachment following are routine builder-owned acceptance; they are not a checklist to outsource to the user.
 
 ## Movement and camera matrix
 
@@ -97,6 +100,7 @@ Automated stream, bus, format, loudness, spectral, and provenance checks are sup
 
 | Gate | PASS / FAIL / NOT TESTED | Evidence summary |
 |---|---|---|
+| Builder-owned production character motion prerequisite | NOT TESTED | Unrecorded |
 | Third-person control contract | NOT TESTED | Unrecorded |
 | Gameplay visibility, including player occlusion and restoration | NOT TESTED | Unrecorded |
 | Pressure-safe interactive onboarding | NOT TESTED | Unrecorded |
