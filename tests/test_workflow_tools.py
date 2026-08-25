@@ -103,6 +103,7 @@ class GenreRubricTests(unittest.TestCase):
             "new-2d-metroidvania-complete": "metroidvania_progression_evidence",
             "new-idle-clicker-complete": "idle_economy_evidence",
             "new-quest-driven-complete": "quest_transaction_evidence",
+            "new-2-5d-complete": "production_art_integrity_evidence",
             "new-isometric-fixed-camera-complete": "isometric_vertical_slice_art_review",
             "ui-reference-integration": "reference_parity_evidence",
         }
@@ -122,6 +123,35 @@ class GenreRubricTests(unittest.TestCase):
                 self.assertEqual(completed.returncode, 0, completed.stdout)
                 evidence = json.loads(output.read_text(encoding="utf-8"))
                 self.assertIn(gate_id, evidence["gates"])
+
+    def test_2_5d_scaffold_instantiates_art_menu_and_motion_contracts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            completed = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-2-5d-complete",
+                "--output",
+                str(temp / "evidence.json"),
+                "--menu-review-output",
+                str(temp / "menu-review.md"),
+                "--production-art-review-output",
+                str(temp / "production-art-review.md"),
+                "--motion-review-output",
+                str(temp / "motion-review.md"),
+            )
+            evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
+            menu = (temp / "menu-review.md").read_text(encoding="utf-8")
+            art = (temp / "production-art-review.md").read_text(encoding="utf-8")
+            motion = (temp / "motion-review.md").read_text(encoding="utf-8")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("menu_identity_craft_review", evidence["gates"])
+        self.assertIn("production_art_integrity_evidence", evidence["gates"])
+        self.assertIn("Menu Identity Craft Review", menu)
+        self.assertIn("Production Art State Review", art)
+        self.assertIn("Production Character Motion Contract", motion)
 
 
 @unittest.skipUnless(importlib.util.find_spec("PIL"), "Pillow is not installed")

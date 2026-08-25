@@ -14,6 +14,19 @@ class ScorecardError(RuntimeError):
     pass
 
 
+ARTIFACT_EXTENSIONS = {
+    "image": {".png", ".jpg", ".jpeg", ".webp"},
+    "video": {".avi", ".mp4", ".webm", ".mov", ".mkv"},
+    "review": {".md", ".json", ".txt"},
+    "report": {".md", ".json", ".txt", ".log"},
+    "trace": {".json", ".txt", ".log", ".csv", ".md"},
+    "log": {".log", ".txt", ".json"},
+    "audio": {".wav", ".ogg", ".mp3", ".flac", ".m4a"},
+    "build": {".exe", ".zip", ".pck", ".wasm", ".html", ".apk", ".appimage"},
+}
+UNRESOLVED_PREFIXES = ("unrecorded", "unresolved", "not tested", "not_tested")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Score a Godot skill evaluation against a stable rubric.")
     parser.add_argument("--rubric", required=True, help="Rubric JSON, normally evals/rubric.json.")
@@ -44,9 +57,135 @@ def evidence_items(value: Any, label: str) -> list[str]:
     return value
 
 
+def artifact_items(value: Any, label: str) -> list[dict[str, Any]]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise ScorecardError(f"{label} must be an array")
+    result: list[dict[str, Any]] = []
+    for index, item in enumerate(value):
+        if not isinstance(item, dict):
+            raise ScorecardError(f"{label}[{index}] must be an object")
+        path = item.get("path")
+        kind = item.get("kind")
+        states = item.get("states", [])
+        description = item.get("description")
+        if not isinstance(path, str) or not path.strip():
+            raise ScorecardError(f"{label}[{index}].path must be a non-empty string")
+        if kind not in ARTIFACT_EXTENSIONS:
+            raise ScorecardError(
+                f"{label}[{index}].kind must be one of {', '.join(sorted(ARTIFACT_EXTENSIONS))}"
+            )
+        if not isinstance(states, list) or any(
+            not isinstance(state, str) or not state.strip() for state in states
+        ):
+            raise ScorecardError(f"{label}[{index}].states must be an array of non-empty strings")
+        if len(states) != len(set(states)):
+            raise ScorecardError(f"{label}[{index}].states must not contain duplicates")
+        if description is not None and (not isinstance(description, str) or not description.strip()):
+            raise ScorecardError(f"{label}[{index}].description must be a non-empty string")
+        result.append(
+            {
+                "path": path.strip(),
+                "kind": kind,
+                "states": states,
+                **({"description": description.strip()} if isinstance(description, str) else {}),
+            }
+        )
+    return result
+
+
+def resolve_artifact_root(evidence_path: Path, run_metadata: Any) -> Path:
+    root_value = run_metadata.get("artifact_root", ".") if isinstance(run_metadata, dict) else "."
+    if not isinstance(root_value, str) or not root_value.strip():
+        raise ScorecardError("run_metadata.artifact_root must be a non-empty path string")
+    root = Path(root_value).expanduser()
+    if not root.is_absolute():
+        root = evidence_path.parent / root
+    return root.resolve()
+
+
+def validate_pass_artifacts(
+    gate_id: str,
+    artifacts: list[dict[str, Any]],
+    requirements: Any,
+    artifact_root: Path,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    failures: list[str] = []
+    resolved_artifacts: list[dict[str, Any]] = []
+    for item in artifacts:
+        path = Path(item["path"]).expanduser()
+        if not path.is_absolute():
+            path = artifact_root / path
+        path = path.resolve()
+        enriched = {**item, "resolved_path": str(path)}
+        resolved_artifacts.append(enriched)
+        if not path.is_file():
+            failures.append(f"artifact is missing or not a file: {item['path']}")
+            continue
+        try:
+            if path.stat().st_size <= 0:
+                failures.append(f"artifact is empty: {item['path']}")
+        except OSError as exc:
+            failures.append(f"artifact cannot be inspected: {item['path']} ({exc})")
+            continue
+        allowed = ARTIFACT_EXTENSIONS[item["kind"]]
+        if path.suffix.lower() not in allowed:
+            failures.append(
+                f"artifact kind {item['kind']} has unexpected extension {path.suffix or '<none>'}: "
+                f"{item['path']}"
+            )
+
+    if requirements is None:
+        return resolved_artifacts, failures
+    if not isinstance(requirements, dict):
+        raise ScorecardError(f"Gate {gate_id}.artifact_requirements must be an object")
+    minimum_by_kind = requirements.get("minimum_by_kind", {})
+    required_states = requirements.get("required_states", {})
+    if not isinstance(minimum_by_kind, dict):
+        raise ScorecardError(f"Gate {gate_id}.artifact_requirements.minimum_by_kind must be an object")
+    if not isinstance(required_states, dict):
+        raise ScorecardError(f"Gate {gate_id}.artifact_requirements.required_states must be an object")
+
+    unique_by_kind: dict[str, set[str]] = {}
+    for item in resolved_artifacts:
+        unique_by_kind.setdefault(item["kind"], set()).add(item["resolved_path"])
+    for kind, minimum in minimum_by_kind.items():
+        if kind not in ARTIFACT_EXTENSIONS:
+            raise ScorecardError(f"Gate {gate_id} requires unknown artifact kind: {kind}")
+        if isinstance(minimum, bool) or not isinstance(minimum, int) or minimum < 1:
+            raise ScorecardError(
+                f"Gate {gate_id}.artifact_requirements.minimum_by_kind.{kind} must be a positive integer"
+            )
+        actual = len(unique_by_kind.get(kind, set()))
+        if actual < minimum:
+            failures.append(f"requires at least {minimum} concrete {kind} artifact(s); found {actual}")
+
+    for state, allowed_kinds in required_states.items():
+        if not isinstance(state, str) or not state:
+            raise ScorecardError(f"Gate {gate_id} has an invalid required artifact state")
+        if (
+            not isinstance(allowed_kinds, list)
+            or not allowed_kinds
+            or any(kind not in ARTIFACT_EXTENSIONS for kind in allowed_kinds)
+        ):
+            raise ScorecardError(
+                f"Gate {gate_id}.artifact_requirements.required_states.{state} must list known kinds"
+            )
+        if not any(
+            state in item["states"] and item["kind"] in allowed_kinds
+            for item in resolved_artifacts
+        ):
+            failures.append(
+                f"missing required state '{state}' as one of: {', '.join(allowed_kinds)}"
+            )
+    return resolved_artifacts, failures
+
+
 def main() -> int:
     args = parse_args()
     try:
+        evidence_path = Path(args.evidence).expanduser().resolve()
         rubric = read_json(args.rubric, "rubric")
         evidence = read_json(args.evidence, "evidence")
         if rubric.get("schema_version") != 1 or evidence.get("schema_version") != 1:
@@ -72,6 +211,7 @@ def main() -> int:
         allowed_owners = set(owner_definitions)
         if owner_default not in allowed_owners:
             raise ScorecardError("rubric.acceptance_owner_default must name a defined acceptance owner")
+        artifact_root = resolve_artifact_root(evidence_path, evidence.get("run_metadata", {}))
 
         gates: list[dict[str, Any]] = []
         blocking = False
@@ -93,21 +233,45 @@ def main() -> int:
             status = value.get("status")
             if status not in {"pass", "fail", "not_tested"}:
                 raise ScorecardError(f"Gate {gate_id}.status must be pass, fail, or not_tested")
-            artifacts = evidence_items(value.get("evidence", []), f"gate {gate_id}.evidence")
-            if not artifacts:
+            evidence_notes = evidence_items(value.get("evidence", []), f"gate {gate_id}.evidence")
+            if not evidence_notes:
                 raise ScorecardError(f"Gate {gate_id} requires at least one evidence artifact or limitation record")
             acceptance_owner = definition.get("acceptance_owner", owner_default)
             if acceptance_owner not in allowed_owners:
                 raise ScorecardError(
                     f"Gate {gate_id}.acceptance_owner must name a defined acceptance owner"
                 )
-            blocking = blocking or status != "pass"
+            reviewer = value.get("reviewer")
+            reviewer_role = reviewer.get("role") if isinstance(reviewer, dict) else None
+            reviewer_context = reviewer.get("context") if isinstance(reviewer, dict) else None
+            structured_artifacts = artifact_items(value.get("artifacts"), f"gate {gate_id}.artifacts")
+            resolved_artifacts, validation_failures = validate_pass_artifacts(
+                gate_id,
+                structured_artifacts,
+                definition.get("artifact_requirements"),
+                artifact_root,
+            )
+            if status == "pass":
+                if reviewer_role != acceptance_owner:
+                    validation_failures.append(
+                        f"passing gate requires reviewer.role={acceptance_owner}; found {reviewer_role or 'missing'}"
+                    )
+                if not isinstance(reviewer_context, str) or not reviewer_context.strip():
+                    validation_failures.append("passing gate requires a non-empty reviewer.context")
+                elif reviewer_context.strip().lower().startswith(UNRESOLVED_PREFIXES):
+                    validation_failures.append("passing gate reviewer.context is still unresolved")
+            effective_status = "fail" if status == "pass" and validation_failures else status
+            blocking = blocking or effective_status != "pass"
             gates.append(
                 {
                     "id": gate_id,
-                    "status": status,
+                    "status": effective_status,
+                    "submitted_status": status,
                     "acceptance_owner": acceptance_owner,
-                    "evidence": artifacts,
+                    "reviewer": reviewer,
+                    "evidence": evidence_notes,
+                    "artifacts": resolved_artifacts,
+                    "validation_failures": validation_failures,
                     "description": definition.get("description"),
                 }
             )
@@ -280,11 +444,15 @@ def main() -> int:
             "baseline_score_100": baseline_score,
             "delta": round(score_100 - baseline_score, 2) if baseline_score is not None else None,
             "blocking_gate_count": sum(gate["status"] != "pass" for gate in gates),
+            "gate_validation_failure_count": sum(
+                len(gate["validation_failures"]) for gate in gates if gate["submitted_status"] == "pass"
+            ),
             "quality_floor_failure_count": len(quality_floor_failures),
             "quality_floor_failures": quality_floor_failures,
             "gates": gates,
             "dimensions": dimensions,
             "warnings": warnings,
+            "artifact_root": str(artifact_root),
             "run_metadata": evidence.get("run_metadata", {}),
             "limitations": evidence.get("limitations", []),
             "acceptance_owner_definitions": owner_definitions,
@@ -298,14 +466,22 @@ def main() -> int:
             f"[RESULT] case={args.case_id} verdict={verdict} score={score_100:.2f}/100 "
             f"submitted={submitted_score_100:.2f}/100 caps={len(score_caps_applied)} "
             f"blocking_gates={report['blocking_gate_count']} "
+            f"gate_validation_failures={report['gate_validation_failure_count']} "
             f"quality_floor_failures={report['quality_floor_failure_count']}"
         )
         if not args.summary:
             for gate in gates:
+                submitted = (
+                    f" submitted={gate['submitted_status']}"
+                    if gate["submitted_status"] != gate["status"]
+                    else ""
+                )
                 print(
                     f"[GATE {gate['status'].upper()}] {gate['id']} "
-                    f"owner={gate['acceptance_owner']}"
+                    f"owner={gate['acceptance_owner']}{submitted}"
                 )
+                for failure in gate["validation_failures"]:
+                    print(f"[ARTIFACT FAIL] gate={gate['id']} {failure}")
             for dimension in dimensions:
                 if dimension["status"] == "scored":
                     submitted = dimension["submitted_score"]

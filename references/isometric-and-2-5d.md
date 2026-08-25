@@ -24,6 +24,8 @@ Reject the slice if the character is visually absorbed by the floor, the mechani
 
 If the production hero is expected to move, it must also pass the separate builder-owned `assets/production-character-motion.template.md` contract before release. Readability screenshots and hero masks can pass while a skeleton remains frozen in bind/T-pose, so require raw target-build idle, locomotion, and brief-required action motion plus real dispatch and attachment evidence; do not delegate that baseline defect search to the independent art reviewer or user.
 
+For complete 2.5D work that is not the fixed-camera isometric case—such as side-view 3D characters over a 2D/painted backdrop, 2D characters in a 3D world, or a depth-limited 3D action route—use rubric case `new-2-5d-complete`. In addition to the spatial contract, fill `assets/production-art-state-review.template.md` and capture quiet, normal, dense interaction, peak VFX/contact, and result states. This specifically tests the presentation bridge: character/environment scale and art family, ground/contact points, depth/sorting, effect origin and thickness, panorama perspective, collision-visible agreement, and HUD competition. A coherent empty frame cannot pass intersections, flat/debug-looking effects, primitive actors/vehicles, or mismatched panorama art revealed during the core action.
+
 ## Define the spatial contract
 
 Record at least:
@@ -157,6 +159,7 @@ Validate in addition to ordinary engine, gameplay, and visual checks:
 11. **Character/route readability:** same-frame screenshot/mask reports meet the declared size, mean-separation, and edge-separation thresholds in quiet, dense, height, and route-changing states, while raw review confirms silhouette and route meaning.
 12. **Onboarding state machine:** the shipping first-use flow makes the player perform every brief-required transition, including movement, pickup, context interaction, mechanism change, route traversal, height/lift, objective delivery, and recovery where applicable; feedback is distinct and overlays never cover the target.
 13. **Composition and duration:** the fixed-camera capture matrix rejects sparse/default-looking presentation, and the declared game duration is supported by authored puzzle/permutation counts plus uncoached playtest evidence.
+14. **Complete 2.5D production art:** for non-isometric complete 2.5D work, the quiet/normal/dense/VFX/result target-build matrix passes depth/contact, presentation-bridge, asset-family, authored-detail, and effects review; a matching raw normal-speed character-motion artifact exists when the focal actor moves.
 
 Copy/adapt these deterministic probes into the project test suite:
 

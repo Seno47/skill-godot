@@ -41,6 +41,8 @@ List the representative states before polishing:
 | Restart/transition | clean reset, no duplicate state or leaked nodes |
 | Edge case | relevant boundary, empty/full, pause, or device change |
 
+For a complete game or production slice, extend the visual portion with `quiet`, `normal_gameplay`, `dense_interaction`, `vfx_peak`, and `result`. These are raw target-build acceptance states, not five variants of an empty opening frame. Use `assets/production-art-state-review.template.md`; dense/contact states are where asset-family mismatch, intersections, bad depth, detached effects, primitive VFX, broken action poses, and empty placeholder panels must be caught.
+
 Keep the matrix proportional. A one-screen toy may need five states; a save/load feature needs persistence and corrupted/missing-data cases.
 
 For a complete game, the boot/menu evidence also includes the exported app icon and primary menu mark at their actual display sizes. Have an independent reviewer describe what the mark depicts before receiving the intended explanation; a coherent palette or clean arrangement of primitives is not evidence of game-specific identity. Record the result with `assets/semantic-identity-review.template.md`.
@@ -76,6 +78,8 @@ python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode captu
 
 The runner does not inject keyboard, mouse, or controller input. Use a project test driver or an approved UI automation layer for input-dependent flows.
 
+“Approved UI automation” does not mean desktop Computer Use by default. Prefer project-owned drivers, `Input.parse_input_event()`, Godot fixtures, CLI capture, and browser automation scoped to a Web export. Use desktop Computer Use only after explicit user opt-in or when a required native OS surface cannot be verified otherwise; do not start it solely for routine game clicks or screenshots. Builder-operated GUI automation remains builder evidence and cannot satisfy an independent or human acceptance owner.
+
 ## Assign acceptance ownership without outsourcing routine QA
 
 Use the `acceptance_owner` attached to an applicable rubric gate:
@@ -110,6 +114,7 @@ When changing this skill materially, test it on isolated projects representing a
 - complete quest-driven slice with duplicate-event and exactly-once reward evidence;
 - new 3D slice using a ready-made asset pack;
 - complete fixed-camera isometric game with an early rendered art gate, measured character/route readability, full onboarding state machine, density/composition matrix, and content-duration evidence;
+- complete 2.5D game with an explicit spatial model, production-art dense/VFX/contact matrix, character motion recording, menu identity craft review, and independent Windows target-build UX/visual verdict;
 - new 3D slice with a generated static prop and authored collision/wrapper;
 - feature added to an existing convention-heavy project;
 - constrained mobile/web build with performance and package-size budgets.
@@ -117,12 +122,12 @@ When changing this skill materially, test it on isolated projects representing a
 
 For each case record: brief, fixture/license, initial project hash, tools available, final project, validation commands, captures, audio listening notes, errors/warnings, human playability result, elapsed time, and token/tool-call usage. Compare regressions on structure, completion, visual coherence, audio quality, performance, and cost; do not tune only to one demo.
 
-Use the stable machine-readable rubric in `evals/rubric.json` and author evidence against `evals/evidence.schema.json`. Respect each gate's `acceptance_owner`: the builder supplies and fixes builder-owned routine evidence; a human or independent evaluation context supplies only gates explicitly assigned to it. The building agent must not award itself high independent/perceptual scores from intent, file presence, or its own screenshots, but it also must not defer ordinary QA to the user. Record the builder and reviewer contexts and keep raw findings, including defects. Every blocking gate needs an artifact, command result, trace, capture review, or explicit rights record.
+Use the stable machine-readable rubric in `evals/rubric.json` and author evidence against `evals/evidence.schema.json`. Respect each gate's `acceptance_owner`: the builder supplies and fixes builder-owned routine evidence; a human or independent evaluation context supplies only gates explicitly assigned to it. The building agent must not award itself high independent/perceptual scores from intent, file presence, or its own screenshots, but it also must not defer ordinary QA to the user. Record the builder and reviewer contexts and keep raw findings, including defects. Every passing gate records a matching `reviewer.role` and concrete context. Gates with `artifact_requirements` also attach structured files under `artifacts`; paths resolve from `run_metadata.artifact_root`, which defaults to the evidence file's directory. A prose note that a movie, screenshot, or review existed cannot replace a missing/empty file.
 
 Create or migrate the case evidence instead of hand-copying the current rubric. Missing gates and dimensions are added as visibly unresolved values while existing evidence is preserved:
 
 ```bash
-python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --output <evidence.json> --capture-manifest-output <captures.json> --review-output <independent-review.md> --yandex-checklist-output <yandex-checklist.md>
+python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --output <evidence.json> --capture-manifest-output <captures.json> --review-output <independent-review.md> --menu-review-output <menu-review.md> --production-art-review-output <production-art-review.md> --motion-review-output <character-motion.md> --yandex-checklist-output <yandex-checklist.md>
 python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --from-existing <old-evidence.json> --output <migrated-evidence.json>
 ```
 

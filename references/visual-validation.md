@@ -8,9 +8,11 @@ Use a real renderer and capture screenshots or short recordings at the intended 
 
 - spawn/idle and normal traversal;
 - complete-game app/export icon at actual smallest/representative platform sizes plus the main-menu mark at runtime size, supplied raw for blind semantic review;
+- complete-game main menu default plus a supported interaction state, supplied raw for independent wordmark/copy/composition review;
 - primary interaction/combat/action;
 - failure/damage and success/transition when applicable;
 - quiet and visually dense scenes;
+- for every complete game or production slice, the same release-like build's quiet, normal gameplay, densest ordinary interaction/contact, peak VFX, and success/failure/result states; do not approve production art from an empty opening frame;
 - UI default, focus/hover, pressed, disabled, empty, loading, error, and overflow states that exist;
 - pointer-open and keyboard/gamepad-open versions of dialogs whose initial focus differs by modality;
 - localized icon-plus-label and icon-only buttons at representative short/long locales in narrow and wide layouts;
@@ -41,6 +43,7 @@ Compare against the user's brief and accepted references:
 
 - composition, focal hierarchy, silhouette, spacing, scale, camera framing, and depth separation;
 - whether the app icon/main-menu mark communicates a game-specific subject or core-loop relationship before the intended meaning is explained; palette consistency and tidy primitive geometry alone are insufficient;
+- whether the main menu title is an authored wordmark/typographic composition at runtime size, every non-navigation phrase has a real purpose, and the whole screen avoids the generic badge/kicker + huge default-font title + accent rule + premise tagline + identical rectangle-stack fingerprint;
 - palette/value structure, texture density, material response, lighting, shadows, and atmosphere;
 - consistency across generated, sourced, and engine-native assets;
 - UI hierarchy, theme, typography, contrast, focus, clipping, and localization/overflow;
@@ -58,6 +61,7 @@ Compare against the user's brief and accepted references:
 - fixed-camera isometric character separation at actual gameplay size: review the silhouette and local edge against the quiet floor, dominant/lightest background values, dense decor, mechanism state, elevation transition, and route-changing stress state. Use `scripts/isometric_readability_audit.py` with predeclared project thresholds, but reject a semantically generic or route-obscuring result even when the measurements pass;
 - fixed-camera density and composition: compare start/teaching, typical puzzle, densest decor/mechanism, highest elevation, and objective/result frames for focal hierarchy, foreground/midground/background structure, landmarks, purposeful negative space, route rhythm, controlled repetition, and HUD/world competition. Asset count and import success do not excuse sparse rows or a default-looking hero;
 - production character motion at normal speed: reject bind/rest/T-pose leakage, a frozen first frame, missing idle/locomotion/context playback, visible source mannequins, retarget deformation, loop pops, foot sliding/contact mismatch, gameplay states that never dispatch, stale poses after interruption, and props/effects that do not follow their animated attachment;
+- production-art integrity in dense action: reject unintentional actor/prop/effect intersections, unreadable contact/depth, asset-family mismatch, sparse repeated blockout modules, empty placeholder panels, rectangular/columnar debug-looking water, flat quad/cone flames, coarse billboard smoke, or other engine/procedural shapes that lack a deliberate final-size visual language;
 - animation timing, transitions, effects, feedback, and motion comfort;
 - hover/focus motion geometry: compare the control's visual center and neighboring `Control` rects before/after; incidental layout shift is a defect even when each still looks individually plausible;
 - seams, halos, missing textures, z-fighting, sorting, clipping, debug visuals, defaults, and placeholders.
@@ -70,7 +74,7 @@ Fix the most visible mismatch, recapture the same representative state, and comp
 
 If no available tool can display the rendered game, complete structural/engine checks and state precisely that visual quality remains unverified. Do not call the result polished.
 
-The building agent must first own routine rendered QA, including bind/T-pose detection, missing animation states, attachment failures, clipping, broken materials, and obvious layout defects. Do not use later independent or user review as the discovery mechanism for these baseline failures. After builder-owned gates pass, a complete game or vertical slice still needs the rubric-required screenshot/motion review by a person or genuinely independent evaluation context that did not author the layout. Provide that reviewer the brief and raw representative captures, not the builder's desired verdict. Record who/what reviewed it, which viewport/state matrix was covered, and the defects found or absence thereof. Optional user preference feedback can refine taste but does not replace either acceptance layer.
+The building agent must first own routine rendered QA, including bind/T-pose detection, missing animation states, attachment failures, clipping, broken materials, and obvious layout defects. Do not use later independent or user review as the discovery mechanism for these baseline failures. After builder-owned gates pass, a complete game or vertical slice still needs the rubric-required screenshot/motion review by a person or genuinely independent evaluation context that did not author the layout. Provide that reviewer the brief and raw representative captures, not the builder's desired verdict. Record who/what reviewed it, which viewport/state matrix was covered, and the defects found or absence thereof. A handoff cannot claim PASS from prose that a capture was reviewed: attach the concrete files and acceptance context required by `evals/rubric.json`. Optional user preference feedback can refine taste but does not replace either acceptance layer.
 
 For a complete fixed-camera isometric case, use `assets/isometric-complete-review.template.md`; the early rendered art verdict must precede bulk level authoring, and the final review must include the density/composition matrix rather than only the best-looking frame.
 

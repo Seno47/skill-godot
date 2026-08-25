@@ -46,6 +46,8 @@ For a static environment, separate or classify render meshes, gameplay collision
 - Use scene instances for repeated semantic objects. Use `MultiMeshInstance3D` for very large repeated visual sets that do not need individual node behavior.
 - Use procedural meshes only when generation is part of the design or provides a clear authoring advantage. Cache or serialize results when humans need to edit them.
 
+Scene authorship and production art are separate claims. Saving a `BoxMesh`, `CylinderMesh`, `SphereMesh`, CSG object, shader quad, or procedural particle emitter in `.tscn` makes it editable; it does not prove a final silhouette, material, detail, or effect. For a claimed-finished game, document any deliberate primitive/minimalist language and judge it in dense target-build gameplay against the characters, background, lighting, and VFX. Unjustified rounded primitive actors, repeated box vehicles/rooms, rectangular spray, flat cone/quad flames, and coarse billboard smoke remain blockout/debug art.
+
 ## Materials, lighting, and environment
 
 - Create a small material language before making dozens of unique materials.
@@ -128,9 +130,11 @@ The builder must autonomously fix objective failures in this contract. Final hum
 
 ## 3D visual completion gate
 
-Inspect representative gameplay views and motion. Reject the pass if:
+Inspect representative gameplay views and motion. Fill `assets/production-art-state-review.template.md` for complete games/slices and include quiet, normal gameplay, dense interaction/contact, peak VFX, and result states from the same release-like build. Reject the pass if:
 
 - blockout primitives remain where authored finish was promised;
+- primitive/debug-looking character, vehicle, environment, water, fire, smoke, impact, or trail shapes are defended only by scene serialization, materials, particles, or shaders rather than a coherent gameplay-size art direction;
+- dense interaction reveals actor/prop/effect intersections, broken contact/depth, detached action effects, asset-family mismatch, empty placeholder panels, or sparse repeated modules that the quiet opening hid;
 - model scales, pivots, or texture densities visibly disagree;
 - lighting flattens important forms or makes gameplay objects unreadable;
 - materials only look coherent under one accidental angle;

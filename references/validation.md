@@ -27,6 +27,12 @@ The scene-graph audit checks serialized hierarchy, parents, resource IDs/paths, 
 
 For C# projects, build with the project-compatible Godot/.NET workflow. Run existing project tests rather than replacing them with the generic checker.
 
+## Prefer engine-owned verification over desktop automation
+
+Default to the Godot CLI/editor command line, project-owned deterministic input drivers, reusable probes, and `scripts/godot_capture.py`. Do not launch Computer Use or other desktop GUI automation merely to click through a game, take a screenshot, or reproduce input that the project/engine can drive itself.
+
+Use desktop Computer Use only when the user explicitly opts in, or when a required native OS behavior cannot be observed through Godot/CLI—such as the actual Windows taskbar icon, installer/shell integration, exclusive-fullscreen transition, native file picker, per-monitor DPI, or another external desktop surface. Scope and disclose that exception. GUI automation performed by the builder remains builder evidence; it does not become an independent playtest or human perceptual signoff.
+
 ## Import and runtime
 
 Run editor import after changing scenes, resources, source assets, fonts, shaders, addons, or import settings. Do not edit/commit `.godot` cache unless the repository intentionally does so.
@@ -156,13 +162,15 @@ For `run` and `capture`, it performs a Godot version check and headless import p
 - Runtime generation has a real procedural/transient/streaming/performance reason.
 - Editor-generated nodes have correct ownership and saved output.
 - Imported assets are customized through wrappers/inheritance/resources, not cache edits.
+- Complete games and production slices have a builder-owned `production-art-state-review` covering quiet, normal gameplay, dense interaction, peak VFX/contact, and result states; scene serialization cannot promote blockout/debug geometry to production art.
+- Complete-game menus have a separate independent craft review of runtime wordmark/typography, copy necessity, background, hierarchy, and interaction state in addition to semantic icon/mark recognition.
 - Production characters expected to move have a builder-owned motion contract covering required states, bind/rest/T-pose rejection, real dispatch, target-build motion, and attachments.
 - Isometric/2.5D work has one documented authoritative spatial model, projection/picking owner, pivot/sort convention, navigation contract, and multi-level occlusion strategy.
 - Complete fixed-camera isometric work has an independently approved gameplay-size art slice before bulk authoring, a same-frame character-readability matrix, a player-performed onboarding transition ledger, a density/composition matrix, and a content-duration contract matching the claimed scope.
 
 ## Completion gate
 
-Do not claim completion with engine errors, missing resources, broken inheritance, unreachable core flow, a production character frozen in bind/rest/T-pose or missing required idle/locomotion/context motion, test-only animation dispatch, a visible source mannequin, detached animated attachments, relevant collision/focus/camera failure, camera-relative movement or capture recovery unproved where applicable, production-HUD mouse routing proved only by input maps/direct calls, camera collision mistaken for player-visibility proof, unresolved multi-occluders, false camera proxies over open holes, incomplete cutaway restoration, high-structure cutaway that leaves the route veiled, unsafe or partial first-use teaching, gameplay sightlines blocked by HUD/emissive geometry, complete-game audio lacking human listening signoff, a complete-game app/menu mark lacking semantic final-size review, fixed-camera isometric art scaled before a gameplay-size slice passes, missing same-frame character/route readability evidence, sparse/default-looking composition, a duration/content claim unsupported by authored depth and uncoached playtime, unsaved editor output, accidental placeholders in a claimed-finished state, a missing clean-profile proof for persistent games, or required conditional validation not performed.
+Do not claim completion with engine errors, missing resources, broken inheritance, unreachable core flow, a production character frozen in bind/rest/T-pose or missing required idle/locomotion/context motion, test-only animation dispatch, a visible source mannequin, detached animated attachments, missing raw normal-speed motion artifacts, relevant collision/focus/camera failure, camera-relative movement or capture recovery unproved where applicable, production-HUD mouse routing proved only by input maps/direct calls, camera collision mistaken for player-visibility proof, unresolved multi-occluders, false camera proxies over open holes, incomplete cutaway restoration, high-structure cutaway that leaves the route veiled, unsafe or partial first-use teaching, gameplay sightlines blocked by HUD/emissive geometry, complete-game audio lacking human listening signoff, a complete-game app/menu mark lacking semantic final-size review, a generic/default-font title/tagline/button-stack menu lacking independent craft review, production art reviewed only in a quiet frame, debug-looking VFX or primitive/mismatched assets in dense gameplay, fixed-camera isometric art scaled before a gameplay-size slice passes, missing same-frame character/route readability evidence, sparse/default-looking composition, a duration/content claim unsupported by authored depth and uncoached playtime, unsaved editor output, accidental placeholders in a claimed-finished state, a missing clean-profile proof for persistent games, a scorecard PASS whose reviewer provenance/concrete artifact files fail validation, or required conditional validation not performed.
 
 At handoff, name commands/tests run, states exercised, storage/profile provenance for captured progress, remaining limitations, and anything not verified.
 

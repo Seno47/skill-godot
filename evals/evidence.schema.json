@@ -45,6 +45,47 @@
         "minLength": 1
       }
     },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "context"],
+      "properties": {
+        "role": {
+          "enum": ["builder", "independent", "human"]
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": ["image", "video", "review", "report", "trace", "log", "audio", "build"]
+        },
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "gate": {
       "type": "object",
       "additionalProperties": false,
@@ -55,6 +96,15 @@
         },
         "evidence": {
           "$ref": "#/$defs/evidence_list"
+        },
+        "reviewer": {
+          "$ref": "#/$defs/reviewer"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact"
+          }
         }
       }
     },

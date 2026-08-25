@@ -24,6 +24,8 @@
 
 Palette consistency, symmetry, clean rendering, initials, or a tidy arrangement of primitives are supporting qualities only. They do not pass this gate when the mark has no independently legible game-specific subject or relationship.
 
+This gate judges what the identity depicts. It does not by itself approve the craft of the complete menu. For a complete game or production slice, also use `menu-identity-craft-review.template.md` to review the runtime title/wordmark, copy necessity, background, hierarchy, interaction states, and template-like composition as one screen.
+
 ## Final verdict
 
 - Meaning remains recognizable at the smallest required size: NOT TESTED

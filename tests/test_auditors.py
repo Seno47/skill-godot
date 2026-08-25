@@ -29,6 +29,30 @@ def run_script(name: str, *arguments: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def load_eval_evidence() -> dict:
+    source = json.loads(
+        (ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8")
+    )
+    rubric = json.loads((ROOT / "evals" / "rubric.json").read_text(encoding="utf-8"))
+    owner_default = rubric.get("acceptance_owner_default", "builder")
+    owners = {
+        item["id"]: item.get("acceptance_owner", owner_default)
+        for item in rubric["blocking_gates"]
+    }
+    for gate_id, gate in source["gates"].items():
+        gate.setdefault(
+            "reviewer",
+            {
+                "role": owners.get(gate_id, owner_default),
+                "context": f"fixture {owners.get(gate_id, owner_default)} acceptance context",
+            },
+        )
+    source.setdefault("run_metadata", {})["artifact_root"] = str(
+        ROOT / "tests" / "fixtures"
+    )
+    return source
+
+
 def load_script_module(name: str):
     path = SCRIPTS / name
     spec = importlib.util.spec_from_file_location(path.stem, path)
@@ -232,7 +256,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("score=100.00/100", completed.stdout)
 
     def test_evidence_helper_migrates_new_gates_and_instantiates_manifest(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         for gate_id in (
             "interactive_onboarding",
@@ -300,7 +324,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("verdict=blocked", scored.stdout)
 
     def test_eval_blocking_gate_overrides_score(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["gates"]["engine_clean"] = {
             "status": "not_tested",
             "evidence": ["fixture: Godot unavailable"],
@@ -322,7 +346,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("verdict=blocked", completed.stdout)
 
     def test_eval_complete_slice_requires_independent_ux_review(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -350,7 +374,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("blocking_gates=1", completed.stdout)
 
     def test_eval_unverified_independent_review_caps_submitted_scores(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -386,7 +410,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(report["verdict"], "blocked")
 
     def test_eval_complete_slice_requires_semantic_identity_review(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -414,7 +438,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("blocking_gates=1", completed.stdout)
 
     def test_eval_mobile_web_requires_input_modality_ui_evidence(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -442,7 +466,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("blocking_gates=1", completed.stdout)
 
     def test_eval_complete_slice_rejects_missing_case_gate(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -466,7 +490,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("Missing gate evidence: interactive_onboarding", completed.stdout)
 
     def test_eval_existing_feature_ignores_complete_game_gates(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["gates"]["interactive_onboarding"] = {
             "status": "not_tested",
             "evidence": ["fixture: unrelated focused feature"],
@@ -493,7 +517,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("blocking_gates=0", completed.stdout)
 
     def test_eval_complete_slice_requires_solid_audio(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         source["scores"]["audio_direction_quality"] = {
             "score": 2,
@@ -517,7 +541,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("quality_floor_failures=1", completed.stdout)
 
     def test_eval_complete_slice_requires_human_audio_listening(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -545,7 +569,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("blocking_gates=1", completed.stdout)
 
     def test_eval_third_person_case_requires_control_and_visibility(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "new-3d-third-person-complete"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -585,7 +609,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("blocking_gates=2", completed.stdout)
 
     def test_eval_production_character_motion_is_builder_owned_and_blocking(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "new-isometric-fixed-camera-complete"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -629,8 +653,157 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(scores["asset_pipeline"]["score"], 2)
         self.assertEqual(report["verdict"], "blocked")
 
+    def test_eval_pass_rejects_missing_raw_motion_artifact(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-2-5d-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: production asset integration"],
+        }
+        source["gates"]["production_character_motion_evidence"]["artifacts"][0]["path"] = (
+            "evidence-artifacts/missing-motion.avi"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-2-5d-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        motion = next(
+            item for item in report["gates"] if item["id"] == "production_character_motion_evidence"
+        )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(motion["submitted_status"], "pass")
+        self.assertEqual(motion["status"], "fail")
+        self.assertTrue(any("missing" in item for item in motion["validation_failures"]))
+
+    def test_eval_independent_gate_cannot_be_self_awarded(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-2-5d-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: production asset integration"],
+        }
+        source["gates"]["menu_identity_craft_review"]["reviewer"] = {
+            "role": "builder",
+            "context": "same context that authored the menu",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-2-5d-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        menu = next(item for item in report["gates"] if item["id"] == "menu_identity_craft_review")
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(menu["status"], "fail")
+        self.assertTrue(any("reviewer.role=independent" in item for item in menu["validation_failures"]))
+
+    def test_eval_2_5d_complete_requires_dense_and_vfx_art_states(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-2-5d-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: production asset integration"],
+        }
+        source["gates"]["production_art_integrity_evidence"]["artifacts"] = [
+            item
+            for item in source["gates"]["production_art_integrity_evidence"]["artifacts"]
+            if "dense_interaction" not in item.get("states", [])
+            and "vfx_peak" not in item.get("states", [])
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-2-5d-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        art = next(
+            item for item in report["gates"] if item["id"] == "production_art_integrity_evidence"
+        )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(art["status"], "fail")
+        self.assertTrue(any("dense_interaction" in item for item in art["validation_failures"]))
+        self.assertTrue(any("vfx_peak" in item for item in art["validation_failures"]))
+
+    def test_eval_2_5d_complete_accepts_concrete_artifacts_and_owners(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-2-5d-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: production asset integration"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-2-5d-complete",
+                "--evidence",
+                str(evidence_path),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("verdict=pass", completed.stdout)
+        self.assertIn("blocking_gates=0", completed.stdout)
+
     def test_evidence_helper_labels_character_motion_as_builder_owned(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "new-isometric-fixed-camera-complete"
         del source["gates"]["production_character_motion_evidence"]
         with tempfile.TemporaryDirectory() as directory:
@@ -654,9 +827,12 @@ class AuditorSmokeTests(unittest.TestCase):
         motion = migrated["gates"]["production_character_motion_evidence"]
         self.assertEqual(motion["status"], "not_tested")
         self.assertIn("[builder-owned]", motion["evidence"][0])
+        self.assertEqual(motion["reviewer"]["role"], "builder")
+        self.assertIn("UNRESOLVED", motion["reviewer"]["context"])
+        self.assertEqual(motion["artifacts"], [])
 
     def test_eval_third_person_case_accepts_complete_evidence(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "new-3d-third-person-complete"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -688,7 +864,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("blocking_gates=0", completed.stdout)
 
     def test_eval_isometric_case_caps_missing_art_onboarding_and_readability(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "new-isometric-fixed-camera-complete"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -736,7 +912,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(report["verdict"], "blocked")
 
     def test_eval_isometric_case_accepts_complete_evidence(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "new-isometric-fixed-camera-complete"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,
@@ -764,7 +940,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("blocking_gates=0", completed.stdout)
 
     def test_eval_complete_slice_accepts_solid_audio(self) -> None:
-        source = json.loads((ROOT / "tests" / "fixtures" / "eval_evidence.json").read_text(encoding="utf-8"))
+        source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
         source["scores"]["audio_direction_quality"] = {
             "score": 3,

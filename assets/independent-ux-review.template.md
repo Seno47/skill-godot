@@ -16,6 +16,8 @@
 | Complete onboarding state-machine coverage | NOT TESTED | Unrecorded |
 | Content-duration claim versus authored/playtested depth | NOT TESTED | Unrecorded |
 | App icon/main-menu semantic identity at final size | NOT TESTED | Unrecorded |
+| Main-menu wordmark, copy necessity, and authored composition | NOT TESTED | Unrecorded |
+| Production-art integrity across quiet, normal, dense interaction, VFX peak, and result states | NOT TESTED | Unrecorded |
 | Responsive integrity | NOT TESTED | Unrecorded |
 | Camera-relative movement after orbit | NOT TESTED | Unrecorded |
 | Camera input/collision and pause/focus capture recovery | NOT TESTED | Unrecorded |
@@ -38,6 +40,19 @@
 | Fixed-camera isometric early art slice at gameplay size | NOT TESTED | Unrecorded |
 | Fixed-camera character silhouette and local contrast | NOT TESTED | Unrecorded |
 | Fixed-camera route readability and density/composition | NOT TESTED | Unrecorded |
+
+## Raw target-build visual matrix
+
+Review the raw artifacts before reading the builder's desired verdict. For a complete game, an attractive menu and quiet opening frame cannot substitute for the states where assets, motion, VFX, contacts, depth, and HUD compete.
+
+| State ID | Raw artifact | Observed hierarchy/contact/VFX/depth defects | PASS / FAIL / NOT TESTED |
+|---|---|---|---|
+| `main_menu` | | | NOT TESTED |
+| `normal_gameplay` | | | NOT TESTED |
+| `dense_interaction` | | | NOT TESTED |
+| `result` | | | NOT TESTED |
+
+When characters are expected to move, review the separate raw normal-speed motion artifact. Deterministic pose/state assertions are supporting evidence and cannot replace watching idle, locomotion, and context action through the production camera.
 
 ## Onboarding action trace
 

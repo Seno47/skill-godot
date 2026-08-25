@@ -16,6 +16,8 @@ Turn the user's design into an editable Godot project, not a scripted imitation 
 - Do not hide ordinary authored composition in `_ready()`, giant controllers, factory scripts, or long `Node.new()` chains.
 - Never present raw primitives, default controls, mismatched assets, or unreviewed placeholders as finished design.
 - For a complete game or vertical slice, give the app/export icon and main menu identity a semantically legible relationship to the game and obtain an independent final-size review; palette consistency cannot turn arbitrary primitive geometry into a meaningful mark.
+- For a complete game or vertical slice, pass a separate independent menu-craft review: use an authored wordmark or deliberate runtime typographic composition, keep only purposeful copy, and reject a generic badge/title/accent-line/tagline/identical-button-stack layout.
+- Before calling production art complete, inspect raw target-build quiet, normal, dense interaction, peak VFX/contact, and result states. Scene serialization, materials, or shaders do not promote blockout primitives, debug-looking effects, broken contacts, sparse modules, or mismatched asset families to finished art.
 - For a complete game or vertical slice, deliver coherent, licensed, integrated music/SFX and mixer controls unless the user explicitly requests a silent experience or non-production prototype. Code-synthesized beeps and generic tracks are placeholders, not finished audio.
 - For every production character expected to move, autonomously pass a builder-owned motion gate before release: required idle/locomotion/context states run on the production visual, ordinary play never leaves it in bind/rest/T-pose, gameplay causes the state changes, animated attachments follow, and raw target-build motion is inspected. Do not make the user discover routine animation defects.
 - For a complete game or vertical slice, prove the clean-profile first-use path through every required onboarding state transition, then obtain independent UX/visual review across representative viewport extremes. Static tutorial text, one generic action, seeded QA state, and the building agent's own screenshot approval are insufficient completion evidence.
@@ -83,6 +85,8 @@ Validation:
 - Export/build-size work: validation section in the export reference
 - Complete mobile/web evidence setup or rubric migration: generate fresh evidence files with `scripts/evidence_helper.py` instead of reconstructing gates, profiles, and the viewport matrix from memory
 - Complete-game app icon/menu identity: complete `assets/semantic-identity-review.template.md` with raw final-size captures and an independent verdict
+- Complete-game main menu craft: complete `assets/menu-identity-craft-review.template.md` with raw default/interaction captures and an independent verdict on wordmark/typography, copy, hierarchy, controls, and composition
+- Complete-game or production-slice art: complete `assets/production-art-state-review.template.md` with builder-owned quiet/normal/dense/VFX/result target-build evidence before independent review
 - Production character expected to animate: complete `assets/production-character-motion.template.md` with builder-owned state dispatch, pose variation, bind/rest/T-pose rejection, attachment-follow checks, and raw target-build motion evidence before optional human preference feedback
 - Required touch-scroll behavior: adapt `assets/godot-tests/touch_scroll_probe.gd` into a deterministic project test scene; node presence alone is not proof
 - Localized compound/icon-only button alignment or pointer-click cleanup: adapt `assets/godot-tests/button_composition_probe.gd` and retain a release-like Web click check
@@ -93,22 +97,24 @@ Validation:
 - Free-orbit third-person locomotion/camera/visibility work: adapt `assets/godot-tests/third_person_controller_probe.gd`, `assets/godot-tests/third_person_hud_mouse_probe.gd`, and `assets/godot-tests/third_person_visibility_probe.gd`, then complete the target-build matrix in `assets/third-person-3d-review.template.md`
 - Isometric projection, picking, grid navigation, height transitions, depth sorting, or occlusion: apply the conditional validation in [references/isometric-and-2-5d.md](references/isometric-and-2-5d.md); adapt `assets/godot-tests/isometric_projection_probe.gd` and `assets/godot-tests/isometric_navigation_probe.gd` where their contracts fit
 - Complete fixed-camera isometric/orthographic game: before bulk content, fill `assets/isometric-complete-review.template.md`; measure same-frame character/background separation with `scripts/isometric_readability_audit.py --require-thresholds`; and support the claimed scope with `assets/content-duration-contract.template.md`
+- Complete non-isometric 2.5D game: use rubric case `new-2-5d-complete`, keep an explicit spatial contract, and combine the production-art state matrix, production-character motion contract, menu/semantic identity reviews, and independent Windows target-build UX verdict
 
 Hybrid tasks may require several references. Do not read unrelated references preemptively.
 
 ## Keep context efficient
 
 - Map the project with scoped file/path searches before opening large scenes or scripts; ignore caches, imports, generated builds, and binaries unless the task targets them.
+- Prefer Godot/CLI/project-owned input and capture evidence. Use desktop Computer Use only with explicit user opt-in or for otherwise unreachable native OS behavior, never merely to click the game or take routine screenshots.
 - Read the relevant scene/resource dependency chain and changed regions instead of repeatedly dumping the repository or whole large files.
 - Prefer compact console summaries with full diagnostics written to report files. Use `--summary`/`--json-output` where bundled auditors support them.
 - Preserve durable decisions in scenes, resources, manifests, budgets, or short project notes rather than restating them every turn. Never trade away verification or maintainability merely to save tokens.
 
 ## Execute in authored slices
 
-Build the smallest complete slice that demonstrates the requested experience: establish scale/camera/input plus visual and sonic language, create reusable scenes/resources, compose the playable scene, add focused behavior, integrate representative production assets including audio, run it, inspect representative states, and iterate. For fixed-camera isometric/orthographic work, do not multiply levels until the representative gameplay-size art/readability gate passes. Do not postpone all sound until after the gameplay and presentation are otherwise declared complete.
+Build the smallest complete slice that demonstrates the requested experience: establish scale/camera/input plus visual and sonic language, create reusable scenes/resources, compose the playable scene, add focused behavior, integrate representative production assets including audio, run it, inspect representative states, and iterate. For fixed-camera isometric/orthographic work, do not multiply levels until the representative gameplay-size art/readability gate passes. For every production slice, inspect dense interaction and peak effects before multiplying the art direction; a quiet frame is not an art gate. Do not postpone all sound until after the gameplay and presentation are otherwise declared complete.
 
 Use direct `.tscn`/`.tres` edits for small understood structures; use the Godot editor for visual placement and fragile serialization; use `EditorScript`/`@tool` for repeatable bulk authoring; use appropriate content tools for source assets. Generated output must remain normal Godot scenes/resources. Never edit `.godot/` cache contents as source or invent UIDs when safer editor/path workflows exist.
 
 ## Handoff truthfully
 
-Report the scenes/resources/assets changed and how they compose; commands/tests/builds run; rendered or profiled states inspected; intentional runtime-generated content; performance/size baselines and deltas when relevant; and remaining placeholders, license obligations, dependencies, or unverified states.
+Report the scenes/resources/assets changed and how they compose; commands/tests/builds run; rendered or profiled states inspected; intentional runtime-generated content; performance/size baselines and deltas when relevant; and remaining placeholders, license obligations, dependencies, or unverified states. For a complete game/slice, run the rubric scorecard against evidence with real reviewer provenance and structured artifact paths. Do not hand off “ready” when any applicable blocking gate is absent, unresolved, self-awarded under an independent/human owner, or backed only by prose about a missing capture/review.

@@ -4,27 +4,36 @@
   "gates": {
     "engine_clean": {
       "status": "pass",
-      "evidence": ["fixture: engine report"]
+      "evidence": ["fixture: engine report"],
+      "reviewer": {"role": "builder", "context": "fixture builder context"}
     },
     "core_loop_reachable": {
       "status": "pass",
-      "evidence": ["fixture: deterministic state trace"]
+      "evidence": ["fixture: deterministic state trace"],
+      "reviewer": {"role": "builder", "context": "fixture builder context"}
     },
     "restart_or_recovery": {
       "status": "pass",
-      "evidence": ["fixture: restart trace"]
+      "evidence": ["fixture: restart trace"],
+      "reviewer": {"role": "builder", "context": "fixture builder context"}
     },
     "scene_authored": {
       "status": "pass",
-      "evidence": ["fixture: scene graph audit"]
+      "evidence": ["fixture: scene graph audit"],
+      "reviewer": {"role": "builder", "context": "fixture builder context"}
     },
     "rights_clear": {
       "status": "pass",
-      "evidence": ["fixture: no external assets introduced"]
+      "evidence": ["fixture: no external assets introduced"],
+      "reviewer": {"role": "builder", "context": "fixture builder context"}
     },
     "production_character_motion_evidence": {
       "status": "pass",
-      "evidence": ["fixture: builder-owned idle/locomotion/action pose contract, real dispatch, attachment following, and target-build motion capture"]
+      "evidence": ["fixture: builder-owned idle/locomotion/action pose contract, real dispatch, attachment following, and target-build motion capture"],
+      "artifacts": [
+        {"path": "evidence-artifacts/motion.avi", "kind": "video", "states": ["idle", "locomotion", "context_action"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["motion_contract"]}
+      ]
     },
     "interactive_onboarding": {
       "status": "pass",
@@ -36,11 +45,23 @@
     },
     "semantic_identity_review": {
       "status": "pass",
-      "evidence": ["fixture: blind independent app-icon and main-menu mark reading at actual final sizes"]
+      "evidence": ["fixture: blind independent app-icon and main-menu mark reading at actual final sizes"],
+      "artifacts": [
+        {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["app_icon_small"]},
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["main_menu"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["semantic_identity"]}
+      ]
     },
     "independent_ux_review": {
       "status": "pass",
-      "evidence": ["fixture: independent reviewer raw findings"]
+      "evidence": ["fixture: independent reviewer raw findings"],
+      "artifacts": [
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["main_menu"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["normal_gameplay"]},
+        {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["dense_interaction"]},
+        {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["result"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["independent_ux"]}
+      ]
     },
     "human_audio_listening": {
       "status": "pass",
@@ -49,6 +70,27 @@
     "content_duration_evidence": {
       "status": "pass",
       "evidence": ["fixture: authored content-duration table and uncoached playtest timing"]
+    },
+    "menu_identity_craft_review": {
+      "status": "pass",
+      "evidence": ["fixture: independent runtime wordmark, copy, hierarchy, and menu composition review"],
+      "artifacts": [
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["main_menu_default"]},
+        {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["main_menu_interaction"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["menu_identity_craft"]}
+      ]
+    },
+    "production_art_integrity_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: builder-owned quiet, normal, dense interaction, VFX peak, and result review"],
+      "artifacts": [
+        {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["quiet"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["normal_gameplay"]},
+        {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["dense_interaction"]},
+        {"path": "evidence-artifacts/vfx.png", "kind": "image", "states": ["vfx_peak"]},
+        {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["result"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["production_art_review"]}
+      ]
     },
     "third_person_control_contract": {
       "status": "pass",
@@ -128,7 +170,8 @@
     }
   },
   "run_metadata": {
-    "purpose": "scorecard smoke fixture"
+    "purpose": "scorecard smoke fixture",
+    "artifact_root": "."
   },
   "limitations": []
 }

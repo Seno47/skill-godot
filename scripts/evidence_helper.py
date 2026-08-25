@@ -17,6 +17,9 @@ ROOT = Path(__file__).resolve().parents[1]
 CAPTURE_TEMPLATE = ROOT / "assets" / "capture-manifest.template.json"
 REVIEW_TEMPLATE = ROOT / "assets" / "independent-ux-review.template.md"
 YANDEX_CHECKLIST_TEMPLATE = ROOT / "assets" / "yandex-release-checklist.template.md"
+MENU_REVIEW_TEMPLATE = ROOT / "assets" / "menu-identity-craft-review.template.md"
+PRODUCTION_ART_REVIEW_TEMPLATE = ROOT / "assets" / "production-art-state-review.template.md"
+MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
 
 
 class EvidenceHelperError(RuntimeError):
@@ -33,6 +36,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--from-existing", help="Existing evidence JSON to preserve and migrate.")
     parser.add_argument("--capture-manifest-output", help="Also instantiate the canonical capture manifest.")
     parser.add_argument("--review-output", help="Also instantiate the independent review template.")
+    parser.add_argument("--menu-review-output", help="Also instantiate the menu identity craft review.")
+    parser.add_argument(
+        "--production-art-review-output",
+        help="Also instantiate the builder-owned production art state review.",
+    )
+    parser.add_argument(
+        "--motion-review-output",
+        help="Also instantiate the production character motion contract.",
+    )
     parser.add_argument("--yandex-checklist-output", help="Also instantiate the Yandex release checklist.")
     parser.add_argument("--force", action="store_true", help="Allow replacing explicitly named outputs.")
     return parser.parse_args()
@@ -67,14 +79,23 @@ def gate_applies(definition: dict[str, Any], case_id: str) -> bool:
     return cases is None or (isinstance(cases, list) and case_id in cases)
 
 
-def unresolved_gate(description: Any, acceptance_owner: str) -> dict[str, Any]:
+def unresolved_gate(
+    description: Any, acceptance_owner: str, requires_artifacts: bool
+) -> dict[str, Any]:
     suffix = str(description).strip() if isinstance(description, str) else "current rubric gate"
-    return {
+    result: dict[str, Any] = {
         "status": "not_tested",
         "evidence": [
             f"UNRESOLVED [{acceptance_owner}-owned]: supply an artifact or limitation for {suffix}"
         ],
+        "reviewer": {
+            "role": acceptance_owner,
+            "context": "UNRESOLVED: record the actual acceptance context before passing this gate",
+        },
     }
+    if requires_artifacts:
+        result["artifacts"] = []
+    return result
 
 
 def unresolved_dimension(description: Any) -> dict[str, Any]:
@@ -154,8 +175,28 @@ def prepare_evidence(
         if acceptance_owner not in owner_definitions:
             raise EvidenceHelperError(f"Gate {gate_id} names an unknown acceptance owner")
         if gate_id not in gates:
-            gates[gate_id] = unresolved_gate(definition.get("description"), acceptance_owner)
+            gates[gate_id] = unresolved_gate(
+                definition.get("description"),
+                acceptance_owner,
+                definition.get("artifact_requirements") is not None,
+            )
             added.append(f"gate:{gate_id}")
+            continue
+        gate_value = gates[gate_id]
+        if not isinstance(gate_value, dict):
+            raise EvidenceHelperError(f"Existing gate {gate_id} must be an object")
+        if "reviewer" not in gate_value:
+            gate_value["reviewer"] = {
+                "role": acceptance_owner,
+                "context": (
+                    "UNRESOLVED: migrated evidence must record the actual acceptance context; "
+                    "the previous status was preserved but cannot pass the current scorecard yet"
+                ),
+            }
+            added.append(f"reviewer:{gate_id}")
+        if definition.get("artifact_requirements") is not None and "artifacts" not in gate_value:
+            gate_value["artifacts"] = []
+            added.append(f"artifacts:{gate_id}")
 
     for definition in rubric.get("dimensions", []):
         if not isinstance(definition, dict):
@@ -184,6 +225,10 @@ def prepare_evidence(
     metadata.setdefault("clean_profile_provenance", "unrecorded")
     metadata.setdefault("seeded_profile_provenance", "unrecorded")
     metadata.setdefault("capture_manifest", "unrecorded")
+    metadata.setdefault(
+        "artifact_root",
+        ".",
+    )
     return result, added
 
 
@@ -210,6 +255,9 @@ def main() -> int:
             for value in (
                 args.capture_manifest_output,
                 args.review_output,
+                args.menu_review_output,
+                args.production_art_review_output,
+                args.motion_review_output,
                 args.yandex_checklist_output,
             )
             if value is not None
@@ -226,6 +274,15 @@ def main() -> int:
             copy_template(CAPTURE_TEMPLATE, output_path(args.capture_manifest_output))
         if args.review_output:
             copy_template(REVIEW_TEMPLATE, output_path(args.review_output))
+        if args.menu_review_output:
+            copy_template(MENU_REVIEW_TEMPLATE, output_path(args.menu_review_output))
+        if args.production_art_review_output:
+            copy_template(
+                PRODUCTION_ART_REVIEW_TEMPLATE,
+                output_path(args.production_art_review_output),
+            )
+        if args.motion_review_output:
+            copy_template(MOTION_REVIEW_TEMPLATE, output_path(args.motion_review_output))
         if args.yandex_checklist_output:
             copy_template(YANDEX_CHECKLIST_TEMPLATE, output_path(args.yandex_checklist_output))
 

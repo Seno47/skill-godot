@@ -51,6 +51,8 @@ For skeletal 3D work, record which stable bones or pose features were sampled an
 
 A still image can expose a T-pose but cannot prove motion, looping, state dispatch, or attachment following. Preserve a short raw target-build recording at the real gameplay camera and inspect it at normal speed. Deterministic pose assertions support this review; they do not replace it.
 
+For rubric evidence, attach the concrete recording as a structured `video` artifact whose `states` cover `idle`, `locomotion`, and `context_action`, plus the completed contract as a `report` artifact. A prose evidence string that says a movie was watched cannot pass when the files are absent or empty.
+
 ## Acceptance ownership
 
 - Builder-owned baseline verdict: PASS / FAIL / NOT TESTED
