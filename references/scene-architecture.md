@@ -83,6 +83,18 @@ Use an `EditorScript`, `@tool` script, or plugin when bulk placement or determin
 
 The generated result must remain a normal editable scene/resource. An authoring generator is not justification for rebuilding the same static tree every time the game runs.
 
+### Verify generated scenes by round trip
+
+When an `EditorScript`, `@tool` script, C# `SceneTree` builder, or other headless authoring tool emits a scene, compilation and `ResourceSaver.save()` are not enough. Silent ownership mistakes can drop descendants, while blindly assigning ownership inside an instantiated imported scene can inline or duplicate content.
+
+- Before packing, record the stable authored node paths/count that are intended to persist. Exclude the internal descendants of instantiated `.tscn`/GLB roots; the instance root belongs to the parent composition, its imported internals remain owned by their source scene.
+- Assign the edited root as `owner` for newly authored descendants that should serialize, but stop recursion at a child whose `scene_file_path`/instanced-scene identity is non-empty.
+- Pack, instantiate the packed result, and compare the recorded persistent paths/count. Save only after that passes; then unload/reload the file from disk and compare again.
+- Treat missing nodes, changed instance boundaries, unexpected embedded mesh/material payload, or a large unexplained `.tscn` size increase as a failed authoring run.
+- Attach runtime scripts only after fragile hierarchy/property work when the language binding invalidates wrappers. In Godot C#, `SetScript()` can invalidate the managed wrapper; re-acquire the node before packing and verify behavior against the installed Godot/.NET version instead of copying an old enum/API name.
+
+This contract is conditional: hand-authored scene edits still need import/open/run validation, but do not need a build-time generator merely to satisfy the skill.
+
 ## Runtime construction exceptions
 
 Runtime construction is appropriate for:
@@ -103,6 +115,8 @@ Prefer instantiating authored `PackedScene` objects inside these systems. For pr
 - Shared materials or themes are duplicated and drift apart.
 - Imported model files are modified indirectly through generated cache files.
 - Tool code creates visible nodes without ownership, so they disappear on save.
+- A generator reports success without comparing the in-memory tree, packed instance, and disk-reloaded scene.
+- Ownership recursion crosses into an imported/instanced scene and bloats or duplicates its internal resources.
 - A technically reusable architecture leaves no representative composed scene to judge.
 
 Useful official references:

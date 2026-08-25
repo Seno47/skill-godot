@@ -2,6 +2,12 @@
 
 Use this guide when the user's description is open-ended, genre-heavy, or visually ambitious. Do not replace the user's idea with a stock genre template.
 
+## Match collaboration to the brief
+
+Read how the task is framed. An exploratory direction benefits from an early playable slice and short checkpoints only at decisions of taste, scope, platform, or paid cost. A finished brief authorizes reasonable reversible implementation choices and steady autonomous progress; do not turn it into a sequence of avoidable questions. Neither mode changes permission boundaries or weakens completion evidence.
+
+For a run likely to span several phases or context compaction, instantiate `assets/project-run-state.template.md`. Keep current playable truth, durable decisions, build/evidence IDs, reproducible commands, asset/cost records, next bounded actions, and genuine blockers there. Update it in place after meaningful checkpoints; a chronological diary wastes context and quickly becomes stale.
+
 ## Extract decisions that affect construction
 
 Capture what the user has actually specified:

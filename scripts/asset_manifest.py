@@ -18,6 +18,11 @@ STATUSES = ("candidate", "accepted", "adapted", "integrated", "verified")
 SOURCE_TYPES = ("external", "generated", "user-provided", "in-house")
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ATTRIBUTION_LICENSE_PATTERN = re.compile(r"(?:CC[- ]?BY|attribution)", re.IGNORECASE)
+VISUAL_KIND_PATTERN = re.compile(
+    r"(?:sprite|texture|model|mesh|character|prop|environment|icon|ui|background|"
+    r"tile|vfx|particle|decal|portrait|animation)",
+    re.IGNORECASE,
+)
 
 
 class ManifestError(RuntimeError):
@@ -52,7 +57,20 @@ def parse_args() -> argparse.Namespace:
     add_parser.add_argument("--license-url")
     add_parser.add_argument("--attribution")
     add_parser.add_argument("--tool", help="Generation/authoring tool and version.")
+    add_parser.add_argument(
+        "--cost-cents",
+        type=int,
+        help="Actual external acquisition/generation cost in cents; requires prior user authorization.",
+    )
+    add_parser.add_argument(
+        "--job-record",
+        help="Project-relative provider task/sidecar record used to resume instead of resubmitting.",
+    )
     add_parser.add_argument("--acquired-on", help="Acquisition/generation date, YYYY-MM-DD.")
+    add_parser.add_argument(
+        "--gameplay-use",
+        help="Final in-game size/scale and behavior, e.g. '1.8m tall' or '128x128 px HUD'.",
+    )
     add_parser.add_argument(
         "--source-file", action="append", default=[], help="Project-relative editable/source file."
     )
@@ -164,6 +182,8 @@ def make_asset(args: argparse.Namespace) -> dict[str, Any]:
         raise ManifestError("--kind must use lowercase kebab-case")
     if args.acquired_on and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.acquired_on):
         raise ManifestError("--acquired-on must use YYYY-MM-DD")
+    if args.cost_cents is not None and args.cost_cents < 0:
+        raise ManifestError("--cost-cents must be zero or greater")
 
     origin = compact_object(
         {
@@ -174,6 +194,8 @@ def make_asset(args: argparse.Namespace) -> dict[str, Any]:
             "license_url": args.license_url,
             "attribution": args.attribution,
             "tool": args.tool,
+            "cost_cents": args.cost_cents,
+            "job_record": normalize_project_path(args.job_record) if args.job_record else None,
             "acquired_on": args.acquired_on,
         }
     )
@@ -182,6 +204,7 @@ def make_asset(args: argparse.Namespace) -> dict[str, Any]:
         "runtime": [normalize_project_path(value) for value in args.runtime_file],
         "scenes": [normalize_project_path(value) for value in args.scene],
     }
+    usage = compact_object({"gameplay_use": args.gameplay_use})
     return compact_object(
         {
             "id": args.id,
@@ -189,6 +212,7 @@ def make_asset(args: argparse.Namespace) -> dict[str, Any]:
             "status": args.status,
             "requires_scene": args.requires_scene,
             "origin": origin,
+            "usage": usage or None,
             "files": files,
             "notes": args.notes,
         }
@@ -287,6 +311,24 @@ def validate_manifest(
                 warnings.append(f"{label}: candidate external asset license is not recorded")
         if source_type == "generated" and not origin.get("tool"):
             errors.append(f"{label}: generated asset needs origin.tool")
+        cost_cents = origin.get("cost_cents")
+        if cost_cents is not None and (
+            not isinstance(cost_cents, int) or isinstance(cost_cents, bool) or cost_cents < 0
+        ):
+            errors.append(f"{label}: origin.cost_cents must be a non-negative integer")
+        job_record = origin.get("job_record")
+        if job_record is not None:
+            if not isinstance(job_record, str):
+                errors.append(f"{label}: origin.job_record must be a project-relative path")
+            else:
+                normalized_job = normalize_project_path(job_record)
+                referenced_files.add(normalized_job)
+                if root is not None:
+                    resolved_job = resolve_project_file(root, normalized_job)
+                    if resolved_job is None:
+                        errors.append(f"{label}: invalid origin.job_record path: {job_record}")
+                    elif not resolved_job.exists():
+                        errors.append(f"{label}: missing origin.job_record path: {normalized_job}")
         license_value = str(origin.get("license", ""))
         if ATTRIBUTION_LICENSE_PATTERN.search(license_value) and not origin.get("attribution"):
             warnings.append(f"{label}: attribution-like license has no attribution text")
@@ -327,6 +369,23 @@ def validate_manifest(
             and not scenes
         ):
             errors.append(f"{label}: integrated/verified scene-backed asset needs files.scenes")
+
+        usage = asset.get("usage", {})
+        if not isinstance(usage, dict):
+            errors.append(f"{label}: usage must be an object when present")
+            usage = {}
+        gameplay_use = usage.get("gameplay_use")
+        if gameplay_use is not None and (not isinstance(gameplay_use, str) or not gameplay_use.strip()):
+            errors.append(f"{label}: usage.gameplay_use must be a non-empty string")
+        if (
+            status_index >= STATUSES.index("accepted")
+            and isinstance(kind, str)
+            and VISUAL_KIND_PATTERN.search(kind)
+            and not gameplay_use
+        ):
+            warnings.append(
+                f"{label}: accepted visual asset should record usage.gameplay_use at final scale"
+            )
 
     return errors, warnings, referenced_files
 

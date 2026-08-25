@@ -2,6 +2,10 @@
 
 Read this for a new game, a substantial vertical slice, or any task where the agent is expected to deliver a complete playable result. Startup without errors is not evidence that a game communicates a goal, closes its loop, or feels correct.
 
+## Keep the run steerable and resumable
+
+For an exploratory brief, expose a real playable slice early and checkpoint only at consequential taste, scope, platform, or paid-cost decisions. For a finished brief, make reasonable reversible decisions and continue autonomously. In both modes, preserve current verified truth in `assets/project-run-state.template.md` when the run is long: source/build IDs, current playable loop, commands, evidence, asset/cost state, next bounded actions, and blockers. Replace stale values rather than accumulating narration.
+
 ## Define the playable contract
 
 Before implementation, reduce the brief to an observable contract:
@@ -78,6 +82,14 @@ python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode run -
 python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode capture --scene res://scenes/main.tscn --frames 300 --fixed-fps 30 --output reports/core-loop.avi --summary --json-output reports/capture.json
 ```
 
+If the user has not watched or played the current target build, create a short delivery proof after routine gates pass:
+
+```bash
+python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode capture --scene res://scenes/main.tscn --proof-seconds 15 --fixed-fps 30 --output reports/delivery-proof.avi --summary --json-output reports/delivery-proof.json
+```
+
+Use a project-owned driver to begin in a composed frame, progress through representative input/core interaction/feedback/result states, and avoid dead time or one repeatedly looped pose. Initialize camera and capture state before the first rendered frame. Watch the entire recording back before handoff and record the states/defects in `capture-manifest.template.json`. This clip is a compact user-facing proof, not a substitute for uncoached play, the raw screenshot/state matrix, human audio listening, performance profiling, or independent review.
+
 The runner does not inject keyboard, mouse, or controller input. Use a project test driver or an approved UI automation layer for input-dependent flows.
 
 “Approved UI automation” does not mean desktop Computer Use by default. Prefer project-owned drivers, `Input.parse_input_event()`, Godot fixtures, CLI capture, and browser automation scoped to a Web export. Use desktop Computer Use only after explicit user opt-in or when a required native OS surface cannot be verified otherwise; do not start it solely for routine game clicks or screenshots. Builder-operated GUI automation remains builder evidence and cannot satisfy an independent or human acceptance owner.
@@ -122,14 +134,14 @@ When changing this skill materially, test it on isolated projects representing a
 - constrained mobile/web build with performance and package-size budgets.
 - approved UI-reference integration with native scene authorship and raw parity artifacts.
 
-For each case record: brief, fixture/license, initial project hash, tools available, final project, validation commands, captures, audio listening notes, errors/warnings, human playability result, elapsed time, and token/tool-call usage. Compare regressions on structure, completion, visual coherence, audio quality, performance, and cost; do not tune only to one demo.
+For each case record: brief, fixture/license, initial project hash, tools available, final project, validation commands, captures including proof watchback when applicable, audio listening notes, errors/warnings, human playability result, elapsed time, external generation cost/retries, and token/tool-call usage. Compare regressions on structure, completion, visual coherence, audio quality, performance, and cost; do not tune only to one demo.
 
 Use the stable machine-readable rubric in `evals/rubric.json` and author evidence against `evals/evidence.schema.json`. Respect each gate's `acceptance_owner`: the builder supplies and fixes builder-owned routine evidence; a human or independent evaluation context supplies only gates explicitly assigned to it. The building agent must not award itself high independent/perceptual scores from intent, file presence, or its own screenshots, but it also must not defer ordinary QA to the user. Record the builder and reviewer contexts and keep raw findings, including defects. Every passing gate records a matching `reviewer.role` and concrete context. Gates with `artifact_requirements` also attach structured files under `artifacts`; paths resolve from `run_metadata.artifact_root`, which defaults to the evidence file's directory. A prose note that a movie, screenshot, or review existed cannot replace a missing/empty file.
 
 Create or migrate the case evidence instead of hand-copying the current rubric. Missing gates and dimensions are added as visibly unresolved values while existing evidence is preserved:
 
 ```bash
-python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --output <evidence.json> --capture-manifest-output <captures.json> --review-output <independent-review.md> --menu-review-output <menu-review.md> --hud-review-output <hud-review.md> --production-art-review-output <production-art-review.md> --motion-review-output <character-motion.md> --yandex-checklist-output <yandex-checklist.md>
+python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --output <evidence.json> --capture-manifest-output <captures.json> --project-status-output <project-run-state.md> --review-output <independent-review.md> --menu-review-output <menu-review.md> --hud-review-output <hud-review.md> --production-art-review-output <production-art-review.md> --motion-review-output <character-motion.md> --yandex-checklist-output <yandex-checklist.md>
 python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --from-existing <old-evidence.json> --output <migrated-evidence.json>
 ```
 

@@ -85,6 +85,7 @@ Validation:
 - Performance/memory optimization: validation section in the relevant optimization reference
 - Export/build-size work: validation section in the export reference
 - Complete mobile/web evidence setup or rubric migration: generate fresh evidence files with `scripts/evidence_helper.py` instead of reconstructing gates, profiles, and the viewport matrix from memory
+- Long autonomous build or work likely to span context compaction: instantiate `assets/project-run-state.template.md`, keep it short, and update verified truth instead of appending a diary
 - Complete-game app icon/menu identity: complete `assets/semantic-identity-review.template.md` with raw final-size captures and an independent verdict
 - Complete-game main menu craft: complete `assets/menu-identity-craft-review.template.md` with raw default/interaction captures and an independent verdict on wordmark/typography, copy, hierarchy, controls, and composition
 - Complete-game or production-slice art: complete `assets/production-art-state-review.template.md` with builder-owned quiet/normal/dense/VFX/result target-build evidence before independent review
@@ -110,6 +111,7 @@ Hybrid tasks may require several references. Do not read unrelated references pr
 - Read the relevant scene/resource dependency chain and changed regions instead of repeatedly dumping the repository or whole large files.
 - Prefer compact console summaries with full diagnostics written to report files. Use `--summary`/`--json-output` where bundled auditors support them.
 - Preserve durable decisions in scenes, resources, manifests, budgets, or short project notes rather than restating them every turn. Never trade away verification or maintainability merely to save tokens.
+- For a long run, keep one compact `project-run-state` record with the current playable truth, exact commands, build/evidence IDs, asset/cost state, next bounded actions, and blockers. Update it only at meaningful checkpoints so it replaces repeated rediscovery rather than becoming another log.
 
 ## Execute in authored slices
 
@@ -119,4 +121,4 @@ Use direct `.tscn`/`.tres` edits for small understood structures; use the Godot 
 
 ## Handoff truthfully
 
-Report the scenes/resources/assets changed and how they compose; commands/tests/builds run; rendered or profiled states inspected; intentional runtime-generated content; performance/size baselines and deltas when relevant; and remaining placeholders, license obligations, dependencies, or unverified states. For a complete game/slice, run the rubric scorecard against evidence with real reviewer provenance and structured artifact paths. Do not hand off “ready” when any applicable blocking gate is absent, unresolved, self-awarded under an independent/human owner, or backed only by prose about a missing capture/review.
+Report the scenes/resources/assets changed and how they compose; commands/tests/builds run; rendered or profiled states inspected; intentional runtime-generated content; performance/size baselines and deltas when relevant; and remaining placeholders, license obligations, dependencies, or unverified states. If the user has not watched or played the current target build, include a short deterministic proof recording that progresses through representative gameplay and that the builder watched back in full; it supplements rather than replaces the raw state matrix, playtest, or independent/human gates. For a complete game/slice, run the rubric scorecard against evidence with real reviewer provenance and structured artifact paths. Do not hand off “ready” when any applicable blocking gate is absent, unresolved, self-awarded under an independent/human owner, or backed only by prose about a missing capture/review.

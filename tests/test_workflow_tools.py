@@ -124,7 +124,7 @@ class GenreRubricTests(unittest.TestCase):
                 evidence = json.loads(output.read_text(encoding="utf-8"))
                 self.assertIn(gate_id, evidence["gates"])
 
-    def test_2_5d_scaffold_instantiates_art_menu_hud_and_motion_contracts(self) -> None:
+    def test_2_5d_scaffold_instantiates_art_menu_hud_motion_and_run_state(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             temp = Path(directory)
             completed = run_script(
@@ -139,6 +139,8 @@ class GenreRubricTests(unittest.TestCase):
                 str(temp / "menu-review.md"),
                 "--hud-review-output",
                 str(temp / "hud-review.md"),
+                "--project-status-output",
+                str(temp / "project-run-state.md"),
                 "--production-art-review-output",
                 str(temp / "production-art-review.md"),
                 "--motion-review-output",
@@ -147,6 +149,7 @@ class GenreRubricTests(unittest.TestCase):
             evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
             menu = (temp / "menu-review.md").read_text(encoding="utf-8")
             hud = (temp / "hud-review.md").read_text(encoding="utf-8")
+            run_state = (temp / "project-run-state.md").read_text(encoding="utf-8")
             art = (temp / "production-art-review.md").read_text(encoding="utf-8")
             motion = (temp / "motion-review.md").read_text(encoding="utf-8")
         self.assertEqual(completed.returncode, 0, completed.stdout)
@@ -155,8 +158,18 @@ class GenreRubricTests(unittest.TestCase):
         self.assertIn("gameplay_hud_glanceability_review", evidence["gates"])
         self.assertIn("Menu Identity Craft Review", menu)
         self.assertIn("Gameplay HUD Glanceability Review", hud)
+        self.assertIn("Project Run State", run_state)
         self.assertIn("Production Art State Review", art)
         self.assertIn("Production Character Motion Contract", motion)
+
+    def test_capture_manifest_includes_watched_delivery_proof_contract(self) -> None:
+        manifest = json.loads(
+            (ROOT / "assets" / "capture-manifest.template.json").read_text(encoding="utf-8")
+        )
+        proof = manifest["delivery_proof"]
+        self.assertIn("not watched or played", proof["required_when"])
+        self.assertIsNone(proof["builder_watched_back_entire_recording"])
+        self.assertEqual(proof["result"], "not_tested")
 
 
 @unittest.skipUnless(importlib.util.find_spec("PIL"), "Pillow is not installed")

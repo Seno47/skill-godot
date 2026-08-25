@@ -38,8 +38,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mode", choices=("import", "run", "capture"), default="run")
     parser.add_argument("--scene", help="Scene to run, preferably res://path/to/scene.tscn.")
     parser.add_argument("--script", help="Project-owned res:// SceneTree script to run (run mode only).")
-    parser.add_argument("--frames", type=int, default=120, help="Iterations before automatic quit.")
+    parser.add_argument("--frames", type=int, help="Iterations before automatic quit (default: 120).")
     parser.add_argument("--fixed-fps", type=int, default=30, help="Capture simulation FPS.")
+    parser.add_argument(
+        "--proof-seconds",
+        type=float,
+        help=(
+            "Capture a 15-20 second deterministic delivery proof; derives --frames from "
+            "--fixed-fps and cannot be combined with --frames."
+        ),
+    )
     parser.add_argument("--output", help="Capture output (.avi or .png sequence path). Required for capture.")
     parser.add_argument("--log-file", help="Godot log path.")
     parser.add_argument("--timeout", type=int, default=120)
@@ -60,6 +68,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-lines", type=int, default=100)
     parser.add_argument("--dry-run", action="store_true", help="Validate and print the command without launching Godot.")
     args = parser.parse_args()
+    if args.proof_seconds is not None:
+        if args.mode != "capture":
+            parser.error("--proof-seconds requires --mode capture")
+        if args.frames is not None:
+            parser.error("--proof-seconds and --frames are mutually exclusive")
+        if not 15 <= args.proof_seconds <= 20:
+            parser.error("--proof-seconds must be between 15 and 20 seconds")
+        args.frames = round(args.proof_seconds * args.fixed_fps)
+    elif args.frames is None:
+        args.frames = 120
     if args.frames < 1 or args.fixed_fps < 1 or args.timeout < 1 or args.max_lines < 0:
         parser.error("frames, FPS, timeout, and line limit must be positive (max-lines may be zero)")
     if args.mode == "capture" and not args.output:
@@ -232,6 +250,11 @@ def main() -> int:
             print(f"[DRY-RUN] {shlex.join(dry_command)}")
         if args.mode == "capture":
             print("[WARN] --write-movie can create a large AVI or image sequence; use run mode for profiling.")
+            if args.proof_seconds is not None:
+                print(
+                    f"[INFO] Delivery proof={args.proof_seconds:g}s frames={args.frames} "
+                    f"fixed_fps={args.fixed_fps}; watch the entire recording before handoff."
+                )
         return 0
     if capture_output:
         capture_output.parent.mkdir(parents=True, exist_ok=True)
@@ -274,6 +297,7 @@ def main() -> int:
         "script": args.script,
         "frames": None if args.mode == "import" else args.frames,
         "fixed_fps": args.fixed_fps if args.mode == "capture" else None,
+        "proof_seconds": args.proof_seconds if args.mode == "capture" else None,
         "pre_import": args.mode != "import" and not args.skip_import,
         "phases": phases,
         "exit_code": next((phase["exit_code"] for phase in phases if phase["failed"]), 0),
@@ -290,6 +314,7 @@ def main() -> int:
             "A successful bounded run proves startup stability for the exercised state, not playability or visual quality.",
             "Forced-quit ObjectDB/resource/orphan diagnostics are retained separately and need a normal-exit reproduction before they can be dismissed as runner-only noise.",
             "Movie capture can create large files and adds overhead; use run mode for performance profiling unless a recording is required.",
+            "A delivery proof must be watched back in full; file creation alone does not prove useful framing, motion, input progression, or absence of dead time.",
         ],
     }
     if args.json_output:

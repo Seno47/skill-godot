@@ -49,6 +49,18 @@ Record the tool/service, model or tool version when available, generation/edit d
 
 Keep editable source files when they materially improve future consistency or repair. Keep only useful accepted generations in the project; rejected explorations belong in a bounded work area, not `res://`.
 
+For every visual asset, record its intended final gameplay use—not only source pixels: world meters/height/length, displayed sprite or icon pixels, texture tile scale, background crop behavior, camera distance, or another concrete scale contract. Use `scripts/asset_manifest.py add --gameplay-use ...`; this prevents an attractive source image/model from being integrated at arbitrary scale.
+
+## Control paid generation and retries
+
+External generation can spend money or consume limited credits. Before the first paid call, state the provider/tool, bounded purpose, estimated per-item and total cost, and ask for explicit user authorization. A previous approval covers only the recorded budget and scope; material expansion needs new authority.
+
+- Record actual cost with `--cost-cents` and any durable provider task/sidecar path with `--job-record` in the asset manifest.
+- For asynchronous providers, persist the task ID and completed stage immediately after submission, before polling. A timeout or a job parked near completion is not proof of failure.
+- Query or resume the recorded task first. Do not submit a duplicate paid job unless the provider confirms terminal failure or the user authorizes a deliberate new attempt.
+- Keep provider job records and generation references outside runtime-loaded asset folders when the game does not need them. Keep only accepted optimized runtime outputs under `res://` paths used by the game.
+- Parallelize independent generations only after the style anchor and budget are accepted. Dependent reference/pose/model/rig stages stay ordered so a bad upstream result does not multiply cost.
+
 ## Raster and 2D assets
 
 - Generate at a resolution and viewpoint appropriate for final framing and cleanup.
@@ -58,6 +70,10 @@ Keep editable source files when they materially improve future consistency or re
 - For tiles, verify edge compatibility, corners, transitions, collision intent, and visible repetition in a filled test map.
 - For seamless textures, inspect repeated grids and normal/roughness companions under representative lighting.
 - For icons/UI, remove accidental text and inconsistent perspective; test at final pixel size, not only zoomed in.
+
+When transparency is needed, do not trust a prompt that merely asks for “transparent background”: generators may bake a checkerboard, halo, or fake shadow. Prefer a uniform matte color distinct from the subject but reasonably close to the expected game environment, remove it with a real alpha/matting tool, and inspect a QA composite on contrasting light, dark, and representative game colors. Preserve a non-matted source when downstream image-to-3D or other tooling expects the original background.
+
+Very small final sprites/icons should not be judged at the generator's large source resolution. Use bold forms that survive reduction, generate a coherent kit/grid when economical, slice deterministically, and review every cell at its actual display size. Downsampling a detailed 1K image to 32–64 px often creates mud rather than production pixel art.
 
 ### Sprite sheets and animation
 
@@ -70,6 +86,8 @@ Never accept a generated sheet based on appearance alone. Verify:
 - separation of directions/actions required by gameplay.
 
 Split and repair frames with deterministic tools or manual editing. Configure the final animation in Godot scenes/resources and inspect it in motion.
+
+For video-derived sprites, keep the pipeline explicit: accepted character/style reference -> action pose -> motion source -> extracted frames -> measured loop trim for cyclic actions -> alpha cleanup -> Godot animation. Reuse the same accepted reference across actions; limit image-to-image chaining because identity and proportions drift with every generation. Keep source cadence in mind, drive playback from elapsed time, and restart an animation only when the gameplay state actually changes.
 
 Run the bundled deterministic checks before motion review:
 
@@ -104,5 +122,6 @@ An output becomes `accepted` only after:
 - technical defects are repairable within scope;
 - generation/tool terms and source-reference rights are acceptable for the intended use;
 - its role and required variants are clear.
+- its final gameplay size/use, paid cost when applicable, and resumable job record are preserved.
 
 Then move it through [asset-integration.md](asset-integration.md). Mark it `verified` only after rendered in the real game.

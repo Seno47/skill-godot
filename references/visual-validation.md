@@ -27,6 +27,10 @@ Use a real renderer and capture screenshots or short recordings at the intended 
 
 Use consistent camera, resolution, renderer, quality preset, and scene state when comparing revisions.
 
+For a deterministic delivery/proof recording, initialize the camera and scripted state before the first captured frame, drive progression through a project-owned test/presentation path, and keep visible behavior advancing across the whole 15–20 second clip. Watch it back from start to finish. Reject dead opening time, stale/repeated single-frame motion, hidden inputs, a camera that settles only after the clip begins, or a montage that omits the core cause-and-effect. A proof clip summarizes a verified build; it does not replace the raw state captures or acceptance owners below.
+
+Prefer the intended hardware renderer for final motion evidence. If the environment falls back to a software Vulkan/rendering device, record it explicitly: still captures may remain useful for limited diagnosis, but do not silently treat degraded, incorrect, or impractically slow motion as target-hardware proof.
+
 When an approved UI screenshot/mockup is the target, follow [ui-reference-integration.md](ui-reference-integration.md): capture the same state and dimensions, create side-by-side/overlay/diff artifacts with `scripts/image_compare.py`, and review named regions. Do not convert a global pixel metric into a parity verdict without inspecting the raw captures and recorded deviations.
 
 For responsive UI or complete mobile/web builds, use a viewport matrix derived from the declared support range rather than only the reference aspect ratio. Include at least:

@@ -140,6 +140,19 @@
     "artifact": "unrecorded",
     "result": "not_tested"
   },
+  "delivery_proof": {
+    "required_when": "the user has not watched or played the current target build",
+    "artifact": "unrecorded",
+    "duration_seconds": null,
+    "fixed_fps": null,
+    "project_owned_driver": "unrecorded",
+    "states_shown": [],
+    "camera_and_state_initialized_before_first_frame": null,
+    "builder_watched_back_entire_recording": null,
+    "dead_time_or_repeated_single-loop_frame": "not_tested",
+    "defects_and_disposition": "unrecorded",
+    "result": "not_tested"
+  },
   "independent_reviewer": {
     "context": "unrecorded",
     "did_not_build_flow": null,

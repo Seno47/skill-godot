@@ -119,6 +119,46 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("--import", completed.stdout)
         self.assertIn("can create a large AVI", completed.stdout)
 
+    def test_capture_delivery_proof_derives_deterministic_frame_count(self) -> None:
+        completed = run_script(
+            "godot_capture.py",
+            "--project",
+            str(FIXTURE),
+            "--mode",
+            "capture",
+            "--scene",
+            "res://main.tscn",
+            "--proof-seconds",
+            "15",
+            "--fixed-fps",
+            "30",
+            "--output",
+            "reports/proof.avi",
+            "--dry-run",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("--quit-after 450", completed.stdout)
+        self.assertIn("Delivery proof=15s frames=450 fixed_fps=30", completed.stdout)
+        self.assertIn("watch the entire recording", completed.stdout)
+
+    def test_capture_delivery_proof_rejects_manual_frames(self) -> None:
+        completed = run_script(
+            "godot_capture.py",
+            "--project",
+            str(FIXTURE),
+            "--mode",
+            "capture",
+            "--proof-seconds",
+            "15",
+            "--frames",
+            "450",
+            "--output",
+            "reports/proof.avi",
+            "--dry-run",
+        )
+        self.assertEqual(completed.returncode, 2, completed.stdout)
+        self.assertIn("mutually exclusive", completed.stdout)
+
     def test_capture_classifies_forced_quit_leak_noise(self) -> None:
         module = load_script_module("godot_capture.py")
         completed = module.execute(
@@ -239,6 +279,59 @@ class AuditorSmokeTests(unittest.TestCase):
         report = json.loads(completed.stdout)
         self.assertEqual(report["project"]["main_scene"], "res://main.tscn")
         self.assertEqual(report["scenes"][0]["node_count"], 2)
+
+    def test_asset_manifest_records_gameplay_use_cost_and_resumable_job(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            project = temp / "project"
+            project.mkdir()
+            (project / "project.godot").write_text("[application]\n", encoding="utf-8")
+            job_record = project / "work" / "hero.provider.json"
+            job_record.parent.mkdir()
+            job_record.write_text('{"task_id":"fixture-1"}\n', encoding="utf-8")
+            manifest = temp / "assets.json"
+            initialized = run_script("asset_manifest.py", "init", "--manifest", str(manifest))
+            added = run_script(
+                "asset_manifest.py",
+                "add",
+                "--manifest",
+                str(manifest),
+                "--id",
+                "hero",
+                "--kind",
+                "character-model",
+                "--source-type",
+                "generated",
+                "--status",
+                "accepted",
+                "--tool",
+                "fixture-generator 1.0",
+                "--cost-cents",
+                "37",
+                "--job-record",
+                "work/hero.provider.json",
+                "--gameplay-use",
+                "1.8m tall at the production camera",
+            )
+            validated = run_script(
+                "asset_manifest.py",
+                "validate",
+                "--manifest",
+                str(manifest),
+                "--project",
+                str(project),
+            )
+            record = json.loads(manifest.read_text(encoding="utf-8"))["assets"][0]
+        self.assertEqual(initialized.returncode, 0, initialized.stdout)
+        self.assertIn("[OK] Created", initialized.stdout)
+        self.assertEqual(added.returncode, 0, added.stdout)
+        self.assert_passes(validated)
+        self.assertEqual(record["origin"]["cost_cents"], 37)
+        self.assertEqual(record["origin"]["job_record"], "work/hero.provider.json")
+        self.assertEqual(
+            record["usage"]["gameplay_use"],
+            "1.8m tall at the production camera",
+        )
 
     def test_eval_scorecard(self) -> None:
         completed = run_script(
