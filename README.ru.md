@@ -93,6 +93,8 @@ flowchart LR
 
 Само меню проходит отдельный gate [`menu-identity-craft-review.template.md`](./assets/menu-identity-craft-review.template.md): wordmark/типографика, необходимость каждого текста, фон, иерархия, контролы и отсутствие шаблонной композиции. [`production-art-state-review.template.md`](./assets/production-art-state-review.template.md) требует raw target-build кадры quiet, normal, dense interaction, VFX peak и result, чтобы красивое пустое начало не скрывало пересечения, сломанную глубину/контакты, debug-подобные эффекты, редкие примитивные модули или несовместимые семейства ассетов.
 
+Для игрового HUD теперь есть собственный блокирующий gate [`gameplay-hud-glanceability-review.template.md`](./assets/gameplay-hud-glanceability-review.template.md). Builder составляет инвентарь всех постоянных и контекстных текстовых зон, решает для каждой `оставить / сократить / заменить иконкой / перенести в мир / удалить`, а затем получает независимый raw-review состояний quiet, normal, dense и VFX peak из target build. Частая телеметрия должна мгновенно считываться через цельное авторское семейство иконок, форм и значений, но не превращаться в непонятный icon-only UI, передачу смысла только цветом или локализуемый абзац.
+
 В passing evidence теперь фиксируются `reviewer.role`, конкретный контекст проверяющего и структурированные пути к артефактам. `eval_scorecard.py` понижает заявленный PASS до FAIL, если builder сам выдал себе independent/human verdict, обязательное состояние не приложено либо скриншот/видео/review отсутствует, пуст или имеет неверный тип. `evidence_helper.py` создаёт и мигрирует evidence; старые статусы сохраняются, но неуказанное происхождение проверки больше не проходит незаметно.
 
 ## Варианты установки

@@ -43,6 +43,8 @@ List the representative states before polishing:
 
 For a complete game or production slice, extend the visual portion with `quiet`, `normal_gameplay`, `dense_interaction`, `vfx_peak`, and `result`. These are raw target-build acceptance states, not five variants of an empty opening frame. Use `assets/production-art-state-review.template.md`; dense/contact states are where asset-family mismatch, intersections, bad depth, detached effects, primitive VFX, broken action poses, and empty placeholder panels must be caught.
 
+Audit gameplay HUD separately with `assets/gameplay-hud-glanceability-review.template.md`. The same release-like build supplies annotated `hud_quiet`, `hud_normal`, `hud_dense`, and `hud_vfx_peak` frames plus a persistent/contextual text inventory. The builder removes obvious duplicated captions and establishes accessible icon/world-cue language; an independent reviewer then states what is recognizable without reading, whether the objective remains action-oriented, and whether distant text zones or a competing prompt overload active play.
+
 Keep the matrix proportional. A one-screen toy may need five states; a save/load feature needs persistence and corrupted/missing-data cases.
 
 For a complete game, the boot/menu evidence also includes the exported app icon and primary menu mark at their actual display sizes. Have an independent reviewer describe what the mark depicts before receiving the intended explanation; a coherent palette or clean arrangement of primitives is not evidence of game-specific identity. Record the result with `assets/semantic-identity-review.template.md`.
@@ -114,7 +116,7 @@ When changing this skill materially, test it on isolated projects representing a
 - complete quest-driven slice with duplicate-event and exactly-once reward evidence;
 - new 3D slice using a ready-made asset pack;
 - complete fixed-camera isometric game with an early rendered art gate, measured character/route readability, full onboarding state machine, density/composition matrix, and content-duration evidence;
-- complete 2.5D game with an explicit spatial model, production-art dense/VFX/contact matrix, character motion recording, menu identity craft review, and independent Windows target-build UX/visual verdict;
+- complete 2.5D game with an explicit spatial model, production-art dense/VFX/contact matrix, character motion recording, gameplay-HUD glanceability/iconography evidence, menu identity craft review, and independent Windows target-build UX/visual verdict;
 - new 3D slice with a generated static prop and authored collision/wrapper;
 - feature added to an existing convention-heavy project;
 - constrained mobile/web build with performance and package-size budgets.
@@ -127,7 +129,7 @@ Use the stable machine-readable rubric in `evals/rubric.json` and author evidenc
 Create or migrate the case evidence instead of hand-copying the current rubric. Missing gates and dimensions are added as visibly unresolved values while existing evidence is preserved:
 
 ```bash
-python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --output <evidence.json> --capture-manifest-output <captures.json> --review-output <independent-review.md> --menu-review-output <menu-review.md> --production-art-review-output <production-art-review.md> --motion-review-output <character-motion.md> --yandex-checklist-output <yandex-checklist.md>
+python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --output <evidence.json> --capture-manifest-output <captures.json> --review-output <independent-review.md> --menu-review-output <menu-review.md> --hud-review-output <hud-review.md> --production-art-review-output <production-art-review.md> --motion-review-output <character-motion.md> --yandex-checklist-output <yandex-checklist.md>
 python <skill-dir>/scripts/evidence_helper.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --from-existing <old-evidence.json> --output <migrated-evidence.json>
 ```
 

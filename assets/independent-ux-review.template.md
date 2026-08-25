@@ -18,6 +18,7 @@
 | App icon/main-menu semantic identity at final size | NOT TESTED | Unrecorded |
 | Main-menu wordmark, copy necessity, and authored composition | NOT TESTED | Unrecorded |
 | Production-art integrity across quiet, normal, dense interaction, VFX peak, and result states | NOT TESTED | Unrecorded |
+| Gameplay HUD glanceability, information density, icon family, and objective/prompt hierarchy | NOT TESTED | Unrecorded |
 | Responsive integrity | NOT TESTED | Unrecorded |
 | Camera-relative movement after orbit | NOT TESTED | Unrecorded |
 | Camera input/collision and pause/focus capture recovery | NOT TESTED | Unrecorded |
@@ -53,6 +54,20 @@ Review the raw artifacts before reading the builder's desired verdict. For a com
 | `result` | | | NOT TESTED |
 
 When characters are expected to move, review the separate raw normal-speed motion artifact. Deterministic pose/state assertions are supporting evidence and cannot replace watching idle, locomotion, and context action through the production camera.
+
+## Gameplay HUD glanceability questions
+
+Use the separate `gameplay-hud-glanceability-review` inventory and annotated raw frames.
+
+| Question | Raw observation | PASS / FAIL / NOT TESTED |
+|---|---|---|
+| Which critical resources/states are recognizable without reading a sentence? | | NOT TESTED |
+| Which headings, captions, or units duplicate an obvious icon, meter, position, or grouping? | | NOT TESTED |
+| Is the immediate objective short and action-oriented? | | NOT TESTED |
+| Do objective and contextual prompt compete in any normal state? | | NOT TESTED |
+| Does normal/dense play require scanning several distant text zones? | | NOT TESTED |
+| Are icons one authored family, distinguishable without color alone, and taught/accessibly named when ambiguous? | | NOT TESTED |
+| Do representative RU/EN or equivalent locale lengths preserve the same glanceability? | | NOT TESTED |
 
 ## Onboarding action trace
 

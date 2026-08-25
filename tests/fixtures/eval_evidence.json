@@ -92,6 +92,18 @@
         {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["production_art_review"]}
       ]
     },
+    "gameplay_hud_glanceability_review": {
+      "status": "pass",
+      "evidence": ["fixture: builder HUD text inventory plus independent glanceability and icon-family review"],
+      "artifacts": [
+        {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["hud_quiet"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["hud_normal"]},
+        {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["hud_dense"]},
+        {"path": "evidence-artifacts/vfx.png", "kind": "image", "states": ["hud_vfx_peak"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["hud_text_inventory"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["hud_independent_review"]}
+      ]
+    },
     "third_person_control_contract": {
       "status": "pass",
       "evidence": ["fixture: camera-relative yaw matrix, production-HUD InputEventMouseMotion yaw/pitch, target-build sensitivity, input axes, collision, and capture recovery"]

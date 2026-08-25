@@ -20,6 +20,7 @@ YANDEX_CHECKLIST_TEMPLATE = ROOT / "assets" / "yandex-release-checklist.template
 MENU_REVIEW_TEMPLATE = ROOT / "assets" / "menu-identity-craft-review.template.md"
 PRODUCTION_ART_REVIEW_TEMPLATE = ROOT / "assets" / "production-art-state-review.template.md"
 MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
+HUD_REVIEW_TEMPLATE = ROOT / "assets" / "gameplay-hud-glanceability-review.template.md"
 
 
 class EvidenceHelperError(RuntimeError):
@@ -37,6 +38,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--capture-manifest-output", help="Also instantiate the canonical capture manifest.")
     parser.add_argument("--review-output", help="Also instantiate the independent review template.")
     parser.add_argument("--menu-review-output", help="Also instantiate the menu identity craft review.")
+    parser.add_argument(
+        "--hud-review-output",
+        help="Also instantiate the gameplay HUD glanceability review.",
+    )
     parser.add_argument(
         "--production-art-review-output",
         help="Also instantiate the builder-owned production art state review.",
@@ -256,6 +261,7 @@ def main() -> int:
                 args.capture_manifest_output,
                 args.review_output,
                 args.menu_review_output,
+                args.hud_review_output,
                 args.production_art_review_output,
                 args.motion_review_output,
                 args.yandex_checklist_output,
@@ -276,6 +282,8 @@ def main() -> int:
             copy_template(REVIEW_TEMPLATE, output_path(args.review_output))
         if args.menu_review_output:
             copy_template(MENU_REVIEW_TEMPLATE, output_path(args.menu_review_output))
+        if args.hud_review_output:
+            copy_template(HUD_REVIEW_TEMPLATE, output_path(args.hud_review_output))
         if args.production_art_review_output:
             copy_template(
                 PRODUCTION_ART_REVIEW_TEMPLATE,

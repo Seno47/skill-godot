@@ -15,6 +15,20 @@ Do not leave every meter persistent because it exists. Record what causes each c
 
 Establish hierarchy from the actual loop. A common starting order is survival/current status, immediate objective/decision, action feedback, then secondary flavor, but the brief may legitimately differ. Review hierarchy during active play, not on an empty background.
 
+## Make persistent HUD glanceable
+
+For a complete game or production slice, fill `assets/gameplay-hud-glanceability-review.template.md`. Inventory every visible text line/reading zone and state which player decision it supports. Classify it as persistent, contextual/peek, expanded, or remove; then decide `keep`, `shorten`, `iconify`, `world-cue`, or `remove`. A polished panel does not justify a permanent caption.
+
+Use icon-first or shape/meter-first telemetry for frequently checked resources and stable states—health, water/ammo/energy, vehicle/team integrity, checkpoint/route, cooldown, carried objective—when players can learn the meaning reliably. Remove captions and units already communicated by position, grouping, fill direction, symbol, or the value itself. Preserve numbers when precision matters. Keep longer text for newly introduced objectives, rare events, tutorial steps, ambiguity, or an expanded/accessibility view.
+
+Do not turn this into blind icon-only UI. Ambiguous symbols need an accessible name, tooltip, first-use label/legend, or expanded description. A short label may disappear after demonstrated learning. Never rely on color alone; combine it with shape, pattern, direction, value, position, motion, sound, or another suitable channel.
+
+Build one authored icon family that belongs to the game's identity: consistent stroke/fill, perspective, corner/shape language, optical weight, palette, and final-size rendering. Emoji, arbitrary Unicode glyphs, default editor icons, unexplained AI-drawn symbols, and a stylistically foreign icon pack remain placeholders.
+
+Audit simultaneous reading load over quiet, normal, dense interaction, and peak-VFX gameplay. Annotate the independent text-zone count, screen-area ratio, required gaze transfers from the action focus, distant-corner scanning, and competing objective/prompt panels. Declare any project thresholds before final review rather than relaxing them after failure. Metrics support comparison; an independent reviewer must still say which critical states are recognizable without reading and whether the immediate objective is understood in a brief glance during action.
+
+Prefer a short action-oriented objective phrase over a permanent heading such as “Current objective” plus a full sentence. Contextual teaching prompts may appear near the relevant action, but they should not compete simultaneously with a large objective panel. Use authored waypoints, landmarks, world highlights, or diegetic cues when they communicate route/target meaning faster than another sentence.
+
 ## Context prompts and input modality
 
 - Generate prompts from the current `InputMap`/binding model so remapping changes the displayed glyph/text.
@@ -59,6 +73,7 @@ Diegetic presentation does not excuse missing focus, localization, or accessibil
 - Do not rebuild HUD trees every frame. Update from state changes/signals or a bounded refresh cadence appropriate to the data.
 - Separate decorative animation from hit targets and container allocation.
 - Keep persistent HUD within the sightline/occupancy contract in `ui.md`; no amount of transparency proves that a large panel preserves world readability.
+- Stress at least two representative locale lengths. A telemetry cluster that works only because one language has a short caption should be shortened/iconified or given an adaptive expanded form, not patched with smaller unreadable text.
 
 ## Verification
 
@@ -71,5 +86,8 @@ Capture the same HUD states over quiet and dense/moving gameplay:
 - fixed-layout counters at representative numeric/localized extremes;
 - pause, focus loss, scene transition, resize, and reduced-motion mode;
 - controller focus path and touch reachability where supported.
+- annotated `hud_quiet`, `hud_normal`, `hud_dense`, and `hud_vfx_peak` frames with persistent versus contextual text inventory, keep/remove/shorten/iconify decisions, text-zone count/area, gaze-transfer notes, and RU/EN or equivalent localization stress;
+- final-size icon family, non-color differentiation, first-use labels/tooltips/accessible names, and the progressive-disclosure state after the icon is learned;
+- objective panel and contextual prompt both separately and in any legitimate simultaneous state, plus the corresponding waypoint/world cue.
 
-Fail the review if UI obscures threats/routes, prompt glyphs disagree with actual bindings, modality cleanup cancels input, important world UI has no readable fallback, counters shift layout, notifications starve or stack without bound, or the HUD only looks coherent in a static designer-authored screenshot.
+Fail the review if UI obscures threats/routes, prompt glyphs disagree with actual bindings, modality cleanup cancels input, important world UI has no readable fallback, counters shift layout, notifications starve or stack without bound, frequent telemetry requires reading redundant captions across several corners, objective and contextual prompt compete, icons are ambiguous without accessible teaching, color is the only state channel, icon art is emoji/default/mismatched, localization recreates long persistent labels, or the HUD only looks coherent in a static designer-authored screenshot.

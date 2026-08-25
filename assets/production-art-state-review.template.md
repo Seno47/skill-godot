@@ -41,6 +41,8 @@ Reject the baseline when any representative state shows:
 
 Link the separate `production-character-motion` recording when characters are expected to move. Still frames are necessary for overlap/contact diagnosis but cannot pass motion quality.
 
+This review checks whether HUD panels are visually integrated and obstruct the world; it does not approve information density. Complete games/slices also use `gameplay-hud-glanceability-review.template.md` to inventory every persistent/contextual text zone, iconify or remove redundant captions, and obtain an independent glanceability verdict across quiet/normal/dense/VFX states.
+
 ## Final verdict
 
 - Quiet and normal art integration: NOT TESTED

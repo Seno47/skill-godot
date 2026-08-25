@@ -265,6 +265,7 @@ class AuditorSmokeTests(unittest.TestCase):
             "independent_ux_review",
             "human_audio_listening",
             "content_duration_evidence",
+            "gameplay_hud_glanceability_review",
             "responsive_layout_evidence",
             "input_modality_ui_evidence",
         ):
@@ -313,6 +314,14 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(migrated["gates"]["semantic_identity_review"]["status"], "not_tested")
         self.assertEqual(migrated["gates"]["human_audio_listening"]["status"], "not_tested")
         self.assertEqual(migrated["gates"]["content_duration_evidence"]["status"], "not_tested")
+        self.assertEqual(
+            migrated["gates"]["gameplay_hud_glanceability_review"]["status"],
+            "not_tested",
+        )
+        self.assertEqual(
+            migrated["gates"]["gameplay_hud_glanceability_review"]["reviewer"]["role"],
+            "independent",
+        )
         self.assertEqual(migrated["gates"]["engine_clean"]["status"], "pass")
         self.assertEqual(
             [(item["width"], item["height"]) for item in manifest["viewport_matrix"]],
@@ -773,6 +782,53 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(art["status"], "fail")
         self.assertTrue(any("dense_interaction" in item for item in art["validation_failures"]))
         self.assertTrue(any("vfx_peak" in item for item in art["validation_failures"]))
+
+    def test_eval_complete_game_requires_all_hud_glanceability_states(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-2-5d-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: production asset integration"],
+        }
+        source["gates"]["gameplay_hud_glanceability_review"]["artifacts"] = [
+            item
+            for item in source["gates"]["gameplay_hud_glanceability_review"]["artifacts"]
+            if "hud_dense" not in item.get("states", [])
+            and "hud_vfx_peak" not in item.get("states", [])
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-2-5d-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        hud = next(
+            item for item in report["gates"] if item["id"] == "gameplay_hud_glanceability_review"
+        )
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(hud["submitted_status"], "pass")
+        self.assertEqual(hud["status"], "fail")
+        self.assertTrue(any("hud_dense" in item for item in hud["validation_failures"]))
+        self.assertTrue(any("hud_vfx_peak" in item for item in hud["validation_failures"]))
+        self.assertEqual(scores["playability_and_ux"]["score"], 1)
+        self.assertEqual(scores["visual_coherence"]["score"], 2)
 
     def test_eval_2_5d_complete_accepts_concrete_artifacts_and_owners(self) -> None:
         source = load_eval_evidence()

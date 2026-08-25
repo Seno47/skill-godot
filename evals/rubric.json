@@ -136,6 +136,21 @@
       }
     },
     {
+      "id": "gameplay_hud_glanceability_review",
+      "acceptance_owner": "independent",
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "description": "A builder inventory plus independent raw target-build review passes the gameplay HUD in quiet, normal, dense interaction, and peak-VFX states. Every persistent/contextual text zone has a keep/shorten/iconify/world-cue/remove rationale; frequent telemetry is recognizable without sentence reading; objective copy is short and does not compete with contextual prompts; icons form one authored final-size family with non-color differentiation and accessible names/tooltips/first-use teaching; representative localization does not recreate long persistent captions. Compact panel bounds or clean styling alone do not pass excessive simultaneous reading load.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"image": 4, "report": 1, "review": 1},
+        "required_states": {
+          "hud_quiet": ["image", "video"],
+          "hud_normal": ["image", "video"],
+          "hud_dense": ["image", "video"],
+          "hud_vfx_peak": ["image", "video"]
+        }
+      }
+    },
+    {
       "id": "fighting_simulation_evidence",
       "cases": ["new-2d-fighting-complete"],
       "description": "A fixed-tick fighting simulation proves repeated seeded input scripts produce identical per-frame state, authoritative move phases align with authored hit/hurt boxes, buffered command boundaries and near-miss rejection work on supported devices, and applicable hit/block/whiff/trade/cancel/hitstop/round-reset cases resolve exactly once; render FPS caps, framework presence, and data files alone do not pass."
@@ -240,6 +255,10 @@
       "dimensions": {"visual_coherence": 1, "asset_pipeline": 1, "playability_and_ux": 2}
     },
     {
+      "gate": "gameplay_hud_glanceability_review",
+      "dimensions": {"playability_and_ux": 1, "visual_coherence": 2, "responsive_visual_integrity": 2}
+    },
+    {
       "gate": "isometric_vertical_slice_art_review",
       "dimensions": {"visual_coherence": 1, "asset_pipeline": 2}
     },
@@ -275,12 +294,12 @@
     {
       "id": "playability_and_ux",
       "weight": 15,
-      "description": "Controls, input-modality-aware focus, camera axes/collision/capture recovery, feedback, pressure-safe interactive onboarding, semantic progression/navigation UI, explained accessibility settings, readable compound controls, and recovery make the loop understandable."
+      "description": "Controls, input-modality-aware focus, camera axes/collision/capture recovery, feedback, pressure-safe interactive onboarding, semantic progression/navigation UI, glanceable icon-first gameplay telemetry, concise objectives/prompts, explained accessibility settings, readable compound controls, and recovery make the loop understandable."
     },
     {
       "id": "visual_coherence",
       "weight": 6,
-      "description": "Art direction, semantic app/menu identity, composition, player and route visibility, cutaway/silhouette behavior and restoration, screen-space HUD occupancy, perspective-sensitive world geometry, motion, lighting, effects, and UI form a coherent game presentation."
+      "description": "Art direction, semantic app/menu identity, composition, player and route visibility, cutaway/silhouette behavior and restoration, screen-space HUD occupancy and icon-family coherence, perspective-sensitive world geometry, motion, lighting, effects, and UI form a coherent game presentation."
     },
     {
       "id": "responsive_visual_integrity",
@@ -363,13 +382,13 @@
     {
       "id": "new-3d-third-person-complete",
       "brief": "Create a complete small third-person 3D slice with a freely orbiting camera and target-build desktop/controller evidence.",
-      "focus": ["production character motion", "camera-relative locomotion", "production-HUD mouse routing and right-stick orbit", "zoom/recenter", "camera collision and capture recovery", "multi-occluder player visibility", "render/collision shell openings", "high-structure cutaway route contrast", "cutaway restoration", "HUD/world sightlines", "semantic app/menu identity", "pressure-safe onboarding", "human audio listening"],
+      "focus": ["production character motion", "camera-relative locomotion", "production-HUD mouse routing and right-stick orbit", "zoom/recenter", "camera collision and capture recovery", "multi-occluder player visibility", "render/collision shell openings", "high-structure cutaway route contrast", "cutaway restoration", "HUD/world sightlines and glanceability", "authored icon telemetry", "semantic app/menu identity", "pressure-safe onboarding", "human audio listening"],
       "minimum_scores": {"playability_and_ux": 3, "visual_coherence": 3, "audio_direction_quality": 3}
     },
     {
       "id": "new-2-5d-complete",
       "brief": "Create a complete small 2.5D Godot game using an explicit 2D, 3D, or hybrid spatial contract, production characters and environment art, readable depth/contact, authored VFX, a complete loop, and a Windows target-build review.",
-      "focus": ["authoritative 2.5D spatial model", "scene-authored production art", "production character motion", "depth and contact readability", "dense interaction and VFX state matrix", "menu identity craft", "semantic app identity", "pressure-safe onboarding", "independent raw visual/UX review", "human audio listening"],
+      "focus": ["authoritative 2.5D spatial model", "scene-authored production art", "production character motion", "depth and contact readability", "dense interaction and VFX state matrix", "gameplay HUD glanceability and authored icon telemetry", "menu identity craft", "semantic app identity", "pressure-safe onboarding", "independent raw visual/UX review", "human audio listening"],
       "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "visual_coherence": 3, "audio_direction_quality": 3, "asset_pipeline": 3}
     },
     {

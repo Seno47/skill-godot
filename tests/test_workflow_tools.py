@@ -124,7 +124,7 @@ class GenreRubricTests(unittest.TestCase):
                 evidence = json.loads(output.read_text(encoding="utf-8"))
                 self.assertIn(gate_id, evidence["gates"])
 
-    def test_2_5d_scaffold_instantiates_art_menu_and_motion_contracts(self) -> None:
+    def test_2_5d_scaffold_instantiates_art_menu_hud_and_motion_contracts(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             temp = Path(directory)
             completed = run_script(
@@ -137,6 +137,8 @@ class GenreRubricTests(unittest.TestCase):
                 str(temp / "evidence.json"),
                 "--menu-review-output",
                 str(temp / "menu-review.md"),
+                "--hud-review-output",
+                str(temp / "hud-review.md"),
                 "--production-art-review-output",
                 str(temp / "production-art-review.md"),
                 "--motion-review-output",
@@ -144,12 +146,15 @@ class GenreRubricTests(unittest.TestCase):
             )
             evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
             menu = (temp / "menu-review.md").read_text(encoding="utf-8")
+            hud = (temp / "hud-review.md").read_text(encoding="utf-8")
             art = (temp / "production-art-review.md").read_text(encoding="utf-8")
             motion = (temp / "motion-review.md").read_text(encoding="utf-8")
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("menu_identity_craft_review", evidence["gates"])
         self.assertIn("production_art_integrity_evidence", evidence["gates"])
+        self.assertIn("gameplay_hud_glanceability_review", evidence["gates"])
         self.assertIn("Menu Identity Craft Review", menu)
+        self.assertIn("Gameplay HUD Glanceability Review", hud)
         self.assertIn("Production Art State Review", art)
         self.assertIn("Production Character Motion Contract", motion)
 
