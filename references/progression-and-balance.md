@@ -79,6 +79,8 @@ Average completion time can hide all of these. Preserve per-archetype traces and
 - **Survival/crafting:** test depletion/regeneration, mandatory needs, crafting chains, death loss, renewable recovery paths, storage caps, and exploit loops.
 - **Metroidvania/quest:** combine this layer with graph/transaction audits; topology can be valid while ability, reward, or backtracking pacing is poor.
 - **Idle/incremental:** retain the exact idle-economy probe for curve/offline arithmetic; use this layer for build diversity, source/sink health, milestone drought, prestige recovery, and active/offline archetypes.
+- **Extraction:** combine this layer with [genre-extraction.md](genre-extraction.md); separately model raid commitment/loss, durable settlement, secure/insurance boundaries, route risk, and recovery rather than treating one expected-value curve as proof.
+- **Persistent online/MMO:** combine this layer with [mmo-and-online-services.md](mmo-and-online-services.md); prove authoritative durable transactions, migration/rollback behavior, cohort and capacity assumptions, and live failure recovery instead of balancing only a local client model.
 - **Live-service or monetized:** evaluate the free path independently. Paid or rewarded acceleration must not conceal a broken free curve, manufacture a problem solely to sell its removal, or violate the user-approved monetization policy.
 
 ## Human pacing evidence

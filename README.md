@@ -7,7 +7,7 @@
   <a href="./README.ru.md">Русская версия</a> · <a href="https://learn.chatgpt.com/docs/build-skills">How Codex skills work</a>
 </p>
 
-`skill-godot` gives Codex a repeatable workflow for creating real Godot projects: authored scenes and resources, coherent assets, playable controls, deterministic checks, visual review, performance evidence, and release-ready exports. It covers 2D, 3D, 2.5D, isometric and orthographic games, UI, audio, mobile/web input, and Yandex Games releases.
+`skill-godot` gives Codex a repeatable workflow for creating real Godot projects: authored scenes and resources, coherent assets, playable controls, deterministic checks, visual review, performance evidence, and release-ready exports. It covers 2D, 3D, 2.5D, isometric and orthographic games, single-player and networked multiplayer, extraction and honest MMO production slices, UI, audio, mobile/web input, and Yandex Games releases.
 
 ## Quick start
 
@@ -31,8 +31,8 @@ Codex can also select the skill automatically when a request clearly matches its
 
 | Included | What it gives you |
 | --- | --- |
-| 29 focused production guides | Scene architecture, 2D/3D/2.5D, UI, genre systems, cross-genre progression balance, asset-source discovery, art, audio, performance, loading, exports, and platform release work |
-| 17 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, fixed-camera readability, progression/economy probes, capture support, budgets, scorecards, and build-size checks |
+| 32 focused production guides | Scene architecture, 2D/3D/2.5D, UI, genre systems, progression, multiplayer, extraction, MMO/online services, asset discovery, art, audio, performance, loading, exports, and release work |
+| 19 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, fixed-camera readability, progression/extraction/network probes, capture support, budgets, scorecards, and build-size checks |
 | 7 reusable Godot probes | Touch scrolling, button composition, third-person controls/HUD mouse routing/visibility, isometric projection, and isometric navigation checks |
 | Scene-first authoring rules | Persistent composition stays in `.tscn` scenes and Godot resources instead of disappearing into large runtime scripts |
 | Evidence-based completion | The scorecard verifies acceptance ownership plus concrete screenshot/video/review paths and rejects prose-only PASS claims |
@@ -59,6 +59,7 @@ The main [`SKILL.md`](./SKILL.md) is a compact router. It sends Codex only to th
 - **Input:** keyboard, mouse, controller, camera-relative locomotion, orbit/capture recovery, touch, drag gestures, and mobile viewport checks.
 - **Optimization:** measured FPS, CPU/GPU/physics investigation, memory and loading analysis, and export-size budgets.
 - **Web and Yandex Games:** SDK lifecycle, advertisements, rewarded flows, saves, leaderboards, localization, moderation, and archive QA.
+- **Multiplayer and persistent online:** server authority, replication, lag/loss/reconnect, dedicated servers, extraction settlement, MMO scope, service capacity, failure recovery, restore, and rollback.
 - **Validation:** headless checks, deterministic probes, automated captures, interactive onboarding verification, and independent UX review.
 
 Complete 2.5D work now has its own `new-2-5d-complete` rubric case. It requires an explicit spatial model, raw quiet/normal/dense/VFX/result art states, production-character motion video, menu and semantic identity review, depth/contact readability, independent target-build UX/visual acceptance, and human audio listening. A `.tscn` containing boxes, spheres, cylinders, shader quads, or particles is editable architecture—not automatic proof of production art.
@@ -72,6 +73,8 @@ Long autonomous runs can instantiate [`project-run-state.template.md`](./assets/
 Approved UI references get a native parity workflow: formal screens remain editor-visible scenes, while [`image_compare.py`](./scripts/image_compare.py) creates same-resolution side-by-side, overlay, and diff artifacts. Progression topology and idle curves have reusable JSON models and deterministic probes; their numerical PASS still requires target-build play and human UX review.
 
 Progression-heavy games now have a cross-genre contract in [`progression-and-balance.md`](./references/progression-and-balance.md). The reusable [`progression-balance.template.json`](./assets/progression-balance.template.json) and [`progression_balance_probe.py`](./scripts/progression_balance_probe.py) check declared player archetypes, early/mid/late checkpoints, power/challenge bands, unlock and choice drought, recovery time, option dominance, resource floors/caps, and source/sink concentration. A separate [`progression-balance-review.template.md`](./assets/progression-balance-review.template.md) keeps model/build correctness builder-owned while requiring real uncoached human traces before claims about pacing, grind, or reward quality pass.
+
+Networked games now use [`multiplayer-networking.md`](./references/multiplayer-networking.md), [`network-contract.template.json`](./assets/network-contract.template.json), and [`network_contract_probe.py`](./scripts/network_contract_probe.py) to block localhost-only success, client authority, unsafe RPC surfaces, missing impairment/reconnect coverage, transport/platform mismatch, and unsupported scale claims. Extraction adds a separate raid/stash ledger through [`genre-extraction.md`](./references/genre-extraction.md) and [`extraction_loop_probe.py`](./scripts/extraction_loop_probe.py). MMO work is deliberately scoped as a production slice in [`mmo-and-online-services.md`](./references/mmo-and-online-services.md): real client/server artifacts, identity and persistence, interest/zone ownership, load/soak, observability, failure injection, restore, and rollback are required before production-readiness claims.
 
 ## Isometric and 2.5D workflow
 

@@ -147,6 +147,108 @@ class ProgressionBalanceTests(unittest.TestCase):
         self.assertIn("option route_b pick share", completed.stdout)
 
 
+class NetworkContractTests(unittest.TestCase):
+    @staticmethod
+    def load_template() -> dict[str, object]:
+        return json.loads(
+            (ROOT / "assets" / "network-contract.template.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+    def run_model(self, model: dict[str, object]) -> subprocess.CompletedProcess[str]:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "network-contract.json"
+            path.write_text(json.dumps(model), encoding="utf-8")
+            return run_script("network_contract_probe.py", "--model", str(path), "--summary")
+
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "network_contract_probe.py",
+            "--model",
+            str(ROOT / "assets" / "network-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS]", completed.stdout)
+
+    def test_client_authoritative_rpc_fails(self) -> None:
+        model = self.load_template()
+        model["rpc_surfaces"][0]["authority"] = "client"
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("not server-authoritative", completed.stdout)
+
+    def test_accepted_hostile_request_fails(self) -> None:
+        model = self.load_template()
+        hostile = next(
+            trace for trace in model["traces"] if trace["scenario"] == "hostile_input"
+        )
+        hostile["invalid_requests_accepted"] = 1
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("accepted 1 invalid request(s)", completed.stdout)
+
+    def test_web_target_with_enet_fails(self) -> None:
+        model = self.load_template()
+        model["architecture"]["target_platforms"].append("web")
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("Web target cannot use declared transport enet", completed.stdout)
+
+
+class ExtractionLoopTests(unittest.TestCase):
+    @staticmethod
+    def load_template() -> dict[str, object]:
+        return json.loads(
+            (ROOT / "assets" / "extraction-loop.template.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+    def run_model(self, model: dict[str, object]) -> subprocess.CompletedProcess[str]:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "extraction-loop.json"
+            path.write_text(json.dumps(model), encoding="utf-8")
+            return run_script("extraction_loop_probe.py", "--model", str(path), "--summary")
+
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "extraction_loop_probe.py",
+            "--model",
+            str(ROOT / "assets" / "extraction-loop.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS]", completed.stdout)
+
+    def test_stash_ledger_mismatch_fails(self) -> None:
+        model = self.load_template()
+        model["traces"][0]["stash_after"] = "999"
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("stash ledger mismatch", completed.stdout)
+
+    def test_death_loot_beyond_secure_capacity_fails(self) -> None:
+        model = self.load_template()
+        death = next(trace for trace in model["traces"] if trace["scenario"] == "death")
+        death["persisted_loot_value"] = "20"
+        death["stash_after"] = "93"
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("death persists loot beyond secure capacity", completed.stdout)
+
+    def test_duplicate_reconnect_settlement_fails(self) -> None:
+        model = self.load_template()
+        reconnect = next(
+            trace for trace in model["traces"] if trace["scenario"] == "reconnect_settlement"
+        )
+        reconnect["settlement_applications"] = 2
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("settlement applied 2 times", completed.stdout)
+
+
 class GenreRubricTests(unittest.TestCase):
     def test_new_cases_prepare_their_conditional_gates(self) -> None:
         expected = {
@@ -155,6 +257,10 @@ class GenreRubricTests(unittest.TestCase):
             "new-idle-clicker-complete": "idle_economy_evidence",
             "new-quest-driven-complete": "quest_transaction_evidence",
             "new-progression-heavy-complete": "progression_balance_model_evidence",
+            "new-networked-multiplayer-complete": "network_contract_evidence",
+            "new-extraction-complete": "extraction_loop_evidence",
+            "new-online-extraction-complete": "network_contract_evidence",
+            "new-mmo-production-slice": "online_service_readiness_evidence",
             "new-2-5d-complete": "production_art_integrity_evidence",
             "new-isometric-fixed-camera-complete": "isometric_vertical_slice_art_review",
             "ui-reference-integration": "reference_parity_evidence",
@@ -202,6 +308,68 @@ class GenreRubricTests(unittest.TestCase):
             "human",
         )
         self.assertIn("Progression and Balance Review", review)
+
+    def test_online_scaffolds_instantiate_owners_and_reviews(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            completed = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-mmo-production-slice",
+                "--output",
+                str(temp / "evidence.json"),
+                "--network-review-output",
+                str(temp / "network-review.md"),
+                "--online-service-review-output",
+                str(temp / "service-review.md"),
+            )
+            evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
+            network_review = (temp / "network-review.md").read_text(encoding="utf-8")
+            service_review = (temp / "service-review.md").read_text(encoding="utf-8")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertEqual(
+            evidence["gates"]["network_contract_evidence"]["reviewer"]["role"],
+            "builder",
+        )
+        self.assertEqual(
+            evidence["gates"]["network_multipeer_playtest"]["reviewer"]["role"],
+            "human",
+        )
+        self.assertEqual(
+            evidence["gates"]["online_service_architecture_review"]["reviewer"]["role"],
+            "independent",
+        )
+        self.assertIn("Networked Multiplayer Review", network_review)
+        self.assertIn("Online Service Readiness", service_review)
+
+    def test_extraction_scaffold_instantiates_loop_and_human_review(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            completed = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-extraction-complete",
+                "--output",
+                str(temp / "evidence.json"),
+                "--extraction-review-output",
+                str(temp / "extraction-review.md"),
+            )
+            evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
+            review = (temp / "extraction-review.md").read_text(encoding="utf-8")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertEqual(
+            evidence["gates"]["extraction_loop_evidence"]["reviewer"]["role"],
+            "builder",
+        )
+        self.assertEqual(
+            evidence["gates"]["extraction_risk_pacing_playtest"]["reviewer"]["role"],
+            "human",
+        )
+        self.assertIn("Extraction Loop Review", review)
 
     def test_2_5d_scaffold_instantiates_art_menu_hud_motion_and_run_state(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

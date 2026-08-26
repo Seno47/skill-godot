@@ -801,6 +801,111 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(scores["evidence_and_reproducibility"]["score"], 2)
         self.assertEqual(report["verdict"], "blocked")
 
+    def test_eval_online_extraction_cannot_bypass_network_and_loop_gates(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-online-extraction-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["performance_and_size"] = {
+            "score": 4,
+            "evidence": ["fixture: submitted network performance claim"],
+        }
+        for gate_id in (
+            "network_contract_evidence",
+            "network_multipeer_playtest",
+            "extraction_loop_evidence",
+            "extraction_risk_pacing_playtest",
+        ):
+            source["gates"][gate_id] = {
+                "status": "not_tested",
+                "evidence": [f"fixture: {gate_id} deliberately absent"],
+            }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-online-extraction-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            self.assertTrue(report_path.exists(), completed.stdout)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        blocking = {item["id"] for item in report["gates"] if item["status"] != "pass"}
+        caps = {item["gate"] for item in report["score_caps_applied"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertTrue(
+            {
+                "network_contract_evidence",
+                "network_multipeer_playtest",
+                "extraction_loop_evidence",
+                "extraction_risk_pacing_playtest",
+            }.issubset(blocking)
+        )
+        self.assertIn("network_contract_evidence", caps)
+        self.assertIn("network_multipeer_playtest", caps)
+        self.assertEqual(report["verdict"], "blocked")
+
+    def test_eval_mmo_slice_cannot_bypass_service_readiness(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-mmo-production-slice"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["performance_and_size"] = {
+            "score": 4,
+            "evidence": ["fixture: submitted service capacity claim"],
+        }
+        for gate_id in (
+            "network_contract_evidence",
+            "network_multipeer_playtest",
+            "online_service_readiness_evidence",
+            "online_service_architecture_review",
+        ):
+            source["gates"][gate_id] = {
+                "status": "not_tested",
+                "evidence": [f"fixture: {gate_id} deliberately absent"],
+            }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-mmo-production-slice",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            self.assertTrue(report_path.exists(), completed.stdout)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        gates = {item["id"]: item for item in report["gates"]}
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(gates["online_service_readiness_evidence"]["status"], "not_tested")
+        self.assertEqual(gates["online_service_architecture_review"]["status"], "not_tested")
+        self.assertEqual(scores["technical_quality"]["score"], 1)
+        self.assertEqual(scores["performance_and_size"]["score"], 1)
+        self.assertEqual(scores["intent_and_scope"]["score"], 2)
+        self.assertEqual(report["verdict"], "blocked")
+
     def test_eval_pass_rejects_missing_raw_motion_artifact(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "new-2-5d-complete"

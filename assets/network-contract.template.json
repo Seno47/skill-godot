@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-network-contract-id",
+  "build_id": "replace-with-tested-build-id",
+  "architecture": {
+    "topology": "dedicated_authoritative",
+    "transport": "enet",
+    "target_platforms": ["windows", "linux_server"],
+    "authentication": "signed_session_ticket",
+    "signaling_service": "not_applicable",
+    "required_checks": [
+      "authority_security",
+      "lifecycle",
+      "state_convergence",
+      "impaired_network",
+      "reconnect",
+      "dedicated_server",
+      "persistence_transactions",
+      "interest_management",
+      "scale_capacity"
+    ],
+    "required_scenarios": [
+      "connect_auth_spawn",
+      "normal_play",
+      "impaired_network",
+      "hostile_input",
+      "disconnect_reconnect",
+      "persistence_transaction",
+      "capacity",
+      "server_boot_shutdown"
+    ]
+  },
+  "impairment_profile": {
+    "minimum_latency_ms": "120",
+    "minimum_jitter_ms": "25",
+    "minimum_packet_loss_percent": "5"
+  },
+  "budgets": {
+    "max_desync_count": 0,
+    "max_state_error": "0.50",
+    "max_reconciliation_ms": "250",
+    "max_reconnect_seconds": "8",
+    "target_concurrent_clients": 8,
+    "max_server_tick_p95_ms": "16.67",
+    "max_bandwidth_bytes_per_second_per_client": "80000",
+    "max_replicated_entities_per_client": 200
+  },
+  "rpc_surfaces": [
+    {
+      "id": "submit_input",
+      "direction": "client_to_server",
+      "authority": "server",
+      "transfer_mode": "unreliable_ordered",
+      "channel": 1,
+      "max_calls_per_second": "60",
+      "validates": ["authenticated", "ownership", "sequence", "range", "rate_limit"]
+    },
+    {
+      "id": "request_inventory_move",
+      "direction": "client_to_server",
+      "authority": "server",
+      "transfer_mode": "reliable",
+      "channel": 2,
+      "max_calls_per_second": "10",
+      "validates": ["authenticated", "ownership", "item_revision", "state", "idempotency", "rate_limit"]
+    }
+  ],
+  "replication_streams": [
+    {
+      "id": "movement_snapshots",
+      "authority": "server",
+      "transfer_mode": "unreliable_ordered",
+      "channel": 1,
+      "high_frequency": true,
+      "interest_filtered": true
+    },
+    {
+      "id": "durable_transactions",
+      "authority": "server",
+      "transfer_mode": "reliable",
+      "channel": 2,
+      "high_frequency": false,
+      "interest_filtered": true
+    }
+  ],
+  "traces": [
+    {
+      "id": "connect-auth-spawn",
+      "scenario": "connect_auth_spawn",
+      "source": "target_build",
+      "clients": 2,
+      "result": "pass",
+      "state_converged": true,
+      "desync_count": 0,
+      "invalid_requests": 0,
+      "invalid_requests_accepted": 0,
+      "duplicate_commits": 0,
+      "unauthorized_mutations": 0
+    },
+    {
+      "id": "normal-two-client-play",
+      "scenario": "normal_play",
+      "source": "target_build",
+      "clients": 2,
+      "result": "pass",
+      "state_converged": true,
+      "desync_count": 0,
+      "max_state_error": "0.12",
+      "max_reconciliation_ms": "70",
+      "invalid_requests": 0,
+      "invalid_requests_accepted": 0,
+      "duplicate_commits": 0,
+      "unauthorized_mutations": 0
+    },
+    {
+      "id": "declared-network-impairment",
+      "scenario": "impaired_network",
+      "source": "target_build",
+      "clients": 2,
+      "result": "pass",
+      "latency_ms": "120",
+      "jitter_ms": "25",
+      "packet_loss_percent": "5",
+      "state_converged": true,
+      "desync_count": 0,
+      "max_state_error": "0.38",
+      "max_reconciliation_ms": "180",
+      "invalid_requests": 0,
+      "invalid_requests_accepted": 0,
+      "duplicate_commits": 0,
+      "unauthorized_mutations": 0
+    },
+    {
+      "id": "hostile-and-stale-requests",
+      "scenario": "hostile_input",
+      "source": "target_build",
+      "clients": 2,
+      "result": "pass",
+      "state_converged": true,
+      "desync_count": 0,
+      "invalid_requests": 40,
+      "invalid_requests_accepted": 0,
+      "duplicate_commits": 0,
+      "unauthorized_mutations": 0
+    },
+    {
+      "id": "disconnect-reconnect-catchup",
+      "scenario": "disconnect_reconnect",
+      "source": "target_build",
+      "clients": 2,
+      "result": "pass",
+      "state_converged": true,
+      "desync_count": 0,
+      "reconnect_seconds": "4.2",
+      "data_loss": false,
+      "invalid_requests": 0,
+      "invalid_requests_accepted": 0,
+      "duplicate_commits": 0,
+      "unauthorized_mutations": 0
+    },
+    {
+      "id": "durable-retry-idempotency",
+      "scenario": "persistence_transaction",
+      "source": "target_build",
+      "clients": 2,
+      "result": "pass",
+      "state_converged": true,
+      "desync_count": 0,
+      "transaction_attempts": 2,
+      "transaction_commits": 1,
+      "data_loss": false,
+      "invalid_requests": 0,
+      "invalid_requests_accepted": 0,
+      "duplicate_commits": 0,
+      "unauthorized_mutations": 0
+    },
+    {
+      "id": "declared-capacity",
+      "scenario": "capacity",
+      "source": "target_build",
+      "clients": 8,
+      "result": "pass",
+      "state_converged": true,
+      "desync_count": 0,
+      "server_tick_p95_ms": "12.4",
+      "bandwidth_bytes_per_second_per_client": "62000",
+      "replicated_entities_per_client": 120,
+      "invalid_requests": 0,
+      "invalid_requests_accepted": 0,
+      "duplicate_commits": 0,
+      "unauthorized_mutations": 0
+    },
+    {
+      "id": "headless-server-boot-shutdown",
+      "scenario": "server_boot_shutdown",
+      "source": "target_build",
+      "clients": 1,
+      "result": "pass",
+      "state_converged": true,
+      "desync_count": 0,
+      "headless_export": true,
+      "server_is_player": false,
+      "invalid_requests": 0,
+      "invalid_requests_accepted": 0,
+      "duplicate_commits": 0,
+      "unauthorized_mutations": 0
+    }
+  ]
+}

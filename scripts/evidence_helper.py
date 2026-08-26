@@ -22,6 +22,9 @@ PRODUCTION_ART_REVIEW_TEMPLATE = ROOT / "assets" / "production-art-state-review.
 MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
 HUD_REVIEW_TEMPLATE = ROOT / "assets" / "gameplay-hud-glanceability-review.template.md"
 PROGRESSION_BALANCE_REVIEW_TEMPLATE = ROOT / "assets" / "progression-balance-review.template.md"
+NETWORK_REVIEW_TEMPLATE = ROOT / "assets" / "networked-multiplayer-review.template.md"
+EXTRACTION_REVIEW_TEMPLATE = ROOT / "assets" / "extraction-review.template.md"
+ONLINE_SERVICE_REVIEW_TEMPLATE = ROOT / "assets" / "online-service-readiness.template.md"
 PROJECT_STATUS_TEMPLATE = ROOT / "assets" / "project-run-state.template.md"
 
 
@@ -51,6 +54,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--progression-balance-review-output",
         help="Also instantiate the cross-genre progression and balance review.",
+    )
+    parser.add_argument(
+        "--network-review-output",
+        help="Also instantiate the networked multiplayer review.",
+    )
+    parser.add_argument(
+        "--extraction-review-output",
+        help="Also instantiate the extraction loop review.",
+    )
+    parser.add_argument(
+        "--online-service-review-output",
+        help="Also instantiate the MMO/online-service readiness review.",
     )
     parser.add_argument(
         "--production-art-review-output",
@@ -273,6 +288,9 @@ def main() -> int:
                 args.menu_review_output,
                 args.hud_review_output,
                 args.progression_balance_review_output,
+                args.network_review_output,
+                args.extraction_review_output,
+                args.online_service_review_output,
                 args.project_status_output,
                 args.production_art_review_output,
                 args.motion_review_output,
@@ -300,6 +318,15 @@ def main() -> int:
             copy_template(
                 PROGRESSION_BALANCE_REVIEW_TEMPLATE,
                 output_path(args.progression_balance_review_output),
+            )
+        if args.network_review_output:
+            copy_template(NETWORK_REVIEW_TEMPLATE, output_path(args.network_review_output))
+        if args.extraction_review_output:
+            copy_template(EXTRACTION_REVIEW_TEMPLATE, output_path(args.extraction_review_output))
+        if args.online_service_review_output:
+            copy_template(
+                ONLINE_SERVICE_REVIEW_TEMPLATE,
+                output_path(args.online_service_review_output),
             )
         if args.project_status_output:
             copy_template(PROJECT_STATUS_TEMPLATE, output_path(args.project_status_output))

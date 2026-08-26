@@ -45,7 +45,7 @@
     },
     {
       "id": "production_character_motion_evidence",
-      "cases": ["new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete"],
+      "cases": ["new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice"],
       "description": "For every production character expected to move in the case, builder-owned deterministic and target-build evidence proves required idle, locomotion, and brief-required context states on the production visual; ordinary play does not remain in bind/rest/T-pose; real gameplay dispatches the states; source mannequins are absent; and required bone/socket/marker attachments follow. Static screenshots, clip presence, preview-rig playback, test-only direct calls, or waiting for the user to notice frozen motion do not pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"video": 1, "report": 1},
@@ -59,18 +59,18 @@
     {
       "id": "interactive_onboarding",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "From a clean first-use state, an uncoached player performs every brief-required onboarding transition and reaches the normal loop; static hints, tutorial fields, narration, or one generic action do not substitute for intermediate verbs/world consequences, and ordinary pressure/failure timing is frozen or forgiving until the relevant teaching succeeds unless an uncoached test proves pressure itself is safely taught."
     },
     {
       "id": "clean_shipping_state",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "A release-like clean profile proves shipping-default progress/settings/onboarding separately from seeded or previously played QA state, with state provenance recorded."
     },
     {
       "id": "semantic_identity_review",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "The app/export icon and main-menu mark receive a blind independent semantic review from raw captures at actual final sizes: the reviewer can describe a game-specific subject, relationship, or core-loop cue without designer narration; palette consistency, initials, symmetry, or tidy primitive geometry alone do not pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 2, "review": 1},
@@ -83,7 +83,7 @@
     {
       "id": "independent_ux_review",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "A person or genuinely independent evaluation context that did not build the flow reviews first-use playability and raw target-build menu, normal gameplay, dense interaction/VFX, and result evidence, including player occlusion/restoration for third-person work and gameplay-size art/readability/density states for fixed-camera isometric work; self-review alone does not pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 4, "review": 1},
@@ -98,18 +98,18 @@
     {
       "id": "human_audio_listening",
       "acceptance_owner": "human",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "A human listener signs off several minutes of representative target-build gameplay audio, overlaps/repetition, UI, pressure/result, transitions, pause/focus, and mixer settings; structural nodes, streams, buses, waveforms, metrics, provenance, or builder intent alone do not pass."
     },
     {
       "id": "content_duration_evidence",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "Any complete-game/duration/content-volume claim is decomposed into authored objectives or puzzles, mechanic introductions and meaningful permutations/combinations, estimated uncoached solve time, and observed playtest time with tutorial/menus/retries/grind/replay/unbuilt assumptions separated; a short slice is labeled as a slice and cannot substantiate unbuilt hours."
     },
     {
       "id": "progression_balance_model_evidence",
-      "cases": ["new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-isometric-fixed-camera-complete", "new-progression-heavy-complete"],
+      "cases": ["new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-isometric-fixed-camera-complete", "new-progression-heavy-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice"],
       "description": "A project-specific balance contract declared before final evidence covers representative archetypes, early/mid/late checkpoints, applicable power/challenge, unlock/choice cadence, failure recovery, option viability, and resource source/sink boundaries. A deterministic audit plus target-build transaction trace prove the implemented curve, exact costs/rewards, persistence, and exploit boundaries; a generic spreadsheet, one optimal autoplay, aggregate averages, or model-only PASS does not pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"report": 1, "trace": 2},
@@ -125,7 +125,7 @@
     {
       "id": "progression_pacing_playtest",
       "acceptance_owner": "human",
-      "cases": ["new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-isometric-fixed-camera-complete", "new-progression-heavy-complete"],
+      "cases": ["new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-isometric-fixed-camera-complete", "new-progression-heavy-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice"],
       "description": "At least two separate clean-profile uncoached human target-build traces cover representative supported cohorts through early, mid, late, and failure/recovery or bottleneck states. The review judges goal clarity, reward relevance, grind/drought, fatigue, recovery, strategy viability, and the free path when monetization exists. The builder must fix routine arithmetic and transaction defects autonomously; the user is not the default tester, and simulation, designer play, autoplay, or theoretical duration cannot substitute for human pacing evidence.",
       "artifact_requirements": {
         "minimum_by_kind": {"trace": 2, "review": 1},
@@ -140,7 +140,7 @@
     {
       "id": "menu_identity_craft_review",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "An independent raw target-build review passes the main menu as an authored game-specific composition: the title is a deliberate wordmark or typographic system at runtime size; the icon/mark, background, hierarchy, controls, and copy belong together; redundant AI-marketing taglines and a generic kicker + huge default-font title + accent rule + explanatory sentence + stack of identical rectangles do not pass merely because they are aligned and themed.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 2, "review": 1},
@@ -152,7 +152,7 @@
     },
     {
       "id": "production_art_integrity_evidence",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "Builder-owned raw target-build review of quiet, normal, dense interaction, peak VFX/contact, and result states proves production art integrity. Serialized Box/Cylinder/Sphere/CSG geometry remains blockout unless a documented minimalist language and gameplay-size review justify it; debug-looking quads, rectangles, cones, billboards or particles, mismatched panorama/character families, broken contact/depth, sparse repeated modules, and empty placeholder panels block release even when scene/import/performance audits pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 5, "report": 1},
@@ -168,7 +168,7 @@
     {
       "id": "gameplay_hud_glanceability_review",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "constrained-mobile-web"],
       "description": "A builder inventory plus independent raw target-build review passes the gameplay HUD in quiet, normal, dense interaction, and peak-VFX states. Every persistent/contextual text zone has a keep/shorten/iconify/world-cue/remove rationale; frequent telemetry is recognizable without sentence reading; objective copy is short and does not compete with contextual prompts; icons form one authored final-size family with non-color differentiation and accessible names/tooltips/first-use teaching; representative localization does not recreate long persistent captions. Compact panel bounds or clean styling alone do not pass excessive simultaneous reading load.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 4, "report": 1, "review": 1},
@@ -177,6 +177,103 @@
           "hud_normal": ["image", "video"],
           "hud_dense": ["image", "video"],
           "hud_vfx_peak": ["image", "video"]
+        }
+      }
+    },
+    {
+      "id": "network_contract_evidence",
+      "cases": ["new-networked-multiplayer-complete", "new-online-extraction-complete", "new-mmo-production-slice"],
+      "description": "A project-specific network contract and separate-process target-build traces prove topology, supported transport/platform pairing, server authority, authenticated and rate-limited RPC surfaces, stable replication identities, convergence under declared latency/jitter/loss, hostile-input rejection, disconnect/reconnect recovery, dedicated-server behavior when promised, persistence idempotence when applicable, interest bounds, and declared client/tick/bandwidth capacity. One editor process, localhost success, node presence, or direct RPC calls do not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "trace": 4, "build": 1},
+        "required_states": {
+          "connect_auth_spawn": ["trace"],
+          "normal_play": ["trace"],
+          "impaired_network": ["trace"],
+          "hostile_input": ["trace"],
+          "disconnect_reconnect": ["trace"],
+          "target_client_build": ["build"],
+          "network_contract_audit": ["report"]
+        }
+      }
+    },
+    {
+      "id": "network_multipeer_playtest",
+      "acceptance_owner": "human",
+      "cases": ["new-networked-multiplayer-complete", "new-online-extraction-complete", "new-mmo-production-slice"],
+      "description": "A human multiplayer session uses at least two independently controlled target-build peers and the promised server topology. It reviews join/leave, moment-to-moment responsiveness, remote motion/action readability, correction severity, failure messaging, impairment behavior, and reconnect continuity. Builder bots and deterministic convergence traces remain required support but cannot certify social clarity, perceived fairness, or network feel.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"trace": 2, "video": 1, "review": 1},
+        "required_states": {
+          "concurrent_clients": ["trace", "video"],
+          "impaired_network": ["trace", "video"],
+          "disconnect_recovery": ["trace", "video"]
+        }
+      }
+    },
+    {
+      "id": "extraction_loop_evidence",
+      "cases": ["new-extraction-complete", "new-online-extraction-complete"],
+      "description": "A declared extraction ledger and target-build traces prove preparation, meaningful route/risk choice, loot acquisition, voluntary extraction, raid death/loss, secure-container and insurance boundaries, exactly-once settlement across retry/reconnect, durable stash reload, unauthorized/duplicate item rejection, and a bounded recovery path from bankruptcy. A combat sandbox with an exit marker or an abstract economy PASS is not an extraction loop.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "trace": 4, "build": 1},
+        "required_states": {
+          "successful_extract": ["trace"],
+          "raid_death": ["trace"],
+          "settlement_idempotence": ["trace"],
+          "bankruptcy_recovery": ["trace"],
+          "stash_reload": ["trace"],
+          "target_build": ["build"],
+          "extraction_contract_audit": ["report"]
+        }
+      }
+    },
+    {
+      "id": "extraction_risk_pacing_playtest",
+      "acceptance_owner": "human",
+      "cases": ["new-extraction-complete", "new-online-extraction-complete"],
+      "description": "Separate clean-profile uncoached target-build sessions prove that players understand what is at stake, can compare at least two viable route/loadout risks, consciously choose when to extract, understand death and settlement, recover after a meaningful loss, and can prepare the next raid without hidden designer narration. Simulated success rates cannot certify tension, greed, frustration, or recovery pacing.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"trace": 2, "video": 1, "review": 1},
+        "required_states": {
+          "loot_decision": ["trace", "video"],
+          "successful_extract": ["trace", "video"],
+          "loss_recovery": ["trace", "video"],
+          "stash_next_raid": ["trace", "video"]
+        }
+      }
+    },
+    {
+      "id": "online_service_readiness_evidence",
+      "cases": ["new-mmo-production-slice"],
+      "description": "An honestly scoped online production slice provides separately deployable client and authoritative server builds plus real service evidence for identity/session handling, durable idempotent transactions, zone/shard or interest ownership, capacity/load and soak budgets, health/metrics/log correlation, failure injection, backup restore, deployment rollback, configuration/secrets separation, abuse/moderation boundaries, and data/privacy lifecycle. A local mock backend, one host process, or a replicated demo cannot be called an MMO production slice.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 3, "trace": 4, "log": 2, "build": 2},
+        "required_states": {
+          "target_client_build": ["build"],
+          "authoritative_server_build": ["build"],
+          "auth_session": ["trace"],
+          "persistent_transaction": ["trace"],
+          "interest_or_zone_handoff": ["trace"],
+          "load_soak": ["trace", "log"],
+          "failure_injection": ["trace", "log"],
+          "backup_restore": ["report"],
+          "deployment_rollback": ["report"]
+        }
+      }
+    },
+    {
+      "id": "online_service_architecture_review",
+      "acceptance_owner": "independent",
+      "cases": ["new-mmo-production-slice"],
+      "description": "An independent architecture/operations review verifies the actual trust boundaries, ownership of authoritative and durable data, service and zone failure model, capacity assumptions, deployment/rollback and restore evidence, privacy/moderation responsibilities, and the exact scope label. It explicitly rejects launch-scale or complete-MMO claims that rely on unbuilt or untested infrastructure.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "review": 1},
+        "required_states": {
+          "trust_boundaries": ["report", "review"],
+          "data_ownership": ["report", "review"],
+          "capacity_failure_model": ["report", "review"],
+          "operations_scope": ["report", "review"]
         }
       }
     },
@@ -295,6 +392,30 @@
     {
       "gate": "gameplay_hud_glanceability_review",
       "dimensions": {"playability_and_ux": 1, "visual_coherence": 2, "responsive_visual_integrity": 2}
+    },
+    {
+      "gate": "network_contract_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 1, "performance_and_size": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "network_multipeer_playtest",
+      "dimensions": {"playability_and_ux": 1, "gameplay_correctness": 2}
+    },
+    {
+      "gate": "extraction_loop_evidence",
+      "dimensions": {"gameplay_correctness": 1, "playability_and_ux": 2, "technical_quality": 2}
+    },
+    {
+      "gate": "extraction_risk_pacing_playtest",
+      "dimensions": {"playability_and_ux": 1, "gameplay_correctness": 2}
+    },
+    {
+      "gate": "online_service_readiness_evidence",
+      "dimensions": {"technical_quality": 1, "performance_and_size": 1, "gameplay_correctness": 2, "evidence_and_reproducibility": 1}
+    },
+    {
+      "gate": "online_service_architecture_review",
+      "dimensions": {"technical_quality": 2, "evidence_and_reproducibility": 2, "intent_and_scope": 2}
     },
     {
       "gate": "isometric_vertical_slice_art_review",
@@ -416,6 +537,30 @@
       "brief": "Create a complete game or production slice whose persistent progression, upgrades/builds, resources/rewards, and escalating challenge are central, with project-declared balance budgets, deterministic multi-archetype traces, exact target-build transactions, and uncoached human pacing evidence.",
       "focus": ["progression promise", "power/challenge checkpoints", "unlock and choice cadence", "viable strategies", "resource sources and sinks", "failure recovery", "model/build parity", "clean-profile cohort traces", "grind and reward relevance", "free-path integrity"],
       "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-networked-multiplayer-complete",
+      "brief": "Create a complete small session-based networked multiplayer game with an explicit topology/transport contract, authoritative simulation, hostile-input boundaries, separate-process target-build peers, impairment and reconnect evidence, and human multiplayer playtesting.",
+      "focus": ["network topology and platform transport", "server authority and RPC validation", "stable replicated identities", "state convergence and correction", "latency jitter and loss", "join leave and reconnect", "separate client/server builds", "capacity budgets", "multipeer feel and readability"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "performance_and_size": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-extraction-complete",
+      "brief": "Create a complete small single-player or local-authoritative extraction game with preparation, meaningful risk routes, loot, voluntary extraction, death/loss, durable exactly-once settlement, recovery, progression balance, and uncoached risk/pacing evidence.",
+      "focus": ["raid and durable-state boundary", "loadout and route risk", "loot and extraction decision", "death secure-container and insurance rules", "exactly-once stash settlement", "save migration and reload", "bankruptcy recovery", "progression balance", "risk and tension playtest"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-online-extraction-complete",
+      "brief": "Create a complete small authoritative online extraction game whose multipeer raid, risk/loot/extract loop, durable stash settlement, reconnect behavior, progression balance, and target-build human sessions are all verified.",
+      "focus": ["authoritative raid simulation", "hostile inventory requests", "multipeer combat and remote readability", "risk routes and voluntary extraction", "death and disconnect policy", "idempotent durable settlement", "stash recovery", "impaired-network play", "progression and risk pacing"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "performance_and_size": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-mmo-production-slice",
+      "brief": "Create an honestly bounded MMO/large persistent-online production slice with authoritative zone simulation, real identity/session and durable transaction services, separate deployable client/server artifacts, interest or zone ownership, load/soak/failure/restore/rollback evidence, and no unearned launch-scale claim.",
+      "focus": ["scope label and trust boundaries", "authoritative client/server separation", "identity and session lifecycle", "durable idempotent transactions", "zone shard or interest ownership", "capacity and soak budgets", "observability and failure injection", "backup restore and deployment rollback", "moderation privacy and operations", "multipeer target-build play"],
+      "minimum_scores": {"intent_and_scope": 3, "gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "performance_and_size": 3, "evidence_and_reproducibility": 3, "audio_direction_quality": 3}
     },
     {
       "id": "new-3d-asset-pack",
