@@ -7,7 +7,7 @@
   <a href="./README.md">English</a> · <a href="https://learn.chatgpt.com/docs/build-skills">Как устроены навыки Codex</a>
 </p>
 
-`skill-godot` задаёт Codex воспроизводимый процесс разработки настоящего проекта Godot: редактируемые сцены и ресурсы, цельные ассеты, удобное управление, детерминированные проверки, визуальная проверка, замеры производительности и готовый к публикации экспорт. Поддерживаются 2D, 3D, 2.5D, изометрические и ортографические игры; procedural, strategy, racing, action и narrative; одиночный, local/online multiplayer, extraction и честные MMO production slices; accessibility, localization, saves, replay, большие миры, LiveOps, native mobile/XR, runtime authoring, reproducible releases, modding/UGC, stores и Яндекс Игры.
+`skill-godot` задаёт Codex воспроизводимый процесс разработки настоящего проекта Godot: редактируемые сцены и ресурсы, цельные ассеты, удобное управление, детерминированные проверки, визуальная проверка, замеры производительности и готовый к публикации экспорт. Поддерживаются 2D, 3D, 2.5D, изометрические и ортографические игры; procedural, strategy, racing, action и narrative; одиночный, local/online multiplayer, extraction и честные MMO production slices; accessibility, localization, saves, replay, большие миры, LiveOps, native mobile/XR, runtime authoring, reproducible releases, crash recovery, commerce/cloud/safety, desktop hardware, modding/UGC, stores и Яндекс Игры.
 
 ## Быстрый старт
 
@@ -31,8 +31,8 @@ Codex также может выбрать навык автоматически
 
 | Состав | Практическая польза |
 | --- | --- |
-| 51 профильное руководство | Архитектура сцен, 2D/3D/2.5D, UI, saves, localization, input/accessibility, AI, procedural и жанровые системы, networking/LiveOps, replay, большие миры, mobile/XR, runtime authoring, stores/modding, ассеты, performance и release |
-| 30 детерминированных Python-утилит | Снимок проекта, аудит сцен/ассетов, screenshot parity, fixed-camera readability, save/input/AI/procedural/progression/extraction/network/localization/replay/build/LiveOps-пробы, композиция rubric, forward-eval audit, capture, бюджеты, scorecard и build size |
+| 59 профильных руководств | Архитектура сцен, 2D/3D/2.5D, UI, saves, accessibility, AI, жанры/network, commerce/cloud/safety, resilience/upgrades, hardware, ассеты, performance и release |
+| 39 детерминированных Python-утилит | Аудиты проекта/ассетов, visual checks, system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive-пробы, композиция rubric, capture, бюджеты, scorecard и build size |
 | 7 переиспользуемых Godot-проб | Тач-прокрутка, компоновка кнопок, third-person управление/HUD mouse routing/видимость, изометрическая проекция и навигация |
 | Правила scene-first | Постоянная композиция хранится в `.tscn` и ресурсах Godot, а не скрывается в больших runtime-скриптах |
 | Завершение по доказательствам | Scorecard сверяет владельца приёмки и реальные пути к скриншотам, видео и review, отклоняя PASS только на словах |
@@ -66,6 +66,7 @@ flowchart LR
 - **Multiplayer и persistent online:** server authority, репликация, лаги/потери/reconnect, dedicated server, extraction settlement, честный MMO-scope, нагрузка сервисов, восстановление после сбоев, restore и rollback.
 - **Платформы и расширяемость:** точные store candidates, clean install/update/signing/SDK lifecycle, а также явные trust tiers для mods/UGC, hostile-content validation, восстановление после удаления мода, safe mode и честные границы изоляции.
 - **Глобальный и advanced production:** localization/plurals/pseudolocalization, replay/ghost/spectator, streamed-world traversal, реальные mobile devices, LiveOps/privacy, OpenXR/authorized console boundaries, runtime creator tools и воспроизводимые clean builds.
+- **Production resilience и сервисы:** crash/hang recovery и diagnostics, exactly-once commerce entitlements, guest/cloud conflicts, proportional online safety, upgrade fixtures/rollback, deterministic fault injection, реальные desktop hardware/display matrices и проверка настоящими assistive technologies.
 - **Проверка:** headless-запуски, детерминированные пробы, автоматический захват, проверка обучения и независимый UX-разбор.
 
 Гибридные задачи используют канонический rubric selector `base+modifier+...`. `rubric_case_plan.py`, `evidence_helper.py` и `eval_scorecard.py` разделяют одну fail-closed композицию: применимые gates объединяются, а для каждой score dimension берётся самый строгий floor. Поэтому удобный жанровый label не может незаметно отбросить localization, replay, mobile, LiveOps или release-обязательства, при этом нерелевантные руководства не загружаются в контекст.
@@ -85,6 +86,8 @@ flowchart LR
 Четыре новых детерминированных контракта делают сохранения, input/accessibility, AI/navigation и процедурную генерацию проверяемыми до субъективного review: [`save_data_probe.py`](./scripts/save_data_probe.py), [`input_accessibility_probe.py`](./scripts/input_accessibility_probe.py), [`ai_navigation_probe.py`](./scripts/ai_navigation_probe.py) и [`procedural_generation_probe.py`](./scripts/procedural_generation_probe.py). Соответствующие rubric cases для strategy, racing, shooter, narrative, local multiplayer, multi-platform release и modding/UGC закрываются с FAIL/BLOCKED, если нет обязательных target-build либо human/independent evidence.
 
 Для сетевых игр теперь используются [`multiplayer-networking.md`](./references/multiplayer-networking.md), [`network-contract.template.json`](./assets/network-contract.template.json) и [`network_contract_probe.py`](./scripts/network_contract_probe.py): они блокируют localhost-only успех, client authority, небезопасные RPC, отсутствие lag/loss/reconnect-проверок, несовместимый с платформой transport и неподтверждённые заявления о масштабе. Extraction получает отдельный raid/stash-ledger через [`genre-extraction.md`](./references/genre-extraction.md) и [`extraction_loop_probe.py`](./scripts/extraction_loop_probe.py). MMO намеренно оценивается как production slice по [`mmo-and-online-services.md`](./references/mmo-and-online-services.md): до production-ready заявления нужны реальные client/server артефакты, identity/persistence, interest/zone ownership, load/soak, observability, failure injection, restore и rollback.
+
+Восемь release-modifiers теперь закрывают crash resilience, commerce/entitlements, accounts/cloud, online safety, upgrade compatibility, fault injection, desktop hardware/display и assistive accessibility. У каждого есть отдельное руководство, проходящий JSON-scaffold, fail-closed probe, review template, rubric case и score cap. Они подключаются только когда действительно нужны: routine correctness остаётся обязанностью builder-а, а реальное железо, assistive technology и независимые security/operations-решения честно остаются отдельными gates.
 
 ## Изометрия и 2.5D
 

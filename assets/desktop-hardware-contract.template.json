@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-desktop-contract-id",
+  "build_id": "replace-exact-target-build-id",
+  "contract": {
+    "required_profiles": ["minimum_integrated", "representative_discrete"],
+    "required_scenarios": ["windowed_resize", "fullscreen_toggle", "ultrawide", "high_dpi_4k", "multi_monitor", "alt_tab", "monitor_disconnect", "controller_hotplug", "low_vram"],
+    "minimum_fps": 30,
+    "maximum_memory_mb": 2048,
+    "profiles": [
+      {"id":"minimum_integrated","os":"Windows 10","gpu_class":"integrated minimum spec","renderer":"Compatibility","real_machine":true},
+      {"id":"representative_discrete","os":"Windows 11","gpu_class":"representative discrete","renderer":"Forward+","real_machine":true}
+    ]
+  },
+  "traces": [
+    {"id":"resize","scenario":"windowed_resize","profile":"minimum_integrated","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":30,"peak_memory_mb":900},
+    {"id":"fullscreen","scenario":"fullscreen_toggle","profile":"representative_discrete","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":60,"peak_memory_mb":1000},
+    {"id":"ultrawide","scenario":"ultrawide","profile":"representative_discrete","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":55,"peak_memory_mb":1050},
+    {"id":"hidpi","scenario":"high_dpi_4k","profile":"representative_discrete","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":45,"peak_memory_mb":1200},
+    {"id":"monitors","scenario":"multi_monitor","profile":"minimum_integrated","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":30,"peak_memory_mb":950},
+    {"id":"alt-tab","scenario":"alt_tab","profile":"minimum_integrated","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":30,"peak_memory_mb":950},
+    {"id":"disconnect","scenario":"monitor_disconnect","profile":"representative_discrete","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":50,"peak_memory_mb":1000},
+    {"id":"controller","scenario":"controller_hotplug","profile":"minimum_integrated","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":30,"peak_memory_mb":900},
+    {"id":"vram","scenario":"low_vram","profile":"minimum_integrated","source":"target_build","result":"pass","no_crash":true,"materials_valid":true,"input_recovered":true,"window_onscreen":true,"settings_persisted":true,"ui_clipping_defects":0,"minimum_observed_fps":30,"peak_memory_mb":1100}
+  ]
+}

@@ -7,7 +7,7 @@
   <a href="./README.ru.md">Русская версия</a> · <a href="https://learn.chatgpt.com/docs/build-skills">How Codex skills work</a>
 </p>
 
-`skill-godot` gives Codex a repeatable workflow for creating real Godot projects: authored scenes and resources, coherent assets, playable controls, deterministic checks, visual review, performance evidence, and release-ready exports. It covers 2D, 3D, 2.5D, isometric and orthographic games; procedural, strategy, vehicle, shooter and narrative systems; single-player, local/online multiplayer, extraction and honest MMO production slices; accessibility, localization, saves, replay, large worlds, LiveOps, native mobile/XR, runtime authoring, reproducible releases, modding/UGC, stores, and Yandex Games.
+`skill-godot` gives Codex a repeatable workflow for creating real Godot projects: authored scenes and resources, coherent assets, playable controls, deterministic checks, visual review, performance evidence, and release-ready exports. It covers 2D, 3D, 2.5D, isometric and orthographic games; procedural, strategy, vehicle, shooter and narrative systems; single-player, local/online multiplayer, extraction and honest MMO production slices; accessibility, localization, saves, replay, large worlds, LiveOps, native mobile/XR, runtime authoring, reproducible releases, crash recovery, commerce/cloud/safety, desktop hardware, modding/UGC, stores, and Yandex Games.
 
 ## Quick start
 
@@ -31,8 +31,8 @@ Codex can also select the skill automatically when a request clearly matches its
 
 | Included | What it gives you |
 | --- | --- |
-| 51 focused production guides | Scene architecture, 2D/3D/2.5D, UI, saves, localization, input/accessibility, AI, procedural and genre systems, networking/LiveOps, replay, large worlds, mobile/XR, runtime authoring, stores/modding, assets, performance, and release work |
-| 30 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, fixed-camera readability, save/input/AI/procedural/progression/extraction/network/localization/replay/build/LiveOps probes, rubric composition, forward-eval audit, capture support, budgets, scorecards, and build-size checks |
+| 59 focused production guides | Scene architecture, 2D/3D/2.5D, UI, saves, accessibility, AI, genre/network systems, commerce/cloud/safety, resilience/upgrades, hardware, assets, performance, and release work |
+| 39 deterministic Python helpers | Project/asset audits, visual checks, system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive probes, rubric composition, capture, budgets, scorecards, and build-size checks |
 | 7 reusable Godot probes | Touch scrolling, button composition, third-person controls/HUD mouse routing/visibility, isometric projection, and isometric navigation checks |
 | Scene-first authoring rules | Persistent composition stays in `.tscn` scenes and Godot resources instead of disappearing into large runtime scripts |
 | Evidence-based completion | The scorecard verifies acceptance ownership plus concrete screenshot/video/review paths and rejects prose-only PASS claims |
@@ -66,6 +66,7 @@ The main [`SKILL.md`](./SKILL.md) is a compact router. It sends Codex only to th
 - **Multiplayer and persistent online:** server authority, replication, lag/loss/reconnect, dedicated servers, extraction settlement, MMO scope, service capacity, failure recovery, restore, and rollback.
 - **Platforms and extensibility:** exact store candidates, clean install/update/signing/SDK lifecycle, plus explicit mod/UGC trust tiers, hostile-content validation, removed-mod recovery, safe mode, and honest isolation limits.
 - **Global and advanced production:** localization/plurals/pseudolocalization, replay/ghost/spectator contracts, streamed-world traversal, native mobile devices, LiveOps/privacy, OpenXR/authorized console boundaries, runtime creator tools, and reproducible clean builds.
+- **Production resilience and services:** crash/hang recovery and diagnostics, exactly-once commerce entitlements, guest/cloud conflict handling, proportional online safety, upgrade fixtures/rollback, deterministic fault injection, real desktop hardware/display matrices, and real assistive-technology acceptance.
 - **Validation:** headless checks, deterministic probes, automated captures, interactive onboarding verification, and independent UX review.
 
 Hybrid work uses a canonical `base+modifier+...` rubric selector. `rubric_case_plan.py`, `evidence_helper.py`, and `eval_scorecard.py` share the same fail-closed composition: applicable gates are unioned and each score floor uses the strictest selected case. This prevents a convenient genre label from silently dropping localization, replay, mobile, LiveOps, or release obligations while keeping unrelated guides out of context.
@@ -85,6 +86,8 @@ Progression-heavy games now have a cross-genre contract in [`progression-and-bal
 Four new deterministic contracts make durable state, input/accessibility, AI/navigation, and procedural generation auditable before subjective review: [`save_data_probe.py`](./scripts/save_data_probe.py), [`input_accessibility_probe.py`](./scripts/input_accessibility_probe.py), [`ai_navigation_probe.py`](./scripts/ai_navigation_probe.py), and [`procedural_generation_probe.py`](./scripts/procedural_generation_probe.py). Matching strategy, racing, shooter, narrative, local multiplayer, multi-platform release, and modding/UGC rubric cases fail closed when their target-build or human/independent evidence is absent.
 
 Networked games now use [`multiplayer-networking.md`](./references/multiplayer-networking.md), [`network-contract.template.json`](./assets/network-contract.template.json), and [`network_contract_probe.py`](./scripts/network_contract_probe.py) to block localhost-only success, client authority, unsafe RPC surfaces, missing impairment/reconnect coverage, transport/platform mismatch, and unsupported scale claims. Extraction adds a separate raid/stash ledger through [`genre-extraction.md`](./references/genre-extraction.md) and [`extraction_loop_probe.py`](./scripts/extraction_loop_probe.py). MMO work is deliberately scoped as a production slice in [`mmo-and-online-services.md`](./references/mmo-and-online-services.md): real client/server artifacts, identity and persistence, interest/zone ownership, load/soak, observability, failure injection, restore, and rollback are required before production-readiness claims.
+
+Eight release modifiers now cover crash resilience, commerce/entitlements, accounts/cloud, online safety, upgrade compatibility, fault injection, desktop hardware/display and assistive accessibility. Each has a focused guide, passing JSON scaffold, deterministic fail-closed probe, review template, rubric case and score cap. They compose only when material; builder-owned routine correctness cannot be deferred to the user, while real hardware, assistive technology and independent security/operations judgments remain honestly separate gates.
 
 ## Isometric and 2.5D workflow
 

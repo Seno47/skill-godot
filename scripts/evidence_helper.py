@@ -45,6 +45,14 @@ MOBILE_NATIVE_REVIEW_TEMPLATE = ROOT / "assets" / "mobile-native-review.template
 LIVEOPS_REVIEW_TEMPLATE = ROOT / "assets" / "liveops-review.template.md"
 XR_CONSOLE_REVIEW_TEMPLATE = ROOT / "assets" / "xr-console-review.template.md"
 RUNTIME_AUTHORING_REVIEW_TEMPLATE = ROOT / "assets" / "runtime-authoring-review.template.md"
+CRASH_REVIEW_TEMPLATE = ROOT / "assets" / "crash-resilience-review.template.md"
+COMMERCE_REVIEW_TEMPLATE = ROOT / "assets" / "commerce-entitlement-review.template.md"
+ACCOUNT_CLOUD_REVIEW_TEMPLATE = ROOT / "assets" / "account-cloud-review.template.md"
+ONLINE_SAFETY_REVIEW_TEMPLATE = ROOT / "assets" / "online-safety-review.template.md"
+UPGRADE_REVIEW_TEMPLATE = ROOT / "assets" / "upgrade-compatibility-review.template.md"
+FAULT_REVIEW_TEMPLATE = ROOT / "assets" / "fault-injection-review.template.md"
+DESKTOP_REVIEW_TEMPLATE = ROOT / "assets" / "desktop-hardware-review.template.md"
+ASSISTIVE_REVIEW_TEMPLATE = ROOT / "assets" / "assistive-accessibility-review.template.md"
 PROJECT_STATUS_TEMPLATE = ROOT / "assets" / "project-run-state.template.md"
 
 
@@ -141,6 +149,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--runtime-authoring-review-output", help="Also instantiate runtime authoring review."
     )
+    parser.add_argument("--crash-review-output", help="Also instantiate crash resilience review.")
+    parser.add_argument("--commerce-review-output", help="Also instantiate commerce review.")
+    parser.add_argument("--account-cloud-review-output", help="Also instantiate account/cloud review.")
+    parser.add_argument("--online-safety-review-output", help="Also instantiate online safety review.")
+    parser.add_argument("--upgrade-review-output", help="Also instantiate upgrade review.")
+    parser.add_argument("--fault-review-output", help="Also instantiate fault-injection review.")
+    parser.add_argument("--desktop-review-output", help="Also instantiate desktop hardware review.")
+    parser.add_argument("--assistive-review-output", help="Also instantiate assistive accessibility review.")
     parser.add_argument(
         "--production-art-review-output",
         help="Also instantiate the builder-owned production art state review.",
@@ -386,6 +402,14 @@ def main() -> int:
                 args.liveops_review_output,
                 args.xr_console_review_output,
                 args.runtime_authoring_review_output,
+                args.crash_review_output,
+                args.commerce_review_output,
+                args.account_cloud_review_output,
+                args.online_safety_review_output,
+                args.upgrade_review_output,
+                args.fault_review_output,
+                args.desktop_review_output,
+                args.assistive_review_output,
                 args.project_status_output,
                 args.production_art_review_output,
                 args.motion_review_output,
@@ -476,6 +500,22 @@ def main() -> int:
                 RUNTIME_AUTHORING_REVIEW_TEMPLATE,
                 output_path(args.runtime_authoring_review_output),
             )
+        if args.crash_review_output:
+            copy_template(CRASH_REVIEW_TEMPLATE, output_path(args.crash_review_output))
+        if args.commerce_review_output:
+            copy_template(COMMERCE_REVIEW_TEMPLATE, output_path(args.commerce_review_output))
+        if args.account_cloud_review_output:
+            copy_template(ACCOUNT_CLOUD_REVIEW_TEMPLATE, output_path(args.account_cloud_review_output))
+        if args.online_safety_review_output:
+            copy_template(ONLINE_SAFETY_REVIEW_TEMPLATE, output_path(args.online_safety_review_output))
+        if args.upgrade_review_output:
+            copy_template(UPGRADE_REVIEW_TEMPLATE, output_path(args.upgrade_review_output))
+        if args.fault_review_output:
+            copy_template(FAULT_REVIEW_TEMPLATE, output_path(args.fault_review_output))
+        if args.desktop_review_output:
+            copy_template(DESKTOP_REVIEW_TEMPLATE, output_path(args.desktop_review_output))
+        if args.assistive_review_output:
+            copy_template(ASSISTIVE_REVIEW_TEMPLATE, output_path(args.assistive_review_output))
         if args.project_status_output:
             copy_template(PROJECT_STATUS_TEMPLATE, output_path(args.project_status_output))
         if args.production_art_review_output:

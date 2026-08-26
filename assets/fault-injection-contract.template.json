@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-fault-contract-id",
+  "build_id": "replace-exact-target-build-id",
+  "contract": {
+    "required_targets": ["save_write", "network_response", "remote_config", "purchase_callback", "cloud_sync", "asset_stream", "scene_transition", "shutdown"],
+    "required_scenarios": ["control", "interruption", "timeout", "duplicate", "reorder", "malformed", "truncated", "oversized", "disk_full", "permission_denied"],
+    "minimum_distinct_seeds": 4
+  },
+  "traces": [
+    {"id":"control","scenario":"control","target":"save_write","seed":1,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"interrupt","scenario":"interruption","target":"shutdown","seed":2,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"timeout","scenario":"timeout","target":"network_response","seed":3,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"duplicate","scenario":"duplicate","target":"purchase_callback","seed":4,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"reorder","scenario":"reorder","target":"cloud_sync","seed":5,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"malformed","scenario":"malformed","target":"remote_config","seed":6,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"truncated","scenario":"truncated","target":"asset_stream","seed":7,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"oversized","scenario":"oversized","target":"scene_transition","seed":8,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"disk","scenario":"disk_full","target":"save_write","seed":9,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0},
+    {"id":"permission","scenario":"permission_denied","target":"cloud_sync","seed":10,"source":"target_build","result":"pass","safe_state":true,"retry_or_rollback_available":true,"invariants_preserved":true,"unhandled_exceptions":0,"duplicate_durable_effects":0,"orphan_tasks":0,"hangs":0}
+  ]
+}

@@ -883,6 +883,103 @@
       "id": "input_modality_ui_evidence",
       "cases": ["constrained-mobile-web"],
       "description": "Required pointer/touch and keyboard/gamepad UI entry paths are exercised separately; initial focus is truthful; pointer-focus cleanup does not cancel BaseButton release/pressed behavior in the target Web build; and every required overflowing touch surface proves drag-induced scroll movement rather than relying on node presence."
+    },
+    {
+      "id": "crash_resilience_evidence",
+      "cases": ["crash-resilience-production"],
+      "description": "The exact target build proves clean exit, controlled error, crash/relaunch, hang/watchdog, memory and renderer failure, corrupted settings, interrupted write and log-redaction states against a declared recovery/data-loss budget, with matching build/symbol identity, bounded breadcrumbs, safe mode and no duplicate durable effects. A forced test-runner shutdown or installed crash SDK alone does not pass.",
+      "artifact_requirements": {"minimum_by_kind":{"report":2,"trace":5,"build":1},"required_states":{"crash_relaunch":["trace"],"hang_watchdog":["trace"],"interrupted_write":["trace"],"redaction":["report"],"target_build":["build"]}}
+    },
+    {
+      "id": "crash_recovery_review",
+      "acceptance_owner": "independent",
+      "cases": ["crash-resilience-production"],
+      "description": "An independent support/release review verifies that artifacts match the exact build, recovery and safe-mode UX are truthful and usable, diagnostics are actionable and privacy-bounded, and forced-quit diagnostics are not misclassified as organic crashes.",
+      "artifact_requirements": {"minimum_by_kind":{"review":1,"report":2},"required_states":{"symbolication_and_redaction":["report"],"recovery_verdict":["review"]}}
+    },
+    {
+      "id": "commerce_entitlement_evidence",
+      "cases": ["commerce-entitlement-production"],
+      "description": "An authoritative exactly-once entitlement ledger proves purchase success, replayed delivery, pending, cancel, offline, acknowledgement retry, refund/revoke, restore, account mismatch and verification outage in the target store/build. Unverified client receipts, embedded secrets or duplicate grants block release.",
+      "artifact_requirements": {"minimum_by_kind":{"report":2,"trace":6,"build":1},"required_states":{"success_duplicate":["trace"],"pending_cancel_offline":["trace"],"refund_restore":["trace"],"account_outage":["trace"],"target_build":["build"]}}
+    },
+    {
+      "id": "commerce_security_review",
+      "acceptance_owner": "independent",
+      "cases": ["commerce-entitlement-production"],
+      "description": "An independent security/operations review confirms verification authority, product/account binding, idempotency, acknowledgement/consumption, restore/revocation, secret handling and truthful policy/SDK scope.",
+      "artifact_requirements": {"minimum_by_kind":{"review":1,"report":2},"required_states":{"ledger_and_authority":["report"],"review_verdict":["review"]}}
+    },
+    {
+      "id": "account_cloud_evidence",
+      "cases": ["account-cloud-cross-progression"],
+      "description": "Target-provider evidence proves guest start, sign-in/link, empty and conflicting cloud, multi-device/offline reconciliation, user switch/sign-out, provider outage and deletion with stable internal identity, per-user isolation, idempotent merge and no silent overwrite or sensitive logging.",
+      "artifact_requirements": {"minimum_by_kind":{"report":2,"trace":6,"build":1},"required_states":{"guest_link_conflict":["trace"],"multi_device_offline":["trace"],"switch_signout":["trace"],"outage_delete":["trace"],"target_build":["build"]}}
+    },
+    {
+      "id": "account_conflict_ux_review",
+      "acceptance_owner": "independent",
+      "cases": ["account-cloud-cross-progression"],
+      "description": "An independent account/conflict UX review proves that provenance, user choice or safe deterministic merge, backup, switching, outage and deletion states are understandable and cannot silently discard or cross-contaminate progress.",
+      "artifact_requirements": {"minimum_by_kind":{"review":1,"image":2,"report":1},"required_states":{"conflict_choice":["image","review"],"account_switch_or_outage":["image","review"]}}
+    },
+    {
+      "id": "online_safety_evidence",
+      "cases": ["online-safety-production"],
+      "description": "Server-owned target evidence rejects hostile requests and proves tiered integrity handling, false-positive review, authenticated rate-limited reports, persistent mute/block, idempotent sanction/expiry, moderation outage and privacy deletion without client sanction authority or cross-user disclosure.",
+      "artifact_requirements": {"minimum_by_kind":{"report":2,"trace":6,"build":1},"required_states":{"hostile_and_integrity":["trace"],"report_and_block":["trace"],"sanction_review_expiry":["trace"],"outage_delete":["trace"],"target_build":["build"]}}
+    },
+    {
+      "id": "online_safety_operations_review",
+      "acceptance_owner": "independent",
+      "cases": ["online-safety-production"],
+      "description": "Independent security/operations review verifies proportional server authority, minimized evidence, abuse-resistant reporting, reversible false positives, appeal/review ownership, clear sanctions, safe outage behavior and honest platform/legal limitations.",
+      "artifact_requirements": {"minimum_by_kind":{"review":1,"report":2},"required_states":{"threat_and_data_review":["report"],"operations_verdict":["review"]}}
+    },
+    {
+      "id": "upgrade_compatibility_evidence",
+      "cases": ["upgrade-compatibility-release"],
+      "description": "Immutable source fixtures and the exact upgraded target prove clean upgrade, old save/replay/mod handling as promised, dependency replacement, declared client/server skew, rollback and explicit downgrade rejection with idempotent migrations, stable IDs and no unclassified data loss.",
+      "artifact_requirements": {"minimum_by_kind":{"report":3,"trace":5,"build":1},"required_states":{"fixture_hashes":["report"],"old_artifacts":["trace"],"rollback_downgrade":["trace"],"clean_target":["build","report"]}}
+    },
+    {
+      "id": "upgrade_compatibility_review",
+      "acceptance_owner": "independent",
+      "cases": ["upgrade-compatibility-release"],
+      "description": "Independent release review confirms backups, migration coverage, behavioral/rendering/performance regressions, protocol/version window, dependency/licensing changes and a workable rollback rather than accepting an editor that merely opens.",
+      "artifact_requirements": {"minimum_by_kind":{"review":1,"report":2},"required_states":{"migration_matrix":["report"],"release_verdict":["review"]}}
+    },
+    {
+      "id": "fault_injection_evidence",
+      "cases": ["fault-injection-hardening"],
+      "description": "Deterministic bounded target-build injection covers declared durable/asynchronous boundaries and control, interruption, timeout, duplicate, reordering, malformed, truncated, oversized, disk-full and permission failures without hangs, unhandled exceptions, duplicate effects, orphan work or unsafe partial state; minimized seeds become regressions.",
+      "artifact_requirements": {"minimum_by_kind":{"report":2,"trace":8},"required_states":{"control":["trace"],"transport_ordering":["trace"],"malformed_size":["trace"],"storage_permissions":["trace"],"minimized_regressions":["report"]}}
+    },
+    {
+      "id": "desktop_hardware_evidence",
+      "cases": ["desktop-hardware-release"],
+      "description": "The exact desktop candidate runs on declared real minimum and representative machines across renderer, resize/fullscreen, ultrawide, HiDPI, multi-display, alt-tab, monitor/controller hot-plug and low-VRAM states within frame/memory budgets, with valid materials, onscreen UI/window and recovered input/settings.",
+      "artifact_requirements": {"minimum_by_kind":{"report":3,"trace":6,"image":3,"build":1},"required_states":{"minimum_profile":["trace","report"],"representative_profile":["trace","report"],"display_extremes":["image","trace"],"lifecycle_hotplug":["trace"],"target_build":["build"]}}
+    },
+    {
+      "id": "desktop_hardware_playtest",
+      "acceptance_owner": "human",
+      "cases": ["desktop-hardware-release"],
+      "description": "Human sessions on real minimum and representative desktop hardware judge moment-to-moment responsiveness, stutter, readability, display transitions, input/audio recovery and fallback settings. Simulated limits, averages or one development machine cannot certify the release matrix.",
+      "artifact_requirements": {"minimum_by_kind":{"review":1,"trace":2},"required_states":{"minimum_hardware_session":["trace","review"],"representative_hardware_session":["trace","review"]}}
+    },
+    {
+      "id": "assistive_accessibility_evidence",
+      "cases": ["assistive-accessibility-release"],
+      "description": "The exact candidate proves meaningful names/roles/states/values/actions, logical order, bounded live announcements, no focus traps, full promised non-pointer operation, non-color cues, captions and real behavioral effects for motion/timing assists across critical menu-to-result flows. A label, tree dump or enabled setting alone does not pass.",
+      "artifact_requirements": {"minimum_by_kind":{"report":2,"trace":6,"video":1,"build":1},"required_states":{"semantic_flow":["trace","report"],"dynamic_announcements":["trace","video"],"non_pointer_and_non_color":["trace"],"behavioral_assists":["trace"],"target_build":["build"]}}
+    },
+    {
+      "id": "assistive_accessibility_playtest",
+      "acceptance_owner": "human",
+      "cases": ["assistive-accessibility-release"],
+      "description": "A human using the actual promised platform assistive technology completes representative critical flows and judges semantics, navigation, announcement load, recovery and cognitive/motor usability. Structural automation is supporting evidence and the commissioning user is not assigned routine defect discovery.",
+      "artifact_requirements": {"minimum_by_kind":{"review":1,"trace":1,"video":1},"required_states":{"real_assistive_technology_session":["trace","video","review"]}}
     }
   ],
   "score_caps": [
@@ -1116,6 +1213,66 @@
     },
     {
       "gate": "creator_usability_playtest",
+      "dimensions": {"playability_and_ux": 1}
+    },
+    {
+      "gate": "crash_resilience_evidence",
+      "dimensions": {"technical_quality": 1, "gameplay_correctness": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "crash_recovery_review",
+      "dimensions": {"playability_and_ux": 2, "technical_quality": 2}
+    },
+    {
+      "gate": "commerce_entitlement_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 1}
+    },
+    {
+      "gate": "commerce_security_review",
+      "dimensions": {"technical_quality": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "account_cloud_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 1}
+    },
+    {
+      "gate": "account_conflict_ux_review",
+      "dimensions": {"playability_and_ux": 1, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "online_safety_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 1}
+    },
+    {
+      "gate": "online_safety_operations_review",
+      "dimensions": {"intent_and_scope": 2, "technical_quality": 2}
+    },
+    {
+      "gate": "upgrade_compatibility_evidence",
+      "dimensions": {"technical_quality": 1, "evidence_and_reproducibility": 1}
+    },
+    {
+      "gate": "upgrade_compatibility_review",
+      "dimensions": {"intent_and_scope": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "fault_injection_evidence",
+      "dimensions": {"technical_quality": 1, "gameplay_correctness": 2}
+    },
+    {
+      "gate": "desktop_hardware_evidence",
+      "dimensions": {"performance_and_size": 1, "responsive_visual_integrity": 1, "technical_quality": 2}
+    },
+    {
+      "gate": "desktop_hardware_playtest",
+      "dimensions": {"playability_and_ux": 2, "visual_coherence": 2, "performance_and_size": 2}
+    },
+    {
+      "gate": "assistive_accessibility_evidence",
+      "dimensions": {"playability_and_ux": 2, "responsive_visual_integrity": 1, "technical_quality": 2}
+    },
+    {
+      "gate": "assistive_accessibility_playtest",
       "dimensions": {"playability_and_ux": 1}
     }
   ],
@@ -1398,6 +1555,54 @@
       "brief": "Create complete in-game or editor authoring tools with versioned data, transactional undo/redo, validation, round-trip persistence, crash recovery, bounded hostile-content handling, preview parity and an uncoached creator workflow.",
       "focus": ["stable IDs and schema versions", "selection and property editing", "transactional undo redo", "dirty state and autosave", "round-trip import export", "invalid cyclic and oversized rejection", "preview runtime parity", "input accessibility", "uncoached creator task"],
       "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "evidence_and_reproducibility": 3}
+    },
+    {
+      "id": "crash-resilience-production",
+      "brief": "Harden an exact release candidate for supportable abnormal termination, bounded data loss, safe relaunch, actionable privacy-bounded diagnostics and honest degraded/recovery UX.",
+      "focus": ["build and symbol identity", "crash and hang distinction", "relaunch and safe mode", "data-loss budget", "interrupted durable work", "memory and renderer fallback", "log redaction", "support workflow"],
+      "minimum_scores": {"gameplay_correctness":3,"playability_and_ux":3,"technical_quality":3,"evidence_and_reproducibility":3}
+    },
+    {
+      "id": "commerce-entitlement-production",
+      "brief": "Implement production purchase and entitlement delivery with authoritative verification, exactly-once grants, pending/offline/retry behavior, restore and revocation, account binding and independent security review.",
+      "focus": ["stable product catalogue", "verification authority", "exactly-once ledger", "pending cancel offline", "acknowledge and consume", "refund and revoke", "restore and account binding", "secret and outage handling"],
+      "minimum_scores": {"intent_and_scope":3,"gameplay_correctness":3,"playability_and_ux":3,"technical_quality":3,"evidence_and_reproducibility":3}
+    },
+    {
+      "id": "account-cloud-cross-progression",
+      "brief": "Add guest/account/cloud cross-progression with stable internal identity, explicit or safely deterministic conflicts, user isolation, offline recovery, provider outages, switching and deletion.",
+      "focus": ["guest ownership", "identity linking", "conflict provenance and backup", "multi-device merge", "offline reconnect", "user switch isolation", "provider outage", "privacy deletion"],
+      "minimum_scores": {"gameplay_correctness":3,"playability_and_ux":3,"technical_quality":3,"evidence_and_reproducibility":3}
+    },
+    {
+      "id": "online-safety-production",
+      "brief": "Harden online play and community surfaces with server authority, proportional anti-abuse signals, report/mute/block, reviewable sanctions, privacy-bounded evidence and operational failure handling.",
+      "focus": ["hostile client authority", "integrity signal calibration", "report abuse controls", "mute and block", "sanction lifecycle", "false-positive review", "moderation outage", "privacy operations"],
+      "minimum_scores": {"intent_and_scope":3,"gameplay_correctness":3,"playability_and_ux":3,"technical_quality":3,"evidence_and_reproducibility":3}
+    },
+    {
+      "id": "upgrade-compatibility-release",
+      "brief": "Upgrade engine, project, dependency or protocol boundaries while preserving declared old artifacts and behavior through immutable fixtures, idempotent migrations, compatibility windows and proven rollback.",
+      "focus": ["source and target identity", "immutable fixtures", "save replay and mod migration", "stable IDs", "dependency replacement", "client/server skew", "rollback", "regression matrix"],
+      "minimum_scores": {"intent_and_scope":3,"gameplay_correctness":3,"technical_quality":3,"evidence_and_reproducibility":3}
+    },
+    {
+      "id": "fault-injection-hardening",
+      "brief": "Exercise declared durable and asynchronous boundaries with deterministic bounded fault injection and fuzz fixtures until interruption, delay, replay, malformed data and resource failures preserve system invariants.",
+      "focus": ["injection boundaries", "deterministic seeds", "timeout interruption replay reorder", "malformed truncated oversized data", "disk and permission failure", "durable invariants", "minimized regressions", "bounded execution"],
+      "minimum_scores": {"gameplay_correctness":3,"technical_quality":3,"evidence_and_reproducibility":3}
+    },
+    {
+      "id": "desktop-hardware-release",
+      "brief": "Verify an exact desktop candidate on real minimum and representative machines across renderer, performance, window/display/DPI extremes, lifecycle, hot-plug and human moment-to-moment play.",
+      "focus": ["real hardware tiers", "renderer and driver", "window/fullscreen", "ultrawide and HiDPI", "multi-display lifecycle", "input hot-plug", "low VRAM fallback", "human performance feel"],
+      "minimum_scores": {"gameplay_correctness":3,"playability_and_ux":3,"visual_coherence":3,"responsive_visual_integrity":3,"technical_quality":3,"performance_and_size":3,"evidence_and_reproducibility":3}
+    },
+    {
+      "id": "assistive-accessibility-release",
+      "brief": "Deliver explicitly promised assistive access with authored semantics, non-visual/non-pointer critical flows, bounded dynamic announcements, behavioral assists and real platform assistive-technology playtesting.",
+      "focus": ["names roles states values actions", "logical focus and recovery", "screen-reader flow", "dynamic announcements", "keyboard gamepad and motor access", "non-color cues", "captions and reduced motion", "human assistive-tech validation"],
+      "minimum_scores": {"intent_and_scope":3,"playability_and_ux":3,"responsive_visual_integrity":3,"technical_quality":3,"evidence_and_reproducibility":3}
     }
   ]
 }

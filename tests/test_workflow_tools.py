@@ -506,6 +506,60 @@ class LiveOpsContractTests(unittest.TestCase):
         self.assertIn("retry is not idempotent", completed.stdout)
 
 
+class ProductionModifierContractTests(unittest.TestCase):
+    CONTRACTS = {
+        "crash": ("crash_resilience_probe.py", "crash-resilience-contract.template.json"),
+        "commerce": ("commerce_entitlement_probe.py", "commerce-entitlement-contract.template.json"),
+        "account": ("account_cloud_probe.py", "account-cloud-contract.template.json"),
+        "safety": ("online_safety_probe.py", "online-safety-contract.template.json"),
+        "upgrade": ("upgrade_compatibility_probe.py", "upgrade-compatibility-contract.template.json"),
+        "fault": ("fault_injection_probe.py", "fault-injection-contract.template.json"),
+        "desktop": ("desktop_hardware_probe.py", "desktop-hardware-contract.template.json"),
+        "assistive": ("assistive_accessibility_probe.py", "assistive-accessibility-contract.template.json"),
+    }
+
+    def test_all_templates_pass(self) -> None:
+        for label, (script, template) in self.CONTRACTS.items():
+            with self.subTest(contract=label):
+                completed = run_script(
+                    script, "--model", str(ROOT / "assets" / template), "--summary"
+                )
+                self.assertEqual(completed.returncode, 0, completed.stdout)
+                self.assertIn("[PASS]", completed.stdout)
+
+    def test_each_contract_rejects_an_invariant_failure(self) -> None:
+        mutations = {
+            "crash": (0, "recovered", False, "does not prove recovered"),
+            "commerce": (1, "grant_count", 2, "not exactly-once"),
+            "account": (0, "silent_overwrites", 1, "non-zero silent_overwrites"),
+            "safety": (0, "client_can_ban", True, "sanction authority"),
+            "upgrade": (0, "data_loss_records", 1, "loses records"),
+            "fault": (0, "hangs", 1, "non-zero hangs"),
+            "desktop": (0, "minimum_observed_fps", 1, "below FPS budget"),
+            "assistive": (0, "focus_traps", 1, "non-zero focus_traps"),
+        }
+        for label, (script, template) in self.CONTRACTS.items():
+            with self.subTest(contract=label):
+                model = load_asset_json(template)
+                index, key, value, message = mutations[label]
+                model["traces"][index][key] = value
+                completed = run_contract(script, model)
+                self.assertEqual(completed.returncode, 1, completed.stdout)
+                self.assertIn(message, completed.stdout)
+
+    def test_each_contract_rejects_missing_required_coverage(self) -> None:
+        for label, (script, template) in self.CONTRACTS.items():
+            with self.subTest(contract=label):
+                model = load_asset_json(template)
+                missing = model["contract"]["required_scenarios"][-1]
+                model["traces"] = [
+                    trace for trace in model["traces"] if trace["scenario"] != missing
+                ]
+                completed = run_contract(script, model)
+                self.assertEqual(completed.returncode, 1, completed.stdout)
+                self.assertIn(missing, completed.stdout)
+
+
 class ForwardEvaluationAuditTests(unittest.TestCase):
     def run_matrix(self, model: dict[str, object]) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as directory:
@@ -599,6 +653,14 @@ class GenreRubricTests(unittest.TestCase):
             "xr-production-slice": "xr_runtime_evidence",
             "console-release-readiness": "console_release_evidence",
             "runtime-authoring-tools-complete": "runtime_authoring_evidence",
+            "crash-resilience-production": "crash_resilience_evidence",
+            "commerce-entitlement-production": "commerce_entitlement_evidence",
+            "account-cloud-cross-progression": "account_cloud_evidence",
+            "online-safety-production": "online_safety_evidence",
+            "upgrade-compatibility-release": "upgrade_compatibility_evidence",
+            "fault-injection-hardening": "fault_injection_evidence",
+            "desktop-hardware-release": "desktop_hardware_evidence",
+            "assistive-accessibility-release": "assistive_accessibility_evidence",
             "new-2-5d-complete": "production_art_integrity_evidence",
             "new-isometric-fixed-camera-complete": "isometric_vertical_slice_art_review",
             "ui-reference-integration": "reference_parity_evidence",
@@ -788,6 +850,14 @@ class GenreRubricTests(unittest.TestCase):
                 "runtime-authoring.md",
                 "Runtime Authoring Tool Review",
             ),
+            "--crash-review-output": ("crash.md", "Crash Resilience and Diagnostics Review"),
+            "--commerce-review-output": ("commerce.md", "Commerce and Entitlement Review"),
+            "--account-cloud-review-output": ("account.md", "Account, Cloud, and Cross-progression Review"),
+            "--online-safety-review-output": ("safety.md", "Online Safety and Anti-abuse Review"),
+            "--upgrade-review-output": ("upgrade.md", "Upgrade Compatibility Review"),
+            "--fault-review-output": ("fault.md", "Fault Injection and Fuzzing Review"),
+            "--desktop-review-output": ("desktop.md", "Desktop Hardware and Display Review"),
+            "--assistive-review-output": ("assistive.md", "Assistive Accessibility Review"),
         }
         with tempfile.TemporaryDirectory() as directory:
             temp = Path(directory)
@@ -813,7 +883,7 @@ class GenreRubricTests(unittest.TestCase):
     def test_hybrid_case_unions_gates_and_uses_maximum_score_floors(self) -> None:
         selector = (
             "new-shooter-action-complete+new-extraction-complete+"
-            "localized-release-complete"
+            "localized-release-complete+fault-injection-hardening"
         )
         with tempfile.TemporaryDirectory() as directory:
             temp = Path(directory)
@@ -845,17 +915,20 @@ class GenreRubricTests(unittest.TestCase):
         self.assertIn("shooter_combat_evidence", evidence["gates"])
         self.assertIn("extraction_loop_evidence", evidence["gates"])
         self.assertIn("localization_contract_evidence", evidence["gates"])
+        self.assertIn("fault_injection_evidence", evidence["gates"])
         self.assertEqual(plan["minimum_scores"]["playability_and_ux"], 3)
-        self.assertEqual(len(plan["component_cases"]), 3)
+        self.assertEqual(len(plan["component_cases"]), 4)
 
-    def test_device_human_gates_cap_unverified_mobile_and_xr_scores(self) -> None:
+    def test_device_human_gates_cap_unverified_scores(self) -> None:
         expected = {
-            "mobile-native-release": "mobile_device_playtest",
-            "xr-production-slice": "xr_comfort_playtest",
+            "mobile-native-release": ("mobile_device_playtest", 1),
+            "xr-production-slice": ("xr_comfort_playtest", 1),
+            "desktop-hardware-release": ("desktop_hardware_playtest", 2),
+            "assistive-accessibility-release": ("assistive_accessibility_playtest", 1),
         }
         with tempfile.TemporaryDirectory() as directory:
             temp = Path(directory)
-            for case_id, human_gate in expected.items():
+            for case_id, (human_gate, expected_cap) in expected.items():
                 evidence_path = temp / f"{case_id}-evidence.json"
                 scorecard_path = temp / f"{case_id}-scorecard.json"
                 prepared = run_script(
@@ -892,7 +965,7 @@ class GenreRubricTests(unittest.TestCase):
                     any(
                         item["gate"] == human_gate
                         and item["dimension"] == "playability_and_ux"
-                        and item["after"] == 1
+                        and item["after"] == expected_cap
                         for item in report["score_caps_applied"]
                     ),
                     report["score_caps_applied"],

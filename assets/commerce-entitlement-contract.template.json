@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-commerce-contract-id",
+  "build_id": "replace-exact-target-build-id",
+  "contract": {
+    "verification_authority": "secure_backend",
+    "durable_online_currency": true,
+    "secrets_embedded": false,
+    "required_scenarios": ["purchase_success", "duplicate_delivery", "pending", "canceled", "offline", "acknowledge_retry", "refund_revoke", "restore", "account_mismatch", "server_timeout"],
+    "products": [{"id":"currency_small","type":"consumable"},{"id":"expansion_one","type":"non_consumable"}]
+  },
+  "traces": [
+    {"id":"success","scenario":"purchase_success","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":["currency:100"],"expected_grants":["currency:100"],"acknowledged_or_consumed":true,"transaction_id_stable":true,"account_match":true},
+    {"id":"duplicate","scenario":"duplicate_delivery","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":["currency:100"],"expected_grants":["currency:100"],"grant_count":1,"acknowledged_or_consumed":true,"transaction_id_stable":true,"account_match":true},
+    {"id":"pending","scenario":"pending","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":[],"expected_grants":[],"account_match":true},
+    {"id":"canceled","scenario":"canceled","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":[],"expected_grants":[],"account_match":true},
+    {"id":"offline","scenario":"offline","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":[],"expected_grants":[],"account_match":true},
+    {"id":"ack-retry","scenario":"acknowledge_retry","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":["currency:100"],"expected_grants":["currency:100"],"acknowledged_or_consumed":true,"transaction_id_stable":true,"account_match":true},
+    {"id":"refund","scenario":"refund_revoke","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":[],"expected_grants":[],"entitlement_removed":true,"account_match":true},
+    {"id":"restore","scenario":"restore","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":["expansion_one"],"expected_grants":["expansion_one"],"entitlement_restored":true,"account_match":true},
+    {"id":"mismatch","scenario":"account_mismatch","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":[],"expected_grants":[],"account_match":false},
+    {"id":"timeout","scenario":"server_timeout","source":"target_build","result":"pass","server_or_platform_verified":true,"ledger_balanced":true,"safe_state":true,"secrets_exposed":0,"grants":[],"expected_grants":[],"account_match":true}
+  ]
+}

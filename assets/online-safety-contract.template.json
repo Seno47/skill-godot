@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-online-safety-contract-id",
+  "build_id": "replace-exact-target-build-id",
+  "contract": {
+    "server_authoritative": true,
+    "integrity_signal_is_not_sole_evidence": true,
+    "appeal_or_review_path": true,
+    "secrets_embedded": false,
+    "required_scenarios": ["hostile_gameplay_request", "suspicious_integrity_signal", "false_positive_review", "player_report", "mute_block", "sanction_enforcement", "sanction_expiry", "moderation_outage", "privacy_delete"]
+  },
+  "traces": [
+    {"id":"hostile","scenario":"hostile_gameplay_request","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0},
+    {"id":"integrity","scenario":"suspicious_integrity_signal","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0,"tiered_response":true},
+    {"id":"false-positive","scenario":"false_positive_review","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0,"reversible":true,"reviewed":true},
+    {"id":"report","scenario":"player_report","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0,"authenticated":true,"rate_limited":true},
+    {"id":"block","scenario":"mute_block","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0,"immediate_and_persistent":true},
+    {"id":"sanction","scenario":"sanction_enforcement","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0},
+    {"id":"expiry","scenario":"sanction_expiry","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0,"access_restored":true},
+    {"id":"outage","scenario":"moderation_outage","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0},
+    {"id":"delete","scenario":"privacy_delete","source":"target_build","result":"pass","safe_state":true,"server_validated":true,"sanction_idempotent":true,"clear_user_message":true,"client_can_ban":false,"private_evidence_excess":0,"cross_user_data":0,"deletion_completed":true}
+  ]
+}

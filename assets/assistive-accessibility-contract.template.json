@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-assistive-accessibility-contract-id",
+  "build_id": "replace-exact-target-build-id",
+  "contract": {
+    "target_platforms": ["Windows"],
+    "required_assistive_technology": ["NVDA"],
+    "required_scenarios": ["menu", "settings", "onboarding", "gameplay", "pause", "result", "dynamic_live_region", "keyboard_only", "gamepad_only", "reduced_motion", "non_color", "subtitles"]
+  },
+  "traces": [
+    {"id":"menu","scenario":"menu","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"settings","scenario":"settings","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"onboarding","scenario":"onboarding","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"gameplay","scenario":"gameplay","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"pause","scenario":"pause","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"result","scenario":"result","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"live","scenario":"dynamic_live_region","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0,"bounded_dynamic_announcement":true},
+    {"id":"keyboard","scenario":"keyboard_only","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"gamepad","scenario":"gamepad_only","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"motion","scenario":"reduced_motion","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"color","scenario":"non_color","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0},
+    {"id":"subtitles","scenario":"subtitles","assistive_technology":"NVDA","source":"target_build","result":"pass","semantic_names_roles_states_valid":true,"logical_order":true,"actions_supported":true,"fully_operable":true,"behavioral_effect_observed":true,"non_color_cues":true,"focus_traps":0,"announcement_spam":0,"unlabeled_critical_controls":0,"speaker_and_critical_audio_cues":true}
+  ]
+}

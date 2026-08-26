@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-upgrade-contract-id",
+  "build_id": "replace-exact-target-build-id",
+  "contract": {
+    "source_engine": "Godot 4.x.y",
+    "target_engine": "Godot 4.x.z",
+    "source_revision": "replace-source-revision",
+    "target_revision": "replace-target-revision",
+    "immutable_fixtures": true,
+    "required_scenarios": ["clean_upgrade", "rollback", "old_save", "old_replay", "old_mod", "mixed_client_server", "removed_dependency", "downgrade_rejection"]
+  },
+  "traces": [
+    {"id":"clean","scenario":"clean_upgrade","source":"target_build","result":"pass","source_fixture_hash_matched":true,"migration_idempotent":true,"stable_ids_preserved":true,"explicit_result":true,"data_loss_records":0,"unclassified_errors":0},
+    {"id":"rollback","scenario":"rollback","source":"target_build","result":"pass","source_fixture_hash_matched":true,"migration_idempotent":true,"stable_ids_preserved":true,"explicit_result":true,"data_loss_records":0,"unclassified_errors":0,"backup_preserved":true},
+    {"id":"save","scenario":"old_save","source":"target_build","result":"pass","source_fixture_hash_matched":true,"migration_idempotent":true,"stable_ids_preserved":true,"explicit_result":true,"data_loss_records":0,"unclassified_errors":0},
+    {"id":"replay","scenario":"old_replay","source":"target_build","result":"pass","source_fixture_hash_matched":true,"migration_idempotent":true,"stable_ids_preserved":true,"explicit_result":true,"data_loss_records":0,"unclassified_errors":0},
+    {"id":"mod","scenario":"old_mod","source":"target_build","result":"pass","source_fixture_hash_matched":true,"migration_idempotent":true,"stable_ids_preserved":true,"explicit_result":true,"data_loss_records":0,"unclassified_errors":0},
+    {"id":"skew","scenario":"mixed_client_server","source":"target_build","result":"pass","source_fixture_hash_matched":true,"migration_idempotent":true,"stable_ids_preserved":true,"explicit_result":true,"data_loss_records":0,"unclassified_errors":0,"version_window_enforced":true},
+    {"id":"dependency","scenario":"removed_dependency","source":"target_build","result":"pass","source_fixture_hash_matched":true,"migration_idempotent":true,"stable_ids_preserved":true,"explicit_result":true,"data_loss_records":0,"unclassified_errors":0},
+    {"id":"downgrade","scenario":"downgrade_rejection","source":"target_build","result":"pass","source_fixture_hash_matched":true,"migration_idempotent":true,"stable_ids_preserved":true,"explicit_result":true,"data_loss_records":0,"unclassified_errors":0,"backup_preserved":true}
+  ]
+}

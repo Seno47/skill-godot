@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-crash-contract-id",
+  "build_id": "replace-exact-target-build-id",
+  "contract": {
+    "required_scenarios": ["clean_exit", "controlled_error", "crash_relaunch", "hang_watchdog", "memory_pressure", "renderer_failure", "corrupted_settings", "interrupted_write", "log_redaction"],
+    "max_data_loss_seconds": 30,
+    "symbol_identity_recorded": true,
+    "privacy_redaction_enabled": true
+  },
+  "traces": [
+    {"id":"clean","scenario":"clean_exit","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":0,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true},
+    {"id":"error","scenario":"controlled_error","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":0,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true},
+    {"id":"crash","scenario":"crash_relaunch","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":10,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true,"previous_crash_detected":true,"crash_artifact_present":true,"safe_mode_available":true},
+    {"id":"hang","scenario":"hang_watchdog","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":10,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true,"watchdog_triggered":true},
+    {"id":"memory","scenario":"memory_pressure","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":0,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true,"fallback_or_truthful_exit":true},
+    {"id":"renderer","scenario":"renderer_failure","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":0,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true,"fallback_or_truthful_exit":true},
+    {"id":"settings","scenario":"corrupted_settings","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":0,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true},
+    {"id":"write","scenario":"interrupted_write","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":5,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true},
+    {"id":"redaction","scenario":"log_redaction","source":"target_build","result":"pass","recovered":true,"data_loss_seconds":0,"duplicate_commits":0,"sensitive_log_fields":[],"build_identity_matched":true,"bounded_breadcrumbs":true,"truthful_recovery_ui":true}
+  ]
+}

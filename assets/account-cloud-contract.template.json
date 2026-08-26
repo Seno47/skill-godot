@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-account-cloud-contract-id",
+  "build_id": "replace-exact-target-build-id",
+  "contract": {
+    "conflict_policy": "explicit_choice_or_deterministic_merge_with_backup",
+    "required_scenarios": ["guest_start", "sign_in_new", "link_guest_empty_cloud", "link_guest_conflict", "multi_device_conflict", "offline_reconnect", "user_switch", "sign_out", "provider_unavailable", "account_delete"]
+  },
+  "traces": [
+    {"id":"guest","scenario":"guest_start","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"guest-a","expected_digest":"guest-a"},
+    {"id":"new","scenario":"sign_in_new","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"new-a","expected_digest":"new-a"},
+    {"id":"link-empty","scenario":"link_guest_empty_cloud","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"guest-a","expected_digest":"guest-a"},
+    {"id":"link-conflict","scenario":"link_guest_conflict","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"merged-a","expected_digest":"merged-a","user_choice_present":true,"deterministic_merge":false,"preserved_backup":true},
+    {"id":"device-conflict","scenario":"multi_device_conflict","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"merged-b","expected_digest":"merged-b","user_choice_present":false,"deterministic_merge":true,"preserved_backup":true},
+    {"id":"reconnect","scenario":"offline_reconnect","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"merged-c","expected_digest":"merged-c","user_choice_present":false,"deterministic_merge":true,"preserved_backup":true},
+    {"id":"switch","scenario":"user_switch","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"user-b","expected_digest":"user-b","previous_user_detached":true,"new_user_isolated":true},
+    {"id":"signout","scenario":"sign_out","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"guest-b","expected_digest":"guest-b","previous_user_detached":true,"new_user_isolated":true},
+    {"id":"provider-down","scenario":"provider_unavailable","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"offline-a","expected_digest":"offline-a"},
+    {"id":"delete","scenario":"account_delete","source":"target_build","result":"pass","safe_state":true,"stable_player_id":true,"merge_idempotent":true,"cross_user_writes":0,"silent_overwrites":0,"sensitive_log_fields":0,"local_cloud_digest":"deleted","expected_digest":"deleted","deletion_completed":true,"local_tokens_cleared":true}
+  ]
+}
