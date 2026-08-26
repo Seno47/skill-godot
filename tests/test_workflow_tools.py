@@ -183,6 +183,72 @@ class ProgressionBalanceTests(unittest.TestCase):
         self.assertIn("option route_b pick share", completed.stdout)
 
 
+class DifficultyPacingTests(unittest.TestCase):
+    @staticmethod
+    def load_template() -> dict[str, object]:
+        return load_asset_json("difficulty-pacing-contract.template.json")
+
+    def run_contract(self, contract: dict[str, object]) -> subprocess.CompletedProcess[str]:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "difficulty-pacing.json"
+            path.write_text(json.dumps(contract), encoding="utf-8")
+            return run_script(
+                "difficulty_pacing_probe.py", "--contract", str(path), "--summary"
+            )
+
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "difficulty_pacing_probe.py",
+            "--contract",
+            str(ROOT / "assets" / "difficulty-pacing-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS]", completed.stdout)
+
+    def test_monotonic_wave_without_relief_fails(self) -> None:
+        contract = self.load_template()
+        for index, beat in enumerate(contract["beats"]):
+            beat["challenge"] = index * 0.5 + 1
+        contract["budgets"]["max_consecutive_challenge_rises"] = 10
+        completed = self.run_contract(contract)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("requires at least one challenge decrease", completed.stdout)
+
+    def test_puzzle_without_learned_skill_combination_fails(self) -> None:
+        contract = self.load_template()
+        contract["contract"]["genre_profile"] = "puzzle"
+        contract["contract"]["curve_model"] = "puzzle_mastery"
+        contract["beats"][3]["uses_skills"] = ["dodge"]
+        completed = self.run_contract(contract)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("combine beat using at least two learned skills", completed.stdout)
+
+    def test_competitive_hidden_midmatch_adjustment_fails(self) -> None:
+        contract = self.load_template()
+        contract["contract"]["genre_profile"] = "competitive_multiplayer"
+        contract["contract"]["curve_model"] = "skill_bands"
+        contract["adaptation"]["ranked_midmatch_outcome_manipulation"] = True
+        completed = self.run_contract(contract)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("requires matchmaking", completed.stdout)
+        self.assertIn("ranked mid-match outcome manipulation must be false", completed.stdout)
+
+    def test_extraction_self_selected_routes_can_pass(self) -> None:
+        contract = self.load_template()
+        contract["contract"]["genre_profile"] = "extraction_survival"
+        contract["contract"]["curve_model"] = "self_selected_routes"
+        contract["contract"]["required_phases"] = [
+            "teach", "choice", "combine", "peak", "recovery", "test"
+        ]
+        contract["beats"][1]["phase"] = "choice"
+        contract["beats"][1]["branch_id"] = "safe_route"
+        contract["beats"][3]["branch_id"] = "risky_route"
+        completed = self.run_contract(contract)
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS]", completed.stdout)
+
+
 class NetworkContractTests(unittest.TestCase):
     @staticmethod
     def load_template() -> dict[str, object]:
@@ -632,6 +698,7 @@ class GenreRubricTests(unittest.TestCase):
             "new-idle-clicker-complete": "idle_economy_evidence",
             "new-quest-driven-complete": "quest_transaction_evidence",
             "new-progression-heavy-complete": "progression_balance_model_evidence",
+            "difficulty-pacing-complete": "difficulty_pacing_evidence",
             "new-networked-multiplayer-complete": "network_contract_evidence",
             "new-extraction-complete": "extraction_loop_evidence",
             "new-online-extraction-complete": "network_contract_evidence",
@@ -708,6 +775,33 @@ class GenreRubricTests(unittest.TestCase):
             "human",
         )
         self.assertIn("Progression and Balance Review", review)
+
+    def test_difficulty_scaffold_instantiates_builder_and_human_gates_and_review(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            completed = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "difficulty-pacing-complete",
+                "--output",
+                str(temp / "evidence.json"),
+                "--difficulty-pacing-review-output",
+                str(temp / "difficulty-review.md"),
+            )
+            evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
+            review = (temp / "difficulty-review.md").read_text(encoding="utf-8")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertEqual(
+            evidence["gates"]["difficulty_pacing_evidence"]["reviewer"]["role"],
+            "builder",
+        )
+        self.assertEqual(
+            evidence["gates"]["difficulty_pacing_playtest"]["reviewer"]["role"],
+            "human",
+        )
+        self.assertIn("Difficulty and Pacing Review", review)
 
     def test_online_scaffolds_instantiate_owners_and_reviews(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -858,6 +952,10 @@ class GenreRubricTests(unittest.TestCase):
             "--fault-review-output": ("fault.md", "Fault Injection and Fuzzing Review"),
             "--desktop-review-output": ("desktop.md", "Desktop Hardware and Display Review"),
             "--assistive-review-output": ("assistive.md", "Assistive Accessibility Review"),
+            "--difficulty-pacing-review-output": (
+                "difficulty.md",
+                "Difficulty and Pacing Review",
+            ),
         }
         with tempfile.TemporaryDirectory() as directory:
             temp = Path(directory)
@@ -883,7 +981,7 @@ class GenreRubricTests(unittest.TestCase):
     def test_hybrid_case_unions_gates_and_uses_maximum_score_floors(self) -> None:
         selector = (
             "new-shooter-action-complete+new-extraction-complete+"
-            "localized-release-complete+fault-injection-hardening"
+            "localized-release-complete+fault-injection-hardening+difficulty-pacing-complete"
         )
         with tempfile.TemporaryDirectory() as directory:
             temp = Path(directory)
@@ -916,8 +1014,9 @@ class GenreRubricTests(unittest.TestCase):
         self.assertIn("extraction_loop_evidence", evidence["gates"])
         self.assertIn("localization_contract_evidence", evidence["gates"])
         self.assertIn("fault_injection_evidence", evidence["gates"])
+        self.assertIn("difficulty_pacing_evidence", evidence["gates"])
         self.assertEqual(plan["minimum_scores"]["playability_and_ux"], 3)
-        self.assertEqual(len(plan["component_cases"]), 4)
+        self.assertEqual(len(plan["component_cases"]), 5)
 
     def test_device_human_gates_cap_unverified_scores(self) -> None:
         expected = {

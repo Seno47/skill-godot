@@ -24,6 +24,7 @@ PRODUCTION_ART_REVIEW_TEMPLATE = ROOT / "assets" / "production-art-state-review.
 MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
 HUD_REVIEW_TEMPLATE = ROOT / "assets" / "gameplay-hud-glanceability-review.template.md"
 PROGRESSION_BALANCE_REVIEW_TEMPLATE = ROOT / "assets" / "progression-balance-review.template.md"
+DIFFICULTY_PACING_REVIEW_TEMPLATE = ROOT / "assets" / "difficulty-pacing-review.template.md"
 NETWORK_REVIEW_TEMPLATE = ROOT / "assets" / "networked-multiplayer-review.template.md"
 EXTRACTION_REVIEW_TEMPLATE = ROOT / "assets" / "extraction-review.template.md"
 ONLINE_SERVICE_REVIEW_TEMPLATE = ROOT / "assets" / "online-service-readiness.template.md"
@@ -87,6 +88,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--progression-balance-review-output",
         help="Also instantiate the cross-genre progression and balance review.",
+    )
+    parser.add_argument(
+        "--difficulty-pacing-review-output",
+        help="Also instantiate the genre-aware difficulty and pacing review.",
     )
     parser.add_argument(
         "--network-review-output",
@@ -381,6 +386,7 @@ def main() -> int:
                 args.menu_review_output,
                 args.hud_review_output,
                 args.progression_balance_review_output,
+                args.difficulty_pacing_review_output,
                 args.network_review_output,
                 args.extraction_review_output,
                 args.online_service_review_output,
@@ -437,6 +443,11 @@ def main() -> int:
             copy_template(
                 PROGRESSION_BALANCE_REVIEW_TEMPLATE,
                 output_path(args.progression_balance_review_output),
+            )
+        if args.difficulty_pacing_review_output:
+            copy_template(
+                DIFFICULTY_PACING_REVIEW_TEMPLATE,
+                output_path(args.difficulty_pacing_review_output),
             )
         if args.network_review_output:
             copy_template(NETWORK_REVIEW_TEMPLATE, output_path(args.network_review_output))

@@ -138,6 +138,33 @@
       }
     },
     {
+      "id": "difficulty_pacing_evidence",
+      "cases": ["new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "difficulty-pacing-complete"],
+      "description": "A genre-aware difficulty contract declared before bulk content separates execution, cognition, time, resources, punishment, uncertainty, coordination and navigation/information load; maps taught skills into practice, combination/test, peaks/relief or player-selected risk; bounds novelty, rises, failure recovery and onboarding pressure; and proves every required beat in the exact target build. One monotonic scalar, HP/damage/cost inflation, grind, obscurity, travel, autoplay, or a designer-authored chart alone does not pass. Dynamic assistance preserves feedback, outcome and reward integrity; ranked play never uses hidden mid-match outcome steering.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "trace": 2},
+        "required_states": {
+          "contract_audit": ["report"],
+          "target_build_envelope": ["trace"],
+          "skill_combination_or_peak_recovery": ["trace"]
+        }
+      }
+    },
+    {
+      "id": "difficulty_pacing_playtest",
+      "acceptance_owner": "human",
+      "cases": ["new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "difficulty-pacing-complete"],
+      "description": "At least two clean-profile uncoached human target-build sessions across representative genre experience judge challenge comprehension, actual skill use, novelty, peaks/relief or voluntary risk, failure attribution/retry, fatigue, fairness and any assistance/adaptation. The builder owns routine contract and implementation defects; simulation, autoplay, aggregate telemetry, designer play or one short opening cannot certify perceived pacing across an unobserved campaign/run/session.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"trace": 2, "review": 1},
+        "required_states": {
+          "skill_acquisition_or_route_choice": ["trace"],
+          "peak_test_or_high_risk": ["trace"],
+          "failure_recovery_or_relief": ["trace"]
+        }
+      }
+    },
+    {
       "id": "menu_identity_craft_review",
       "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "constrained-mobile-web"],
@@ -1016,6 +1043,14 @@
       "dimensions": {"playability_and_ux": 1, "gameplay_correctness": 2, "evidence_and_reproducibility": 2}
     },
     {
+      "gate": "difficulty_pacing_evidence",
+      "dimensions": {"gameplay_correctness": 1, "playability_and_ux": 2, "technical_quality": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "difficulty_pacing_playtest",
+      "dimensions": {"playability_and_ux": 1, "gameplay_correctness": 2, "evidence_and_reproducibility": 2}
+    },
+    {
       "gate": "menu_identity_craft_review",
       "dimensions": {"visual_coherence": 1, "playability_and_ux": 2}
     },
@@ -1597,6 +1632,12 @@
       "brief": "Verify an exact desktop candidate on real minimum and representative machines across renderer, performance, window/display/DPI extremes, lifecycle, hot-plug and human moment-to-moment play.",
       "focus": ["real hardware tiers", "renderer and driver", "window/fullscreen", "ultrawide and HiDPI", "multi-display lifecycle", "input hot-plug", "low VRAM fallback", "human performance feel"],
       "minimum_scores": {"gameplay_correctness":3,"playability_and_ux":3,"visual_coherence":3,"responsive_visual_integrity":3,"technical_quality":3,"performance_and_size":3,"evidence_and_reproducibility":3}
+    },
+    {
+      "id": "difficulty-pacing-complete",
+      "brief": "Add or validate a material difficulty and pacing envelope using a genre-appropriate curve, separate challenge dimensions, learned-skill combinations, peaks/relief or player-selected risk, bounded fair adaptation and uncoached target-build pacing evidence.",
+      "focus": ["genre-aware curve model", "difficulty dimensions", "teach practice combine test", "novelty budget", "peaks relief and recovery", "failure and retry", "player-selected risk", "fair adaptation and assists", "ranked outcome integrity", "clean-profile human pacing"],
+      "minimum_scores": {"gameplay_correctness":3,"playability_and_ux":3,"technical_quality":3,"evidence_and_reproducibility":3}
     },
     {
       "id": "assistive-accessibility-release",

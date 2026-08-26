@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-project-contract-id",
+  "build_id": "replace-with-tested-build-id",
+  "contract": {
+    "genre_profile": "action",
+    "secondary_profiles": [],
+    "curve_model": "authored_wave",
+    "rationale": "Short combat chapters teach one threat, combine it with spatial pressure, peak, then provide a safe recovery beat.",
+    "required_dimensions": ["execution", "resource_pressure", "navigation_information"],
+    "required_phases": ["teach", "practice", "combine", "peak", "recovery", "test"],
+    "required_cohorts": ["novice", "typical", "expert"],
+    "required_evidence_sources": ["simulation", "target_build"]
+  },
+  "dimension_definitions": {
+    "execution": "Timing, aiming, movement precision, and action sequencing.",
+    "resource_pressure": "Meaningful scarcity of health, ammunition, charges, or safe space.",
+    "navigation_information": "Need to read space, routes, objectives, and threat direction."
+  },
+  "budgets": {
+    "max_consecutive_challenge_rises": 3,
+    "max_new_dimensions_per_beat": 1,
+    "max_beats_from_peak_to_recovery": 2,
+    "onboarding_pressure_cap": 2.0,
+    "max_typical_attempts_per_test": 4
+  },
+  "adaptation": {
+    "policy": "assist_only",
+    "surfaces": ["optional_aim_assist", "optional_extra_checkpoint"],
+    "bounded": true,
+    "cooldown_or_hysteresis": true,
+    "player_control_or_disclosure": true,
+    "outcome_integrity_preserved": true,
+    "reward_value_preserved": true,
+    "ranked_midmatch_outcome_manipulation": false
+  },
+  "beats": [
+    {
+      "id": "safe_teach",
+      "order": 1,
+      "phase": "teach",
+      "challenge": 1.0,
+      "intensity": 1.0,
+      "dimensions": {"execution": 1.0, "resource_pressure": 0.0, "navigation_information": 1.0},
+      "introduces_skills": ["dodge"],
+      "uses_skills": ["dodge"],
+      "new_dimensions": ["execution"],
+      "onboarding": true,
+      "recovery_available": true,
+      "branch_id": "main"
+    },
+    {
+      "id": "practice_dodge",
+      "order": 2,
+      "phase": "practice",
+      "challenge": 1.5,
+      "intensity": 1.5,
+      "dimensions": {"execution": 1.5, "resource_pressure": 0.5, "navigation_information": 1.0},
+      "introduces_skills": [],
+      "uses_skills": ["dodge"],
+      "new_dimensions": [],
+      "onboarding": true,
+      "recovery_available": true,
+      "branch_id": "main"
+    },
+    {
+      "id": "teach_cover",
+      "order": 3,
+      "phase": "teach",
+      "challenge": 1.3,
+      "intensity": 1.5,
+      "dimensions": {"execution": 1.0, "resource_pressure": 0.5, "navigation_information": 1.8},
+      "introduces_skills": ["use_cover"],
+      "uses_skills": ["use_cover"],
+      "new_dimensions": ["navigation_information"],
+      "onboarding": true,
+      "recovery_available": true,
+      "branch_id": "main"
+    },
+    {
+      "id": "combine_arena",
+      "order": 4,
+      "phase": "combine",
+      "challenge": 2.8,
+      "intensity": 3.0,
+      "dimensions": {"execution": 2.5, "resource_pressure": 1.5, "navigation_information": 2.5},
+      "introduces_skills": [],
+      "uses_skills": ["dodge", "use_cover"],
+      "new_dimensions": [],
+      "recovery_available": false,
+      "branch_id": "main"
+    },
+    {
+      "id": "chapter_peak",
+      "order": 5,
+      "phase": "peak",
+      "challenge": 3.8,
+      "intensity": 4.2,
+      "dimensions": {"execution": 3.5, "resource_pressure": 3.0, "navigation_information": 3.0},
+      "introduces_skills": [],
+      "uses_skills": ["dodge", "use_cover"],
+      "new_dimensions": [],
+      "recovery_available": false,
+      "branch_id": "main"
+    },
+    {
+      "id": "safe_room",
+      "order": 6,
+      "phase": "recovery",
+      "challenge": 1.2,
+      "intensity": 0.8,
+      "dimensions": {"execution": 0.5, "resource_pressure": 0.0, "navigation_information": 1.0},
+      "introduces_skills": [],
+      "uses_skills": [],
+      "new_dimensions": [],
+      "recovery_available": true,
+      "branch_id": "main"
+    },
+    {
+      "id": "transfer_test",
+      "order": 7,
+      "phase": "test",
+      "challenge": 3.2,
+      "intensity": 3.2,
+      "dimensions": {"execution": 3.0, "resource_pressure": 2.0, "navigation_information": 2.5},
+      "introduces_skills": [],
+      "uses_skills": ["dodge", "use_cover"],
+      "new_dimensions": [],
+      "recovery_available": false,
+      "branch_id": "main"
+    }
+  ],
+  "observations": [
+    {"id": "novice-sim", "cohort": "novice", "source": "simulation", "completed_beat_ids": ["safe_teach", "practice_dodge", "teach_cover", "combine_arena", "chapter_peak", "safe_room", "transfer_test"], "test_attempts": {"transfer_test": 4}},
+    {"id": "typical-build", "cohort": "typical", "source": "target_build", "completed_beat_ids": ["safe_teach", "practice_dodge", "teach_cover", "combine_arena", "chapter_peak", "safe_room", "transfer_test"], "test_attempts": {"transfer_test": 2}},
+    {"id": "expert-sim", "cohort": "expert", "source": "simulation", "completed_beat_ids": ["safe_teach", "practice_dodge", "teach_cover", "combine_arena", "chapter_peak", "safe_room", "transfer_test"], "test_attempts": {"transfer_test": 1}}
+  ]
+}

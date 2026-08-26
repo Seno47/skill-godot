@@ -89,6 +89,24 @@
         {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["progression_pacing_review"]}
       ]
     },
+    "difficulty_pacing_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: genre-aware difficulty contract audit and exact target-build envelope traces"],
+      "artifacts": [
+        {"path": "evidence-artifacts/progression-model.json", "kind": "report", "states": ["contract_audit"]},
+        {"path": "evidence-artifacts/progression-trace-a.json", "kind": "trace", "states": ["target_build_envelope"]},
+        {"path": "evidence-artifacts/progression-trace-b.json", "kind": "trace", "states": ["skill_combination_or_peak_recovery"]}
+      ]
+    },
+    "difficulty_pacing_playtest": {
+      "status": "pass",
+      "evidence": ["fixture: separate clean-profile uncoached human difficulty and pacing traces"],
+      "artifacts": [
+        {"path": "evidence-artifacts/progression-trace-a.json", "kind": "trace", "states": ["skill_acquisition_or_route_choice", "failure_recovery_or_relief"]},
+        {"path": "evidence-artifacts/progression-trace-b.json", "kind": "trace", "states": ["peak_test_or_high_risk"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["difficulty_pacing_review"]}
+      ]
+    },
     "menu_identity_craft_review": {
       "status": "pass",
       "evidence": ["fixture: independent runtime wordmark, copy, hierarchy, and menu composition review"],

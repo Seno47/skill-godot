@@ -2,6 +2,8 @@
 
 Read this when a game has material persistent progression, upgrades, levels, resources, rewards, unlocks, escalating challenge, meta-progression, or a player-facing economy. Apply it alongside the genre guide; it does not replace quest topology, metroidvania soft-lock checks, idle arithmetic, combat simulation, or target-build play.
 
+When the moment-to-moment or chapter difficulty shape is material, also apply [difficulty-and-pacing.md](difficulty-and-pacing.md). This guide checks persistent power, rewards and economy; it does not prove that encounters teach skills, combine them well, create appropriate peaks/relief, or adapt fairly.
+
 ## Decide whether the layer applies
 
 Use the progression-heavy contract when one or more of these can materially change the player's future options or power:
