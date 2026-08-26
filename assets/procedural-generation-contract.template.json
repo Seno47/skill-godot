@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-procedural-contract-id",
+  "build_id": "replace-with-tested-build-id",
+  "generator_version": 4,
+  "content_version": 7,
+  "contract": {
+    "minimum_unique_seeds": 8,
+    "required_features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"],
+    "required_scenarios": ["typical", "dense", "regression", "fallback", "save_resume", "performance"],
+    "max_generation_ms": "120",
+    "max_retry_count": 3,
+    "max_invalid_results": 0,
+    "max_unreachable_objectives": 0,
+    "max_dominant_layout_share": "0.30"
+  },
+  "seed_traces": [
+    {"id": "seed-101-a", "seed": "101", "scenario": "typical", "source": "target_build", "result": "pass", "layout_hash": "layout-a1", "topology_hash": "topo-101", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "42", "retry_count": 0, "fallback_succeeded": true, "save_resume_hash": "resume-101"},
+    {"id": "seed-101-b", "seed": "101", "scenario": "save_resume", "source": "target_build", "result": "pass", "layout_hash": "layout-a1", "topology_hash": "topo-101", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "41", "retry_count": 0, "fallback_succeeded": true, "save_resume_hash": "resume-101"},
+    {"id": "seed-202", "seed": "202", "scenario": "dense", "source": "target_build", "result": "pass", "layout_hash": "layout-b2", "topology_hash": "topo-202", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "76", "retry_count": 1, "fallback_succeeded": true, "save_resume_hash": "resume-202"},
+    {"id": "seed-303", "seed": "303", "scenario": "regression", "source": "target_build", "result": "pass", "layout_hash": "layout-c3", "topology_hash": "topo-303", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "55", "retry_count": 1, "fallback_succeeded": true, "save_resume_hash": "resume-303"},
+    {"id": "seed-404", "seed": "404", "scenario": "fallback", "source": "target_build", "result": "pass", "layout_hash": "layout-d4", "topology_hash": "topo-404", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "88", "retry_count": 2, "fallback_succeeded": true, "save_resume_hash": "resume-404"},
+    {"id": "seed-505", "seed": "505", "scenario": "performance", "source": "target_build", "result": "pass", "layout_hash": "layout-e5", "topology_hash": "topo-505", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "91", "retry_count": 0, "fallback_succeeded": true, "save_resume_hash": "resume-505"},
+    {"id": "seed-606", "seed": "606", "scenario": "typical", "source": "target_build", "result": "pass", "layout_hash": "layout-f6", "topology_hash": "topo-606", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "48", "retry_count": 0, "fallback_succeeded": true, "save_resume_hash": "resume-606"},
+    {"id": "seed-707", "seed": "707", "scenario": "dense", "source": "target_build", "result": "pass", "layout_hash": "layout-g7", "topology_hash": "topo-707", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "83", "retry_count": 1, "fallback_succeeded": true, "save_resume_hash": "resume-707"},
+    {"id": "seed-808", "seed": "808", "scenario": "typical", "source": "target_build", "result": "pass", "layout_hash": "layout-h8", "topology_hash": "topo-808", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "50", "retry_count": 0, "fallback_succeeded": true, "save_resume_hash": "resume-808"},
+    {"id": "seed-909", "seed": "909", "scenario": "typical", "source": "target_build", "result": "pass", "layout_hash": "layout-i9", "topology_hash": "topo-909", "start_exit_connected": true, "unreachable_objectives": 0, "features": ["start", "exit", "recovery", "mechanic_a", "mechanic_b"], "generation_ms": "47", "retry_count": 0, "fallback_succeeded": true, "save_resume_hash": "resume-909"}
+  ],
+  "distributions": [
+    {"id": "healing_rooms", "observed_share": "0.22", "minimum_share": "0.15", "maximum_share": "0.30"},
+    {"id": "elite_encounters", "observed_share": "0.18", "minimum_share": "0.10", "maximum_share": "0.25"},
+    {"id": "branching_routes", "observed_share": "0.55", "minimum_share": "0.40", "maximum_share": "0.75"}
+  ]
+}

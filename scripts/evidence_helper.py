@@ -25,6 +25,16 @@ PROGRESSION_BALANCE_REVIEW_TEMPLATE = ROOT / "assets" / "progression-balance-rev
 NETWORK_REVIEW_TEMPLATE = ROOT / "assets" / "networked-multiplayer-review.template.md"
 EXTRACTION_REVIEW_TEMPLATE = ROOT / "assets" / "extraction-review.template.md"
 ONLINE_SERVICE_REVIEW_TEMPLATE = ROOT / "assets" / "online-service-readiness.template.md"
+SAVE_REVIEW_TEMPLATE = ROOT / "assets" / "save-data-integrity-review.template.md"
+AI_REVIEW_TEMPLATE = ROOT / "assets" / "ai-navigation-review.template.md"
+PROCEDURAL_REVIEW_TEMPLATE = ROOT / "assets" / "procedural-generation-review.template.md"
+INPUT_ACCESSIBILITY_REVIEW_TEMPLATE = ROOT / "assets" / "input-accessibility-review.template.md"
+STRATEGY_REVIEW_TEMPLATE = ROOT / "assets" / "strategy-simulation-review.template.md"
+VEHICLE_REVIEW_TEMPLATE = ROOT / "assets" / "vehicle-racing-review.template.md"
+SHOOTER_REVIEW_TEMPLATE = ROOT / "assets" / "shooter-action-review.template.md"
+NARRATIVE_REVIEW_TEMPLATE = ROOT / "assets" / "narrative-review.template.md"
+PLATFORM_RELEASE_TEMPLATE = ROOT / "assets" / "platform-release-matrix.template.md"
+MODDING_REVIEW_TEMPLATE = ROOT / "assets" / "modding-ugc-review.template.md"
 PROJECT_STATUS_TEMPLATE = ROOT / "assets" / "project-run-state.template.md"
 
 
@@ -66,6 +76,40 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--online-service-review-output",
         help="Also instantiate the MMO/online-service readiness review.",
+    )
+    parser.add_argument("--save-review-output", help="Also instantiate the save integrity review.")
+    parser.add_argument("--ai-review-output", help="Also instantiate the AI/navigation review.")
+    parser.add_argument(
+        "--procedural-review-output",
+        help="Also instantiate the procedural-generation review.",
+    )
+    parser.add_argument(
+        "--input-accessibility-review-output",
+        help="Also instantiate the input/accessibility review.",
+    )
+    parser.add_argument(
+        "--strategy-review-output",
+        help="Also instantiate the strategy/simulation review.",
+    )
+    parser.add_argument(
+        "--vehicle-review-output",
+        help="Also instantiate the vehicle/racing review.",
+    )
+    parser.add_argument(
+        "--shooter-review-output",
+        help="Also instantiate the shooter/action review.",
+    )
+    parser.add_argument(
+        "--narrative-review-output",
+        help="Also instantiate the narrative/cinematic review.",
+    )
+    parser.add_argument(
+        "--platform-release-output",
+        help="Also instantiate the platform/store release matrix.",
+    )
+    parser.add_argument(
+        "--modding-review-output",
+        help="Also instantiate the modding/UGC review.",
     )
     parser.add_argument(
         "--production-art-review-output",
@@ -291,6 +335,16 @@ def main() -> int:
                 args.network_review_output,
                 args.extraction_review_output,
                 args.online_service_review_output,
+                args.save_review_output,
+                args.ai_review_output,
+                args.procedural_review_output,
+                args.input_accessibility_review_output,
+                args.strategy_review_output,
+                args.vehicle_review_output,
+                args.shooter_review_output,
+                args.narrative_review_output,
+                args.platform_release_output,
+                args.modding_review_output,
                 args.project_status_output,
                 args.production_art_review_output,
                 args.motion_review_output,
@@ -328,6 +382,29 @@ def main() -> int:
                 ONLINE_SERVICE_REVIEW_TEMPLATE,
                 output_path(args.online_service_review_output),
             )
+        if args.save_review_output:
+            copy_template(SAVE_REVIEW_TEMPLATE, output_path(args.save_review_output))
+        if args.ai_review_output:
+            copy_template(AI_REVIEW_TEMPLATE, output_path(args.ai_review_output))
+        if args.procedural_review_output:
+            copy_template(PROCEDURAL_REVIEW_TEMPLATE, output_path(args.procedural_review_output))
+        if args.input_accessibility_review_output:
+            copy_template(
+                INPUT_ACCESSIBILITY_REVIEW_TEMPLATE,
+                output_path(args.input_accessibility_review_output),
+            )
+        if args.strategy_review_output:
+            copy_template(STRATEGY_REVIEW_TEMPLATE, output_path(args.strategy_review_output))
+        if args.vehicle_review_output:
+            copy_template(VEHICLE_REVIEW_TEMPLATE, output_path(args.vehicle_review_output))
+        if args.shooter_review_output:
+            copy_template(SHOOTER_REVIEW_TEMPLATE, output_path(args.shooter_review_output))
+        if args.narrative_review_output:
+            copy_template(NARRATIVE_REVIEW_TEMPLATE, output_path(args.narrative_review_output))
+        if args.platform_release_output:
+            copy_template(PLATFORM_RELEASE_TEMPLATE, output_path(args.platform_release_output))
+        if args.modding_review_output:
+            copy_template(MODDING_REVIEW_TEMPLATE, output_path(args.modding_review_output))
         if args.project_status_output:
             copy_template(PROJECT_STATUS_TEMPLATE, output_path(args.project_status_output))
         if args.production_art_review_output:

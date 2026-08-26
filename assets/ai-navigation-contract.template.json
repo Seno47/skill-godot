@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-ai-navigation-contract-id",
+  "build_id": "replace-with-tested-build-id",
+  "contract": {
+    "required_archetypes": ["guard", "ranged", "crowd"],
+    "required_scenarios": [
+      "spawn_idle",
+      "perception_boundary",
+      "chase_route",
+      "blocked_replan",
+      "unreachable_target",
+      "crowd_avoidance",
+      "combat_telegraph",
+      "disengage_return",
+      "pause_resume",
+      "capacity"
+    ],
+    "forbidden_information": ["raw_player_input", "future_rng", "hidden_inventory"],
+    "max_stuck_events": 0,
+    "max_deadlocks": 0,
+    "max_path_ms": "4",
+    "max_replan_ms": "100",
+    "minimum_telegraph_ms": "250",
+    "minimum_reaction_ms": "120",
+    "max_capacity_tick_p95_ms": "16.67",
+    "target_active_agents": 64,
+    "max_offscreen_updates_per_second": "5"
+  },
+  "traces": [
+    {"id": "guard-idle", "scenario": "spawn_idle", "archetype": "guard", "source": "target_build", "result": "pass", "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "0.2"},
+    {"id": "range-boundary", "scenario": "perception_boundary", "archetype": "ranged", "source": "target_build", "result": "pass", "inside_detected": true, "outside_detected": false, "occluded_detected": false, "reaction_ms": "180", "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "0.3"},
+    {"id": "guard-chase-route", "scenario": "chase_route", "archetype": "guard", "source": "target_build", "result": "pass", "route_valid": true, "target_reached": true, "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "1.1"},
+    {"id": "blocked-door-replan", "scenario": "blocked_replan", "archetype": "guard", "source": "target_build", "result": "pass", "route_valid": true, "replan_succeeded": true, "replan_ms": "44", "target_reached": true, "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "2.1"},
+    {"id": "deleted-target", "scenario": "unreachable_target", "archetype": "ranged", "source": "target_build", "result": "pass", "unreachable_handled": true, "target_reached": false, "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "1.0"},
+    {"id": "crowd-doorway", "scenario": "crowd_avoidance", "archetype": "crowd", "source": "target_build", "result": "pass", "route_valid": true, "actors": 24, "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "2.8"},
+    {"id": "attack-telegraph", "scenario": "combat_telegraph", "archetype": "ranged", "source": "target_build", "result": "pass", "telegraph_ms": "420", "reaction_ms": "160", "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "0.4"},
+    {"id": "guard-disengage", "scenario": "disengage_return", "archetype": "guard", "source": "target_build", "result": "pass", "route_valid": true, "returned_to_valid_state": true, "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "1.2"},
+    {"id": "pause-resume", "scenario": "pause_resume", "archetype": "guard", "source": "target_build", "result": "pass", "state_advanced_while_paused": false, "cooldown_drift_ms": "0", "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "0.2"},
+    {"id": "capacity-64", "scenario": "capacity", "archetype": "crowd", "source": "target_build", "result": "pass", "actors": 64, "capacity_tick_p95_ms": "12.8", "offscreen_updates_per_second": "4", "state_transition_valid": true, "forbidden_information_read": [], "stuck_events": 0, "deadlocks": 0, "path_ms": "3.2"}
+  ]
+}

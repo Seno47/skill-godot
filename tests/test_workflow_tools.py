@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke tests for parity, progression, and idle-economy workflow helpers."""
+"""Smoke tests for deterministic contracts and production workflow helpers."""
 
 from __future__ import annotations
 
@@ -26,6 +26,17 @@ def run_script(name: str, *arguments: str) -> subprocess.CompletedProcess[str]:
         errors="replace",
         check=False,
     )
+
+
+def load_asset_json(name: str) -> dict[str, object]:
+    return json.loads((ROOT / "assets" / name).read_text(encoding="utf-8"))
+
+
+def run_contract(script: str, model: dict[str, object]) -> subprocess.CompletedProcess[str]:
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "contract.json"
+        path.write_text(json.dumps(model), encoding="utf-8")
+        return run_script(script, "--model", str(path), "--summary")
 
 
 class ProgressionGraphTests(unittest.TestCase):
@@ -249,7 +260,130 @@ class ExtractionLoopTests(unittest.TestCase):
         self.assertIn("settlement applied 2 times", completed.stdout)
 
 
+class SaveDataContractTests(unittest.TestCase):
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "save_data_probe.py",
+            "--model",
+            str(ROOT / "assets" / "save-data-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] save-data", completed.stdout)
+
+    def test_digest_mismatch_fails(self) -> None:
+        model = load_asset_json("save-data-contract.template.json")
+        model["traces"][1]["actual_digest"] = "wrong-state"
+        completed = run_contract("save_data_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("round-trip digest mismatch", completed.stdout)
+
+    def test_missing_supported_migration_fails(self) -> None:
+        model = load_asset_json("save-data-contract.template.json")
+        model["traces"] = [
+            trace
+            for trace in model["traces"]
+            if not (trace["scenario"] == "migration" and trace["source_version"] == 1)
+        ]
+        completed = run_contract("save_data_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("missing migration traces from versions: 1", completed.stdout)
+
+
+class AINavigationContractTests(unittest.TestCase):
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "ai_navigation_probe.py",
+            "--model",
+            str(ROOT / "assets" / "ai-navigation-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] ai-navigation", completed.stdout)
+
+    def test_forbidden_information_fails(self) -> None:
+        model = load_asset_json("ai-navigation-contract.template.json")
+        model["traces"][0]["forbidden_information_read"] = ["raw_player_input"]
+        completed = run_contract("ai_navigation_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("reads forbidden information: raw_player_input", completed.stdout)
+
+    def test_unreachable_target_without_recovery_fails(self) -> None:
+        model = load_asset_json("ai-navigation-contract.template.json")
+        trace = next(
+            trace for trace in model["traces"] if trace["scenario"] == "unreachable_target"
+        )
+        trace["unreachable_handled"] = False
+        completed = run_contract("ai_navigation_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("does not handle unreachable target", completed.stdout)
+
+
+class ProceduralGenerationContractTests(unittest.TestCase):
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "procedural_generation_probe.py",
+            "--model",
+            str(ROOT / "assets" / "procedural-generation-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] procedural-generation", completed.stdout)
+
+    def test_same_seed_nondeterminism_fails(self) -> None:
+        model = load_asset_json("procedural-generation-contract.template.json")
+        model["seed_traces"][1]["layout_hash"] = "changed-layout"
+        completed = run_contract("procedural_generation_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("seed 101 is not deterministic", completed.stdout)
+
+    def test_disconnected_seed_fails(self) -> None:
+        model = load_asset_json("procedural-generation-contract.template.json")
+        model["seed_traces"][2]["start_exit_connected"] = False
+        completed = run_contract("procedural_generation_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("has disconnected start and exit", completed.stdout)
+
+
+class InputAccessibilityContractTests(unittest.TestCase):
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "input_accessibility_probe.py",
+            "--model",
+            str(ROOT / "assets" / "input-accessibility-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] input-accessibility", completed.stdout)
+
+    def test_missing_device_binding_fails(self) -> None:
+        model = load_asset_json("input-accessibility-contract.template.json")
+        model["contract"]["bindings"][0]["devices"] = ["keyboard_mouse"]
+        completed = run_contract("input_accessibility_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("critical action move misses devices: gamepad", completed.stdout)
+
+    def test_cross_player_input_leak_fails(self) -> None:
+        model = load_asset_json("input-accessibility-contract.template.json")
+        trace = next(
+            trace for trace in model["traces"] if trace["scenario"] == "local_join_leave"
+        )
+        trace["cross_player_actions"] = 1
+        completed = run_contract("input_accessibility_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("leaks actions across players", completed.stdout)
+
+
 class GenreRubricTests(unittest.TestCase):
+    def test_rubric_case_and_score_cap_references_are_closed(self) -> None:
+        rubric = json.loads((ROOT / "evals" / "rubric.json").read_text(encoding="utf-8"))
+        cases = {item["id"] for item in rubric["cases"]}
+        gates = {item["id"] for item in rubric["blocking_gates"]}
+        for gate in rubric["blocking_gates"]:
+            self.assertTrue(set(gate.get("cases", [])) <= cases, gate["id"])
+        for cap in rubric["score_caps"]:
+            self.assertIn(cap["gate"], gates)
+
     def test_new_cases_prepare_their_conditional_gates(self) -> None:
         expected = {
             "new-2d-fighting-complete": "fighting_simulation_evidence",
@@ -261,6 +395,14 @@ class GenreRubricTests(unittest.TestCase):
             "new-extraction-complete": "extraction_loop_evidence",
             "new-online-extraction-complete": "network_contract_evidence",
             "new-mmo-production-slice": "online_service_readiness_evidence",
+            "new-procedural-roguelike-complete": "procedural_generation_evidence",
+            "new-strategy-simulation-complete": "strategy_simulation_evidence",
+            "new-vehicle-racing-complete": "vehicle_racing_evidence",
+            "new-shooter-action-complete": "shooter_combat_evidence",
+            "new-narrative-complete": "narrative_flow_evidence",
+            "new-local-multiplayer-complete": "local_multiplayer_input_evidence",
+            "multi-platform-store-release": "platform_release_evidence",
+            "modding-ugc-production-slice": "modding_ugc_evidence",
             "new-2-5d-complete": "production_art_integrity_evidence",
             "new-isometric-fixed-camera-complete": "isometric_vertical_slice_art_review",
             "ui-reference-integration": "reference_parity_evidence",
@@ -417,6 +559,43 @@ class GenreRubricTests(unittest.TestCase):
         self.assertIn("not watched or played", proof["required_when"])
         self.assertIsNone(proof["builder_watched_back_entire_recording"])
         self.assertEqual(proof["result"], "not_tested")
+
+    def test_extended_review_templates_are_scaffolded(self) -> None:
+        flags = {
+            "--save-review-output": ("save.md", "Save Data Integrity Review"),
+            "--ai-review-output": ("ai.md", "AI and Navigation Review"),
+            "--procedural-review-output": ("procedural.md", "Procedural Generation Review"),
+            "--input-accessibility-review-output": (
+                "input.md",
+                "Input and Accessibility Review",
+            ),
+            "--strategy-review-output": ("strategy.md", "Strategy and Simulation Review"),
+            "--vehicle-review-output": ("vehicle.md", "Vehicle and Racing Review"),
+            "--shooter-review-output": ("shooter.md", "Shooter and Action Combat Review"),
+            "--narrative-review-output": ("narrative.md", "Narrative and Cinematic Review"),
+            "--platform-release-output": ("platform.md", "Platform and Store Release Matrix"),
+            "--modding-review-output": ("modding.md", "Modding and UGC Review"),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            arguments = [
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-procedural-roguelike-complete",
+                "--output",
+                str(temp / "evidence.json"),
+            ]
+            for flag, (name, _) in flags.items():
+                arguments.extend([flag, str(temp / name)])
+            completed = run_script("evidence_helper.py", *arguments)
+            rendered = {
+                name: (temp / name).read_text(encoding="utf-8")
+                for name, _ in flags.values()
+            }
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        for name, heading in flags.values():
+            self.assertIn(heading, rendered[name])
 
 
 @unittest.skipUnless(importlib.util.find_spec("PIL"), "Pillow is not installed")

@@ -122,6 +122,44 @@
         {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["hud_independent_review"]}
       ]
     },
+    "save_data_integrity_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: versioned save, recovery, migration, idempotence, and target-build contract"],
+      "reviewer": {"role": "builder", "context": "fixture builder context"},
+      "artifacts": [
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["save_contract_audit"]},
+        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["clean_create", "round_trip"]},
+        {"path": "evidence-artifacts/trace-b.json", "kind": "trace", "states": ["interruption_recovery"]},
+        {"path": "evidence-artifacts/trace-c.json", "kind": "trace", "states": ["corruption_recovery"]},
+        {"path": "evidence-artifacts/trace-d.json", "kind": "trace", "states": ["migration"]},
+        {"path": "evidence-artifacts/trace-e.json", "kind": "trace", "states": ["duplicate_load"]},
+        {"path": "evidence-artifacts/build.zip", "kind": "build", "states": ["target_build"]}
+      ]
+    },
+    "input_accessibility_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: device, remap, hot-plug, focus, ownership, and accessibility behavior contract"],
+      "reviewer": {"role": "builder", "context": "fixture builder context"},
+      "artifacts": [
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["input_contract_audit"]},
+        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["all_devices"]},
+        {"path": "evidence-artifacts/trace-b.json", "kind": "trace", "states": ["remap_persistence"]},
+        {"path": "evidence-artifacts/trace-c.json", "kind": "trace", "states": ["hotplug_or_modality_switch", "focus_reentry"]},
+        {"path": "evidence-artifacts/trace-d.json", "kind": "trace", "states": ["accessibility_effect"]},
+        {"path": "evidence-artifacts/build.zip", "kind": "build", "states": ["target_build"]}
+      ]
+    },
+    "accessibility_usability_review": {
+      "status": "pass",
+      "evidence": ["fixture: independent first-use and before/after accessibility review"],
+      "reviewer": {"role": "independent", "context": "fixture independent accessibility reviewer"},
+      "artifacts": [
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["first_use_input", "settings_effect", "representative_gameplay"]},
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["first_use_input", "settings_effect"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["representative_gameplay"]},
+        {"path": "evidence-artifacts/trace-e.json", "kind": "trace", "states": ["first_use_input", "settings_effect"]}
+      ]
+    },
     "third_person_control_contract": {
       "status": "pass",
       "evidence": ["fixture: camera-relative yaw matrix, production-HUD InputEventMouseMotion yaw/pitch, target-build sensitivity, input axes, collision, and capture recovery"]

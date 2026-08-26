@@ -1,4 +1,4 @@
 interface:
   display_name: "Godot Game Development"
-  short_description: "Build polished 2D, 3D, and isometric Godot games"
-  default_prompt: "Use $skill-godot to build my Godot game as editable scenes, resources, and coherent assets; for isometric or 2.5D work, establish and test the spatial contract, then run, visually verify, and optimize the result against my target budgets."
+  short_description: "Build and verify production-focused Godot 4 games"
+  default_prompt: "Use $skill-godot to build my Godot 4 game as editable scenes, resources, and coherent assets; select the relevant genre, save, input/accessibility, AI, procedural, multiplayer, platform, and release contracts, then run and verify the actual target build against the brief and declared budgets."

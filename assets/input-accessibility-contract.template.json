@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-input-accessibility-contract-id",
+  "build_id": "replace-with-tested-build-id",
+  "contract": {
+    "required_devices": ["keyboard_mouse", "gamepad"],
+    "required_scenarios": [
+      "clean_first_use",
+      "remap",
+      "conflict_recovery",
+      "persistence",
+      "hotplug",
+      "modality_switch",
+      "local_join_leave",
+      "focus_reentry",
+      "accessibility_effect"
+    ],
+    "critical_actions": ["move", "primary", "pause", "ui_confirm", "ui_back"],
+    "maximum_local_players": 2,
+    "minimum_touch_target_px": 44,
+    "required_accessibility_features": ["text_scale", "reduced_motion", "non_color_state", "hold_toggle"],
+    "emergency_navigation_actions": ["ui_confirm", "ui_back"],
+    "bindings": [
+      {"action": "move", "critical": true, "rebindable": true, "devices": ["keyboard_mouse", "gamepad"]},
+      {"action": "primary", "critical": true, "rebindable": true, "devices": ["keyboard_mouse", "gamepad"]},
+      {"action": "pause", "critical": true, "rebindable": true, "devices": ["keyboard_mouse", "gamepad"]},
+      {"action": "ui_confirm", "critical": true, "rebindable": true, "devices": ["keyboard_mouse", "gamepad"]},
+      {"action": "ui_back", "critical": true, "rebindable": true, "devices": ["keyboard_mouse", "gamepad"]}
+    ]
+  },
+  "traces": [
+    {"id": "keyboard-first-use", "scenario": "clean_first_use", "device": "keyboard_mouse", "source": "target_build", "result": "pass", "actions_reached": ["move", "primary", "pause", "ui_confirm", "ui_back"], "glyph_family": "keyboard_mouse", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "gamepad-first-use", "scenario": "clean_first_use", "device": "gamepad", "source": "target_build", "result": "pass", "actions_reached": ["move", "primary", "pause", "ui_confirm", "ui_back"], "glyph_family": "xbox", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "remap-primary", "scenario": "remap", "device": "gamepad", "source": "target_build", "result": "pass", "remapped_action": "primary", "remap_effective": true, "actions_reached": ["primary", "ui_confirm", "ui_back"], "glyph_family": "xbox", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "conflict-keeps-back", "scenario": "conflict_recovery", "device": "keyboard_mouse", "source": "target_build", "result": "pass", "binding_conflicts_unresolved": 0, "emergency_navigation_reachable": true, "actions_reached": ["ui_confirm", "ui_back"], "glyph_family": "keyboard_mouse", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "binding-reload", "scenario": "persistence", "device": "gamepad", "source": "target_build", "result": "pass", "settings_persisted": true, "remap_effective": true, "actions_reached": ["primary", "ui_confirm", "ui_back"], "glyph_family": "xbox", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "gamepad-hotplug", "scenario": "hotplug", "device": "gamepad", "source": "target_build", "result": "pass", "disconnect_state_explained": true, "reconnect_restored_owner": true, "actions_reached": ["move", "primary", "pause"], "glyph_family": "xbox", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "mouse-to-gamepad", "scenario": "modality_switch", "device": "gamepad", "source": "target_build", "result": "pass", "glyph_matches_last_device": true, "actions_reached": ["ui_confirm", "ui_back"], "glyph_family": "xbox", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "two-player-join-leave", "scenario": "local_join_leave", "device": "gamepad", "source": "target_build", "result": "pass", "local_players": 2, "unique_device_owners": 2, "cross_player_actions": 0, "join_leave_recovered": true, "actions_reached": ["move", "primary", "pause"], "glyph_family": "xbox", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "focus-loss-reentry", "scenario": "focus_reentry", "device": "keyboard_mouse", "source": "target_build", "result": "pass", "input_advanced_while_unfocused": false, "focus_recovered": true, "actions_reached": ["pause", "ui_confirm", "ui_back"], "glyph_family": "keyboard_mouse", "focus_path_valid": true, "duplicate_input_events": 0},
+    {"id": "accessibility-effects", "scenario": "accessibility_effect", "device": "keyboard_mouse", "source": "target_build", "result": "pass", "features_verified": ["text_scale", "reduced_motion", "non_color_state", "hold_toggle"], "settings_persisted": true, "critical_meaning_preserved": true, "actions_reached": ["move", "primary", "pause", "ui_confirm", "ui_back"], "glyph_family": "keyboard_mouse", "focus_path_valid": true, "duplicate_input_events": 0}
+  ]
+}

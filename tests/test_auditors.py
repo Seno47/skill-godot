@@ -906,6 +906,132 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(scores["intent_and_scope"]["score"], 2)
         self.assertEqual(report["verdict"], "blocked")
 
+    def test_eval_procedural_case_cannot_bypass_generation_ai_and_human_gates(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-procedural-roguelike-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["performance_and_size"] = {
+            "score": 4,
+            "evidence": ["fixture: submitted procedural capacity claim"],
+        }
+        missing = (
+            "progression_balance_model_evidence",
+            "progression_pacing_playtest",
+            "ai_navigation_evidence",
+            "ai_behavior_readability_review",
+            "procedural_generation_evidence",
+            "procedural_variety_playtest",
+        )
+        for gate_id in missing:
+            source["gates"][gate_id] = {
+                "status": "not_tested",
+                "evidence": [f"fixture: {gate_id} deliberately absent"],
+            }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-procedural-roguelike-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        blocking = {item["id"] for item in report["gates"] if item["status"] != "pass"}
+        caps = {item["gate"] for item in report["score_caps_applied"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertTrue(set(missing).issubset(blocking))
+        self.assertTrue(
+            {
+                "progression_balance_model_evidence",
+                "ai_navigation_evidence",
+                "ai_behavior_readability_review",
+            }.issubset(caps)
+        )
+        self.assertEqual(report["verdict"], "blocked")
+
+    def test_eval_platform_release_requires_exact_candidate_matrix(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "multi-platform-store-release"
+        source["scores"]["performance_and_size"] = {
+            "score": 4,
+            "evidence": ["fixture: submitted package performance claim"],
+        }
+        source["gates"]["platform_release_evidence"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: exports exist without install/update matrix"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "multi-platform-store-release",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(scores["technical_quality"]["score"], 1)
+        self.assertEqual(scores["performance_and_size"]["score"], 1)
+        self.assertEqual(scores["evidence_and_reproducibility"]["score"], 1)
+        self.assertEqual(report["verdict"], "blocked")
+
+    def test_eval_modding_slice_requires_loader_and_security_review(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "modding-ugc-production-slice"
+        for gate_id in ("modding_ugc_evidence", "modding_security_review"):
+            source["gates"][gate_id] = {
+                "status": "not_tested",
+                "evidence": [f"fixture: {gate_id} deliberately absent"],
+            }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "modding-ugc-production-slice",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        gates = {item["id"]: item for item in report["gates"]}
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(gates["modding_ugc_evidence"]["status"], "not_tested")
+        self.assertEqual(gates["modding_security_review"]["status"], "not_tested")
+        self.assertEqual(scores["technical_quality"]["score"], 1)
+        self.assertEqual(scores["intent_and_scope"]["score"], 2)
+        self.assertEqual(report["verdict"], "blocked")
+
     def test_eval_pass_rejects_missing_raw_motion_artifact(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "new-2-5d-complete"

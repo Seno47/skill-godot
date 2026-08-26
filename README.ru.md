@@ -7,7 +7,7 @@
   <a href="./README.md">English</a> · <a href="https://learn.chatgpt.com/docs/build-skills">Как устроены навыки Codex</a>
 </p>
 
-`skill-godot` задаёт Codex воспроизводимый процесс разработки настоящего проекта Godot: редактируемые сцены и ресурсы, цельные ассеты, удобное управление, детерминированные проверки, визуальная проверка, замеры производительности и готовый к публикации экспорт. Поддерживаются 2D, 3D, 2.5D, изометрические и ортографические игры, одиночный и сетевой multiplayer, extraction и честно ограниченные MMO production slice, интерфейсы, звук, мобильное и веб-управление, а также релизы в Яндекс Играх.
+`skill-godot` задаёт Codex воспроизводимый процесс разработки настоящего проекта Godot: редактируемые сцены и ресурсы, цельные ассеты, удобное управление, детерминированные проверки, визуальная проверка, замеры производительности и готовый к публикации экспорт. Поддерживаются 2D, 3D, 2.5D, изометрические и ортографические игры; процедурные, стратегические, гоночные, экшен- и нарративные системы; одиночный, локальный и сетевой multiplayer, extraction и честно ограниченные MMO production slice; доступность, сохранения, моддинг/UGC, интерфейсы, звук, мобильное и веб-управление, магазины и релизы в Яндекс Играх.
 
 ## Быстрый старт
 
@@ -31,8 +31,8 @@ Codex также может выбрать навык автоматически
 
 | Состав | Практическая польза |
 | --- | --- |
-| 32 профильных руководства | Архитектура сцен, 2D/3D/2.5D, UI, жанровые системы, прогрессия, multiplayer, extraction, MMO/online services, поиск ассетов, графика, звук, производительность, загрузка, экспорт и публикация |
-| 19 детерминированных Python-утилит | Снимок проекта, аудит сцен/ассетов, сравнение UI, проверка читаемости фиксированной камеры, пробы прогрессии/extraction/network, захват, бюджеты, scorecard и размер сборки |
+| 42 профильных руководства | Архитектура сцен, 2D/3D/2.5D, UI, сохранения, input/accessibility, AI, процедурные и жанровые системы, multiplayer, магазины/моддинг, ассеты, звук, производительность, загрузка, экспорт и публикация |
+| 23 детерминированные Python-утилиты | Снимок проекта, аудит сцен/ассетов, сравнение UI, читаемость фиксированной камеры, пробы save/input/AI/procedural/progression/extraction/network, захват, бюджеты, scorecard и размер сборки |
 | 7 переиспользуемых Godot-проб | Тач-прокрутка, компоновка кнопок, third-person управление/HUD mouse routing/видимость, изометрическая проекция и навигация |
 | Правила scene-first | Постоянная композиция хранится в `.tscn` и ресурсах Godot, а не скрывается в больших runtime-скриптах |
 | Завершение по доказательствам | Scorecard сверяет владельца приёмки и реальные пути к скриншотам, видео и review, отклоняя PASS только на словах |
@@ -57,9 +57,14 @@ flowchart LR
 - **2D и 3D:** нативные паттерны сцен Godot и отдельные рекомендации для каждого измерения.
 - **2.5D и изометрия:** явный пространственный контракт для проекции, выбора клетки, сортировки, высоты, перекрытий, поиска пути и гибридного 2D/3D.
 - **Управление:** клавиатура, мышь, контроллер, camera-relative движение, orbit/capture recovery, тач, drag-жесты и проверка мобильных размеров.
+- **Долговечные системы:** versioned save envelope, атомарная запись, восстановление после прерывания/повреждения, миграции, idempotence и правила cloud/device conflict.
+- **AI и генерация:** честное восприятие, навигация/replan/crowd recovery, capacity evidence, именованные random streams, разрешимые seed cohorts, распределения, fallback и save/resume parity.
+- **Специализированные жанры:** production-контракты для strategy/simulation, vehicle/racing, shooter/action, narrative/cinematics и одновременного local multiplayer с разделением builder correctness и человеческой оценки feel/comprehension.
+- **Доступность:** remapping, hot-plug/focus recovery, правдивые modality/glyphs, смысл не только цветом, читаемые subtitles/captions, motion/flash/timing alternatives и независимая проверка эффекта настроек.
 - **Оптимизация:** измерение FPS, CPU/GPU/physics, анализ памяти, загрузки и размера экспорта.
 - **Веб и Яндекс Игры:** жизненный цикл SDK, реклама, rewarded-сценарии, сохранения, лидерборды, локализация, модерация и проверка архива.
 - **Multiplayer и persistent online:** server authority, репликация, лаги/потери/reconnect, dedicated server, extraction settlement, честный MMO-scope, нагрузка сервисов, восстановление после сбоев, restore и rollback.
+- **Платформы и расширяемость:** точные store candidates, clean install/update/signing/SDK lifecycle, а также явные trust tiers для mods/UGC, hostile-content validation, восстановление после удаления мода, safe mode и честные границы изоляции.
 - **Проверка:** headless-запуски, детерминированные пробы, автоматический захват, проверка обучения и независимый UX-разбор.
 
 Для законченных 2.5D-игр теперь есть отдельный rubric case `new-2-5d-complete`. Он требует явную пространственную модель, raw-состояния quiet/normal/dense/VFX/result, видео production-анимации персонажа, проверку меню и semantic identity, читаемые глубину и контакты, независимую приёмку target build по UX/визуалу и человеческое прослушивание аудио. Наличие box/sphere/cylinder, shader quad или particles внутри `.tscn` доказывает редактируемую архитектуру, но не production-art.
@@ -73,6 +78,8 @@ flowchart LR
 Для утверждённых UI-референсов добавлен нативный parity-workflow: формальные экраны остаются видимыми в редакторе сценами, а [`image_compare.py`](./scripts/image_compare.py) создаёт side-by-side, overlay и diff в одинаковом разрешении. Для графов прогрессии и idle-кривых есть JSON-модели и детерминированные пробы; их числовой PASS всё равно не заменяет прохождение целевой сборки и человеческий UX-review.
 
 Для игр, где прогрессия является основой, добавлен межжанровый контракт [`progression-and-balance.md`](./references/progression-and-balance.md). Переиспользуемые [`progression-balance.template.json`](./assets/progression-balance.template.json) и [`progression_balance_probe.py`](./scripts/progression_balance_probe.py) проверяют заявленные архетипы игроков, ранние/средние/поздние точки, соотношение силы и сложности, засухи наград и решений, восстановление, доминирование вариантов, границы ресурсов и концентрацию источников/стоков. Отдельный [`progression-balance-review.template.md`](./assets/progression-balance-review.template.md) оставляет корректность модели и сборки обязанностью builder-а, но не позволяет объявить темп, grind или качество наград проверенными без реальных uncoached human traces.
+
+Четыре новых детерминированных контракта делают сохранения, input/accessibility, AI/navigation и процедурную генерацию проверяемыми до субъективного review: [`save_data_probe.py`](./scripts/save_data_probe.py), [`input_accessibility_probe.py`](./scripts/input_accessibility_probe.py), [`ai_navigation_probe.py`](./scripts/ai_navigation_probe.py) и [`procedural_generation_probe.py`](./scripts/procedural_generation_probe.py). Соответствующие rubric cases для strategy, racing, shooter, narrative, local multiplayer, multi-platform release и modding/UGC закрываются с FAIL/BLOCKED, если нет обязательных target-build либо human/independent evidence.
 
 Для сетевых игр теперь используются [`multiplayer-networking.md`](./references/multiplayer-networking.md), [`network-contract.template.json`](./assets/network-contract.template.json) и [`network_contract_probe.py`](./scripts/network_contract_probe.py): они блокируют localhost-only успех, client authority, небезопасные RPC, отсутствие lag/loss/reconnect-проверок, несовместимый с платформой transport и неподтверждённые заявления о масштабе. Extraction получает отдельный raid/stash-ledger через [`genre-extraction.md`](./references/genre-extraction.md) и [`extraction_loop_probe.py`](./scripts/extraction_loop_probe.py). MMO намеренно оценивается как production slice по [`mmo-and-online-services.md`](./references/mmo-and-online-services.md): до production-ready заявления нужны реальные client/server артефакты, identity/persistence, interest/zone ownership, load/soak, observability, failure injection, restore и rollback.
 
