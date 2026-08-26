@@ -1,4 +1,4 @@
 interface:
   display_name: "Godot Game Development"
   short_description: "Build and verify production-focused Godot 4 games"
-  default_prompt: "Use $skill-godot to build my Godot 4 game as editable scenes, resources, and coherent assets; select the relevant genre, save, input/accessibility, AI, procedural, multiplayer, platform, and release contracts, then run and verify the actual target build against the brief and declared budgets."
+  default_prompt: "Use $skill-godot to build my Godot 4 game as editable scenes, resources, and coherent assets; compose the truthful base and modifier rubric cases, load only their relevant contracts, then run and verify the actual target build against the brief, budgets, devices, and required reviewer provenance."

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-liveops-contract-id",
+  "build_id": "replace-with-tested-build-id",
+  "contract": {
+    "config_schema_version": 2,
+    "default_config_digest": "safe-default-v2",
+    "maximum_queue_events": 1000,
+    "required_scenarios": ["online_valid", "offline_default", "timeout", "malformed", "stale", "rollback", "queue_overflow", "duplicate_retry", "opt_out", "deletion", "environment_mismatch"],
+    "forbidden_fields": ["password", "payment_token", "raw_chat"],
+    "secrets_embedded": false
+  },
+  "traces": [
+    {"id": "valid-config", "scenario": "online_valid", "source": "target_build", "result": "pass", "safe_state": true, "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 1},
+    {"id": "offline-default", "scenario": "offline_default", "source": "target_build", "result": "pass", "safe_state": true, "default_digest": "safe-default-v2", "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 2},
+    {"id": "timeout-default", "scenario": "timeout", "source": "target_build", "result": "pass", "safe_state": true, "default_digest": "safe-default-v2", "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 3},
+    {"id": "malformed-rejected", "scenario": "malformed", "source": "target_build", "result": "pass", "safe_state": true, "default_digest": "safe-default-v2", "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 4},
+    {"id": "stale-rejected", "scenario": "stale", "source": "target_build", "result": "pass", "safe_state": true, "default_digest": "safe-default-v2", "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 5},
+    {"id": "rollback", "scenario": "rollback", "source": "target_build", "result": "pass", "safe_state": true, "rollback_completed": true, "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 6},
+    {"id": "bounded-overflow", "scenario": "queue_overflow", "source": "target_build", "result": "pass", "safe_state": true, "events_dropped_by_policy": 20, "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 1000},
+    {"id": "duplicate-retry", "scenario": "duplicate_retry", "source": "target_build", "result": "pass", "safe_state": true, "idempotent_event_ids": true, "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 10},
+    {"id": "opt-out", "scenario": "opt_out", "source": "target_build", "result": "pass", "safe_state": true, "events_sent_after_opt_out": 0, "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 0},
+    {"id": "delete-data", "scenario": "deletion", "source": "target_build", "result": "pass", "safe_state": true, "deletion_completed": true, "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 0},
+    {"id": "environment-mismatch", "scenario": "environment_mismatch", "source": "target_build", "result": "pass", "safe_state": true, "request_blocked": true, "duplicate_rewards": 0, "forbidden_fields_sent": [], "consent_respected": true, "queue_size": 0}
+  ]
+}

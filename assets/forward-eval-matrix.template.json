@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "skill_commit": "replace-with-tested-skill-commit",
+  "required_contracts": [
+    "2d",
+    "3d-third-person",
+    "fixed-isometric",
+    "2.5d",
+    "procedural",
+    "strategy",
+    "vehicle",
+    "shooter",
+    "narrative",
+    "local-multiplayer",
+    "online-extraction",
+    "mobile-native",
+    "localization",
+    "large-world",
+    "replay",
+    "runtime-authoring"
+  ],
+  "scenarios": [
+    {
+      "id": "replace-with-scenario-id",
+      "brief_path": "replace-with-blind-brief",
+      "godot_version": "replace-with-version",
+      "composite_case": "replace-with-case-or-case+modifier",
+      "contracts": ["replace-with-covered-contract"],
+      "builder_context": "independent build context",
+      "reviewer_context": "separate raw-artifact review context",
+      "first_pass_verdict": "not_tested",
+      "positive_fixture": false,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "unmeasured",
+      "token_cost": null,
+      "elapsed_minutes": null,
+      "result_artifacts": []
+    }
+  ]
+}

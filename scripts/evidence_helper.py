@@ -12,6 +12,8 @@ import shutil
 import sys
 from typing import Any
 
+from rubric_case_composer import CaseCompositionError, gate_applies, resolve_case_selector
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPTURE_TEMPLATE = ROOT / "assets" / "capture-manifest.template.json"
@@ -35,6 +37,14 @@ SHOOTER_REVIEW_TEMPLATE = ROOT / "assets" / "shooter-action-review.template.md"
 NARRATIVE_REVIEW_TEMPLATE = ROOT / "assets" / "narrative-review.template.md"
 PLATFORM_RELEASE_TEMPLATE = ROOT / "assets" / "platform-release-matrix.template.md"
 MODDING_REVIEW_TEMPLATE = ROOT / "assets" / "modding-ugc-review.template.md"
+LOCALIZATION_REVIEW_TEMPLATE = ROOT / "assets" / "localization-review.template.md"
+REPRODUCIBLE_BUILD_REVIEW_TEMPLATE = ROOT / "assets" / "reproducible-build-review.template.md"
+REPLAY_REVIEW_TEMPLATE = ROOT / "assets" / "replay-review.template.md"
+LARGE_WORLD_REVIEW_TEMPLATE = ROOT / "assets" / "large-world-streaming-review.template.md"
+MOBILE_NATIVE_REVIEW_TEMPLATE = ROOT / "assets" / "mobile-native-review.template.md"
+LIVEOPS_REVIEW_TEMPLATE = ROOT / "assets" / "liveops-review.template.md"
+XR_CONSOLE_REVIEW_TEMPLATE = ROOT / "assets" / "xr-console-review.template.md"
+RUNTIME_AUTHORING_REVIEW_TEMPLATE = ROOT / "assets" / "runtime-authoring-review.template.md"
 PROJECT_STATUS_TEMPLATE = ROOT / "assets" / "project-run-state.template.md"
 
 
@@ -47,7 +57,12 @@ def parse_args() -> argparse.Namespace:
         description="Create or migrate evaluation evidence against the current rubric without inventing passes."
     )
     parser.add_argument("--rubric", required=True, help="Rubric JSON, normally evals/rubric.json.")
-    parser.add_argument("--case", required=True, dest="case_id", help="Case ID from the rubric.")
+    parser.add_argument(
+        "--case",
+        required=True,
+        dest="case_id",
+        help="One case ID or a '+'-joined fail-closed composite of rubric case IDs.",
+    )
     parser.add_argument("--output", required=True, help="Destination evidence JSON.")
     parser.add_argument("--from-existing", help="Existing evidence JSON to preserve and migrate.")
     parser.add_argument("--capture-manifest-output", help="Also instantiate the canonical capture manifest.")
@@ -111,6 +126,21 @@ def parse_args() -> argparse.Namespace:
         "--modding-review-output",
         help="Also instantiate the modding/UGC review.",
     )
+    parser.add_argument("--localization-review-output", help="Also instantiate localization review.")
+    parser.add_argument(
+        "--reproducible-build-review-output",
+        help="Also instantiate reproducible build and dependency review.",
+    )
+    parser.add_argument("--replay-review-output", help="Also instantiate replay/ghost review.")
+    parser.add_argument(
+        "--large-world-review-output", help="Also instantiate large-world streaming review."
+    )
+    parser.add_argument("--mobile-native-review-output", help="Also instantiate mobile review.")
+    parser.add_argument("--liveops-review-output", help="Also instantiate LiveOps/privacy review.")
+    parser.add_argument("--xr-console-review-output", help="Also instantiate XR/console review.")
+    parser.add_argument(
+        "--runtime-authoring-review-output", help="Also instantiate runtime authoring review."
+    )
     parser.add_argument(
         "--production-art-review-output",
         help="Also instantiate the builder-owned production art state review.",
@@ -148,11 +178,6 @@ def require_writable(path: Path, force: bool) -> None:
         raise EvidenceHelperError(f"Output is not a file: {path}")
 
 
-def gate_applies(definition: dict[str, Any], case_id: str) -> bool:
-    cases = definition.get("cases")
-    return cases is None or (isinstance(cases, list) and case_id in cases)
-
-
 def unresolved_gate(
     description: Any, acceptance_owner: str, requires_artifacts: bool
 ) -> dict[str, Any]:
@@ -187,13 +212,14 @@ def unresolved_dimension(description: Any) -> dict[str, Any]:
 
 
 def prepare_evidence(
-    rubric: dict[str, Any], case_id: str, existing: dict[str, Any] | None, rubric_path: Path
+    rubric: dict[str, Any], case_selector: str, existing: dict[str, Any] | None, rubric_path: Path
 ) -> tuple[dict[str, Any], list[str]]:
     if rubric.get("schema_version") != 1:
         raise EvidenceHelperError("Only rubric schema_version 1 is supported")
-    cases = {item.get("id"): item for item in rubric.get("cases", []) if isinstance(item, dict)}
-    if case_id not in cases:
-        raise EvidenceHelperError(f"Unknown case ID: {case_id}")
+    try:
+        case_id, selected_cases, _ = resolve_case_selector(rubric, case_selector)
+    except CaseCompositionError as exc:
+        raise EvidenceHelperError(str(exc)) from exc
 
     if existing is None:
         result: dict[str, Any] = {
@@ -240,7 +266,13 @@ def prepare_evidence(
     if not isinstance(owner_definitions, dict) or owner_default not in owner_definitions:
         raise EvidenceHelperError("Rubric acceptance owner definitions/default are invalid")
     for definition in rubric.get("blocking_gates", []):
-        if not isinstance(definition, dict) or not gate_applies(definition, case_id):
+        if not isinstance(definition, dict):
+            continue
+        try:
+            applies = gate_applies(definition, selected_cases)
+        except CaseCompositionError as exc:
+            raise EvidenceHelperError(str(exc)) from exc
+        if not applies:
             continue
         gate_id = definition.get("id")
         if not isinstance(gate_id, str) or not gate_id:
@@ -290,6 +322,7 @@ def prepare_evidence(
         {
             "rubric_sha256": digest,
             "case_id": case_id,
+            "component_cases": selected_cases,
             "generated_values_are_unresolved": True,
         }
     )
@@ -345,6 +378,14 @@ def main() -> int:
                 args.narrative_review_output,
                 args.platform_release_output,
                 args.modding_review_output,
+                args.localization_review_output,
+                args.reproducible_build_review_output,
+                args.replay_review_output,
+                args.large_world_review_output,
+                args.mobile_native_review_output,
+                args.liveops_review_output,
+                args.xr_console_review_output,
+                args.runtime_authoring_review_output,
                 args.project_status_output,
                 args.production_art_review_output,
                 args.motion_review_output,
@@ -405,6 +446,36 @@ def main() -> int:
             copy_template(PLATFORM_RELEASE_TEMPLATE, output_path(args.platform_release_output))
         if args.modding_review_output:
             copy_template(MODDING_REVIEW_TEMPLATE, output_path(args.modding_review_output))
+        if args.localization_review_output:
+            copy_template(
+                LOCALIZATION_REVIEW_TEMPLATE, output_path(args.localization_review_output)
+            )
+        if args.reproducible_build_review_output:
+            copy_template(
+                REPRODUCIBLE_BUILD_REVIEW_TEMPLATE,
+                output_path(args.reproducible_build_review_output),
+            )
+        if args.replay_review_output:
+            copy_template(REPLAY_REVIEW_TEMPLATE, output_path(args.replay_review_output))
+        if args.large_world_review_output:
+            copy_template(
+                LARGE_WORLD_REVIEW_TEMPLATE, output_path(args.large_world_review_output)
+            )
+        if args.mobile_native_review_output:
+            copy_template(
+                MOBILE_NATIVE_REVIEW_TEMPLATE, output_path(args.mobile_native_review_output)
+            )
+        if args.liveops_review_output:
+            copy_template(LIVEOPS_REVIEW_TEMPLATE, output_path(args.liveops_review_output))
+        if args.xr_console_review_output:
+            copy_template(
+                XR_CONSOLE_REVIEW_TEMPLATE, output_path(args.xr_console_review_output)
+            )
+        if args.runtime_authoring_review_output:
+            copy_template(
+                RUNTIME_AUTHORING_REVIEW_TEMPLATE,
+                output_path(args.runtime_authoring_review_output),
+            )
         if args.project_status_output:
             copy_template(PROJECT_STATUS_TEMPLATE, output_path(args.project_status_output))
         if args.production_art_review_output:
@@ -418,7 +489,7 @@ def main() -> int:
             copy_template(YANDEX_CHECKLIST_TEMPLATE, output_path(args.yandex_checklist_output))
 
         print(
-            f"[PASS] Evidence prepared case={args.case_id} added={len(added)} "
+            f"[PASS] Evidence prepared case={evidence['case_id']} added={len(added)} "
             f"output={evidence_output}"
         )
         for item in added:

@@ -7,7 +7,7 @@
   <a href="./README.ru.md">Русская версия</a> · <a href="https://learn.chatgpt.com/docs/build-skills">How Codex skills work</a>
 </p>
 
-`skill-godot` gives Codex a repeatable workflow for creating real Godot projects: authored scenes and resources, coherent assets, playable controls, deterministic checks, visual review, performance evidence, and release-ready exports. It covers 2D, 3D, 2.5D, isometric and orthographic games; procedural, strategy, vehicle, shooter and narrative systems; single-player, local/online multiplayer, extraction and honest MMO production slices; accessibility, saves, modding/UGC, UI, audio, mobile/web input, stores, and Yandex Games releases.
+`skill-godot` gives Codex a repeatable workflow for creating real Godot projects: authored scenes and resources, coherent assets, playable controls, deterministic checks, visual review, performance evidence, and release-ready exports. It covers 2D, 3D, 2.5D, isometric and orthographic games; procedural, strategy, vehicle, shooter and narrative systems; single-player, local/online multiplayer, extraction and honest MMO production slices; accessibility, localization, saves, replay, large worlds, LiveOps, native mobile/XR, runtime authoring, reproducible releases, modding/UGC, stores, and Yandex Games.
 
 ## Quick start
 
@@ -31,8 +31,8 @@ Codex can also select the skill automatically when a request clearly matches its
 
 | Included | What it gives you |
 | --- | --- |
-| 42 focused production guides | Scene architecture, 2D/3D/2.5D, UI, saves, input/accessibility, AI, procedural and genre systems, multiplayer, stores/modding, assets, audio, performance, loading, exports, and release work |
-| 23 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, fixed-camera readability, save/input/AI/procedural/progression/extraction/network probes, capture support, budgets, scorecards, and build-size checks |
+| 51 focused production guides | Scene architecture, 2D/3D/2.5D, UI, saves, localization, input/accessibility, AI, procedural and genre systems, networking/LiveOps, replay, large worlds, mobile/XR, runtime authoring, stores/modding, assets, performance, and release work |
+| 30 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, fixed-camera readability, save/input/AI/procedural/progression/extraction/network/localization/replay/build/LiveOps probes, rubric composition, forward-eval audit, capture support, budgets, scorecards, and build-size checks |
 | 7 reusable Godot probes | Touch scrolling, button composition, third-person controls/HUD mouse routing/visibility, isometric projection, and isometric navigation checks |
 | Scene-first authoring rules | Persistent composition stays in `.tscn` scenes and Godot resources instead of disappearing into large runtime scripts |
 | Evidence-based completion | The scorecard verifies acceptance ownership plus concrete screenshot/video/review paths and rejects prose-only PASS claims |
@@ -65,7 +65,10 @@ The main [`SKILL.md`](./SKILL.md) is a compact router. It sends Codex only to th
 - **Web and Yandex Games:** SDK lifecycle, advertisements, rewarded flows, saves, leaderboards, localization, moderation, and archive QA.
 - **Multiplayer and persistent online:** server authority, replication, lag/loss/reconnect, dedicated servers, extraction settlement, MMO scope, service capacity, failure recovery, restore, and rollback.
 - **Platforms and extensibility:** exact store candidates, clean install/update/signing/SDK lifecycle, plus explicit mod/UGC trust tiers, hostile-content validation, removed-mod recovery, safe mode, and honest isolation limits.
+- **Global and advanced production:** localization/plurals/pseudolocalization, replay/ghost/spectator contracts, streamed-world traversal, native mobile devices, LiveOps/privacy, OpenXR/authorized console boundaries, runtime creator tools, and reproducible clean builds.
 - **Validation:** headless checks, deterministic probes, automated captures, interactive onboarding verification, and independent UX review.
+
+Hybrid work uses a canonical `base+modifier+...` rubric selector. `rubric_case_plan.py`, `evidence_helper.py`, and `eval_scorecard.py` share the same fail-closed composition: applicable gates are unioned and each score floor uses the strictest selected case. This prevents a convenient genre label from silently dropping localization, replay, mobile, LiveOps, or release obligations while keeping unrelated guides out of context.
 
 Complete 2.5D work now has its own `new-2-5d-complete` rubric case. It requires an explicit spatial model, raw quiet/normal/dense/VFX/result art states, production-character motion video, menu and semantic identity review, depth/contact readability, independent target-build UX/visual acceptance, and human audio listening. A `.tscn` containing boxes, spheres, cylinders, shader quads, or particles is editable architecture—not automatic proof of production art.
 

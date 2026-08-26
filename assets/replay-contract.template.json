@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-replay-contract-id",
+  "build_id": "replace-with-tested-build-id",
+  "contract": {
+    "replay_schema_version": 3,
+    "tick_rate": 60,
+    "recorded_authority": "semantic_commands_rng_external_outcomes_and_periodic_state",
+    "physics_input_only_claim": false,
+    "required_modes": ["replay", "ghost", "spectator"],
+    "required_scenarios": ["record_playback", "render_cap", "seek", "save_resume", "corrupt", "old_version", "spectator_catchup", "ghost_isolation"],
+    "max_divergences": 0
+  },
+  "traces": [
+    {"id": "record-playback", "mode": "replay", "scenario": "record_playback", "source": "target_build", "result": "pass", "expected_digest": "finish-a", "actual_digest": "finish-a", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true},
+    {"id": "render-cap-30", "mode": "replay", "scenario": "render_cap", "source": "target_build", "result": "pass", "render_fps": 30, "expected_digest": "finish-a", "actual_digest": "finish-a", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true},
+    {"id": "render-cap-144", "mode": "replay", "scenario": "render_cap", "source": "target_build", "result": "pass", "render_fps": 144, "expected_digest": "finish-a", "actual_digest": "finish-a", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true},
+    {"id": "seek-middle", "mode": "replay", "scenario": "seek", "source": "target_build", "result": "pass", "expected_digest": "mid-a", "actual_digest": "mid-a", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true},
+    {"id": "save-resume", "mode": "replay", "scenario": "save_resume", "source": "target_build", "result": "pass", "expected_digest": "finish-a", "actual_digest": "finish-a", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true},
+    {"id": "corrupt-rejected", "mode": "replay", "scenario": "corrupt", "source": "target_build", "result": "pass", "rejected_safely": true, "expected_digest": "rejected", "actual_digest": "rejected", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true},
+    {"id": "old-version-policy", "mode": "replay", "scenario": "old_version", "source": "target_build", "result": "pass", "rejected_safely": true, "expected_digest": "version-policy", "actual_digest": "version-policy", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true},
+    {"id": "spectator-catchup", "mode": "spectator", "scenario": "spectator_catchup", "source": "target_build", "result": "pass", "expected_digest": "live-a", "actual_digest": "live-a", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true},
+    {"id": "ghost-isolation", "mode": "ghost", "scenario": "ghost_isolation", "source": "target_build", "result": "pass", "ghost_collision_events": 0, "expected_digest": "finish-a", "actual_digest": "finish-a", "divergences": 0, "external_outcomes_recorded": true, "result_state_equal": true}
+  ]
+}

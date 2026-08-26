@@ -652,6 +652,229 @@
       "description": "Independent raw target-build review of start/teaching, typical puzzle, densest mechanism/decor, highest elevation, and objective/result frames confirms focal hierarchy, purposeful foreground/midground/background structure, landmarks, route rhythm, controlled repetition, intentional negative space, and HUD/world balance; sparse tile rows, default-white lost characters, and nominal asset variety do not pass."
     },
     {
+      "id": "localization_contract_evidence",
+      "cases": ["localized-release-complete"],
+      "description": "A versioned locale contract and target-build traces prove every required locale and fallback, plural branches, font/glyph coverage, placeholder preservation, live language switching, subtitle timing, directional/focus semantics when applicable, pseudolocalization, and dense/narrow overflow budgets. String-table presence or one wide screenshot does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "trace": 3, "image": 3, "build": 1},
+        "required_states": {
+          "required_locales": ["trace", "image"],
+          "pseudolocale": ["trace", "image"],
+          "plural_and_placeholders": ["trace"],
+          "live_switch": ["trace"],
+          "narrow_dense_ui": ["image"],
+          "target_build": ["build"]
+        }
+      }
+    },
+    {
+      "id": "localization_usability_review",
+      "acceptance_owner": "independent",
+      "cases": ["localized-release-complete"],
+      "description": "An independent reviewer checks representative short, long, plural, subtitle, input-label, narrow and right-to-left states in the exact target build for meaning, hierarchy, truncation, shaping, focus order and culturally unsafe assumptions. Automated key coverage alone does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "image": 3},
+        "required_states": {
+          "short_and_long_locale": ["image"],
+          "narrow_dense_ui": ["image"],
+          "review_verdict": ["review"]
+        }
+      }
+    },
+    {
+      "id": "reproducible_build_evidence",
+      "cases": ["reproducible-release-pipeline"],
+      "description": "Pinned engine, export templates, dependencies, import inputs and build commands produce functionally identical clean target artifacts in at least two clean environments per declared preset; credentials remain external, warnings/errors are classified, dependency hashes/licenses are recorded, and an exact source revision can be rebuilt. One warm-worktree export or raw ZIP hash alone does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 2, "build": 2, "log": 2},
+        "required_states": {
+          "clean_environment_a": ["build", "log"],
+          "clean_environment_b": ["build", "log"],
+          "dependency_lock": ["report"],
+          "artifact_comparison": ["report"]
+        }
+      }
+    },
+    {
+      "id": "dependency_license_review",
+      "acceptance_owner": "independent",
+      "cases": ["reproducible-release-pipeline"],
+      "description": "Independent release review confirms every addon/tool/native library has a pinned source and version, compatible license and notices, bounded update policy and no bundled secrets or unexplained binary drift.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "report": 1},
+        "required_states": {"dependency_inventory": ["report"], "review_verdict": ["review"]}
+      }
+    },
+    {
+      "id": "replay_contract_evidence",
+      "cases": ["replay-ghost-spectator-complete"],
+      "description": "A versioned replay contract proves record/playback parity at declared checkpoints, safe old/corrupt rejection or migration, external nondeterministic outcome capture, ghost collision isolation, seek/pause/speed behavior where supported, and target-build replay of representative short, long and failure sessions. Godot physics must not be claimed cross-machine deterministic without measured proof.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "trace": 4, "video": 1, "build": 1},
+        "required_states": {
+          "record_playback_parity": ["trace"],
+          "corrupt_or_old": ["trace"],
+          "ghost_isolation": ["trace", "video"],
+          "seek_or_spectate": ["trace", "video"],
+          "target_build": ["build"]
+        }
+      }
+    },
+    {
+      "id": "replay_usability_review",
+      "acceptance_owner": "independent",
+      "cases": ["replay-ghost-spectator-complete"],
+      "description": "Independent target-build review confirms replay, ghost or spectator controls are discoverable, time/subject state is legible, camera transitions are safe, desync/corruption is explained without damaging progress, and the feature has actual player value rather than only a deterministic test harness.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "video": 1},
+        "required_states": {"normal_session": ["video"], "failure_or_desync": ["video", "review"]}
+      }
+    },
+    {
+      "id": "large_world_streaming_evidence",
+      "cases": ["large-world-streaming-complete"],
+      "description": "Target-build traversal proves predeclared cell/chunk, memory, frame-time and loading budgets across ordinary travel, fast travel, boundary oscillation, teleport, save/load and missing/corrupt content; async requests do not synchronously stall, ownership unloads cleanly, navigation/physics/audio/VFX remain coherent, and large-world coordinates are enabled only from measured need.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 2, "trace": 4, "video": 1, "build": 1},
+        "required_states": {
+          "ordinary_travel": ["trace", "video"],
+          "fast_boundary_crossing": ["trace", "video"],
+          "teleport_and_return": ["trace"],
+          "save_load_streamed_state": ["trace"],
+          "memory_loading_profile": ["report"],
+          "target_build": ["build"]
+        }
+      }
+    },
+    {
+      "id": "large_world_traversal_review",
+      "acceptance_owner": "independent",
+      "cases": ["large-world-streaming-complete"],
+      "description": "Independent traversal review judges pop-in, landmark continuity, navigation clarity, repeated seams, missing ambience/actors and recovery after rapid travel; passing memory counters cannot hide an incoherent or visibly empty streamed world.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "video": 1},
+        "required_states": {"normal_travel": ["video"], "rapid_travel": ["video"], "review_verdict": ["review"]}
+      }
+    },
+    {
+      "id": "mobile_native_evidence",
+      "cases": ["mobile-native-release"],
+      "description": "Exact Android/iOS candidates prove clean install/update, touch targets and gestures, safe areas/cutouts, orientation contract, keyboard/back navigation, pause/background/resume, interruption/audio focus, thermal and battery-aware performance, memory pressure, permission denial, offline state and store package/signing metadata on declared real-device tiers. Desktop emulation alone does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 2, "trace": 4, "video": 1, "build": 1},
+        "required_states": {
+          "clean_install_update": ["trace"],
+          "safe_area_orientation": ["video", "trace"],
+          "background_resume_interrupt": ["trace"],
+          "permission_offline": ["trace"],
+          "thermal_memory_profile": ["report"],
+          "signed_candidate": ["build", "report"]
+        }
+      }
+    },
+    {
+      "id": "mobile_device_playtest",
+      "acceptance_owner": "human",
+      "cases": ["mobile-native-release"],
+      "description": "A real-device human session on the declared minimum and representative device tiers judges grip, reach, gesture conflict, text scale, heat, interruptions and sustained play comfort. Simulator screenshots and automated taps are supporting evidence only.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "trace": 2},
+        "required_states": {"minimum_device": ["trace", "review"], "representative_device": ["trace", "review"]}
+      }
+    },
+    {
+      "id": "liveops_contract_evidence",
+      "cases": ["liveops-production-slice"],
+      "description": "A versioned LiveOps contract and target-build traces prove schema validation, signed/environment-scoped configuration, safe bundled defaults, timeout/offline/malformed/stale fallback, staged rollout and rollback, bounded idempotent analytics queues, consent/opt-out/deletion behavior, forbidden-field filtering and no client secrets. A successful happy-path HTTP request does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 2, "trace": 5, "build": 1},
+        "required_states": {
+          "safe_default": ["trace"],
+          "offline_timeout_malformed": ["trace"],
+          "staged_rollout_rollback": ["trace"],
+          "queue_retry_idempotence": ["trace"],
+          "consent_optout_delete": ["trace"],
+          "target_build": ["build"]
+        }
+      }
+    },
+    {
+      "id": "liveops_privacy_review",
+      "acceptance_owner": "independent",
+      "cases": ["liveops-production-slice"],
+      "description": "Independent privacy/operations review verifies data minimization, retention and deletion, consent surfaces, environment separation, experiment guardrails, emergency rollback, observability and honest disclosure of third-party processors and untested backend scale.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "report": 2},
+        "required_states": {"data_inventory": ["report"], "rollback_runbook": ["report"], "review_verdict": ["review"]}
+      }
+    },
+    {
+      "id": "xr_runtime_evidence",
+      "cases": ["xr-production-slice"],
+      "description": "The exact OpenXR target build proves startup/runtime fallback, tracked head and both supported controllers/hands, calibrated origin/height, locomotion/turn/recenter, boundary and pause recovery, interaction reach, stable frame timing, readable world-space UI and no required desktop-only input. Editor preview or mocked poses alone do not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 2, "trace": 3, "video": 1, "build": 1},
+        "required_states": {
+          "tracked_runtime": ["trace", "video"],
+          "locomotion_recenter": ["trace", "video"],
+          "pause_boundary_recovery": ["trace"],
+          "performance_profile": ["report"],
+          "target_build": ["build"]
+        }
+      }
+    },
+    {
+      "id": "xr_comfort_playtest",
+      "acceptance_owner": "human",
+      "cases": ["xr-production-slice"],
+      "description": "A real-headset human session judges scale, reach, locomotion, turning, acceleration, camera motion, text distance, handedness, seated/standing assumptions and discomfort over the declared session length. Automated pose traces cannot certify comfort.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "trace": 1},
+        "required_states": {"declared_session_length": ["trace", "review"]}
+      }
+    },
+    {
+      "id": "console_release_evidence",
+      "acceptance_owner": "independent",
+      "cases": ["console-release-readiness"],
+      "description": "Authorized platform evidence records the actual provider/port, SDK and devkit scope, package/signing identity, controller and user lifecycle, suspend/resume, storage/save, network/account/entitlement failure, performance and certification checklist status. Public Godot export success, invented proprietary requirements or an unlicensed compatibility claim do not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "report": 3, "build": 1, "trace": 2},
+        "required_states": {
+          "authorized_toolchain": ["report"],
+          "devkit_target_build": ["build", "trace"],
+          "user_suspend_storage": ["trace"],
+          "certification_status": ["review", "report"]
+        }
+      }
+    },
+    {
+      "id": "runtime_authoring_evidence",
+      "cases": ["runtime-authoring-tools-complete"],
+      "description": "Runtime/editor creator tools prove stable IDs and versioned schemas, bounded undo/redo transactions, dirty-state prompts, save/load/export/import round trips, invalid/cyclic/oversized content rejection, autosave/crash recovery, keyboard/controller/touch reachability as declared, preview/runtime parity and safe content namespaces. One happy-path editor demo does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 2, "trace": 5, "video": 1, "build": 1},
+        "required_states": {
+          "create_edit_undo_redo": ["trace", "video"],
+          "save_reload_roundtrip": ["trace"],
+          "invalid_oversized_rejection": ["trace"],
+          "autosave_crash_recovery": ["trace"],
+          "preview_runtime_parity": ["trace", "video"],
+          "target_build": ["build"]
+        }
+      }
+    },
+    {
+      "id": "creator_usability_playtest",
+      "acceptance_owner": "human",
+      "cases": ["runtime-authoring-tools-complete"],
+      "description": "An uncoached creator completes the declared author-publish-test-reopen task, understands selection and validation feedback, recovers from a mistake and can locate the resulting content without builder narration. Automation proves mechanics, not authoring usability.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"review": 1, "trace": 1, "video": 1},
+        "required_states": {"uncoached_authoring_task": ["trace", "video", "review"], "mistake_recovery": ["trace", "video"]}
+      }
+    },
+    {
       "id": "responsive_layout_evidence",
       "cases": ["constrained-mobile-web"],
       "description": "The supported viewport matrix includes reference, near-square/short-height, extreme-narrow, and wide states as applicable, with no blocking overlap, detachment, clipping, or image distortion."
@@ -826,6 +1049,74 @@
     {
       "gate": "modding_security_review",
       "dimensions": {"technical_quality": 1, "evidence_and_reproducibility": 2, "intent_and_scope": 2}
+    },
+    {
+      "gate": "localization_contract_evidence",
+      "dimensions": {"playability_and_ux": 2, "technical_quality": 2, "responsive_visual_integrity": 2}
+    },
+    {
+      "gate": "localization_usability_review",
+      "dimensions": {"playability_and_ux": 1, "responsive_visual_integrity": 1}
+    },
+    {
+      "gate": "reproducible_build_evidence",
+      "dimensions": {"technical_quality": 1, "evidence_and_reproducibility": 1}
+    },
+    {
+      "gate": "dependency_license_review",
+      "dimensions": {"asset_pipeline": 2, "technical_quality": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "replay_contract_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "replay_usability_review",
+      "dimensions": {"playability_and_ux": 1}
+    },
+    {
+      "gate": "large_world_streaming_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 1, "performance_and_size": 1}
+    },
+    {
+      "gate": "large_world_traversal_review",
+      "dimensions": {"playability_and_ux": 1, "visual_coherence": 2}
+    },
+    {
+      "gate": "mobile_native_evidence",
+      "dimensions": {"gameplay_correctness": 2, "technical_quality": 1, "performance_and_size": 1, "responsive_visual_integrity": 1}
+    },
+    {
+      "gate": "mobile_device_playtest",
+      "dimensions": {"playability_and_ux": 1, "performance_and_size": 2, "responsive_visual_integrity": 1}
+    },
+    {
+      "gate": "liveops_contract_evidence",
+      "dimensions": {"gameplay_correctness": 2, "technical_quality": 1, "evidence_and_reproducibility": 1}
+    },
+    {
+      "gate": "liveops_privacy_review",
+      "dimensions": {"intent_and_scope": 1, "technical_quality": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "xr_runtime_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 1, "performance_and_size": 1, "responsive_visual_integrity": 1}
+    },
+    {
+      "gate": "xr_comfort_playtest",
+      "dimensions": {"playability_and_ux": 1}
+    },
+    {
+      "gate": "console_release_evidence",
+      "dimensions": {"intent_and_scope": 1, "technical_quality": 1, "performance_and_size": 1, "evidence_and_reproducibility": 1}
+    },
+    {
+      "gate": "runtime_authoring_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 1, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "creator_usability_playtest",
+      "dimensions": {"playability_and_ux": 1}
     }
   ],
   "dimensions": [
@@ -1053,6 +1344,60 @@
       "brief": "Create an honestly scoped modding or UGC production slice with a versioned manifest, explicit trust tier and override policy, hostile-content validation, bounded loading, dependency and removed-mod recovery, safe mode, diagnostics, target-build evidence, and independent security review.",
       "focus": ["manifest and compatibility", "trust and executable-code policy", "namespace and override boundaries", "malformed oversized and traversal rejection", "dependency and load order", "save behavior after removal", "safe mode diagnostics and rollback", "security and distribution review"],
       "minimum_scores": {"intent_and_scope": 3, "gameplay_correctness": 3, "technical_quality": 3, "evidence_and_reproducibility": 3}
+    },
+    {
+      "id": "localized-release-complete",
+      "brief": "Add a production localization contract for every declared shipping locale, including plurals, fonts, input labels, subtitles, live switching, pseudolocalization, narrow layouts and independent language-state review.",
+      "focus": ["locale and fallback contract", "plural and placeholder coverage", "font glyph and shaping coverage", "pseudolocalization", "live language switching", "subtitle timing", "directional focus semantics", "narrow localized layouts", "independent usability review"],
+      "minimum_scores": {"playability_and_ux": 3, "responsive_visual_integrity": 3, "technical_quality": 3, "evidence_and_reproducibility": 3}
+    },
+    {
+      "id": "reproducible-release-pipeline",
+      "brief": "Make every declared Godot release preset reproducible from a pinned clean source revision in independent clean environments with external credentials, locked dependencies, comparable artifacts and license review.",
+      "focus": ["pinned engine and templates", "clean build environments", "deterministic import inputs", "dependency lock and provenance", "external credentials", "functional artifact comparison", "licenses and notices", "exact rebuild commands"],
+      "minimum_scores": {"asset_pipeline": 3, "technical_quality": 3, "evidence_and_reproducibility": 3}
+    },
+    {
+      "id": "replay-ghost-spectator-complete",
+      "brief": "Add a production replay, ghost, or spectator feature with a versioned record format, measured playback parity, safe compatibility handling, isolated ghosts, usable controls and honest physics-determinism claims.",
+      "focus": ["versioned replay format", "checkpoint parity", "external outcome capture", "old and corrupt handling", "ghost isolation", "seek pause and speed", "spectator camera", "target-build usability", "determinism boundary"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "evidence_and_reproducibility": 3}
+    },
+    {
+      "id": "large-world-streaming-complete",
+      "brief": "Create or extend a large streamed world with explicit chunk ownership, loading/memory/frame budgets, rapid-travel and persistence recovery, coherent navigation/audio/visual transitions and an independently reviewed traversal experience.",
+      "focus": ["world scale decision", "chunk and ownership contract", "background loading without stalls", "memory and frame budgets", "rapid boundary traversal", "teleport and return", "streamed persistence", "navigation physics audio and VFX continuity", "visible traversal quality"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "visual_coherence": 3, "technical_quality": 3, "performance_and_size": 3}
+    },
+    {
+      "id": "mobile-native-release",
+      "brief": "Prepare exact native mobile release candidates for the declared Android/iOS scope with real-device install/update, touch, safe-area, lifecycle, permission, offline, thermal, memory, signing and sustained-play evidence.",
+      "focus": ["real device tiers", "clean install and update", "touch reach and gestures", "safe areas and orientation", "background interruption and audio focus", "permissions and offline", "thermal memory and battery", "package signing", "human device comfort"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "responsive_visual_integrity": 3, "technical_quality": 3, "performance_and_size": 3, "evidence_and_reproducibility": 3}
+    },
+    {
+      "id": "liveops-production-slice",
+      "brief": "Build an honestly scoped LiveOps production slice with schema-validated remote configuration, safe offline defaults, staged rollout and rollback, bounded idempotent telemetry, consent/privacy controls and independent operational review.",
+      "focus": ["schema and environment contract", "safe bundled defaults", "offline timeout malformed and stale behavior", "staged rollout and rollback", "bounded analytics queue", "idempotent retry", "consent opt-out and deletion", "forbidden data filtering", "operations and privacy review"],
+      "minimum_scores": {"intent_and_scope": 3, "gameplay_correctness": 3, "technical_quality": 3, "evidence_and_reproducibility": 3}
+    },
+    {
+      "id": "xr-production-slice",
+      "brief": "Create an honestly scoped OpenXR production slice verified on declared real headset/controller or hand-tracking hardware for startup, tracking, locomotion, interaction, recovery, frame timing, world-space UI and human comfort.",
+      "focus": ["OpenXR startup and fallback", "head and controller tracking", "origin scale and reach", "locomotion turn and recenter", "boundary pause and recovery", "world-space UI", "stable headset performance", "seated standing and handedness", "human comfort"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "responsive_visual_integrity": 3, "technical_quality": 3, "performance_and_size": 3}
+    },
+    {
+      "id": "console-release-readiness",
+      "brief": "Prepare an authorized console release-readiness evidence package using the actual approved provider, SDK and devkit, with honest platform scope, lifecycle, storage, entitlement, performance, packaging and certification status.",
+      "focus": ["authorized provider and NDA boundary", "SDK and devkit scope", "package and signing identity", "controller and user lifecycle", "suspend resume and storage", "network account and entitlement failure", "performance", "certification checklist status", "honest untested limits"],
+      "minimum_scores": {"intent_and_scope": 3, "technical_quality": 3, "performance_and_size": 3, "evidence_and_reproducibility": 3}
+    },
+    {
+      "id": "runtime-authoring-tools-complete",
+      "brief": "Create complete in-game or editor authoring tools with versioned data, transactional undo/redo, validation, round-trip persistence, crash recovery, bounded hostile-content handling, preview parity and an uncoached creator workflow.",
+      "focus": ["stable IDs and schema versions", "selection and property editing", "transactional undo redo", "dirty state and autosave", "round-trip import export", "invalid cyclic and oversized rejection", "preview runtime parity", "input accessibility", "uncoached creator task"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "evidence_and_reproducibility": 3}
     }
   ]
 }

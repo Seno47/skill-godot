@@ -1,6 +1,6 @@
 ---
 name: skill-godot
-description: Build, extend, optimize, release, and visually and sonically polish Godot 4 games from a user-defined brief using native scenes, resources, imported assets, focused scripts, editor tooling, profiling, and verified playable results. Use for 2D, 3D, 2.5D, isometric, orthographic, hybrid, procedural, strategy/simulation, vehicle/racing, shooter/action, narrative, single-player, local/online multiplayer, extraction, persistent online/MMO slices, accessibility, saves, modding/UGC, UI, gameplay, levels, assets, audio, performance, loading, memory, export size, stores, and project architecture in Godot; do not use for projects targeting another engine.
+description: Build, extend, optimize, test, and release Godot 4 games and production pipelines with scene-first authoring, integrated assets, gameplay systems, profiling, and target-build evidence. Use for Godot projects across 2D/3D/hybrid, single/multiplayer, genre systems, saves, accessibility, localization, procedural content, online/LiveOps, mobile/XR/stores, modding, performance, and release engineering; not other engines.
 ---
 
 # Godot Game Development
@@ -34,6 +34,8 @@ Turn the user's design into an editable Godot project, not a scripted imitation 
 - For MMO or persistent-online work, label scope honestly. A production slice requires real authoritative server and identity/persistence paths plus load, failure, observability, restore, and rollback evidence; local mocks and replicated demos cannot substantiate a complete or launch-ready MMO.
 - For platform/store release, verify each exact candidate through clean install, update over an old save, missing/offline SDK, lifecycle/display/input recovery, configured services, signing/package identity, upload scope, and rollback; export exit code alone is not a release verdict.
 - For mods or UGC, declare the trust tier and override/executable-code policy, validate hostile malformed/oversized/path-collision cases, prove dependency/removal/safe-mode recovery, and never claim sandboxing Godot does not provide or auto-execute unknown downloaded payloads.
+- For localization, replay/ghost/spectator, large streamed worlds, native mobile, LiveOps, XR/console, runtime creator tools, or reproducible releases, apply the matching conditional contract and real target/runtime evidence. A translation table, editor preview, simulator, mocked hardware/backend, warm local build, or happy-path trace does not certify the feature.
+- Compose evaluation cases from the smallest truthful base game case plus every material modifier. Applicable gates are the fail-closed union and score floors are the per-dimension maximum; never choose one convenient case to omit a promised system.
 - For fixed-camera isometric/orthographic complete work, block bulk level authoring until a rendered gameplay-size slice—hero, mechanism states, objective, decor, lighting, and UI—passes independent review; later prove character/background separation, route readability, and density/composition in the target camera.
 - Do not claim polish, performance, memory, or size improvements without testing the relevant built/rendered result.
 - Keep the result maintainable and editable after the agent finishes.
@@ -78,6 +80,9 @@ Core construction:
 - Online/networked multiplayer, client/server authority, replication, prediction/rollback, impairment, reconnect, dedicated server, or Web networking: [references/multiplayer-networking.md](references/multiplayer-networking.md)
 - Extraction, raid/stash boundaries, loot/loss/insurance, settlement, risk routes, or recovery: [references/genre-extraction.md](references/genre-extraction.md), plus the multiplayer guide when online
 - MMO, persistent online worlds, zones/shards, identity/persistence services, interest management, load/soak, observability, restore, deployment, moderation, or honest production-slice scope: [references/mmo-and-online-services.md](references/mmo-and-online-services.md), plus the multiplayer and progression guides
+- Multiple locales, plurals, fonts/scripts, runtime switching, subtitles, or global storefront copy: [references/localization-and-globalization.md](references/localization-and-globalization.md)
+- Replay, ghosts, spectators, input/state recording, playback compatibility, or determinism claims: [references/replay-and-determinism.md](references/replay-and-determinism.md)
+- In-game editors, builders, level/character tools, runtime creation, undo/redo, or creator export: [references/runtime-authoring-tools.md](references/runtime-authoring-tools.md)
 - Complete game/vertical slice or autonomous build: [references/playability-and-evaluation.md](references/playability-and-evaluation.md) and [references/audio-vfx-fonts.md](references/audio-vfx-fonts.md)
 - Live editor automation, bridge, or MCP: [references/editor-bridge-mcp.md](references/editor-bridge-mcp.md)
 
@@ -95,8 +100,13 @@ Optimization and release:
 
 - FPS, CPU/GPU/physics bottlenecks or performance budgets: [references/performance-and-profiling.md](references/performance-and-profiling.md)
 - RAM/VRAM, loading, streaming, stutter, lifecycle: [references/memory-and-loading.md](references/memory-and-loading.md)
+- Large/open worlds, chunk ownership, origin/precision decisions, rapid traversal, or streaming continuity: [references/large-worlds-and-streaming.md](references/large-worlds-and-streaming.md)
 - Export/package/download size or release presets: [references/export-and-size.md](references/export-and-size.md)
+- CI/CD, dependency locks, clean rebuilds, signing separation, or reproducibility claims: [references/reproducible-builds-and-dependencies.md](references/reproducible-builds-and-dependencies.md)
 - Desktop/mobile/console storefront candidates, signing, install/update, platform SDKs, cloud/achievements, or store submission: [references/platform-release-and-stores.md](references/platform-release-and-stores.md)
+- Native Android/iOS install, safe area, orientation, lifecycle, permission, thermal, memory, or device QA: [references/mobile-native-production.md](references/mobile-native-production.md)
+- Remote config, experiments, events, telemetry, privacy, rollout, rollback, or backend fallback: [references/liveops-telemetry-and-privacy.md](references/liveops-telemetry-and-privacy.md)
+- OpenXR/headsets or authorized console SDK/devkit work: [references/xr-and-console.md](references/xr-and-console.md)
 - Mods, plugins, PCK/resource packs, user-authored content, load order, safe mode, or UGC trust/distribution: [references/modding-and-ugc.md](references/modding-and-ugc.md)
 - Yandex Games Web integration, monetization, saves, lifecycle, moderation, or archive QA: [references/yandex-games-web.md](references/yandex-games-web.md)
 
@@ -110,35 +120,19 @@ Validation:
 - Performance/memory optimization: validation section in the relevant optimization reference
 - Export/build-size work: validation section in the export reference
 - Complete mobile/web evidence setup or rubric migration: generate fresh evidence files with `scripts/evidence_helper.py` instead of reconstructing gates, profiles, and the viewport matrix from memory
+- Mixed-genre/platform/system work: run `scripts/rubric_case_plan.py --rubric <skill-dir>/evals/rubric.json --case <base+modifier+...> --json-output <plan.json> --summary`, then pass the same canonical composite selector to `evidence_helper.py` and `eval_scorecard.py`
 - Long autonomous build or work likely to span context compaction: instantiate `assets/project-run-state.template.md`, keep it short, and update verified truth instead of appending a diary
-- Complete-game app icon/menu identity: complete `assets/semantic-identity-review.template.md` with raw final-size captures and an independent verdict
-- Complete-game main menu craft: complete `assets/menu-identity-craft-review.template.md` with raw default/interaction captures and an independent verdict on wordmark/typography, copy, hierarchy, controls, and composition
-- Complete-game or production-slice art: complete `assets/production-art-state-review.template.md` with builder-owned quiet/normal/dense/VFX/result target-build evidence before independent review
-- Complete-game gameplay HUD: complete `assets/gameplay-hud-glanceability-review.template.md` with annotated text inventory, icon/accessibility contract, quiet/normal/dense/VFX raw states, localization stress, and an independent verdict
-- Production character expected to animate: complete `assets/production-character-motion.template.md` with builder-owned state dispatch, pose variation, bind/rest/T-pose rejection, attachment-follow checks, and raw target-build motion evidence before optional human preference feedback
-- Required touch-scroll behavior: adapt `assets/godot-tests/touch_scroll_probe.gd` into a deterministic project test scene; node presence alone is not proof
-- Localized compound/icon-only button alignment or pointer-click cleanup: adapt `assets/godot-tests/button_composition_probe.gd` and retain a release-like Web click check
-- Strict/adapted UI-reference integration: fill `assets/ui-reference-parity.template.md` and create same-resolution comparison artifacts with `scripts/image_compare.py`; pixel metrics do not replace region-level human review
-- Third-party code/addon adoption: fill `assets/addon-adoption-record.template.md`; a repository link, aggregator summary, clean import, or compatible license alone does not prove ownership/architecture fit
-- Metroidvania or quest dependency/escape topology: start from `assets/progression-graph.template.json` and run `scripts/progression_graph_audit.py`, then prove the modeled paths in the actual authored rooms/flows
-- Idle/clicker economy work: export a project-specific model from `assets/idle-economy.template.json`, run `scripts/idle_economy_probe.py`, then verify actual transactions, save/offline idempotence, numeric UI, and human pacing in the target build
-- Material progression/balance in any genre: adapt `assets/progression-balance.template.json`, run `scripts/progression_balance_probe.py`, prove the declared model matches target-build transactions, and complete `assets/progression-balance-review.template.md`; use rubric case `new-progression-heavy-complete` when no narrower progression case fits
-- Persistent state: adapt `assets/save-data-contract.template.json`, run `scripts/save_data_probe.py`, and complete `assets/save-data-integrity-review.template.md`; retain target-build interruption, corruption, migration, duplicate-load and cloud/device-conflict evidence as applicable
-- Gameplay AI/navigation: adapt `assets/ai-navigation-contract.template.json`, run `scripts/ai_navigation_probe.py`, and complete `assets/ai-navigation-review.template.md`; retain raw normal/dense/recovery target motion and use the procedural, strategy, or shooter case that owns the behavior
-- Procedural content: adapt `assets/procedural-generation-contract.template.json`, run `scripts/procedural_generation_probe.py`, and complete `assets/procedural-generation-review.template.md`; use rubric case `new-procedural-roguelike-complete` when it describes the whole deliverable
-- Input/accessibility: adapt `assets/input-accessibility-contract.template.json`, run `scripts/input_accessibility_probe.py`, and complete `assets/input-accessibility-review.template.md`; independently review real before/after behavior rather than settings labels
-- Strategy/simulation, vehicle/racing, shooter/action, narrative, or local multiplayer: use rubric cases `new-strategy-simulation-complete`, `new-vehicle-racing-complete`, `new-shooter-action-complete`, `new-narrative-complete`, or `new-local-multiplayer-complete` and complete the matching review template; their human/independent gates cannot be replaced by builder assertions
-- Multi-platform/store release: complete `assets/platform-release-matrix.template.md` for rubric case `multi-platform-store-release`; each platform row needs an exact candidate and install/update/lifecycle evidence
-- Mods/UGC: complete `assets/modding-ugc-review.template.md` for rubric case `modding-ugc-production-slice`; include hostile-loader traces and independent trust/isolation review
-- Networked multiplayer: adapt `assets/network-contract.template.json`, run `scripts/network_contract_probe.py`, retain separate-process client/server traces, and complete `assets/networked-multiplayer-review.template.md`; use `new-networked-multiplayer-complete` unless a narrower online case applies
-- Extraction: adapt `assets/extraction-loop.template.json`, run `scripts/extraction_loop_probe.py`, prove the same ledger in the target build, and complete `assets/extraction-review.template.md`; choose `new-extraction-complete` or `new-online-extraction-complete` honestly
-- MMO/persistent-online production slice: combine the network and progression contracts with `assets/online-service-readiness.template.md` and rubric case `new-mmo-production-slice`; do not promote mocked, untested, or future services to passing evidence
+- Complete game/slice packet: fill the semantic identity, menu craft, production-art state, HUD glanceability, character-motion and independent UX templates named above, with their required raw target-build states and reviewer owners; one self-review cannot replace the packet
+- UI behavior: adapt the bundled touch-scroll or button-composition Godot probe when applicable; for reference parity use its template plus `scripts/image_compare.py`, and for third-party adoption record the decision in `assets/addon-adoption-record.template.md`
+- Selected gameplay/system contracts: run the project-specific model, deterministic probe, target-build traces and review named in its routed reference. A model PASS does not replace authored-flow proof or required independent/human acceptance
+- Online, platform, device and creator contracts: retain separate-process/real-service, exact-candidate, real-device/hardware/authorization, or uncoached-creator evidence required by the selected case; mocks and future work remain limitations
+- Changes to this skill itself: maintain `assets/forward-eval-matrix.template.json` and run `scripts/forward_eval_audit.py`; every changed contract needs positive and negative fixtures in isolated builder/reviewer contexts
 - Free-orbit third-person locomotion/camera/visibility work: adapt `assets/godot-tests/third_person_controller_probe.gd`, `assets/godot-tests/third_person_hud_mouse_probe.gd`, and `assets/godot-tests/third_person_visibility_probe.gd`, then complete the target-build matrix in `assets/third-person-3d-review.template.md`
 - Isometric projection, picking, grid navigation, height transitions, depth sorting, or occlusion: apply the conditional validation in [references/isometric-and-2-5d.md](references/isometric-and-2-5d.md); adapt `assets/godot-tests/isometric_projection_probe.gd` and `assets/godot-tests/isometric_navigation_probe.gd` where their contracts fit
 - Complete fixed-camera isometric/orthographic game: before bulk content, fill `assets/isometric-complete-review.template.md`; measure same-frame character/background separation with `scripts/isometric_readability_audit.py --require-thresholds`; and support the claimed scope with `assets/content-duration-contract.template.md`
 - Complete non-isometric 2.5D game: use rubric case `new-2-5d-complete`, keep an explicit spatial contract, and combine the production-art state matrix, production-character motion contract, gameplay-HUD glanceability review, menu/semantic identity reviews, and independent Windows target-build UX verdict
 
-Hybrid tasks may require several references. Do not read unrelated references preemptively.
+Hybrid tasks may require several references, but only after the composite case plan names the material contracts. Do not read unrelated references preemptively.
 
 ## Keep context efficient
 

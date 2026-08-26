@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-localization-contract-id",
+  "build_id": "replace-with-tested-build-id",
+  "contract": {
+    "required_locales": ["en", "ru", "ar"],
+    "fallback_locale": "en",
+    "pseudolocale": "qps_ploc",
+    "required_scenarios": ["menu", "dense_hud", "plural", "runtime_switch", "subtitles", "pseudolocale"],
+    "required_keys": ["menu.play", "hud.health", "objective.current", "result.complete"],
+    "required_plural_counts": [0, 1, 2, 5],
+    "max_missing_keys": 0,
+    "max_overflow_controls": 0,
+    "max_missing_glyphs": 0
+  },
+  "traces": [
+    {"id": "en-menu", "locale": "en", "scenario": "menu", "source": "target_build", "result": "pass", "keys_resolved": ["menu.play", "hud.health", "objective.current", "result.complete"], "missing_keys": 0, "overflow_controls": 0, "missing_glyphs": 0, "placeholders_preserved": true, "focus_path_valid": true, "directional_semantics_valid": true},
+    {"id": "ru-dense-hud", "locale": "ru", "scenario": "dense_hud", "source": "target_build", "result": "pass", "keys_resolved": ["menu.play", "hud.health", "objective.current", "result.complete"], "missing_keys": 0, "overflow_controls": 0, "missing_glyphs": 0, "placeholders_preserved": true, "focus_path_valid": true, "directional_semantics_valid": true},
+    {"id": "ar-menu", "locale": "ar", "scenario": "menu", "source": "target_build", "result": "pass", "keys_resolved": ["menu.play", "hud.health", "objective.current", "result.complete"], "missing_keys": 0, "overflow_controls": 0, "missing_glyphs": 0, "placeholders_preserved": true, "focus_path_valid": true, "directional_semantics_valid": true},
+    {"id": "plural-matrix", "locale": "ru", "scenario": "plural", "source": "target_build", "result": "pass", "keys_resolved": ["objective.current"], "plural_counts_verified": [0, 1, 2, 5], "missing_keys": 0, "overflow_controls": 0, "missing_glyphs": 0, "placeholders_preserved": true, "focus_path_valid": true, "directional_semantics_valid": true},
+    {"id": "live-switch", "locale": "ar", "scenario": "runtime_switch", "source": "target_build", "result": "pass", "keys_resolved": ["menu.play", "hud.health"], "locale_switch_applied": true, "cached_text_invalidated": true, "missing_keys": 0, "overflow_controls": 0, "missing_glyphs": 0, "placeholders_preserved": true, "focus_path_valid": true, "directional_semantics_valid": true},
+    {"id": "subtitle-layout", "locale": "ru", "scenario": "subtitles", "source": "target_build", "result": "pass", "keys_resolved": ["objective.current"], "speaker_and_timing_valid": true, "missing_keys": 0, "overflow_controls": 0, "missing_glyphs": 0, "placeholders_preserved": true, "focus_path_valid": true, "directional_semantics_valid": true},
+    {"id": "pseudo-long", "locale": "qps_ploc", "scenario": "pseudolocale", "source": "target_build", "result": "pass", "keys_resolved": ["menu.play", "hud.health", "objective.current", "result.complete"], "missing_keys": 0, "overflow_controls": 0, "missing_glyphs": 0, "placeholders_preserved": true, "focus_path_valid": true, "directional_semantics_valid": true}
+  ]
+}

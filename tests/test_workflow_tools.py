@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -37,6 +38,30 @@ def run_contract(script: str, model: dict[str, object]) -> subprocess.CompletedP
         path = Path(directory) / "contract.json"
         path.write_text(json.dumps(model), encoding="utf-8")
         return run_script(script, "--model", str(path), "--summary")
+
+
+class RepositoryIntegrityTests(unittest.TestCase):
+    def test_local_markdown_links_resolve(self) -> None:
+        documents = [ROOT / "SKILL.md", ROOT / "README.md", ROOT / "README.ru.md"]
+        documents.extend((ROOT / "references").glob("*.md"))
+        missing: list[str] = []
+        pattern = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+        for document in documents:
+            for raw_target in pattern.findall(document.read_text(encoding="utf-8")):
+                target = raw_target.strip().split("#", 1)[0]
+                if not target or "://" in target or target.startswith("mailto:"):
+                    continue
+                resolved = (document.parent / target).resolve()
+                if not resolved.exists():
+                    missing.append(f"{document.relative_to(ROOT)} -> {raw_target}")
+        self.assertEqual(missing, [], "\n".join(missing))
+
+    def test_all_json_assets_and_eval_files_parse(self) -> None:
+        paths = list((ROOT / "assets").glob("*.json"))
+        paths.extend((ROOT / "evals").glob("*.json"))
+        for path in paths:
+            with self.subTest(path=path.name):
+                self.assertIsInstance(json.loads(path.read_text(encoding="utf-8")), dict)
 
 
 class ProgressionGraphTests(unittest.TestCase):
@@ -374,6 +399,168 @@ class InputAccessibilityContractTests(unittest.TestCase):
         self.assertIn("leaks actions across players", completed.stdout)
 
 
+class LocalizationContractTests(unittest.TestCase):
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "localization_probe.py",
+            "--model",
+            str(ROOT / "assets" / "localization-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] localization", completed.stdout)
+
+    def test_overflow_fails(self) -> None:
+        model = load_asset_json("localization-contract.template.json")
+        model["traces"][1]["overflow_controls"] = 1
+        completed = run_contract("localization_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("exceeds overflow budget", completed.stdout)
+
+    def test_stale_runtime_switch_fails(self) -> None:
+        model = load_asset_json("localization-contract.template.json")
+        trace = next(item for item in model["traces"] if item["scenario"] == "runtime_switch")
+        trace["cached_text_invalidated"] = False
+        completed = run_contract("localization_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("leaves stale cached text", completed.stdout)
+
+
+class ReproducibleBuildContractTests(unittest.TestCase):
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "reproducible_build_probe.py",
+            "--model",
+            str(ROOT / "assets" / "reproducible-build-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] reproducible-build", completed.stdout)
+
+    def test_warm_checkout_fails(self) -> None:
+        model = load_asset_json("reproducible-build-contract.template.json")
+        model["builds"][0]["clean_checkout"] = False
+        completed = run_contract("reproducible_build_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("not from a clean checkout", completed.stdout)
+
+    def test_artifact_drift_fails(self) -> None:
+        model = load_asset_json("reproducible-build-contract.template.json")
+        model["builds"][1]["normalized_hash"] = "different"
+        completed = run_contract("reproducible_build_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("normalized outputs differ", completed.stdout)
+
+
+class ReplayContractTests(unittest.TestCase):
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "replay_probe.py",
+            "--model",
+            str(ROOT / "assets" / "replay-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] replay", completed.stdout)
+
+    def test_digest_divergence_fails(self) -> None:
+        model = load_asset_json("replay-contract.template.json")
+        model["traces"][0]["actual_digest"] = "different"
+        completed = run_contract("replay_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("state digest diverges", completed.stdout)
+
+    def test_colliding_ghost_fails(self) -> None:
+        model = load_asset_json("replay-contract.template.json")
+        trace = next(item for item in model["traces"] if item["scenario"] == "ghost_isolation")
+        trace["ghost_collision_events"] = 1
+        completed = run_contract("replay_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("ghost affects collision", completed.stdout)
+
+
+class LiveOpsContractTests(unittest.TestCase):
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "liveops_probe.py",
+            "--model",
+            str(ROOT / "assets" / "liveops-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] liveops", completed.stdout)
+
+    def test_forbidden_telemetry_field_fails(self) -> None:
+        model = load_asset_json("liveops-contract.template.json")
+        model["traces"][0]["forbidden_fields_sent"] = ["payment_token"]
+        completed = run_contract("liveops_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("sends forbidden fields", completed.stdout)
+
+    def test_non_idempotent_retry_fails(self) -> None:
+        model = load_asset_json("liveops-contract.template.json")
+        trace = next(item for item in model["traces"] if item["scenario"] == "duplicate_retry")
+        trace["idempotent_event_ids"] = False
+        completed = run_contract("liveops_probe.py", model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("retry is not idempotent", completed.stdout)
+
+
+class ForwardEvaluationAuditTests(unittest.TestCase):
+    def run_matrix(self, model: dict[str, object]) -> subprocess.CompletedProcess[str]:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "matrix.json"
+            path.write_text(json.dumps(model), encoding="utf-8")
+            return run_script("forward_eval_audit.py", "--matrix", str(path), "--summary")
+
+    def valid_matrix(self) -> dict[str, object]:
+        base = {
+            "brief_path": "briefs/scenario.md",
+            "godot_version": "4.7.2-stable",
+            "composite_case": "new-shooter-action-complete+localized-release-complete",
+            "contracts": ["shooter"],
+            "builder_context": "isolated builder task",
+            "reviewer_context": "separate raw reviewer task",
+            "first_pass_verdict": "pass",
+            "user_found_defects": [],
+            "expected_gate_for_each_defect": {},
+            "false_positive_burden": "none observed in isolated control case",
+            "token_cost": 1000,
+            "elapsed_minutes": 10,
+            "result_artifacts": ["reports/raw.mp4"],
+        }
+        positive = {**base, "id": "shooter-positive", "positive_fixture": True, "negative_fixture": False}
+        negative = {
+            **base,
+            "id": "shooter-negative",
+            "first_pass_verdict": "fail",
+            "positive_fixture": False,
+            "negative_fixture": True,
+            "user_found_defects": ["missing recoil"],
+            "expected_gate_for_each_defect": {"missing recoil": "shooter_combat_playtest"},
+        }
+        positive_two = {**positive, "id": "shooter-positive-2"}
+        negative_two = {**negative, "id": "shooter-negative-2"}
+        return {
+            "schema_version": 1,
+            "skill_commit": "abcdef1234567890",
+            "required_contracts": ["shooter"],
+            "scenarios": [positive, negative, positive_two, negative_two],
+        }
+
+    def test_positive_and_negative_coverage_passes(self) -> None:
+        completed = self.run_matrix(self.valid_matrix())
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] forward-eval", completed.stdout)
+
+    def test_missing_negative_fixture_fails(self) -> None:
+        model = self.valid_matrix()
+        model["scenarios"] = model["scenarios"][:1]
+        completed = self.run_matrix(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("lacks a negative fixture", completed.stdout)
+
+
 class GenreRubricTests(unittest.TestCase):
     def test_rubric_case_and_score_cap_references_are_closed(self) -> None:
         rubric = json.loads((ROOT / "evals" / "rubric.json").read_text(encoding="utf-8"))
@@ -403,6 +590,15 @@ class GenreRubricTests(unittest.TestCase):
             "new-local-multiplayer-complete": "local_multiplayer_input_evidence",
             "multi-platform-store-release": "platform_release_evidence",
             "modding-ugc-production-slice": "modding_ugc_evidence",
+            "localized-release-complete": "localization_contract_evidence",
+            "reproducible-release-pipeline": "reproducible_build_evidence",
+            "replay-ghost-spectator-complete": "replay_contract_evidence",
+            "large-world-streaming-complete": "large_world_streaming_evidence",
+            "mobile-native-release": "mobile_native_evidence",
+            "liveops-production-slice": "liveops_contract_evidence",
+            "xr-production-slice": "xr_runtime_evidence",
+            "console-release-readiness": "console_release_evidence",
+            "runtime-authoring-tools-complete": "runtime_authoring_evidence",
             "new-2-5d-complete": "production_art_integrity_evidence",
             "new-isometric-fixed-camera-complete": "isometric_vertical_slice_art_review",
             "ui-reference-integration": "reference_parity_evidence",
@@ -575,6 +771,23 @@ class GenreRubricTests(unittest.TestCase):
             "--narrative-review-output": ("narrative.md", "Narrative and Cinematic Review"),
             "--platform-release-output": ("platform.md", "Platform and Store Release Matrix"),
             "--modding-review-output": ("modding.md", "Modding and UGC Review"),
+            "--localization-review-output": (
+                "localization.md",
+                "Localization and Globalization Review",
+            ),
+            "--reproducible-build-review-output": (
+                "reproducible.md",
+                "Reproducible Build and Dependency Review",
+            ),
+            "--replay-review-output": ("replay.md", "Replay, Ghost, and Spectator Review"),
+            "--large-world-review-output": ("large-world.md", "Large-world and Streaming Review"),
+            "--mobile-native-review-output": ("mobile.md", "Mobile-native Production Review"),
+            "--liveops-review-output": ("liveops.md", "LiveOps, Telemetry, and Privacy Review"),
+            "--xr-console-review-output": ("xr-console.md", "XR and Console Review"),
+            "--runtime-authoring-review-output": (
+                "runtime-authoring.md",
+                "Runtime Authoring Tool Review",
+            ),
         }
         with tempfile.TemporaryDirectory() as directory:
             temp = Path(directory)
@@ -596,6 +809,94 @@ class GenreRubricTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         for name, heading in flags.values():
             self.assertIn(heading, rendered[name])
+
+    def test_hybrid_case_unions_gates_and_uses_maximum_score_floors(self) -> None:
+        selector = (
+            "new-shooter-action-complete+new-extraction-complete+"
+            "localized-release-complete"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            plan_path = temp / "plan.json"
+            prepared = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                selector,
+                "--output",
+                str(evidence_path),
+            )
+            planned = run_script(
+                "rubric_case_plan.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                selector,
+                "--json-output",
+                str(plan_path),
+                "--summary",
+            )
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        self.assertEqual(prepared.returncode, 0, prepared.stdout)
+        self.assertEqual(planned.returncode, 0, planned.stdout)
+        self.assertIn("shooter_combat_evidence", evidence["gates"])
+        self.assertIn("extraction_loop_evidence", evidence["gates"])
+        self.assertIn("localization_contract_evidence", evidence["gates"])
+        self.assertEqual(plan["minimum_scores"]["playability_and_ux"], 3)
+        self.assertEqual(len(plan["component_cases"]), 3)
+
+    def test_device_human_gates_cap_unverified_mobile_and_xr_scores(self) -> None:
+        expected = {
+            "mobile-native-release": "mobile_device_playtest",
+            "xr-production-slice": "xr_comfort_playtest",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            for case_id, human_gate in expected.items():
+                evidence_path = temp / f"{case_id}-evidence.json"
+                scorecard_path = temp / f"{case_id}-scorecard.json"
+                prepared = run_script(
+                    "evidence_helper.py",
+                    "--rubric",
+                    str(ROOT / "evals" / "rubric.json"),
+                    "--case",
+                    case_id,
+                    "--output",
+                    str(evidence_path),
+                )
+                self.assertEqual(prepared.returncode, 0, prepared.stdout)
+                evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+                for score in evidence["scores"].values():
+                    score["score"] = 4
+                    score["evidence"] = ["fixture: submitted maximum before unresolved caps"]
+                evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+                scored = run_script(
+                    "eval_scorecard.py",
+                    "--rubric",
+                    str(ROOT / "evals" / "rubric.json"),
+                    "--case",
+                    case_id,
+                    "--evidence",
+                    str(evidence_path),
+                    "--json-output",
+                    str(scorecard_path),
+                    "--summary",
+                )
+                self.assertEqual(scored.returncode, 1, scored.stdout)
+                report = json.loads(scorecard_path.read_text(encoding="utf-8"))
+                self.assertEqual(report["verdict"], "blocked")
+                self.assertTrue(
+                    any(
+                        item["gate"] == human_gate
+                        and item["dimension"] == "playability_and_ux"
+                        and item["after"] == 1
+                        for item in report["score_caps_applied"]
+                    ),
+                    report["score_caps_applied"],
+                )
 
 
 @unittest.skipUnless(importlib.util.find_spec("PIL"), "Pillow is not installed")

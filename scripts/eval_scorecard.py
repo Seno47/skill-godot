@@ -9,6 +9,8 @@ from pathlib import Path
 import sys
 from typing import Any
 
+from rubric_case_composer import CaseCompositionError, gate_applies, resolve_case_selector
+
 
 class ScorecardError(RuntimeError):
     pass
@@ -31,7 +33,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Score a Godot skill evaluation against a stable rubric.")
     parser.add_argument("--rubric", required=True, help="Rubric JSON, normally evals/rubric.json.")
     parser.add_argument("--evidence", required=True, help="Evaluation evidence JSON.")
-    parser.add_argument("--case", required=True, dest="case_id", help="Case ID from the rubric.")
+    parser.add_argument(
+        "--case",
+        required=True,
+        dest="case_id",
+        help="One case ID or a '+'-joined fail-closed composite of rubric case IDs.",
+    )
     parser.add_argument("--baseline", help="Optional previous scorecard JSON for a score delta.")
     parser.add_argument("--json-output", help="Write the complete scorecard JSON.")
     parser.add_argument("--summary", action="store_true")
@@ -190,10 +197,11 @@ def main() -> int:
         evidence = read_json(args.evidence, "evidence")
         if rubric.get("schema_version") != 1 or evidence.get("schema_version") != 1:
             raise ScorecardError("rubric and evidence schema_version must be 1")
-        cases = {item.get("id"): item for item in rubric.get("cases", []) if isinstance(item, dict)}
-        if args.case_id not in cases:
-            raise ScorecardError(f"Unknown case ID: {args.case_id}")
-        if evidence.get("case_id") != args.case_id:
+        try:
+            case_id, selected_cases, case_definition = resolve_case_selector(rubric, args.case_id)
+        except CaseCompositionError as exc:
+            raise ScorecardError(str(exc)) from exc
+        if evidence.get("case_id") != case_id:
             raise ScorecardError("evidence.case_id does not match --case")
 
         gate_evidence = evidence.get("gates")
@@ -217,16 +225,12 @@ def main() -> int:
         blocking = False
         for definition in rubric.get("blocking_gates", []):
             gate_id = definition.get("id")
-            case_filter = definition.get("cases")
-            if case_filter is not None:
-                if (
-                    not isinstance(case_filter, list)
-                    or not case_filter
-                    or any(not isinstance(item, str) or not item for item in case_filter)
-                ):
-                    raise ScorecardError(f"Gate {gate_id}.cases must be a non-empty list of case IDs")
-                if args.case_id not in case_filter:
-                    continue
+            try:
+                applies = gate_applies(definition, selected_cases)
+            except CaseCompositionError as exc:
+                raise ScorecardError(f"Gate {gate_id}: {exc}") from exc
+            if not applies:
+                continue
             value = gate_evidence.get(gate_id)
             if not isinstance(value, dict):
                 raise ScorecardError(f"Missing gate evidence: {gate_id}")
@@ -384,13 +388,13 @@ def main() -> int:
             result["weighted_points"] = round(adjusted_points, 3)
 
         quality_floor_failures: list[dict[str, Any]] = []
-        minimum_scores = cases[args.case_id].get("minimum_scores", {})
+        minimum_scores = case_definition.get("minimum_scores", {})
         if not isinstance(minimum_scores, dict):
-            raise ScorecardError(f"Case {args.case_id}.minimum_scores must be an object")
+            raise ScorecardError(f"Case {case_id}.minimum_scores must be an object")
         for dimension_id, required_score in minimum_scores.items():
             if dimension_id not in dimension_results:
                 raise ScorecardError(
-                    f"Case {args.case_id} requires unknown dimension: {dimension_id}"
+                    f"Case {case_id} requires unknown dimension: {dimension_id}"
                 )
             if (
                 isinstance(required_score, bool)
@@ -398,7 +402,7 @@ def main() -> int:
                 or not minimum <= required_score <= maximum
             ):
                 raise ScorecardError(
-                    f"Case {args.case_id}.minimum_scores.{dimension_id} must be between "
+                    f"Case {case_id}.minimum_scores.{dimension_id} must be between "
                     f"{minimum} and {maximum}"
                 )
             result = dimension_results[dimension_id]
@@ -429,14 +433,15 @@ def main() -> int:
         baseline_score = None
         if args.baseline:
             baseline = read_json(args.baseline, "baseline")
-            if baseline.get("case_id") != args.case_id:
+            if baseline.get("case_id") != case_id:
                 raise ScorecardError("baseline.case_id does not match --case")
             if isinstance(baseline.get("score_100"), (int, float)):
                 baseline_score = float(baseline["score_100"])
         report = {
             "schema_version": 1,
-            "case_id": args.case_id,
-            "case": cases[args.case_id],
+            "case_id": case_id,
+            "component_cases": selected_cases,
+            "case": case_definition,
             "verdict": verdict,
             "score_100": score_100,
             "submitted_score_100": submitted_score_100,
@@ -463,7 +468,7 @@ def main() -> int:
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(
-            f"[RESULT] case={args.case_id} verdict={verdict} score={score_100:.2f}/100 "
+            f"[RESULT] case={case_id} verdict={verdict} score={score_100:.2f}/100 "
             f"submitted={submitted_score_100:.2f}/100 caps={len(score_caps_applied)} "
             f"blocking_gates={report['blocking_gate_count']} "
             f"gate_validation_failures={report['gate_validation_failure_count']} "

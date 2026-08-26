@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "contract_id": "replace-with-build-contract-id",
+  "source_revision": "replace-with-source-commit",
+  "contract": {
+    "engine_id": "Godot 4.x exact build and digest",
+    "export_template_sha256": "replace-with-template-sha256",
+    "required_presets": ["Windows Desktop", "Linux"],
+    "minimum_clean_environments": 2,
+    "normalization_policy": "exclude documented container timestamps/signature envelope only",
+    "credentials_outside_repository": true,
+    "required_scenarios": ["clean_build", "repeat_build", "functional_smoke", "dependency_manifest", "license_manifest"]
+  },
+  "dependencies": [
+    {"id": "example-addon", "source": "replace-with-source", "version": "replace-with-commit-or-version", "license": "replace-with-license", "native": false, "sha256": "replace-with-sha256"}
+  ],
+  "builds": [
+    {"id": "windows-clean-a", "preset": "Windows Desktop", "environment": "clean-a", "scenario": "clean_build", "source_revision": "replace-with-source-commit", "engine_id": "Godot 4.x exact build and digest", "template_sha256": "replace-with-template-sha256", "result": "pass", "clean_checkout": true, "normalized_hash": "windows-normalized", "functional_digest": "windows-smoke", "errors": 0, "warnings": 0, "credentials_embedded": false, "output_bytes": 1000000},
+    {"id": "windows-clean-b", "preset": "Windows Desktop", "environment": "clean-b", "scenario": "repeat_build", "source_revision": "replace-with-source-commit", "engine_id": "Godot 4.x exact build and digest", "template_sha256": "replace-with-template-sha256", "result": "pass", "clean_checkout": true, "normalized_hash": "windows-normalized", "functional_digest": "windows-smoke", "errors": 0, "warnings": 0, "credentials_embedded": false, "output_bytes": 1000000},
+    {"id": "linux-clean-a", "preset": "Linux", "environment": "clean-a", "scenario": "clean_build", "source_revision": "replace-with-source-commit", "engine_id": "Godot 4.x exact build and digest", "template_sha256": "replace-with-template-sha256", "result": "pass", "clean_checkout": true, "normalized_hash": "linux-normalized", "functional_digest": "linux-smoke", "errors": 0, "warnings": 0, "credentials_embedded": false, "output_bytes": 1000000},
+    {"id": "linux-clean-b", "preset": "Linux", "environment": "clean-b", "scenario": "repeat_build", "source_revision": "replace-with-source-commit", "engine_id": "Godot 4.x exact build and digest", "template_sha256": "replace-with-template-sha256", "result": "pass", "clean_checkout": true, "normalized_hash": "linux-normalized", "functional_digest": "linux-smoke", "errors": 0, "warnings": 0, "credentials_embedded": false, "output_bytes": 1000000},
+    {"id": "functional-smoke", "preset": "Windows Desktop", "environment": "clean-b", "scenario": "functional_smoke", "source_revision": "replace-with-source-commit", "engine_id": "Godot 4.x exact build and digest", "template_sha256": "replace-with-template-sha256", "result": "pass", "clean_checkout": true, "normalized_hash": "windows-normalized", "functional_digest": "windows-smoke", "errors": 0, "warnings": 0, "credentials_embedded": false, "output_bytes": 1000000},
+    {"id": "dependency-manifest", "preset": "Windows Desktop", "environment": "clean-a", "scenario": "dependency_manifest", "source_revision": "replace-with-source-commit", "engine_id": "Godot 4.x exact build and digest", "template_sha256": "replace-with-template-sha256", "result": "pass", "clean_checkout": true, "normalized_hash": "windows-normalized", "functional_digest": "windows-smoke", "errors": 0, "warnings": 0, "credentials_embedded": false, "output_bytes": 1000000},
+    {"id": "license-manifest", "preset": "Windows Desktop", "environment": "clean-a", "scenario": "license_manifest", "source_revision": "replace-with-source-commit", "engine_id": "Godot 4.x exact build and digest", "template_sha256": "replace-with-template-sha256", "result": "pass", "clean_checkout": true, "normalized_hash": "windows-normalized", "functional_digest": "windows-smoke", "errors": 0, "warnings": 0, "credentials_embedded": false, "output_bytes": 1000000}
+  ]
+}

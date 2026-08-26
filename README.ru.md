@@ -7,7 +7,7 @@
   <a href="./README.md">English</a> · <a href="https://learn.chatgpt.com/docs/build-skills">Как устроены навыки Codex</a>
 </p>
 
-`skill-godot` задаёт Codex воспроизводимый процесс разработки настоящего проекта Godot: редактируемые сцены и ресурсы, цельные ассеты, удобное управление, детерминированные проверки, визуальная проверка, замеры производительности и готовый к публикации экспорт. Поддерживаются 2D, 3D, 2.5D, изометрические и ортографические игры; процедурные, стратегические, гоночные, экшен- и нарративные системы; одиночный, локальный и сетевой multiplayer, extraction и честно ограниченные MMO production slice; доступность, сохранения, моддинг/UGC, интерфейсы, звук, мобильное и веб-управление, магазины и релизы в Яндекс Играх.
+`skill-godot` задаёт Codex воспроизводимый процесс разработки настоящего проекта Godot: редактируемые сцены и ресурсы, цельные ассеты, удобное управление, детерминированные проверки, визуальная проверка, замеры производительности и готовый к публикации экспорт. Поддерживаются 2D, 3D, 2.5D, изометрические и ортографические игры; procedural, strategy, racing, action и narrative; одиночный, local/online multiplayer, extraction и честные MMO production slices; accessibility, localization, saves, replay, большие миры, LiveOps, native mobile/XR, runtime authoring, reproducible releases, modding/UGC, stores и Яндекс Игры.
 
 ## Быстрый старт
 
@@ -31,8 +31,8 @@ Codex также может выбрать навык автоматически
 
 | Состав | Практическая польза |
 | --- | --- |
-| 42 профильных руководства | Архитектура сцен, 2D/3D/2.5D, UI, сохранения, input/accessibility, AI, процедурные и жанровые системы, multiplayer, магазины/моддинг, ассеты, звук, производительность, загрузка, экспорт и публикация |
-| 23 детерминированные Python-утилиты | Снимок проекта, аудит сцен/ассетов, сравнение UI, читаемость фиксированной камеры, пробы save/input/AI/procedural/progression/extraction/network, захват, бюджеты, scorecard и размер сборки |
+| 51 профильное руководство | Архитектура сцен, 2D/3D/2.5D, UI, saves, localization, input/accessibility, AI, procedural и жанровые системы, networking/LiveOps, replay, большие миры, mobile/XR, runtime authoring, stores/modding, ассеты, performance и release |
+| 30 детерминированных Python-утилит | Снимок проекта, аудит сцен/ассетов, screenshot parity, fixed-camera readability, save/input/AI/procedural/progression/extraction/network/localization/replay/build/LiveOps-пробы, композиция rubric, forward-eval audit, capture, бюджеты, scorecard и build size |
 | 7 переиспользуемых Godot-проб | Тач-прокрутка, компоновка кнопок, third-person управление/HUD mouse routing/видимость, изометрическая проекция и навигация |
 | Правила scene-first | Постоянная композиция хранится в `.tscn` и ресурсах Godot, а не скрывается в больших runtime-скриптах |
 | Завершение по доказательствам | Scorecard сверяет владельца приёмки и реальные пути к скриншотам, видео и review, отклоняя PASS только на словах |
@@ -65,7 +65,10 @@ flowchart LR
 - **Веб и Яндекс Игры:** жизненный цикл SDK, реклама, rewarded-сценарии, сохранения, лидерборды, локализация, модерация и проверка архива.
 - **Multiplayer и persistent online:** server authority, репликация, лаги/потери/reconnect, dedicated server, extraction settlement, честный MMO-scope, нагрузка сервисов, восстановление после сбоев, restore и rollback.
 - **Платформы и расширяемость:** точные store candidates, clean install/update/signing/SDK lifecycle, а также явные trust tiers для mods/UGC, hostile-content validation, восстановление после удаления мода, safe mode и честные границы изоляции.
+- **Глобальный и advanced production:** localization/plurals/pseudolocalization, replay/ghost/spectator, streamed-world traversal, реальные mobile devices, LiveOps/privacy, OpenXR/authorized console boundaries, runtime creator tools и воспроизводимые clean builds.
 - **Проверка:** headless-запуски, детерминированные пробы, автоматический захват, проверка обучения и независимый UX-разбор.
+
+Гибридные задачи используют канонический rubric selector `base+modifier+...`. `rubric_case_plan.py`, `evidence_helper.py` и `eval_scorecard.py` разделяют одну fail-closed композицию: применимые gates объединяются, а для каждой score dimension берётся самый строгий floor. Поэтому удобный жанровый label не может незаметно отбросить localization, replay, mobile, LiveOps или release-обязательства, при этом нерелевантные руководства не загружаются в контекст.
 
 Для законченных 2.5D-игр теперь есть отдельный rubric case `new-2-5d-complete`. Он требует явную пространственную модель, raw-состояния quiet/normal/dense/VFX/result, видео production-анимации персонажа, проверку меню и semantic identity, читаемые глубину и контакты, независимую приёмку target build по UX/визуалу и человеческое прослушивание аудио. Наличие box/sphere/cylinder, shader quad или particles внутри `.tscn` доказывает редактируемую архитектуру, но не production-art.
 
