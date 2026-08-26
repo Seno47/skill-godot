@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "model_id": "replace-with-project-model-id",
+  "build_id": "replace-with-tested-build-id",
+  "contract": {
+    "progression_kind": "level-campaign",
+    "monetization_policy": "none",
+    "required_archetypes": ["novice", "typical", "expert"],
+    "required_checkpoints": ["onboarding", "early_choice", "midgame", "late_game", "completion"],
+    "required_trace_sources": ["simulation", "target_build"],
+    "required_checks": [
+      "power_challenge",
+      "unlock_cadence",
+      "choice_cadence",
+      "failure_recovery",
+      "option_viability",
+      "resource_bounds",
+      "source_sink_concentration"
+    ]
+  },
+  "budgets": {
+    "power_challenge_ratio": {"min": "0.65", "max": "1.60"},
+    "max_minutes_without_unlock": "25",
+    "max_minutes_without_meaningful_choice": "25",
+    "max_failure_recovery_minutes": "8",
+    "max_single_option_pick_share": "0.75",
+    "max_single_reward_source_share": "0.80",
+    "max_single_resource_sink_share": "0.80"
+  },
+  "resources": [
+    {
+      "id": "coins",
+      "floor": "0",
+      "ceiling": "500",
+      "must_have_source": true,
+      "must_have_sink": true
+    }
+  ],
+  "options": [
+    {"id": "route_a", "family": "first_build", "required_viable": true},
+    {"id": "route_b", "family": "first_build", "required_viable": true}
+  ],
+  "traces": [
+    {
+      "id": "novice-safe-sim",
+      "archetype": "novice",
+      "strategy": "safe",
+      "source": "simulation",
+      "seed": "101",
+      "checkpoints": [
+        {"id": "onboarding", "elapsed_minutes": "0", "player_power": "1.0", "challenge": "1.0", "balances": {"coins": "0"}, "unlocks": ["core_action"], "choices_presented": [], "choices_selected": [], "failure_recovery_minutes": "0", "resource_sources": {"coins": {"starter": "12"}}, "resource_sinks": {"coins": {}}},
+        {"id": "early_choice", "elapsed_minutes": "12", "player_power": "1.3", "challenge": "1.2", "balances": {"coins": "4"}, "unlocks": ["first_build"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_a"], "failure_recovery_minutes": "3", "resource_sources": {"coins": {"missions": "8"}}, "resource_sinks": {"coins": {"upgrades": "16"}}},
+        {"id": "midgame", "elapsed_minutes": "32", "player_power": "2.0", "challenge": "1.8", "balances": {"coins": "9"}, "unlocks": ["midgame_tool"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_a"], "failure_recovery_minutes": "4", "resource_sources": {"coins": {"missions": "14", "optional": "5"}}, "resource_sinks": {"coins": {"upgrades": "12", "repair": "2"}}},
+        {"id": "late_game", "elapsed_minutes": "52", "player_power": "2.8", "challenge": "2.6", "balances": {"coins": "7"}, "unlocks": ["late_tool"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_a"], "failure_recovery_minutes": "5", "resource_sources": {"coins": {"missions": "12", "optional": "6"}}, "resource_sinks": {"coins": {"upgrades": "15", "repair": "5"}}},
+        {"id": "completion", "elapsed_minutes": "72", "player_power": "3.3", "challenge": "3.1", "balances": {"coins": "11"}, "unlocks": ["completion_reward"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_a"], "failure_recovery_minutes": "4", "resource_sources": {"coins": {"missions": "15", "optional": "7"}}, "resource_sinks": {"coins": {"upgrades": "11", "repair": "7"}}}
+      ]
+    },
+    {
+      "id": "typical-balanced-build",
+      "archetype": "typical",
+      "strategy": "balanced",
+      "source": "target_build",
+      "seed": "202",
+      "checkpoints": [
+        {"id": "onboarding", "elapsed_minutes": "0", "player_power": "1.0", "challenge": "1.0", "balances": {"coins": "0"}, "unlocks": ["core_action"], "choices_presented": [], "choices_selected": [], "failure_recovery_minutes": "0", "resource_sources": {"coins": {"starter": "12"}}, "resource_sinks": {"coins": {}}},
+        {"id": "early_choice", "elapsed_minutes": "10", "player_power": "1.4", "challenge": "1.3", "balances": {"coins": "5"}, "unlocks": ["first_build"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_b"], "failure_recovery_minutes": "2", "resource_sources": {"coins": {"missions": "9"}}, "resource_sinks": {"coins": {"upgrades": "16"}}},
+        {"id": "midgame", "elapsed_minutes": "28", "player_power": "2.2", "challenge": "2.0", "balances": {"coins": "13"}, "unlocks": ["midgame_tool"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_b"], "failure_recovery_minutes": "3", "resource_sources": {"coins": {"missions": "15", "optional": "7"}}, "resource_sinks": {"coins": {"upgrades": "11", "repair": "3"}}},
+        {"id": "late_game", "elapsed_minutes": "47", "player_power": "3.0", "challenge": "2.8", "balances": {"coins": "12"}, "unlocks": ["late_tool"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_b"], "failure_recovery_minutes": "4", "resource_sources": {"coins": {"missions": "13", "optional": "8"}}, "resource_sinks": {"coins": {"upgrades": "15", "repair": "7"}}},
+        {"id": "completion", "elapsed_minutes": "65", "player_power": "3.5", "challenge": "3.3", "balances": {"coins": "16"}, "unlocks": ["completion_reward"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_b"], "failure_recovery_minutes": "3", "resource_sources": {"coins": {"missions": "16", "optional": "8"}}, "resource_sinks": {"coins": {"upgrades": "12", "repair": "8"}}}
+      ]
+    },
+    {
+      "id": "expert-risk-sim",
+      "archetype": "expert",
+      "strategy": "high-risk",
+      "source": "simulation",
+      "seed": "303",
+      "checkpoints": [
+        {"id": "onboarding", "elapsed_minutes": "0", "player_power": "1.0", "challenge": "1.0", "balances": {"coins": "0"}, "unlocks": ["core_action"], "choices_presented": [], "choices_selected": [], "failure_recovery_minutes": "0", "resource_sources": {"coins": {"starter": "12"}}, "resource_sinks": {"coins": {}}},
+        {"id": "early_choice", "elapsed_minutes": "8", "player_power": "1.2", "challenge": "1.3", "balances": {"coins": "3"}, "unlocks": ["first_build"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_b"], "failure_recovery_minutes": "2", "resource_sources": {"coins": {"missions": "10"}}, "resource_sinks": {"coins": {"upgrades": "19"}}},
+        {"id": "midgame", "elapsed_minutes": "24", "player_power": "1.9", "challenge": "2.1", "balances": {"coins": "8"}, "unlocks": ["midgame_tool"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_b"], "failure_recovery_minutes": "2", "resource_sources": {"coins": {"missions": "16", "optional": "6"}}, "resource_sinks": {"coins": {"upgrades": "14", "repair": "3"}}},
+        {"id": "late_game", "elapsed_minutes": "41", "player_power": "2.7", "challenge": "3.0", "balances": {"coins": "10"}, "unlocks": ["late_tool"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_b"], "failure_recovery_minutes": "3", "resource_sources": {"coins": {"missions": "15", "optional": "8"}}, "resource_sinks": {"coins": {"upgrades": "15", "repair": "6"}}},
+        {"id": "completion", "elapsed_minutes": "58", "player_power": "3.2", "challenge": "3.5", "balances": {"coins": "14"}, "unlocks": ["completion_reward"], "choices_presented": ["route_a", "route_b"], "choices_selected": ["route_b"], "failure_recovery_minutes": "2", "resource_sources": {"coins": {"missions": "17", "optional": "9"}}, "resource_sinks": {"coins": {"upgrades": "13", "repair": "9"}}}
+      ]
+    }
+  ]
+}

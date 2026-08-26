@@ -755,6 +755,52 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(scores["asset_pipeline"]["score"], 2)
         self.assertEqual(report["verdict"], "blocked")
 
+    def test_eval_progression_case_blocks_model_and_human_pacing_claims(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-progression-heavy-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: human target-build listening"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 3,
+            "evidence": ["fixture: production asset manifest"],
+        }
+        for gate_id in (
+            "progression_balance_model_evidence",
+            "progression_pacing_playtest",
+        ):
+            source["gates"][gate_id]["status"] = "not_tested"
+            source["gates"][gate_id]["evidence"] = [
+                f"fixture: {gate_id} was inferred from one optimal autoplay"
+            ]
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-progression-heavy-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(report["blocking_gate_count"], 2)
+        self.assertEqual(scores["gameplay_correctness"]["score"], 1)
+        self.assertEqual(scores["playability_and_ux"]["score"], 1)
+        self.assertEqual(scores["technical_quality"]["score"], 2)
+        self.assertEqual(scores["evidence_and_reproducibility"]["score"], 2)
+        self.assertEqual(report["verdict"], "blocked")
+
     def test_eval_pass_rejects_missing_raw_motion_artifact(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "new-2-5d-complete"

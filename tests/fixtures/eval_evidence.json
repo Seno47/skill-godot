@@ -71,6 +71,24 @@
       "status": "pass",
       "evidence": ["fixture: authored content-duration table and uncoached playtest timing"]
     },
+    "progression_balance_model_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: declared multi-archetype model audit and matching target-build transaction trace"],
+      "artifacts": [
+        {"path": "evidence-artifacts/progression-model.json", "kind": "report", "states": ["model_audit"]},
+        {"path": "evidence-artifacts/progression-trace-a.json", "kind": "trace", "states": ["target_build_transaction", "novice_or_conservative", "typical"]},
+        {"path": "evidence-artifacts/progression-trace-b.json", "kind": "trace", "states": ["expert_or_aggressive"]}
+      ]
+    },
+    "progression_pacing_playtest": {
+      "status": "pass",
+      "evidence": ["fixture: separate clean-profile uncoached human pacing traces"],
+      "artifacts": [
+        {"path": "evidence-artifacts/progression-trace-a.json", "kind": "trace", "states": ["early_progression", "mid_progression", "failure_recovery_or_bottleneck"]},
+        {"path": "evidence-artifacts/progression-trace-b.json", "kind": "trace", "states": ["early_progression", "late_progression", "failure_recovery_or_bottleneck"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["progression_pacing_review"]}
+      ]
+    },
     "menu_identity_craft_review": {
       "status": "pass",
       "evidence": ["fixture: independent runtime wordmark, copy, hierarchy, and menu composition review"],

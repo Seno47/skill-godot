@@ -59,18 +59,18 @@
     {
       "id": "interactive_onboarding",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "From a clean first-use state, an uncoached player performs every brief-required onboarding transition and reaches the normal loop; static hints, tutorial fields, narration, or one generic action do not substitute for intermediate verbs/world consequences, and ordinary pressure/failure timing is frozen or forgiving until the relevant teaching succeeds unless an uncoached test proves pressure itself is safely taught."
     },
     {
       "id": "clean_shipping_state",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "A release-like clean profile proves shipping-default progress/settings/onboarding separately from seeded or previously played QA state, with state provenance recorded."
     },
     {
       "id": "semantic_identity_review",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "The app/export icon and main-menu mark receive a blind independent semantic review from raw captures at actual final sizes: the reviewer can describe a game-specific subject, relationship, or core-loop cue without designer narration; palette consistency, initials, symmetry, or tidy primitive geometry alone do not pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 2, "review": 1},
@@ -83,7 +83,7 @@
     {
       "id": "independent_ux_review",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "A person or genuinely independent evaluation context that did not build the flow reviews first-use playability and raw target-build menu, normal gameplay, dense interaction/VFX, and result evidence, including player occlusion/restoration for third-person work and gameplay-size art/readability/density states for fixed-camera isometric work; self-review alone does not pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 4, "review": 1},
@@ -98,19 +98,49 @@
     {
       "id": "human_audio_listening",
       "acceptance_owner": "human",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "A human listener signs off several minutes of representative target-build gameplay audio, overlaps/repetition, UI, pressure/result, transitions, pause/focus, and mixer settings; structural nodes, streams, buses, waveforms, metrics, provenance, or builder intent alone do not pass."
     },
     {
       "id": "content_duration_evidence",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "Any complete-game/duration/content-volume claim is decomposed into authored objectives or puzzles, mechanic introductions and meaningful permutations/combinations, estimated uncoached solve time, and observed playtest time with tutorial/menus/retries/grind/replay/unbuilt assumptions separated; a short slice is labeled as a slice and cannot substantiate unbuilt hours."
+    },
+    {
+      "id": "progression_balance_model_evidence",
+      "cases": ["new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-isometric-fixed-camera-complete", "new-progression-heavy-complete"],
+      "description": "A project-specific balance contract declared before final evidence covers representative archetypes, early/mid/late checkpoints, applicable power/challenge, unlock/choice cadence, failure recovery, option viability, and resource source/sink boundaries. A deterministic audit plus target-build transaction trace prove the implemented curve, exact costs/rewards, persistence, and exploit boundaries; a generic spreadsheet, one optimal autoplay, aggregate averages, or model-only PASS does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "trace": 2},
+        "required_states": {
+          "model_audit": ["report"],
+          "target_build_transaction": ["trace"],
+          "novice_or_conservative": ["trace"],
+          "typical": ["trace"],
+          "expert_or_aggressive": ["trace"]
+        }
+      }
+    },
+    {
+      "id": "progression_pacing_playtest",
+      "acceptance_owner": "human",
+      "cases": ["new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-isometric-fixed-camera-complete", "new-progression-heavy-complete"],
+      "description": "At least two separate clean-profile uncoached human target-build traces cover representative supported cohorts through early, mid, late, and failure/recovery or bottleneck states. The review judges goal clarity, reward relevance, grind/drought, fatigue, recovery, strategy viability, and the free path when monetization exists. The builder must fix routine arithmetic and transaction defects autonomously; the user is not the default tester, and simulation, designer play, autoplay, or theoretical duration cannot substitute for human pacing evidence.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"trace": 2, "review": 1},
+        "required_states": {
+          "early_progression": ["trace"],
+          "mid_progression": ["trace"],
+          "late_progression": ["trace"],
+          "failure_recovery_or_bottleneck": ["trace"]
+        }
+      }
     },
     {
       "id": "menu_identity_craft_review",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "An independent raw target-build review passes the main menu as an authored game-specific composition: the title is a deliberate wordmark or typographic system at runtime size; the icon/mark, background, hierarchy, controls, and copy belong together; redundant AI-marketing taglines and a generic kicker + huge default-font title + accent rule + explanatory sentence + stack of identical rectangles do not pass merely because they are aligned and themed.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 2, "review": 1},
@@ -122,7 +152,7 @@
     },
     {
       "id": "production_art_integrity_evidence",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "Builder-owned raw target-build review of quiet, normal, dense interaction, peak VFX/contact, and result states proves production art integrity. Serialized Box/Cylinder/Sphere/CSG geometry remains blockout unless a documented minimalist language and gameplay-size review justify it; debug-looking quads, rectangles, cones, billboards or particles, mismatched panorama/character families, broken contact/depth, sparse repeated modules, and empty placeholder panels block release even when scene/import/performance audits pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 5, "report": 1},
@@ -138,7 +168,7 @@
     {
       "id": "gameplay_hud_glanceability_review",
       "acceptance_owner": "independent",
-      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "constrained-mobile-web"],
       "description": "A builder inventory plus independent raw target-build review passes the gameplay HUD in quiet, normal, dense interaction, and peak-VFX states. Every persistent/contextual text zone has a keep/shorten/iconify/world-cue/remove rationale; frequent telemetry is recognizable without sentence reading; objective copy is short and does not compete with contextual prompts; icons form one authored final-size family with non-color differentiation and accessible names/tooltips/first-use teaching; representative localization does not recreate long persistent captions. Compact panel bounds or clean styling alone do not pass excessive simultaneous reading load.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 4, "report": 1, "review": 1},
@@ -245,6 +275,14 @@
     {
       "gate": "content_duration_evidence",
       "dimensions": {"intent_and_scope": 2, "playability_and_ux": 2}
+    },
+    {
+      "gate": "progression_balance_model_evidence",
+      "dimensions": {"gameplay_correctness": 1, "technical_quality": 2, "playability_and_ux": 2}
+    },
+    {
+      "gate": "progression_pacing_playtest",
+      "dimensions": {"playability_and_ux": 1, "gameplay_correctness": 2, "evidence_and_reproducibility": 2}
     },
     {
       "gate": "menu_identity_craft_review",
@@ -372,6 +410,12 @@
       "brief": "Create a complete small quest-driven slice with Resource-authored definitions, event-driven objectives, a branch/failure path, versioned persistence, exactly-once rewards, and readable localized tracking.",
       "focus": ["definition/runtime/UI separation", "stable IDs", "event idempotence", "branch and failure", "save migration", "reward transaction", "localized tracker/journal"],
       "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "audio_direction_quality": 3}
+    },
+    {
+      "id": "new-progression-heavy-complete",
+      "brief": "Create a complete game or production slice whose persistent progression, upgrades/builds, resources/rewards, and escalating challenge are central, with project-declared balance budgets, deterministic multi-archetype traces, exact target-build transactions, and uncoached human pacing evidence.",
+      "focus": ["progression promise", "power/challenge checkpoints", "unlock and choice cadence", "viable strategies", "resource sources and sinks", "failure recovery", "model/build parity", "clean-profile cohort traces", "grind and reward relevance", "free-path integrity"],
+      "minimum_scores": {"gameplay_correctness": 3, "playability_and_ux": 3, "technical_quality": 3, "audio_direction_quality": 3}
     },
     {
       "id": "new-3d-asset-pack",

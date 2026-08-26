@@ -31,8 +31,8 @@ Codex can also select the skill automatically when a request clearly matches its
 
 | Included | What it gives you |
 | --- | --- |
-| 28 focused production guides | Scene architecture, 2D/3D/2.5D, UI, genre systems, asset-source discovery, art, audio, performance, loading, exports, and platform release work |
-| 16 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, fixed-camera readability, progression/economy probes, capture support, budgets, scorecards, and build-size checks |
+| 29 focused production guides | Scene architecture, 2D/3D/2.5D, UI, genre systems, cross-genre progression balance, asset-source discovery, art, audio, performance, loading, exports, and platform release work |
+| 17 deterministic Python helpers | Project snapshots, scene/asset audits, screenshot parity, fixed-camera readability, progression/economy probes, capture support, budgets, scorecards, and build-size checks |
 | 7 reusable Godot probes | Touch scrolling, button composition, third-person controls/HUD mouse routing/visibility, isometric projection, and isometric navigation checks |
 | Scene-first authoring rules | Persistent composition stays in `.tscn` scenes and Godot resources instead of disappearing into large runtime scripts |
 | Evidence-based completion | The scorecard verifies acceptance ownership plus concrete screenshot/video/review paths and rejects prose-only PASS claims |
@@ -70,6 +70,8 @@ Asset discovery has its own source router for 2D, 3D, UI, recorded audio, music,
 Long autonomous runs can instantiate [`project-run-state.template.md`](./assets/project-run-state.template.md) so playable truth, build IDs, commands, evidence, asset costs/jobs, and the next bounded actions survive context changes without a growing diary. Paid generation records actual cost and a resumable provider job/sidecar before polling; visual assets retain their final gameplay-size contract. Scene-authoring tools must prove in-memory, packed-instance, and disk-reloaded parity, while [`godot_capture.py`](./scripts/godot_capture.py) can derive a deterministic 15–20 second delivery proof that the builder watches back before handoff.
 
 Approved UI references get a native parity workflow: formal screens remain editor-visible scenes, while [`image_compare.py`](./scripts/image_compare.py) creates same-resolution side-by-side, overlay, and diff artifacts. Progression topology and idle curves have reusable JSON models and deterministic probes; their numerical PASS still requires target-build play and human UX review.
+
+Progression-heavy games now have a cross-genre contract in [`progression-and-balance.md`](./references/progression-and-balance.md). The reusable [`progression-balance.template.json`](./assets/progression-balance.template.json) and [`progression_balance_probe.py`](./scripts/progression_balance_probe.py) check declared player archetypes, early/mid/late checkpoints, power/challenge bands, unlock and choice drought, recovery time, option dominance, resource floors/caps, and source/sink concentration. A separate [`progression-balance-review.template.md`](./assets/progression-balance-review.template.md) keeps model/build correctness builder-owned while requiring real uncoached human traces before claims about pacing, grind, or reward quality pass.
 
 ## Isometric and 2.5D workflow
 

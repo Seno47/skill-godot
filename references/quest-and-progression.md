@@ -2,6 +2,8 @@
 
 Read this for quests, missions, objectives, branching chains, contracts, achievements with progress, or other event-driven progression that survives scene changes.
 
+When quest rewards, unlock cadence, player power, resources, or difficulty are material rather than incidental, also apply [progression-and-balance.md](progression-and-balance.md). A transaction can be exactly-once and topologically valid while the reward curve, recovery cost, or route choice is still badly balanced.
+
 ## Separate definition, runtime state, and presentation
 
 - Author immutable quest/objective/reward definitions as typed `Resource` assets with stable `StringName` IDs and localization keys.

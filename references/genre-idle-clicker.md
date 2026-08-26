@@ -2,6 +2,8 @@
 
 Read this for manual-click, incremental, idle, automation, prestige, or long-horizon economy loops. A large number and an upgrade list do not by themselves make a complete idle game.
 
+Also apply [progression-and-balance.md](progression-and-balance.md) for active/mixed/offline archetypes, build or producer viability, source/sink concentration, milestone drought, failure/prestige recovery, and uncoached pacing. The idle-specific probe remains authoritative for exact curve/offline arithmetic; the cross-genre layer does not replace it.
+
 ## Define the economy as data
 
 Record:
@@ -62,4 +64,3 @@ Test:
 Record target time-to-first-purchase, first automation, first meaningful choice, session-end milestone, and later walls. Compare them against deterministic simulations and several human sessions. Reject the economy when one obvious purchase dominates indefinitely, progress stalls without warning, rewards change only the number's formatting, or the player can ignore the core decision loop.
 
 Community clicker demos in `evaluated-ecosystem.md` are learning fixtures, not production architecture. Their per-frame UI updates, hardcoded tiers, mixed numeric types, and absent save/offline contracts are specifically not defaults for this skill.
-

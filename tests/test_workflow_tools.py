@@ -96,6 +96,57 @@ class IdleEconomyTests(unittest.TestCase):
         self.assertIn("milestone 10s", completed.stdout)
 
 
+class ProgressionBalanceTests(unittest.TestCase):
+    @staticmethod
+    def load_template() -> dict[str, object]:
+        return json.loads(
+            (ROOT / "assets" / "progression-balance.template.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+    def run_model(self, model: dict[str, object]) -> subprocess.CompletedProcess[str]:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "progression-balance.json"
+            path.write_text(json.dumps(model), encoding="utf-8")
+            return run_script(
+                "progression_balance_probe.py", "--model", str(path), "--summary"
+            )
+
+    def test_template_passes(self) -> None:
+        completed = run_script(
+            "progression_balance_probe.py",
+            "--model",
+            str(ROOT / "assets" / "progression-balance.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS]", completed.stdout)
+
+    def test_missing_required_archetype_fails(self) -> None:
+        model = self.load_template()
+        model["traces"] = [
+            trace for trace in model["traces"] if trace["archetype"] != "expert"
+        ]
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("missing required archetypes: expert", completed.stdout)
+
+    def test_resource_bankruptcy_fails(self) -> None:
+        model = self.load_template()
+        model["traces"][0]["checkpoints"][1]["balances"]["coins"] = "-1"
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("below floor", completed.stdout)
+
+    def test_declared_dominant_option_fails(self) -> None:
+        model = self.load_template()
+        model["budgets"]["max_single_option_pick_share"] = "0.60"
+        completed = self.run_model(model)
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("option route_b pick share", completed.stdout)
+
+
 class GenreRubricTests(unittest.TestCase):
     def test_new_cases_prepare_their_conditional_gates(self) -> None:
         expected = {
@@ -103,6 +154,7 @@ class GenreRubricTests(unittest.TestCase):
             "new-2d-metroidvania-complete": "metroidvania_progression_evidence",
             "new-idle-clicker-complete": "idle_economy_evidence",
             "new-quest-driven-complete": "quest_transaction_evidence",
+            "new-progression-heavy-complete": "progression_balance_model_evidence",
             "new-2-5d-complete": "production_art_integrity_evidence",
             "new-isometric-fixed-camera-complete": "isometric_vertical_slice_art_review",
             "ui-reference-integration": "reference_parity_evidence",
@@ -123,6 +175,33 @@ class GenreRubricTests(unittest.TestCase):
                 self.assertEqual(completed.returncode, 0, completed.stdout)
                 evidence = json.loads(output.read_text(encoding="utf-8"))
                 self.assertIn(gate_id, evidence["gates"])
+
+    def test_progression_scaffold_instantiates_model_and_human_gates_and_review(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            completed = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-progression-heavy-complete",
+                "--output",
+                str(temp / "evidence.json"),
+                "--progression-balance-review-output",
+                str(temp / "progression-review.md"),
+            )
+            evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
+            review = (temp / "progression-review.md").read_text(encoding="utf-8")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertEqual(
+            evidence["gates"]["progression_balance_model_evidence"]["reviewer"]["role"],
+            "builder",
+        )
+        self.assertEqual(
+            evidence["gates"]["progression_pacing_playtest"]["reviewer"]["role"],
+            "human",
+        )
+        self.assertIn("Progression and Balance Review", review)
 
     def test_2_5d_scaffold_instantiates_art_menu_hud_motion_and_run_state(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

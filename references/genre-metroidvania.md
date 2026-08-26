@@ -2,6 +2,8 @@
 
 Read this for ability-gated exploration, interconnected rooms/regions, persistent world changes, backtracking, map revelation, and traversal abilities that unlock routes. A platformer with linear stages does not need this architecture.
 
+Also apply [progression-and-balance.md](progression-and-balance.md) when ability/reward cadence, build choices, currency, power growth, or difficulty escalation are material. A graph can be reachable and soft-lock-free while its reward, return-traversal, or challenge pacing is still poor.
+
 ## Define the world/progression contract
 
 Before detailed level art, record:
@@ -78,4 +80,3 @@ Useful primary references:
 - [Godot saving games](https://docs.godotengine.org/en/stable/tutorials/io/saving_games.html)
 - [Godot resources](https://docs.godotengine.org/en/stable/tutorials/scripting/resources.html)
 - [Godot groups](https://docs.godotengine.org/en/stable/tutorials/scripting/groups.html)
-
