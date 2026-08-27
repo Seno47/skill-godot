@@ -27,6 +27,16 @@
       "evidence": ["fixture: no external assets introduced"],
       "reviewer": {"role": "builder", "context": "fixture builder context"}
     },
+    "art_direction_selection_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: builder-owned fixed/open path, layered direction, production-risk comparison, selected anchor, and pre-bulk decision"],
+      "reviewer": {"role": "builder", "context": "fixture builder art-direction context"},
+      "artifacts": [
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["direction_contract", "selection_rationale"]},
+        {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["style_anchor"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["representative_composition"]}
+      ]
+    },
     "production_character_motion_evidence": {
       "status": "pass",
       "evidence": ["fixture: builder-owned idle/locomotion/action pose contract, real dispatch, attachment following, and target-build motion capture"],
@@ -37,7 +47,13 @@
     },
     "interactive_onboarding": {
       "status": "pass",
-      "evidence": ["fixture: clean first-use action trace and uncoached playtest"]
+      "evidence": ["fixture: clean first frame, uncoached tutorial discovery, player-caused action/feedback/consequence, and normal-loop entry"],
+      "reviewer": {"role": "independent", "context": "fixture independent onboarding reviewer"},
+      "artifacts": [
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["clean_first_frame"]},
+        {"path": "evidence-artifacts/motion.avi", "kind": "video", "states": ["tutorial_discovery", "first_required_action", "feedback_and_consequence", "normal_loop_entry"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["onboarding_discoverability"]}
+      ]
     },
     "clean_shipping_state": {
       "status": "pass",
@@ -57,6 +73,7 @@
       "evidence": ["fixture: independent reviewer raw findings"],
       "artifacts": [
         {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["main_menu"]},
+        {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["settings"]},
         {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["normal_gameplay"]},
         {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["dense_interaction"]},
         {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["result"]},
@@ -87,6 +104,19 @@
         {"path": "evidence-artifacts/progression-trace-a.json", "kind": "trace", "states": ["early_progression", "mid_progression", "failure_recovery_or_bottleneck"]},
         {"path": "evidence-artifacts/progression-trace-b.json", "kind": "trace", "states": ["early_progression", "late_progression", "failure_recovery_or_bottleneck"]},
         {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["progression_pacing_review"]}
+      ]
+    },
+    "progression_visual_comprehension_review": {
+      "status": "pass",
+      "evidence": ["fixture: independent visual current/next/cost/consequence/new-decision review across progression states"],
+      "reviewer": {"role": "independent", "context": "fixture independent progression comprehension reviewer"},
+      "artifacts": [
+        {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["progression_clean_current"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["progression_first_reward"]},
+        {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["progression_first_choice"]},
+        {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["progression_purchased_unlocked"]},
+        {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["progression_locked_late"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["progression_visual_comprehension"]}
       ]
     },
     "difficulty_pacing_evidence": {

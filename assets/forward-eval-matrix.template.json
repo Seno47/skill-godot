@@ -2,6 +2,10 @@
   "schema_version": 1,
   "skill_commit": "replace-with-tested-skill-commit",
   "required_contracts": [
+    "art-direction-selection",
+    "ui-onboarding-discoverability",
+    "telegraph-art-language",
+    "progression-visual-comprehension",
     "2d",
     "3d-third-person",
     "fixed-isometric",

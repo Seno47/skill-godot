@@ -41,6 +41,20 @@ Summarize the intended progression promise, session cadence, completion/reset ca
 - Model/build divergences and fixes:
 - Builder gate: `PASS / FAIL / NOT TESTED`
 
+## Player-facing visual comprehension matrix
+
+Use raw target-build states from a clean profile. Correct transactions and localized text do not answer these questions by themselves.
+
+| State ID | Raw artifact | What visibly changed | Next reachable goal/action | Cost or requirement | Consequence / new decision | PASS / FAIL / NOT TESTED |
+|---|---|---|---|---|---|---|
+| `progression_clean_current` | | | | | | NOT TESTED |
+| `progression_first_reward` | | | | | | NOT TESTED |
+| `progression_first_choice` | | | | | | NOT TESTED |
+| `progression_purchased_unlocked` | | | | | | NOT TESTED |
+| `progression_locked_late` | | | | | | NOT TESTED |
+
+Review whether maps, paths, node state, item/ability silhouettes, before/after art, meters, connectors, animation, landmarks, or another authored visual language communicate the progression. Reject a text table, solver trace, or repeated labeled card stack that requires builder narration to explain current state and consequence.
+
 ## Uncoached pacing sessions
 
 Use at least two separate clean-profile human sessions and enough representative cohorts to stress the declared support contract. The reviewer need not be the user. Designer/autoplay/model traces are supporting evidence, not replacements.
@@ -61,9 +75,19 @@ Use at least two separate clean-profile human sessions and enough representative
 - Did numeric/localized UI communicate cost, gain, cap, and locked state correctly?
 - What differed between novice/conservative and expert/aggressive play?
 
+## Independent visual-comprehension questions
+
+- What changed after the reward or purchase?
+- What can the player do next, and which goal is currently reachable?
+- What does the next action cost or require?
+- What consequence will the highlighted choice have?
+- Which new route, build, action, or decision did the unlock create?
+- Which of those answers came from authored visual state rather than reading a paragraph/table?
+
 ## Final verdict
 
 - `progression_balance_model_evidence`: `PASS / FAIL / NOT TESTED`
+- `progression_visual_comprehension_review`: `PASS / FAIL / NOT TESTED`
 - `progression_pacing_playtest`: `PASS / FAIL / NOT TESTED`
 - Tested range (early/mid/late/reset, systems and builds):
 - Blocking defects:

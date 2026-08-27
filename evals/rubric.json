@@ -50,6 +50,20 @@
       "description": "External/generated assets used in the evaluated result have sufficient provenance and rights status for the intended test."
     },
     {
+      "id": "art_direction_selection_evidence",
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "constrained-mobile-web"],
+      "description": "Before bulk visual production, a builder-owned record classifies the direction as user-fixed, constraint-determined, or materially ambiguous; preserves explicit user references/exclusions; records a layered style and source contract; compares serious same-content candidates when ambiguity is material or explains truthfully why alternatives do not apply; rejects hard gameplay/rights/platform/tool/scope mismatches; and resolves taste, identity, paid-cost, or major scope choices. Raw Godot gameplay-size hero/style-anchor and representative composition evidence proves the selected route can support its environment, interaction/objective, lighting/material, and material UI/VFX layers. An available pack, fashionable label, generator default, moodboard, or isolated source preview does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "image": 2},
+        "required_states": {
+          "direction_contract": ["report"],
+          "selection_rationale": ["report"],
+          "style_anchor": ["image"],
+          "representative_composition": ["image"]
+        }
+      }
+    },
+    {
       "id": "production_character_motion_evidence",
       "cases": ["new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-shooter-action-complete", "new-narrative-complete"],
       "description": "For every production character expected to move in the case, builder-owned deterministic and target-build evidence proves required idle, locomotion, and brief-required context states on the production visual; ordinary play does not remain in bind/rest/T-pose; real gameplay dispatches the states; source mannequins are absent; and required bone/socket/marker attachments follow. Static screenshots, clip presence, preview-rig playback, test-only direct calls, or waiting for the user to notice frozen motion do not pass.",
@@ -66,7 +80,17 @@
       "id": "interactive_onboarding",
       "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "constrained-mobile-web"],
-      "description": "From a clean first-use state, an uncoached player performs every brief-required onboarding transition and reaches the normal loop; static hints, tutorial fields, narration, or one generic action do not substitute for intermediate verbs/world consequences, and ordinary pressure/failure timing is frozen or forgiving until the relevant teaching succeeds unless an uncoached test proves pressure itself is safely taught."
+      "description": "From the raw clean shipping frame, an uncoached player notices that guidance exists, visually binds the required input to its target, performs every brief-required transition, reads immediate feedback and consequence, and reaches the normal loop. If the player does not discover the tutorial or cannot tell what to act on, the gate fails even when localized labels, tutorial variables, or state-machine transitions exist. Static hints, narration, one generic action, and a first teaching state that deliberately drives the player near failure do not pass; ordinary pressure remains frozen or forgiving until the relevant teaching succeeds unless uncoached evidence proves pressure itself is safely taught.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"video": 1, "review": 1},
+        "required_states": {
+          "clean_first_frame": ["image", "video"],
+          "tutorial_discovery": ["video", "trace"],
+          "first_required_action": ["video", "trace"],
+          "feedback_and_consequence": ["video", "trace"],
+          "normal_loop_entry": ["video", "trace"]
+        }
+      }
     },
     {
       "id": "clean_shipping_state",
@@ -90,11 +114,12 @@
       "id": "independent_ux_review",
       "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "constrained-mobile-web"],
-      "description": "A person or genuinely independent evaluation context that did not build the flow reviews first-use playability and raw target-build menu, normal gameplay, dense interaction/VFX, and result evidence, including player occlusion/restoration for third-person work and gameplay-size art/readability/density states for fixed-camera isometric work; self-review alone does not pass.",
+      "description": "A person or genuinely independent evaluation context that did not build the flow reviews tutorial discoverability and first-use playability plus raw target-build menu, settings, normal gameplay, dense interaction/VFX, and result evidence. The review explicitly rejects text-first/repeated-labeled-rectangle surfaces, native/default-looking controls, unclear core-action telegraphs, and progression copy that lacks visual current/next/cost/consequence meaning; it also covers player occlusion/restoration for third-person work and gameplay-size art/readability/density states for fixed-camera isometric work. Self-review alone does not pass.",
       "artifact_requirements": {
-        "minimum_by_kind": {"image": 4, "review": 1},
+        "minimum_by_kind": {"image": 5, "review": 1},
         "required_states": {
           "main_menu": ["image", "video"],
+          "settings": ["image", "video"],
           "normal_gameplay": ["image", "video"],
           "dense_interaction": ["image", "video"],
           "result": ["image", "video"]
@@ -144,6 +169,22 @@
       }
     },
     {
+      "id": "progression_visual_comprehension_review",
+      "acceptance_owner": "independent",
+      "cases": ["new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-isometric-fixed-camera-complete", "new-progression-heavy-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete"],
+      "description": "A clean-profile independent raw target-build review covers current/starting progression, first reward, first meaningful choice, a purchased/unlocked consequence, and a locked/late state. Without builder narration or spreadsheet knowledge, the reviewer can state what changed, what can be done next, what it costs or requires, what consequence the choice has, and what new decision the unlock creates. A localized text table, correct source/sink arithmetic, valid save transaction, level count, or solver/autoplay PASS cannot substitute for visual hierarchy, state change, reachable-goal cues, and meaningful choice communication.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"image": 5, "review": 1},
+        "required_states": {
+          "progression_clean_current": ["image", "video"],
+          "progression_first_reward": ["image", "video"],
+          "progression_first_choice": ["image", "video"],
+          "progression_purchased_unlocked": ["image", "video"],
+          "progression_locked_late": ["image", "video"]
+        }
+      }
+    },
+    {
       "id": "difficulty_pacing_evidence",
       "cases": ["new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "difficulty-pacing-complete"],
       "description": "A genre-aware difficulty contract declared before bulk content separates execution, cognition, time, resources, punishment, uncertainty, coordination and navigation/information load; maps taught skills into practice, combination/test, peaks/relief or player-selected risk; bounds novelty, rises, failure recovery and onboarding pressure; and proves every required beat in the exact target build. One monotonic scalar, HP/damage/cost inflation, grind, obscurity, travel, autoplay, or a designer-authored chart alone does not pass. Dynamic assistance preserves feedback, outcome and reward integrity; ranked play never uses hidden mid-match outcome steering.",
@@ -186,7 +227,7 @@
     {
       "id": "production_art_integrity_evidence",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "constrained-mobile-web"],
-      "description": "Builder-owned raw target-build review of quiet, normal, dense interaction, peak VFX/contact, and result states proves production art integrity. Serialized Box/Cylinder/Sphere/CSG geometry remains blockout unless a documented minimalist language and gameplay-size review justify it; debug-looking quads, rectangles, cones, billboards or particles, mismatched panorama/character families, broken contact/depth, sparse repeated modules, and empty placeholder panels block release even when scene/import/performance audits pass.",
+      "description": "Builder-owned raw target-build review of quiet, normal, dense interaction, peak VFX/contact, and result states proves production art integrity. Any material aim, trajectory, route, bounce, placement, area, or intent telegraph encodes the action's direction, contact/change, endpoint and validity through the selected shape/material/motion language; exact math in a raw debug-like Line2D/mesh is insufficient. Serialized Box/Cylinder/Sphere/CSG geometry remains blockout unless a documented minimalist language and gameplay-size review justify it; debug-looking quads, rectangles, cones, billboards or particles, mismatched panorama/character families, broken contact/depth, sparse repeated modules, and empty placeholder panels block release even when scene/import/performance audits pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 5, "report": 1},
         "required_states": {
@@ -202,7 +243,7 @@
       "id": "gameplay_hud_glanceability_review",
       "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "constrained-mobile-web"],
-      "description": "A builder inventory plus independent raw target-build review passes the gameplay HUD in quiet, normal, dense interaction, and peak-VFX states. Every persistent/contextual text zone has a keep/shorten/iconify/world-cue/remove rationale; frequent telemetry is recognizable without sentence reading; objective copy is short and does not compete with contextual prompts; icons form one authored final-size family with non-color differentiation and accessible names/tooltips/first-use teaching; representative localization does not recreate long persistent captions. Compact panel bounds or clean styling alone do not pass excessive simultaneous reading load.",
+      "description": "A builder visual-versus-text inventory plus independent raw target-build review passes the gameplay HUD in quiet, normal, dense interaction, and peak-VFX states. Every persistent/contextual text zone has a keep/shorten/iconify/world-cue/remove rationale; repeated identical labeled rectangles and panels do not become finished communication by being aligned or localized; frequent telemetry and core-action state are recognizable through authored icons, shapes, meters, world cues, motion and concise accessible teaching without sentence reading. Objective copy is short and does not compete with contextual prompts; icons form one authored final-size family with non-color differentiation and accessible names/tooltips/first-use teaching; representative localization does not recreate long persistent captions. Compact panel bounds or clean styling alone do not pass excessive simultaneous reading load.",
       "artifact_requirements": {
         "minimum_by_kind": {"image": 4, "report": 1, "review": 1},
         "required_states": {
@@ -1024,6 +1065,10 @@
   ],
   "score_caps": [
     {
+      "gate": "art_direction_selection_evidence",
+      "dimensions": {"intent_and_scope": 2, "visual_coherence": 1, "asset_pipeline": 1, "performance_and_size": 2}
+    },
+    {
       "gate": "production_character_motion_evidence",
       "dimensions": {"visual_coherence": 1, "asset_pipeline": 2, "playability_and_ux": 2}
     },
@@ -1054,6 +1099,10 @@
     {
       "gate": "progression_pacing_playtest",
       "dimensions": {"playability_and_ux": 1, "gameplay_correctness": 2, "evidence_and_reproducibility": 2}
+    },
+    {
+      "gate": "progression_visual_comprehension_review",
+      "dimensions": {"playability_and_ux": 1, "visual_coherence": 2, "intent_and_scope": 2}
     },
     {
       "gate": "difficulty_pacing_evidence",
@@ -1352,7 +1401,7 @@
     {
       "id": "visual_coherence",
       "weight": 6,
-      "description": "Art direction, semantic app/menu identity, composition, player and route visibility, cutaway/silhouette behavior and restoration, screen-space HUD occupancy and icon-family coherence, perspective-sensitive world geometry, motion, lighting, effects, and UI form a coherent game presentation."
+      "description": "The selected layered art direction is justified against user intent, gameplay scale, production feasibility and target constraints; semantic app/menu identity, composition, player and route visibility, cutaway/silhouette behavior and restoration, screen-space HUD occupancy and icon-family coherence, perspective-sensitive world geometry, motion, lighting, effects, and UI form a coherent game presentation."
     },
     {
       "id": "responsive_visual_integrity",
@@ -1370,7 +1419,7 @@
       "id": "asset_pipeline",
       "weight": 9,
       "allow_not_applicable": true,
-      "description": "Asset sourcing/generation, provenance, cleanup, import, wrapper scenes, and reimport behavior are production-appropriate."
+      "description": "The selected art route can scale to the declared content; asset sourcing/generation, provenance, family consistency, cleanup, import, wrapper scenes, and reimport behavior are production-appropriate."
     },
     {
       "id": "technical_quality",

@@ -7,9 +7,12 @@ Read this only when the task changes presentation, composition, UI, animation, e
 Use a real renderer and capture screenshots or short recordings at the intended viewport/aspect. Include the states relevant to the feature:
 
 - spawn/idle and normal traversal;
+- for a new complete game or production slice, the selected pre-bulk `style_anchor` and `representative_composition` from the real Godot camera, linked to the art-direction selection record; user-fixed directions still need the anchor even when alternatives are not applicable;
 - complete-game app/export icon at actual smallest/representative platform sizes plus the main-menu mark at runtime size, supplied raw for blind semantic review;
 - complete-game main menu default plus a supported interaction state, supplied raw for independent wordmark/copy/composition review;
+- complete-game settings with real slider/switch/check/option/focus states and the text-heaviest result/map/upgrade/progression surface; functional native/default widget art is not a finished visual state;
 - primary interaction/combat/action;
+- material aim/trajectory/route/placement/intent telegraphs at ordinary, multi-contact or changed-direction, invalid/blocked, and dense states;
 - failure/damage and success/transition when applicable;
 - quiet and visually dense scenes;
 - for every complete game or production slice, the same release-like build's quiet, normal gameplay, densest ordinary interaction/contact, peak VFX, and success/failure/result states; do not approve production art from an empty opening frame;
@@ -47,8 +50,10 @@ Choose actual platform minima when known. If a constrained browser/mobile brief 
 Compare against the user's brief and accepted references:
 
 - composition, focal hierarchy, silhouette, spacing, scale, camera framing, and depth separation;
+- whether the chosen layered direction preserves explicit user references/exclusions and remains viable for the declared content, animation/VFX, target performance/size, UI/localization/accessibility, rights, cost, and maintenance constraints; an available pack, fashionable label, or generator default is not a rationale;
 - whether the app icon/main-menu mark communicates a game-specific subject or core-loop relationship before the intended meaning is explained; palette consistency and tidy primitive geometry alone are insufficient;
 - whether the main menu title is an authored wordmark/typographic composition at runtime size, every non-navigation phrase has a real purpose, and the whole screen avoids the generic badge/kicker + huge default-font title + accent rule + premise tagline + identical rectangle-stack fingerprint;
+- whether menu, settings, result, map/selector, upgrade/shop, and progression surfaces use one authored interface family and communicate through hierarchy, icons, meters, state art, spatial grouping and visible change rather than native/default sliders/checkbuttons or repeated labeled rectangles;
 - palette/value structure, texture density, material response, lighting, shadows, and atmosphere;
 - consistency across generated, sourced, and engine-native assets;
 - UI hierarchy, theme, typography, contrast, focus, clipping, and localization/overflow;
@@ -69,6 +74,7 @@ Compare against the user's brief and accepted references:
 - fixed-camera density and composition: compare start/teaching, typical puzzle, densest decor/mechanism, highest elevation, and objective/result frames for focal hierarchy, foreground/midground/background structure, landmarks, purposeful negative space, route rhythm, controlled repetition, and HUD/world competition. Asset count and import success do not excuse sparse rows or a default-looking hero;
 - production character motion at normal speed: reject bind/rest/T-pose leakage, a frozen first frame, missing idle/locomotion/context playback, visible source mannequins, retarget deformation, loop pops, foot sliding/contact mismatch, gameplay states that never dispatch, stale poses after interruption, and props/effects that do not follow their animated attachment;
 - production-art integrity in dense action: reject unintentional actor/prop/effect intersections, unreadable contact/depth, asset-family mismatch, sparse repeated blockout modules, empty placeholder panels, rectangular/columnar debug-looking water, flat quad/cone flames, coarse billboard smoke, or other engine/procedural shapes that lack a deliberate final-size visual language;
+- gameplay telegraph craft: aim, launch, ricochet, path, placement, area, and enemy-intent cues must visually encode owner/origin, direction, contacts/turns, endpoint, validity and consequence in the selected art/material/motion family. Exact math, `Line2D`, a mesh strip, polygon, dots, or arrows remain debug candidates until the raw target-build states prove both meaning and art-family fit;
 - animation timing, transitions, effects, feedback, and motion comfort;
 - hover/focus motion geometry: compare the control's visual center and neighboring `Control` rects before/after; incidental layout shift is a defect even when each still looks individually plausible;
 - seams, halos, missing textures, z-fighting, sorting, clipping, debug visuals, defaults, and placeholders.

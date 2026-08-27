@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "skill_commit": "fixture-art-direction-contract",
+  "required_contracts": ["art-direction-selection"],
+  "scenarios": [
+    {
+      "id": "fixed-direction-positive",
+      "brief_path": "fixtures/brief-fixed-pixel.md",
+      "godot_version": "4.x",
+      "composite_case": "new-2d-generated-assets+localized-release-complete",
+      "contracts": ["art-direction-selection"],
+      "builder_context": "isolated builder translating a user-fixed pixel direction",
+      "reviewer_context": "separate raw gameplay-size artifact reviewer",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "no artificial alternative pitch; fixed direction retained with layered contract and anchor",
+      "token_cost": 900,
+      "elapsed_minutes": 8,
+      "result_artifacts": ["reports/art-direction-fixed.md", "reports/style-anchor.png", "reports/representative-composition.png"]
+    },
+    {
+      "id": "ambiguous-direction-positive",
+      "brief_path": "fixtures/brief-open-hybrid.md",
+      "godot_version": "4.x",
+      "composite_case": "new-2-5d-complete+localized-release-complete",
+      "contracts": ["art-direction-selection"],
+      "builder_context": "isolated builder comparing serious same-content 2.5D routes",
+      "reviewer_context": "separate raw gameplay-size artifact reviewer",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "comparison bounded to viable routes and resolved before bulk production",
+      "token_cost": 1400,
+      "elapsed_minutes": 14,
+      "result_artifacts": ["reports/art-direction-comparison.md", "reports/style-anchor.png", "reports/representative-composition.png"]
+    },
+    {
+      "id": "first-free-pack-negative",
+      "brief_path": "fixtures/brief-open-3d.md",
+      "godot_version": "4.x",
+      "composite_case": "new-3d-third-person-complete+desktop-hardware-release",
+      "contracts": ["art-direction-selection"],
+      "builder_context": "isolated builder choosing the first available low-poly pack",
+      "reviewer_context": "separate raw gameplay-size artifact reviewer",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": ["available asset pack silently became the art direction without candidate comparison or user-authority rationale"],
+      "expected_gate_for_each_defect": {
+        "available asset pack silently became the art direction without candidate comparison or user-authority rationale": "art_direction_selection_evidence"
+      },
+      "false_positive_burden": "none; open brief and materially different viable directions were explicit",
+      "token_cost": 800,
+      "elapsed_minutes": 7,
+      "result_artifacts": ["reports/pack-only-notes.md"]
+    },
+    {
+      "id": "moodboard-only-negative",
+      "brief_path": "fixtures/brief-open-illustrated.md",
+      "godot_version": "4.x",
+      "composite_case": "new-2d-generated-assets+localized-release-complete",
+      "contracts": ["art-direction-selection"],
+      "builder_context": "isolated builder supplying adjective moodboards without Godot anchor evidence",
+      "reviewer_context": "separate raw gameplay-size artifact reviewer",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": ["selected direction has no raw gameplay-size representative composition and cannot prove animation or UI family feasibility"],
+      "expected_gate_for_each_defect": {
+        "selected direction has no raw gameplay-size representative composition and cannot prove animation or UI family feasibility": "art_direction_selection_evidence"
+      },
+      "false_positive_burden": "none; only source previews and prose were supplied",
+      "token_cost": 700,
+      "elapsed_minutes": 6,
+      "result_artifacts": ["reports/moodboard-only.md"]
+    }
+  ]
+}

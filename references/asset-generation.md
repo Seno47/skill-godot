@@ -17,6 +17,8 @@ Do not pretend a missing capability exists. A raster image is not a rigged model
 
 ## Lock a style anchor
 
+If the visual direction is not already fixed and translated into production constraints, first complete the selection workflow in [visual-style-selection.md](visual-style-selection.md). Generation availability must not decide the game's style by itself.
+
 Before bulk generation:
 
 1. Convert the art direction into an asset-specific brief with dimensions/view, gameplay scale, background/transparency, palette, materials, lighting, required variants, and rejection criteria.

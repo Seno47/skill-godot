@@ -680,6 +680,26 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertIn("lacks a negative fixture", completed.stdout)
 
+    def test_art_direction_selection_has_isolated_positive_and_negative_fixtures(self) -> None:
+        completed = run_script(
+            "forward_eval_audit.py",
+            "--matrix",
+            str(ROOT / "tests" / "fixtures" / "art-direction-forward-eval.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] forward-eval", completed.stdout)
+
+    def test_ui_onboarding_and_progression_have_positive_and_negative_fixtures(self) -> None:
+        completed = run_script(
+            "forward_eval_audit.py",
+            "--matrix",
+            str(ROOT / "tests" / "fixtures" / "ui-onboarding-progression-forward-eval.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] forward-eval", completed.stdout)
+
 
 class GenreRubricTests(unittest.TestCase):
     def test_rubric_case_and_score_cap_references_are_closed(self) -> None:
@@ -774,7 +794,12 @@ class GenreRubricTests(unittest.TestCase):
             evidence["gates"]["progression_pacing_playtest"]["reviewer"]["role"],
             "human",
         )
+        self.assertEqual(
+            evidence["gates"]["progression_visual_comprehension_review"]["reviewer"]["role"],
+            "independent",
+        )
         self.assertIn("Progression and Balance Review", review)
+        self.assertIn("Player-facing visual comprehension matrix", review)
 
     def test_difficulty_scaffold_instantiates_builder_and_human_gates_and_review(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -880,6 +905,8 @@ class GenreRubricTests(unittest.TestCase):
                 str(temp / "menu-review.md"),
                 "--hud-review-output",
                 str(temp / "hud-review.md"),
+                "--art-direction-selection-output",
+                str(temp / "art-direction-selection.md"),
                 "--project-status-output",
                 str(temp / "project-run-state.md"),
                 "--production-art-review-output",
@@ -890,6 +917,7 @@ class GenreRubricTests(unittest.TestCase):
             evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
             menu = (temp / "menu-review.md").read_text(encoding="utf-8")
             hud = (temp / "hud-review.md").read_text(encoding="utf-8")
+            direction = (temp / "art-direction-selection.md").read_text(encoding="utf-8")
             run_state = (temp / "project-run-state.md").read_text(encoding="utf-8")
             art = (temp / "production-art-review.md").read_text(encoding="utf-8")
             motion = (temp / "motion-review.md").read_text(encoding="utf-8")
@@ -897,8 +925,10 @@ class GenreRubricTests(unittest.TestCase):
         self.assertIn("menu_identity_craft_review", evidence["gates"])
         self.assertIn("production_art_integrity_evidence", evidence["gates"])
         self.assertIn("gameplay_hud_glanceability_review", evidence["gates"])
+        self.assertIn("art_direction_selection_evidence", evidence["gates"])
         self.assertIn("Menu Identity Craft Review", menu)
         self.assertIn("Gameplay HUD Glanceability Review", hud)
+        self.assertIn("Art Direction Selection Contract", direction)
         self.assertIn("Project Run State", run_state)
         self.assertIn("Production Art State Review", art)
         self.assertIn("Production Character Motion Contract", motion)

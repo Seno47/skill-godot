@@ -23,6 +23,8 @@ Use icon-first or shape/meter-first telemetry for frequently checked resources a
 
 Do not turn this into blind icon-only UI. Ambiguous symbols need an accessible name, tooltip, first-use label/legend, or expanded description. A short label may disappear after demonstrated learning. Never rely on color alone; combine it with shape, pattern, direction, value, position, motion, sound, or another suitable channel.
 
+Inventory non-text communication as explicitly as text. For each critical state or action, name the icon, meter, shape, world cue, material, motion, contact marker, sound, or spatial relationship that carries meaning before a sentence is read. Reject a complete-game surface that is mainly large panels and repeated identical labeled rectangles even when every string localizes and every touch target passes.
+
 Build one authored icon family that belongs to the game's identity: consistent stroke/fill, perspective, corner/shape language, optical weight, palette, and final-size rendering. Emoji, arbitrary Unicode glyphs, default editor icons, unexplained AI-drawn symbols, and a stylistically foreign icon pack remain placeholders.
 
 Audit simultaneous reading load over quiet, normal, dense interaction, and peak-VFX gameplay. Annotate the independent text-zone count, screen-area ratio, required gaze transfers from the action focus, distant-corner scanning, and competing objective/prompt panels. Declare any project thresholds before final review rather than relaxing them after failure. Metrics support comparison; an independent reviewer must still say which critical states are recognizable without reading and whether the immediate objective is understood in a brief glance during action.
@@ -52,6 +54,19 @@ Use a queue/arbiter when several systems can emit notifications. Define:
 - whether sound, vibration, color, shape, text, or world effect also communicates the event.
 
 Repeated numbers, loot, quest updates, warnings, and tutorials should not cover the next decision or create an unreadable wall. Aggregate rapid low-priority events; let critical warnings preempt flavor. Damage numbers and markers need clustering/occlusion rules and a screen-density budget.
+
+## Aim, trajectory, route, and intent telegraphs
+
+When a mechanic previews aim, launch, ricochet, movement, placement, area, route, or enemy intent, define the visual grammar rather than drawing raw debug geometry:
+
+- origin/owner and current direction;
+- every material contact, bounce, split, turn, or state-change point;
+- endpoint, affected target/area, and whether the action is valid, blocked, dangerous, or uncertain;
+- occlusion/depth policy and how the cue competes with hazards, actors, VFX, and HUD;
+- selected shape, edge, material, color/non-color, motion, and sound language from the art contract;
+- reduced-motion, color-vision, touch/precision, and low-graphics behavior.
+
+Exact physics/math is necessary but not sufficient. A default `Line2D`, bright mesh strip, polygon, debug dot, or generic dotted arrow that looks foreign to the art family fails production review even when every bounce is correct. Inspect at quiet, multi-contact, invalid/blocked, dense-action, and final-confirmation states; the player should read direction, contacts, endpoint, and consequence without developer narration.
 
 ## Diegetic and world-space UI
 
@@ -89,5 +104,6 @@ Capture the same HUD states over quiet and dense/moving gameplay:
 - annotated `hud_quiet`, `hud_normal`, `hud_dense`, and `hud_vfx_peak` frames with persistent versus contextual text inventory, keep/remove/shorten/iconify decisions, text-zone count/area, gaze-transfer notes, and RU/EN or equivalent localization stress;
 - final-size icon family, non-color differentiation, first-use labels/tooltips/accessible names, and the progressive-disclosure state after the icon is learned;
 - objective panel and contextual prompt both separately and in any legitimate simultaneous state, plus the corresponding waypoint/world cue.
+- aim/trajectory/route/intent telegraphs in quiet, multi-contact, invalid/blocked, dense, and confirmed states, including their art-family fit and direction/contact/endpoint/validity meaning.
 
-Fail the review if UI obscures threats/routes, prompt glyphs disagree with actual bindings, modality cleanup cancels input, important world UI has no readable fallback, counters shift layout, notifications starve or stack without bound, frequent telemetry requires reading redundant captions across several corners, objective and contextual prompt compete, icons are ambiguous without accessible teaching, color is the only state channel, icon art is emoji/default/mismatched, localization recreates long persistent labels, or the HUD only looks coherent in a static designer-authored screenshot.
+Fail the review if UI obscures threats/routes, prompt glyphs disagree with actual bindings, modality cleanup cancels input, important world UI has no readable fallback, counters shift layout, notifications starve or stack without bound, frequent telemetry requires reading redundant captions across several corners, repeated labeled rectangles dominate complete-game communication, objective and contextual prompt compete, icons are ambiguous without accessible teaching, color is the only state channel, icon art is emoji/default/mismatched, a trajectory/route/intent cue is mathematically correct but debug-looking or semantically incomplete, localization recreates long persistent labels, or the HUD only looks coherent in a static designer-authored screenshot.

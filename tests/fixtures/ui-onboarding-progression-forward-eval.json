@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "skill_commit": "fixture-ui-onboarding-progression-contracts",
+  "required_contracts": [
+    "ui-onboarding-discoverability",
+    "telegraph-art-language",
+    "progression-visual-comprehension"
+  ],
+  "scenarios": [
+    {
+      "id": "visual-first-progression-positive-a",
+      "brief_path": "fixtures/brief-mobile-trajectory-defense-a.md",
+      "godot_version": "4.x",
+      "composite_case": "new-progression-heavy-complete+constrained-mobile-web+localized-release-complete",
+      "contracts": ["ui-onboarding-discoverability", "telegraph-art-language", "progression-visual-comprehension"],
+      "builder_context": "isolated builder using clean-profile discovery and visual-first interface contracts",
+      "reviewer_context": "separate uncoached reviewer of raw target-build states",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "settings, telegraph and progression questions apply to material systems only",
+      "token_cost": 1600,
+      "elapsed_minutes": 18,
+      "result_artifacts": ["reports/clean-onboarding.mp4", "reports/settings.png", "reports/telegraph-matrix.png", "reports/progression-matrix.md"]
+    },
+    {
+      "id": "visual-first-progression-positive-b",
+      "brief_path": "fixtures/brief-mobile-trajectory-defense-b.md",
+      "godot_version": "4.x",
+      "composite_case": "new-progression-heavy-complete+constrained-mobile-web+localized-release-complete",
+      "contracts": ["ui-onboarding-discoverability", "telegraph-art-language", "progression-visual-comprehension"],
+      "builder_context": "isolated builder verifying touch-first tutorial and authored map/state art",
+      "reviewer_context": "separate uncoached reviewer of raw target-build states",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "ambiguous symbols retain first-use and accessible text",
+      "token_cost": 1500,
+      "elapsed_minutes": 17,
+      "result_artifacts": ["reports/tutorial-discovery.mp4", "reports/interface-surfaces.png", "reports/progression-five-state-review.md"]
+    },
+    {
+      "id": "text-first-undiscovered-negative",
+      "brief_path": "fixtures/brief-mobile-trajectory-defense-negative-a.md",
+      "godot_version": "4.x",
+      "composite_case": "new-progression-heavy-complete+localized-release-complete",
+      "contracts": ["ui-onboarding-discoverability", "telegraph-art-language", "progression-visual-comprehension"],
+      "builder_context": "isolated builder relying on localized labels, internal tutorial states and native controls",
+      "reviewer_context": "separate uncoached reviewer of raw clean-profile target build",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "uncoached player did not discover the tutorial in the clean shipping frame",
+        "settings and gameplay surfaces remained native-looking text-first scaffolding"
+      ],
+      "expected_gate_for_each_defect": {
+        "uncoached player did not discover the tutorial in the clean shipping frame": "interactive_onboarding",
+        "settings and gameplay surfaces remained native-looking text-first scaffolding": "independent_ux_review"
+      },
+      "false_positive_burden": "none; the user-facing failure is observable despite structural PASS",
+      "token_cost": 1100,
+      "elapsed_minutes": 11,
+      "result_artifacts": ["reports/clean-first-frame.png", "reports/settings-native.png", "reports/uncoached-fail.md"]
+    },
+    {
+      "id": "debug-telegraph-progression-table-negative",
+      "brief_path": "fixtures/brief-mobile-trajectory-defense-negative-b.md",
+      "godot_version": "4.x",
+      "composite_case": "new-progression-heavy-complete+localized-release-complete",
+      "contracts": ["ui-onboarding-discoverability", "telegraph-art-language", "progression-visual-comprehension"],
+      "builder_context": "isolated builder relying on exact trajectory math and a correct localized progression table",
+      "reviewer_context": "separate uncoached reviewer of raw dense and progression states",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "trajectory preview read as foreign debug geometry and did not artfully encode bounce contact endpoint or validity",
+        "progression screen did not reveal current state next goal cost consequence or new decision"
+      ],
+      "expected_gate_for_each_defect": {
+        "trajectory preview read as foreign debug geometry and did not artfully encode bounce contact endpoint or validity": "production_art_integrity_evidence",
+        "progression screen did not reveal current state next goal cost consequence or new decision": "progression_visual_comprehension_review"
+      },
+      "false_positive_burden": "none; solver and transaction correctness remain accepted but are outside these perceptual gates",
+      "token_cost": 1200,
+      "elapsed_minutes": 12,
+      "result_artifacts": ["reports/trajectory-dense.png", "reports/progression-text-table.png", "reports/independent-fail.md"]
+    }
+  ]
+}

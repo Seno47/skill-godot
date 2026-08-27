@@ -24,6 +24,8 @@ Audit every visible text line or independent reading zone, not only whole panels
 
 Titles such as “Current objective”, “Health”, “Water”, “Integrity”, route/role captions, units, and repeated status words do not earn permanent space merely by being localized. If position, shape, an authored icon, meter behavior, or a learned world cue already communicates the category, remove or shorten the duplicate caption. Keep longer text for a newly introduced objective, rare event, tutorial, ambiguity resolution, or expanded/accessibility view.
 
+Also inventory the non-text channel for every critical state/action. A blank entry means the player must read; decide whether an authored icon, meter, state shape, world cue, material, motion, contact marker, sound, or spatial relation should carry the first-glance meaning. Reject large panels and repeated identical labeled rectangles as the dominant complete-game language even when localization and layout pass.
+
 ## Icon and non-text language contract
 
 | Telemetry/state | Authored icon/shape/meter/world cue | Recognizable at final size | Non-color channel | Accessible name/tooltip/first-use label | Progressive-disclosure rule | PASS / FAIL / NOT TESTED |
@@ -60,6 +62,17 @@ Count separated headings, captions, objective paragraphs, telemetry labels, valu
 | A contextual teaching/action prompt appears only when relevant and does not compete with a large persistent objective panel | | NOT TESTED |
 | Waypoints, landmarks, highlights, or world-space cues carry route/target meaning when they are more immediate than another sentence | | NOT TESTED |
 | Rare explanation can expand on demand without keeping every phrase persistent | | NOT TESTED |
+
+## Aim, trajectory, route, and intent cues when applicable
+
+| State | Raw artifact | Owner/origin and direction | Contact/bounce/turn meaning | Endpoint and validity/consequence | Art-family fit | PASS / FAIL / NOT TESTED |
+|---|---|---|---|---|---|---|
+| Ordinary preview | | | | | | NOT TESTED |
+| Multi-contact / changed direction | | | | | | NOT TESTED |
+| Invalid / blocked | | | | | | NOT TESTED |
+| Dense gameplay / confirmation | | | | | | NOT TESTED |
+
+Exact physics/math supports this table but cannot pass a raw debug-looking `Line2D`, mesh strip, polygon, dots, or arrow that does not belong to the selected shape/material/motion language.
 
 ## Localization and accessibility stress
 

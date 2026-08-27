@@ -867,6 +867,118 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("verdict=blocked", completed.stdout)
         self.assertIn("blocking_gates=1", completed.stdout)
 
+    def test_eval_complete_slice_rejects_incomplete_art_direction_selection(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed audio and independent target-build listening"],
+        }
+        source["gates"]["art_direction_selection_evidence"]["artifacts"] = [
+            item
+            for item in source["gates"]["art_direction_selection_evidence"]["artifacts"]
+            if "representative_composition" not in item["states"]
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            report_path = Path(directory) / "report.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("blocking_gates=1", completed.stdout)
+        gate = next(
+            item for item in report["gates"] if item["id"] == "art_direction_selection_evidence"
+        )
+        self.assertEqual(gate["status"], "fail")
+        self.assertTrue(
+            any("representative_composition" in issue for issue in gate["validation_failures"])
+        )
+
+    def test_eval_complete_slice_requires_tutorial_discovery_artifact(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed audio and independent target-build listening"],
+        }
+        for artifact in source["gates"]["interactive_onboarding"]["artifacts"]:
+            artifact["states"] = [
+                state for state in artifact["states"] if state != "tutorial_discovery"
+            ]
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            report_path = Path(directory) / "report.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        gate = next(item for item in report["gates"] if item["id"] == "interactive_onboarding")
+        self.assertEqual(gate["status"], "fail")
+        self.assertTrue(any("tutorial_discovery" in issue for issue in gate["validation_failures"]))
+
+    def test_progression_visual_comprehension_rejects_missing_locked_late_state(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-progression-heavy-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed audio and independent target-build listening"],
+        }
+        source["gates"]["progression_visual_comprehension_review"]["artifacts"] = [
+            item
+            for item in source["gates"]["progression_visual_comprehension_review"]["artifacts"]
+            if "progression_locked_late" not in item["states"]
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            report_path = Path(directory) / "report.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-progression-heavy-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        gate = next(
+            item
+            for item in report["gates"]
+            if item["id"] == "progression_visual_comprehension_review"
+        )
+        self.assertEqual(gate["status"], "fail")
+        self.assertTrue(
+            any("progression_locked_late" in issue for issue in gate["validation_failures"])
+        )
+
     def test_eval_mobile_web_requires_input_modality_ui_evidence(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"

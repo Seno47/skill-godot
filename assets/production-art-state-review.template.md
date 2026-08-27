@@ -6,6 +6,7 @@ Use this builder-owned gate for a complete game or production vertical slice. It
 
 - Build/artifact:
 - Builder/context:
+- Accepted art-direction selection record and pre-bulk anchor:
 - Primary rendering/spatial architecture:
 - Character/environment/UI asset families:
 - Shape, material, lighting, VFX, and motion direction:
@@ -38,6 +39,7 @@ Reject the baseline when any representative state shows:
 - sparse repeated modules without the structural detail, landmarks, variation, or rhythm promised by the direction;
 - empty prompt/HUD panels, placeholder text, default controls, debug markers, or presentation that exists only to fill space;
 - post-processing used to hide weak silhouettes, materials, VFX, or composition.
+- an aim, trajectory, ricochet, route, placement, area, or intent cue that is mathematically correct but still reads as raw `Line2D`/mesh/polygon/dots/arrows, omits direction/contact/endpoint/validity/consequence meaning, or clashes with the selected shape/material/motion language.
 
 Link the separate `production-character-motion` recording when characters are expected to move. Still frames are necessary for overlap/contact diagnosis but cannot pass motion quality.
 

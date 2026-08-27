@@ -28,6 +28,7 @@ Keep this living file short. Update it in place after a meaningful playable chec
 ## Assets, generation, and cost
 
 - Asset manifest:
+- Art-direction selection contract / selected profile:
 - Accepted style anchor / gameplay-size art gate:
 - Generated-job records or provider sidecars:
 - User-approved paid budget and approval context:

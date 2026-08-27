@@ -9,6 +9,7 @@ Use this with the `new-isometric-fixed-camera-complete` rubric case. Preserve ra
 - Fixed camera projection/rotation/zoom:
 - Gameplay-safe frame and HUD occupancy budget:
 - Spatial contract:
+- Art-direction selection record / selected profile and pre-bulk anchor:
 - Content-duration contract:
 - Builder-owned production character motion contract:
 - Reviewer/context independent from builder:

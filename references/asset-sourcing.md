@@ -6,6 +6,8 @@ When the task needs concrete places to search, read [asset-source-catalog.md](as
 
 ## Write an asset brief before searching
 
+When a new game's visual direction remains materially open, complete [visual-style-selection.md](visual-style-selection.md) before browsing packs. Search availability is evidence in a direction decision, not permission to let the first coherent free pack define the game.
+
 Derive a compact search brief from the game and art direction:
 
 - gameplay role and required variants;

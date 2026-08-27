@@ -25,6 +25,7 @@ Capture what the user has actually specified:
 - first representative level/encounter: start, first decision, first reward, first threat, landmark, escalation, and recovery beat;
 - for a finite selector with many levels/missions/items, the navigation model (`scroll`, `pages`, `chapters`, search/filter, or a deliberate combination), chosen from content volume, comparison needs, resume position, and mobile reachability rather than habit;
 - visual references, exclusions, mood, palette, density, and animation character;
+- whether the visual direction is user-fixed, constraint-determined, or materially open; when open, which decisions are taste/identity choices rather than reversible implementation details;
 - production characters expected to move and their smallest required idle/locomotion/context-action state set; do not infer that a rigged/imported character is acceptably animated;
 - sonic references and exclusions, music/ambience role, important audible feedback, voice needs, and whether generative audio is allowed;
 - requested deliverable: experiment, vertical slice, level, system, content pass, polish pass, or finished build.
@@ -55,6 +56,8 @@ If the game is networked, decide the maximum concurrent players per session/zone
 For extraction, separately define raid state, durable stash state, loadout commitment, secure/insurance rules, voluntary extraction, death/disconnect settlement, retry idempotence, route risk/reward, and recovery from a bad run. Read [genre-extraction.md](genre-extraction.md). For an MMO or persistent online world, record an honest scope label and the real service/operations boundary using [mmo-and-online-services.md](mmo-and-online-services.md); unbuilt backend, moderation, capacity, restore, or deployment work is a limitation, not implied future evidence.
 
 For fixed-camera isometric/orthographic complete work, also schedule the early rendered art gate from `assets/isometric-complete-review.template.md` before multiplying levels. This is a production decision: hero, mechanism states, objective, representative decor, lighting, and UI must coexist readably at the actual gameplay camera first.
+
+For every new complete game or production slice, read [visual-style-selection.md](visual-style-selection.md) and instantiate `assets/art-direction-selection.template.md` before bulk visual production. When the user supplied a complete direction, translate it without forcing alternative pitches. When the direction is materially open, compare serious production routes using the same gameplay content and resolve any taste, identity, paid-cost, or scope choice before an available asset pack silently becomes the art direction.
 
 When a focal production character is expected to move, schedule the builder-owned `assets/production-character-motion.template.md` contract before release. This is routine implementation acceptance, not a preference question for the user: idle, locomotion, required actions, real dispatch, bind/rest-pose rejection, and animated attachments must be proved in the target build.
 

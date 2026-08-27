@@ -23,6 +23,7 @@ MENU_REVIEW_TEMPLATE = ROOT / "assets" / "menu-identity-craft-review.template.md
 PRODUCTION_ART_REVIEW_TEMPLATE = ROOT / "assets" / "production-art-state-review.template.md"
 MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
 HUD_REVIEW_TEMPLATE = ROOT / "assets" / "gameplay-hud-glanceability-review.template.md"
+ART_DIRECTION_SELECTION_TEMPLATE = ROOT / "assets" / "art-direction-selection.template.md"
 PROGRESSION_BALANCE_REVIEW_TEMPLATE = ROOT / "assets" / "progression-balance-review.template.md"
 DIFFICULTY_PACING_REVIEW_TEMPLATE = ROOT / "assets" / "difficulty-pacing-review.template.md"
 NETWORK_REVIEW_TEMPLATE = ROOT / "assets" / "networked-multiplayer-review.template.md"
@@ -80,6 +81,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--hud-review-output",
         help="Also instantiate the gameplay HUD glanceability review.",
+    )
+    parser.add_argument(
+        "--art-direction-selection-output",
+        help="Also instantiate the pre-bulk art-direction selection contract.",
     )
     parser.add_argument(
         "--project-status-output",
@@ -385,6 +390,7 @@ def main() -> int:
                 args.review_output,
                 args.menu_review_output,
                 args.hud_review_output,
+                args.art_direction_selection_output,
                 args.progression_balance_review_output,
                 args.difficulty_pacing_review_output,
                 args.network_review_output,
@@ -439,6 +445,11 @@ def main() -> int:
             copy_template(MENU_REVIEW_TEMPLATE, output_path(args.menu_review_output))
         if args.hud_review_output:
             copy_template(HUD_REVIEW_TEMPLATE, output_path(args.hud_review_output))
+        if args.art_direction_selection_output:
+            copy_template(
+                ART_DIRECTION_SELECTION_TEMPLATE,
+                output_path(args.art_direction_selection_output),
+            )
         if args.progression_balance_review_output:
             copy_template(
                 PROGRESSION_BALANCE_REVIEW_TEMPLATE,

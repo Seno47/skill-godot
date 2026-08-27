@@ -55,6 +55,18 @@ The probe validates declared archetype/checkpoint coverage, resource floors/caps
 
 Therefore a builder-owned balance gate needs both deterministic model evidence and at least one target-build transaction trace. Prove displayed cost equals debited cost, reward is granted exactly once, unlock conditions match the authored data, save/reload preserves the result, and the player cannot duplicate, skip, or lose the transaction through pause/retry/scene transitions.
 
+Correct transactions do not prove player-facing comprehension. For a complete progression-heavy game, prepare the raw visual matrix in `assets/progression-balance-review.template.md` from a clean profile: current/start, first reward, first meaningful choice, purchased/unlocked consequence, and locked/late state. Show state change through authored maps, paths, landmarks, item/ability silhouettes, before/after art, meters, connectors, animation, or another project-specific visual language—not only a localized table or a stack of labeled cards.
+
+An independent reviewer who did not build the flow must be able to answer without a spreadsheet or builder narration:
+
+- what just changed;
+- what can be done next and which goal is currently reachable;
+- what it costs or requires;
+- what consequence the purchase/unlock has;
+- which new decision, route, build, or action the reward creates.
+
+This is `progression_visual_comprehension_review`, separate from arithmetic/model correctness and longer-term human pacing. A visually strong map cannot fix broken transactions, and a solver/model PASS cannot fix a progression surface the player cannot understand.
+
 ## Test the whole curve, not only averages
 
 Inspect at least onboarding/first reward, first meaningful choice, early stable loop, representative midgame, late/high-pressure state, and completion or reset. Add any discontinuity: new currency, difficulty tier, prestige, chapter boundary, procedural modifier, death-loss rule, or paid/rewarded acceleration.
@@ -100,8 +112,10 @@ Human evidence answers what simulation cannot:
 - did a supposedly viable option feel like a trap;
 - could critical state be read without spreadsheet knowledge.
 
+The separate independent visual-comprehension matrix may be reviewed before long pacing sessions. A FAIL is actionable builder work: repair the surface and repeat the narrow state review rather than asking the user to interpret a checklist.
+
 If these traces are unavailable, report the pacing gate as `NOT TESTED`. Do not convert a deterministic autoplay, designer playthrough, theoretical solve-time sum, or model PASS into human pacing evidence.
 
 ## Completion rule
 
-Do not hand off a progression-heavy complete game as balanced when either the builder-owned model/target-build gate or the uncoached pacing gate is unresolved. A vertical slice may be handed off as a slice with explicit tested range and limitations; it must not imply that an unmodeled midgame, endgame, prestige, or monetized path is ready.
+Do not hand off a progression-heavy complete game as balanced when the builder-owned model/target-build gate, independent visual-comprehension gate, or uncoached pacing gate is unresolved beyond its acceptance-owner boundary. A vertical slice may be handed off as a slice with explicit tested range and limitations; it must not imply that an unmodeled midgame, endgame, prestige, or monetized path is ready.

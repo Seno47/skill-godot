@@ -2,6 +2,7 @@
 
 Read this to establish and enforce visual coherence. For execution details, route to:
 
+- [visual-style-selection.md](visual-style-selection.md) when the direction itself is new, materially open, or needs a family-specific production profile;
 - [asset-sourcing.md](asset-sourcing.md) for search, comparison, provenance, licensing, and downloads;
 - [asset-generation.md](asset-generation.md) for creating and editing source assets;
 - [asset-integration.md](asset-integration.md) for adapting files and turning them into native Godot objects;
@@ -9,7 +10,7 @@ Read this to establish and enforce visual coherence. For execution details, rout
 
 ## Establish a visual contract
 
-Derive a compact art direction from the user's description and references before producing a large asset set. Record it in the project only when a persistent brief is useful; otherwise keep it in the working notes.
+Derive a compact art direction from the user's description and references before producing a large asset set. For a new complete game or production slice, make the selection durable with `assets/art-direction-selection.template.md`; do not leave the reason for a bulk visual commitment only in transient conversation. Existing projects and smaller changes may keep a bounded contract in working notes when no direction is being selected or replaced.
 
 Define enough constraints to make rejection possible:
 
@@ -24,6 +25,8 @@ Define enough constraints to make rejection possible:
 - explicit exclusions taken from the user's brief.
 
 Do not invent a fashionable style to fill ambiguity. A coherent simple direction is better than an assortment of individually impressive assets.
+
+When the direction is materially ambiguous, do not choose whichever free pack or generation route is easiest. Compare viable routes through [visual-style-selection.md](visual-style-selection.md), preserve user authorship, and lock a gameplay-size hero plus representative composition before bulk asset or level production. A fixed user direction does not need performative alternatives, but it still needs production constraints and a rendered anchor.
 
 ## Give the shipped identity semantic content
 
@@ -42,7 +45,7 @@ Review the complete main menu separately with `assets/menu-identity-craft-review
 
 ## Plan assets by role
 
-Before bulk generation, identify the minimum representative set:
+Before bulk sourcing, generation, or authoring, identify the minimum representative set:
 
 - hero assets that define the style;
 - modular/repeated world assets;
