@@ -10,7 +10,12 @@ Do not equate the current OS/store user with the game profile without an explici
 
 ## Required state matrix
 
-Prove guest start, new sign-in, linking to empty cloud, guest/cloud conflict, multi-device conflict, offline edits and reconnect, user switch, sign-out, provider outage, and account deletion. Each trace must show isolation between users, stable identity, idempotent sync, exact expected digest, no silent overwrite, and no token/PII leakage. Test the real provider path where release claims depend on it; a local mock only validates client behavior.
+Split acceptance into two explicit layers:
+
+- Builder-owned `account_cloud_evidence` proves the production client adapter, resolver and durable state against project-owned provider doubles or injected responses: guest start, sign-in/link callbacks, empty/conflicting payloads, multi-device/offline inputs, switch/sign-out, outage/error responses and deletion requests. Each trace shows user isolation, stable identity, idempotent sync, exact expected digest, preserved fallback, no silent overwrite and no token/PII leakage.
+- Provider-owned `account_cloud_provider_evidence` replays the required matrix through real provider accounts and the unchanged target candidate: actual guest/link, two-device/offline conflict, switch/sign-out, outage behavior and provider-confirmed deletion. A local SDK mock, deterministic resolver, production-shaped fixture or callback replay cannot pass this layer. If provider/account access is unavailable while the builder layer passes, leave this gate `NOT TESTED` as an external boundary; it permits `BUILDER_COMPLETE / READY_FOR_HUMAN_TEST` but not `PUBLICATION_CERTIFIED`.
+
+An observed provider failure that exposes a client defect returns to the builder for repair. A provider-only unavailable operation remains external rather than being converted into a user checklist.
 
 Run `scripts/account_cloud_probe.py`, then use `assets/account-cloud-review.template.md` for an independent conflict/account-switch UX review.
 

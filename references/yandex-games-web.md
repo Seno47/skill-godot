@@ -47,6 +47,8 @@ Official sources: [Game loading and gameplay markup](https://yandex.com/dev/game
 - Keep QA seeding separate from both shipping local defaults and cloud data. Test a clean guest, returning guest, authenticated cloud user, offline/error path, and local/cloud conflict if cloud saves are claimed.
 - Respect current Player data limits and storage guidance; do not move sensitive authority to an untrusted client save.
 
+When the release claim includes real Yandex Player account/cloud cross-progression, compose the account/cloud modifier and keep its two acceptance layers separate. The builder proves the production bridge, resolver, local fallback, merge/isolation and error callbacks with controlled target-build traces. Real Player identity, cross-device state, account switching and provider-confirmed operations belong to `account_cloud_provider_evidence`; without an authorized Yandex account/provider path they remain an external `NOT TESTED`, not a failed builder gate.
+
 Official source: [Player data](https://yandex.com/dev/games/doc/en/sdk/sdk-player).
 
 ## Initialize localization from the platform

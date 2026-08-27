@@ -25,7 +25,7 @@
   "optional_user_preference_policy": "User preference feedback may refine taste after blocking acceptance passes, but routine defects must not be deferred to the user unless the brief explicitly makes that preference an acceptance requirement.",
   "responsibility_status_policy": {
     "builder_work_remaining": "Continue autonomously; do not hand off a repair or QA checklist.",
-    "ready_for_human_test": "All available and authorized builder-owned work passes on the exact candidate, no known external-review failure remains unfixed, and only genuinely external evidence is pending.",
+    "ready_for_human_test": "All available and authorized builder-owned work passes on the exact candidate, honest pre-external dimension scores meet every matching external-gate cap, no known external-review failure remains unfixed, and only genuinely external evidence is pending.",
     "publication_certified": "The exact candidate passes all builder, independent, human, provider, quality-floor, and publication gates."
   },
   "blocking_gates": [
@@ -946,7 +946,14 @@
     {
       "id": "account_cloud_evidence",
       "cases": ["account-cloud-cross-progression"],
-      "description": "Target-provider evidence proves guest start, sign-in/link, empty and conflicting cloud, multi-device/offline reconciliation, user switch/sign-out, provider outage and deletion with stable internal identity, per-user isolation, idempotent merge and no silent overwrite or sensitive logging.",
+      "description": "Builder-owned production-client evidence proves the exact account/cloud adapter, resolver and persistence path across guest start, sign-in/link callbacks, empty and conflicting cloud payloads, multi-device/offline reconciliation inputs, user switch/sign-out, provider failure responses and deletion requests with stable internal identity, per-user isolation, idempotent merge, preserved fallback and no silent overwrite or sensitive logging. Project-owned provider doubles or injected responses validate client behavior only; they do not certify the real provider.",
+      "artifact_requirements": {"minimum_by_kind":{"report":2,"trace":6,"build":1},"required_states":{"guest_link_conflict":["trace"],"multi_device_offline":["trace"],"switch_signout":["trace"],"outage_delete":["trace"],"target_build":["build"]}}
+    },
+    {
+      "id": "account_cloud_provider_evidence",
+      "acceptance_owner": "provider",
+      "cases": ["account-cloud-cross-progression"],
+      "description": "Target-provider evidence on the unchanged candidate proves real guest/sign-in/link, empty and conflicting cloud, two-device/offline reconciliation, user switch/sign-out, service outage behavior and provider-confirmed deletion without cross-user contamination, silent overwrite or sensitive logging. A local SDK mock, deterministic resolver, production-shaped fixture or builder-owned callback replay cannot pass this gate.",
       "artifact_requirements": {"minimum_by_kind":{"report":2,"trace":6,"build":1},"required_states":{"guest_link_conflict":["trace"],"multi_device_offline":["trace"],"switch_signout":["trace"],"outage_delete":["trace"],"target_build":["build"]}}
     },
     {
@@ -1275,6 +1282,10 @@
     {
       "gate": "account_cloud_evidence",
       "dimensions": {"gameplay_correctness": 1, "technical_quality": 1}
+    },
+    {
+      "gate": "account_cloud_provider_evidence",
+      "dimensions": {"gameplay_correctness": 2, "technical_quality": 2, "evidence_and_reproducibility": 2}
     },
     {
       "gate": "account_conflict_ux_review",

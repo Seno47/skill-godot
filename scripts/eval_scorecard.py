@@ -429,6 +429,45 @@ def main() -> int:
                         "status": result.get("status"),
                     }
                 )
+        builder_quality_floor_failures: list[dict[str, Any]] = []
+        external_deferred_quality_floors: list[dict[str, Any]] = []
+        for failure in submitted_quality_floor_failures:
+            dimension_id = failure["id"]
+            submitted_actual = failure["actual_score"]
+            pending_caps: list[dict[str, Any]] = []
+            for rule in cap_rules:
+                gate_id = rule["gate"]
+                gate_result = gate_results.get(gate_id)
+                statuses = rule.get("statuses", ["fail", "not_tested"])
+                cap = rule["dimensions"].get(dimension_id)
+                if (
+                    gate_result is not None
+                    and gate_result["acceptance_owner"] != "builder"
+                    and gate_result["status"] == "not_tested"
+                    and "not_tested" in statuses
+                    and isinstance(cap, (int, float))
+                    and not isinstance(cap, bool)
+                ):
+                    pending_caps.append({"gate": gate_id, "cap": cap})
+            pre_external_floor = max(
+                (float(item["cap"]) for item in pending_caps),
+                default=None,
+            )
+            if (
+                pre_external_floor is not None
+                and isinstance(submitted_actual, (int, float))
+                and not isinstance(submitted_actual, bool)
+                and float(submitted_actual) >= pre_external_floor
+            ):
+                external_deferred_quality_floors.append(
+                    {
+                        **failure,
+                        "pre_external_floor": pre_external_floor,
+                        "pending_external_gates": [item["gate"] for item in pending_caps],
+                    }
+                )
+            else:
+                builder_quality_floor_failures.append(failure)
         blocking = blocking or bool(quality_floor_failures)
 
         submitted_score_100 = round(submitted_weighted_points / active_weight * 100.0, 2)
@@ -459,7 +498,7 @@ def main() -> int:
             if gate["acceptance_owner"] != "builder" and gate["status"] == "not_tested"
         ]
         builder_quality_ready = (
-            not submitted_quality_floor_failures
+            not builder_quality_floor_failures
             and submitted_score_100 >= thresholds.get("pass", 85)
         )
         if verdict == "pass":
@@ -499,6 +538,10 @@ def main() -> int:
             "quality_floor_failures": quality_floor_failures,
             "submitted_quality_floor_failure_count": len(submitted_quality_floor_failures),
             "submitted_quality_floor_failures": submitted_quality_floor_failures,
+            "builder_quality_floor_failure_count": len(builder_quality_floor_failures),
+            "builder_quality_floor_failures": builder_quality_floor_failures,
+            "external_deferred_quality_floor_count": len(external_deferred_quality_floors),
+            "external_deferred_quality_floors": external_deferred_quality_floors,
             "responsibility_status": responsibility_status,
             "builder_completion_status": (
                 "complete"

@@ -474,6 +474,208 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(report["external_failed_gates"], ["independent_ux_review"])
         self.assertEqual(report["builder_completion_status"], "incomplete")
 
+    def test_account_cloud_acceptance_splits_builder_and_provider_owners(self) -> None:
+        rubric = json.loads((ROOT / "evals" / "rubric.json").read_text(encoding="utf-8"))
+        owner_default = rubric["acceptance_owner_default"]
+        gates = {item["id"]: item for item in rubric["blocking_gates"]}
+        self.assertEqual(
+            gates["account_cloud_evidence"].get("acceptance_owner", owner_default),
+            "builder",
+        )
+        self.assertEqual(
+            gates["account_cloud_provider_evidence"]["acceptance_owner"],
+            "provider",
+        )
+
+    def test_account_cloud_provider_boundary_allows_ready_but_client_gap_does_not(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "account-cloud-cross-progression"
+        source["gates"]["account_cloud_evidence"] = {
+            "status": "pass",
+            "evidence": ["fixture: production client resolver and provider-response matrix"],
+            "reviewer": {"role": "builder", "context": "isolated client-contract builder"},
+            "artifacts": [
+                {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["client_contract"]},
+                {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["redaction"]},
+                {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["guest_link_conflict"]},
+                {"path": "evidence-artifacts/trace-b.json", "kind": "trace", "states": ["multi_device_offline"]},
+                {"path": "evidence-artifacts/trace-c.json", "kind": "trace", "states": ["switch_signout"]},
+                {"path": "evidence-artifacts/trace-d.json", "kind": "trace", "states": ["outage_delete"]},
+                {"path": "evidence-artifacts/trace-e.json", "kind": "trace", "states": ["guest_link_conflict"]},
+                {"path": "evidence-artifacts/progression-trace-a.json", "kind": "trace", "states": ["multi_device_offline"]},
+                {"path": "evidence-artifacts/build.zip", "kind": "build", "states": ["target_build"]},
+            ],
+        }
+        source["gates"]["account_cloud_provider_evidence"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: no authorized target-provider account in this run"],
+            "reviewer": {"role": "provider", "context": "provider access unavailable"},
+        }
+        source["gates"]["account_conflict_ux_review"] = {
+            "status": "pass",
+            "evidence": ["fixture: separate conflict and account-switch UX review"],
+            "reviewer": {"role": "independent", "context": "isolated account UX reviewer"},
+            "artifacts": [
+                {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["conflict_choice", "account_switch_or_outage"]},
+                {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["conflict_choice"]},
+                {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["account_switch_or_outage"]},
+                {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["ux_inventory"]},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            ready_evidence = temp / "ready.json"
+            ready_report = temp / "ready-scorecard.json"
+            ready_evidence.write_text(json.dumps(source), encoding="utf-8")
+            ready = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "account-cloud-cross-progression",
+                "--evidence",
+                str(ready_evidence),
+                "--json-output",
+                str(ready_report),
+                "--summary",
+            )
+            ready_data = json.loads(ready_report.read_text(encoding="utf-8"))
+
+            incomplete_source = json.loads(json.dumps(source))
+            incomplete_source["gates"]["account_cloud_evidence"] = {
+                "status": "not_tested",
+                "evidence": ["fixture: available client resolver matrix was not run"],
+            }
+            incomplete_evidence = temp / "incomplete.json"
+            incomplete_report = temp / "incomplete-scorecard.json"
+            incomplete_evidence.write_text(json.dumps(incomplete_source), encoding="utf-8")
+            incomplete = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "account-cloud-cross-progression",
+                "--evidence",
+                str(incomplete_evidence),
+                "--json-output",
+                str(incomplete_report),
+                "--summary",
+            )
+            incomplete_data = json.loads(incomplete_report.read_text(encoding="utf-8"))
+
+        self.assertEqual(ready.returncode, 1, ready.stdout)
+        self.assertIn("responsibility=ready_for_human_test", ready.stdout)
+        self.assertEqual(ready_data["builder_owned_unresolved_gate_count"], 0)
+        self.assertEqual(
+            ready_data["external_pending_gates"],
+            ["account_cloud_provider_evidence"],
+        )
+        self.assertEqual(ready_data["builder_completion_status"], "complete")
+
+        self.assertEqual(incomplete.returncode, 1, incomplete.stdout)
+        self.assertIn("responsibility=builder_work_remaining", incomplete.stdout)
+        self.assertEqual(
+            incomplete_data["builder_owned_unresolved_gates"],
+            ["account_cloud_evidence"],
+        )
+        self.assertEqual(incomplete_data["builder_completion_status"], "incomplete")
+
+    def test_external_audio_floor_defers_at_cap_but_not_below_cap(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 2,
+            "evidence": ["fixture: builder verified coverage, provenance, integration and runtime behavior"],
+        }
+        source["gates"]["human_audio_listening"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: representative listening requires an external human"],
+            "reviewer": {"role": "human", "context": "human listener unavailable"},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            ready_evidence = temp / "audio-ready.json"
+            ready_report = temp / "audio-ready-scorecard.json"
+            ready_evidence.write_text(json.dumps(source), encoding="utf-8")
+            ready = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(ready_evidence),
+                "--json-output",
+                str(ready_report),
+                "--summary",
+            )
+            ready_data = json.loads(ready_report.read_text(encoding="utf-8"))
+
+            weak_source = json.loads(json.dumps(source))
+            weak_source["scores"]["audio_direction_quality"]["score"] = 1
+            weak_evidence = temp / "audio-weak.json"
+            weak_report = temp / "audio-weak-scorecard.json"
+            weak_evidence.write_text(json.dumps(weak_source), encoding="utf-8")
+            weak = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(weak_evidence),
+                "--json-output",
+                str(weak_report),
+                "--summary",
+            )
+            weak_data = json.loads(weak_report.read_text(encoding="utf-8"))
+
+        self.assertEqual(ready.returncode, 1, ready.stdout)
+        self.assertIn("responsibility=ready_for_human_test", ready.stdout)
+        self.assertEqual(ready_data["submitted_quality_floor_failure_count"], 1)
+        self.assertEqual(ready_data["builder_quality_floor_failure_count"], 0)
+        self.assertEqual(ready_data["external_deferred_quality_floor_count"], 1)
+        deferred = ready_data["external_deferred_quality_floors"][0]
+        self.assertEqual(deferred["id"], "audio_direction_quality")
+        self.assertEqual(deferred["pre_external_floor"], 2.0)
+        self.assertEqual(deferred["pending_external_gates"], ["human_audio_listening"])
+
+        self.assertEqual(weak.returncode, 1, weak.stdout)
+        self.assertIn("responsibility=builder_work_remaining", weak.stdout)
+        self.assertEqual(weak_data["builder_quality_floor_failure_count"], 1)
+        self.assertEqual(weak_data["external_deferred_quality_floor_count"], 0)
+
+    def test_evidence_helper_migrates_account_provider_gate_without_promoting_mock(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "account-cloud-cross-progression"
+        source["gates"]["account_cloud_evidence"] = {
+            "status": "pass",
+            "evidence": ["fixture: legacy client and mock-provider contract"],
+            "reviewer": {"role": "builder", "context": "legacy isolated builder"},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            old_path = temp / "old-account-evidence.json"
+            migrated_path = temp / "migrated-account-evidence.json"
+            old_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "account-cloud-cross-progression",
+                "--from-existing",
+                str(old_path),
+                "--output",
+                str(migrated_path),
+            )
+            migrated = json.loads(migrated_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertEqual(migrated["gates"]["account_cloud_evidence"]["status"], "pass")
+        provider_gate = migrated["gates"]["account_cloud_provider_evidence"]
+        self.assertEqual(provider_gate["status"], "not_tested")
+        self.assertEqual(provider_gate["reviewer"]["role"], "provider")
+
     def test_evidence_helper_migrates_new_gates_and_instantiates_manifest(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
