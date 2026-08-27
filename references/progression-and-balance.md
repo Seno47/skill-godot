@@ -57,7 +57,7 @@ Therefore a builder-owned balance gate needs both deterministic model evidence a
 
 Correct transactions do not prove player-facing comprehension. For a complete progression-heavy game, prepare the raw visual matrix in `assets/progression-balance-review.template.md` from a clean profile: current/start, first reward, first meaningful choice, purchased/unlocked consequence, and locked/late state. Show state change through authored maps, paths, landmarks, item/ability silhouettes, before/after art, meters, connectors, animation, or another project-specific visual language—not only a localized table or a stack of labeled cards.
 
-An independent reviewer who did not build the flow must be able to answer without a spreadsheet or builder narration:
+An independent reviewer who did not build the flow must first receive neutrally named raw states without the builder's intended mappings, progression narration, or desired verdict. Under a short recorded first-glance budget, they must answer without a spreadsheet or builder narration:
 
 - what just changed;
 - what can be done next and which goal is currently reachable;
@@ -66,6 +66,8 @@ An independent reviewer who did not build the flow must be able to answer withou
 - which new decision, route, build, or action the reward creates.
 
 This is `progression_visual_comprehension_review`, separate from arithmetic/model correctness and longer-term human pacing. A visually strong map cannot fix broken transactions, and a solver/model PASS cannot fix a progression surface the player cannot understand.
+
+Record uncertainty and wrong guesses before any explanation. The reviewer may study the flow afterward to diagnose a defect, but that coached interpretation cannot retroactively convert the blind first-glance result into PASS. Use neutral artifact IDs rather than names such as `purchased`, `unlocked`, or `next_goal` until the initial answers are locked.
 
 ## Test the whole curve, not only averages
 

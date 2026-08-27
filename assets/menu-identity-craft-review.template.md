@@ -32,6 +32,8 @@ List every non-navigation phrase. Keep it only when it serves player orientation
 
 Reject generic explanatory or marketing copy that merely restates the premise, especially slogan-shaped text of the form “do X; survive/master/reach Y” when the menu does not need it. Omission is better than synthetic personality.
 
+Navigation copy is judged separately from atmosphere. For each consequential menu action, record what an uncoached reviewer predicts before implementation notes: resume/continue, new game/save, return, discard, exit, or another exact effect. A thematic synonym does not pass when it hides progress retention/loss or disagrees with its icon. Use the shared blind action table in `cross-surface-production-craft-review.template.md` for menu/pause/result consistency.
+
 ## Composition and controls
 
 | Raw state | What must be judged | Artifact | PASS / FAIL / NOT TESTED |

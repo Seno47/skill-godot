@@ -45,6 +45,14 @@ Summarize the intended progression promise, session cadence, completion/reset ca
 
 Use raw target-build states from a clean profile. Correct transactions and localized text do not answer these questions by themselves.
 
+### Blind first-glance protocol
+
+- Neutral artifact IDs/order (do not reveal `reward`, `choice`, `purchased`, `unlocked`, or `late` before first answers):
+- Time budget per state:
+- Intended mappings, model, and builder narration withheld: NOT TESTED
+- First answers, uncertainty, and wrong guesses recorded before explanation: NOT TESTED
+- Later study did not overwrite the first-glance verdict: NOT TESTED
+
 | State ID | Raw artifact | What visibly changed | Next reachable goal/action | Cost or requirement | Consequence / new decision | PASS / FAIL / NOT TESTED |
 |---|---|---|---|---|---|---|
 | `progression_clean_current` | | | | | | NOT TESTED |

@@ -41,6 +41,8 @@ Reject the baseline when any representative state shows:
 - post-processing used to hide weak silhouettes, materials, VFX, or composition.
 - an aim, trajectory, ricochet, route, placement, area, or intent cue that is mathematically correct but still reads as raw `Line2D`/mesh/polygon/dots/arrows, omits direction/contact/endpoint/validity/consequence meaning, or clashes with the selected shape/material/motion language.
 
+Do not review each asset family in isolation. In the same normal/dense/peak frames, compare world actors/objects, UI/icons, telegraphs/tutorial cues/threats, and VFX for perspective, edge treatment, texture density, scale, optical weight, material/motion language, contact, anchor, and depth. Palette agreement cannot pass painterly world art crossed by foreign flat strips, thin wireframes, detached arrows/rings, unanchored smudges, or unrelated sharp VFX symbols. Attach the separate independent verdict from `assets/cross-surface-production-craft-review.template.md`; the builder matrix catches routine defects first and cannot self-award that independent gate.
+
 Link the separate `production-character-motion` recording when characters are expected to move. Still frames are necessary for overlap/contact diagnosis but cannot pass motion quality.
 
 This review checks whether HUD panels are visually integrated and obstruct the world; it does not approve information density. Complete games/slices also use `gameplay-hud-glanceability-review.template.md` to inventory every persistent/contextual text zone, iconify or remove redundant captions, and obtain an independent glanceability verdict across quiet/normal/dense/VFX states.

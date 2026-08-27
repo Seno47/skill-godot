@@ -6,6 +6,8 @@ Use this guide when the user's description is open-ended, genre-heavy, or visual
 
 Read how the task is framed. An exploratory direction benefits from an early playable slice and short checkpoints only at decisions of taste, scope, platform, or paid cost. A finished brief authorizes reasonable reversible implementation choices and steady autonomous progress; do not turn it into a sequence of avoidable questions. Neither mode changes permission boundaries or weakens completion evidence.
 
+For an open-ended new complete game, a post-play product decision is material even when the owner selected an idea in text. After the smallest representative slice passes routine builder QA, use [production-craft-and-product-approval.md](production-craft-and-product-approval.md) and `assets/product-owner-slice-decision.template.md`: obtain explicit approval or waiver of the core loop/concept and visual direction before multiplying content. An independent evaluator can certify clarity/craft, not that the owner enjoys the idea. If the owner explicitly closes the project, stop with the recorded non-success closure terminal rather than continuing repairs without authorization.
+
 For a run likely to span several phases or context compaction, instantiate `assets/project-run-state.template.md`. Keep current playable truth, durable decisions, build/evidence IDs, reproducible commands, asset/cost records, next bounded actions, and genuine blockers there. Update it in place after meaningful checkpoints; a chronological diary wastes context and quickly becomes stale.
 
 ## Extract decisions that affect construction

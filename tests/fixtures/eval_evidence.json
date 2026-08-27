@@ -57,7 +57,12 @@
     },
     "clean_shipping_state": {
       "status": "pass",
-      "evidence": ["fixture: clean profile capture separated from seeded QA state"]
+      "evidence": ["fixture: exact review modality primary/backup reset and clean first boot separated from seeded QA state"],
+      "artifacts": [
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["shipping_default_contract"]},
+        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["actual_review_modality_reset"]},
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["clean_first_boot"]}
+      ]
     },
     "semantic_identity_review": {
       "status": "pass",
@@ -78,6 +83,51 @@
         {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["dense_interaction"]},
         {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["result"]},
         {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["independent_ux"]}
+      ]
+    },
+    "cross_surface_production_craft_review": {
+      "status": "pass",
+      "evidence": ["fixture: same-candidate blind-first cross-surface craft and optical family review"],
+      "artifacts": [
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["main_menu"]},
+        {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["pause_or_runtime_modal"]},
+        {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["critical_icon_family_actual_size"]},
+        {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["settings"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["ordinary_hud_or_core_play"]},
+        {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["result_or_fail"]},
+        {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["text_heaviest_secondary_surface"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["optical_asset_audit"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["blind_first_read"]}
+      ]
+    },
+    "critical_action_comprehension_review": {
+      "status": "pass",
+      "evidence": ["fixture: independent blind prediction of exact consequential actions"],
+      "artifacts": [
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["main_menu_action"]},
+        {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["pause_or_runtime_modal_action"]},
+        {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["result_or_failure_action"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["blind_action_prediction"]}
+      ]
+    },
+    "cross_family_art_coherence_review": {
+      "status": "pass",
+      "evidence": ["fixture: independent same-frame world UI telegraph and VFX family review"],
+      "artifacts": [
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["world_ui_normal"]},
+        {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["dense_contact_or_telegraph"]},
+        {"path": "evidence-artifacts/vfx.png", "kind": "image", "states": ["peak_vfx_or_consequence"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["cross_family_verdict"]}
+      ]
+    },
+    "product_owner_slice_approval": {
+      "status": "pass",
+      "evidence": ["fixture: product owner approved the representative loop and direction before bulk authoring"],
+      "artifacts": [
+        {"path": "evidence-artifacts/motion.avi", "kind": "video", "states": ["representative_core_loop"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["representative_visual_direction"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["bulk_authoring_boundary"]},
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["owner_decision_before_bulk"]}
       ]
     },
     "human_audio_listening": {
@@ -116,7 +166,7 @@
         {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["progression_first_choice"]},
         {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["progression_purchased_unlocked"]},
         {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["progression_locked_late"]},
-        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["progression_visual_comprehension"]}
+        {"path": "evidence-artifacts/review.md", "kind": "review", "states": ["progression_visual_comprehension", "blind_first_glance"]}
       ]
     },
     "difficulty_pacing_evidence": {
@@ -288,6 +338,9 @@
   "run_metadata": {
     "purpose": "scorecard smoke fixture",
     "artifact_root": "."
+  },
+  "project_disposition": {
+    "status": "active"
   },
   "limitations": []
 }

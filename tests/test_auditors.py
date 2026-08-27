@@ -474,6 +474,124 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(report["external_failed_gates"], ["independent_ux_review"])
         self.assertEqual(report["builder_completion_status"], "incomplete")
 
+    def test_cross_surface_pass_fails_without_pause_or_runtime_modal_artifact(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed target-build audio"],
+        }
+        gate = source["gates"]["cross_surface_production_craft_review"]
+        gate["artifacts"] = [
+            item
+            for item in gate["artifacts"]
+            if "pause_or_runtime_modal" not in item.get("states", [])
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        cross_surface = next(
+            item for item in report["gates"] if item["id"] == "cross_surface_production_craft_review"
+        )
+        self.assertEqual(cross_surface["status"], "fail")
+        self.assertTrue(
+            any("pause_or_runtime_modal" in item for item in cross_surface["validation_failures"])
+        )
+        self.assertEqual(report["responsibility_status"], "builder_work_remaining")
+
+    def test_product_owner_rejection_is_builder_work_until_explicit_closure(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-progression-heavy-complete"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed target-build audio"],
+        }
+        source["scores"]["asset_pipeline"] = {
+            "score": 4,
+            "evidence": ["fixture: production asset pipeline"],
+        }
+        source["scores"]["performance_and_size"] = {
+            "score": 4,
+            "evidence": ["fixture: target budget"],
+        }
+        source["gates"]["product_owner_slice_approval"] = {
+            "status": "fail",
+            "evidence": ["fixture: owner rejected the core concept after the representative slice"],
+            "reviewer": {
+                "role": "product_owner",
+                "context": "fixture product owner rejection",
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            active_path = temp / "active.json"
+            active_report = temp / "active-scorecard.json"
+            active_path.write_text(json.dumps(source), encoding="utf-8")
+            active = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-progression-heavy-complete",
+                "--evidence",
+                str(active_path),
+                "--json-output",
+                str(active_report),
+                "--summary",
+            )
+            active_data = json.loads(active_report.read_text(encoding="utf-8"))
+
+            closed_source = json.loads(json.dumps(source))
+            closed_source["project_disposition"] = {
+                "status": "user_closed",
+                "decision_owner": "user",
+                "context": "fixture user explicitly closed the disliked project",
+                "reason": "core concept did not appeal to the product owner",
+                "continue_authorized": False,
+            }
+            closed_path = temp / "closed.json"
+            closed_report = temp / "closed-scorecard.json"
+            closed_path.write_text(json.dumps(closed_source), encoding="utf-8")
+            closed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-progression-heavy-complete",
+                "--evidence",
+                str(closed_path),
+                "--json-output",
+                str(closed_report),
+                "--summary",
+            )
+            closed_data = json.loads(closed_report.read_text(encoding="utf-8"))
+
+        self.assertEqual(active.returncode, 1, active.stdout)
+        self.assertEqual(active_data["responsibility_status"], "builder_work_remaining")
+        self.assertEqual(closed.returncode, 1, closed.stdout)
+        self.assertIn("verdict=closed", closed.stdout)
+        self.assertIn("responsibility=project_closed_user_rejected", closed.stdout)
+        self.assertEqual(closed_data["responsibility_status"], "project_closed_user_rejected")
+        self.assertEqual(closed_data["builder_completion_status"], "closed")
+        self.assertEqual(closed_data["publication_status"], "not_certified")
+        self.assertEqual(closed_data["project_disposition"]["status"], "user_closed")
+
     def test_account_cloud_acceptance_splits_builder_and_provider_owners(self) -> None:
         rubric = json.loads((ROOT / "evals" / "rubric.json").read_text(encoding="utf-8"))
         owner_default = rubric["acceptance_owner_default"]
@@ -2055,6 +2173,53 @@ class AuditorSmokeTests(unittest.TestCase):
                     "--summary",
                 )
             )
+
+
+@unittest.skipUnless(importlib.util.find_spec("PIL"), "Pillow is not installed")
+class IconOpticalAuditTests(unittest.TestCase):
+    def test_optical_audit_passes_balanced_family_and_fails_shifted_icon(self) -> None:
+        from PIL import Image, ImageDraw
+
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            centered_a = temp / "centered-a.png"
+            centered_b = temp / "centered-b.png"
+            shifted = temp / "shifted.png"
+            for path, bounds in (
+                (centered_a, (8, 8, 24, 24)),
+                (centered_b, (7, 7, 25, 25)),
+                (shifted, (0, 8, 16, 24)),
+            ):
+                image = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+                ImageDraw.Draw(image).ellipse(bounds, fill=(255, 255, 255, 255))
+                image.save(path)
+
+            passing = run_script(
+                "icon_optical_audit.py",
+                "--image",
+                str(centered_a),
+                "--image",
+                str(centered_b),
+                "--max-center-offset-ratio",
+                "0.05",
+                "--max-weight-ratio",
+                "1.5",
+                "--summary",
+            )
+            failing = run_script(
+                "icon_optical_audit.py",
+                "--image",
+                str(centered_a),
+                "--image",
+                str(shifted),
+                "--max-center-offset-ratio",
+                "0.1",
+                "--summary",
+            )
+        self.assertEqual(passing.returncode, 0, passing.stdout)
+        self.assertIn("[PASS]", passing.stdout)
+        self.assertEqual(failing.returncode, 1, failing.stdout)
+        self.assertIn("[FAIL]", failing.stdout)
 
 
 if __name__ == "__main__":

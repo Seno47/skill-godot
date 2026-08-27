@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "skill_commit": "postmortem-ce69c4e-calibration",
+  "required_contracts": [
+    "cross-surface-production-craft",
+    "optical-icon-family",
+    "critical-action-copy",
+    "cross-family-art-coherence",
+    "actual-review-profile-reset",
+    "product-owner-slice-checkpoint",
+    "project-closure-status"
+  ],
+  "scenarios": [
+    {
+      "id": "coherent-cross-surface-positive",
+      "brief_path": "fixtures/brief-coherent-complete-game-a.md",
+      "godot_version": "4.x",
+      "composite_case": "new-progression-heavy-complete+localized-release-complete+desktop-hardware-release",
+      "contracts": ["cross-surface-production-craft", "optical-icon-family", "critical-action-copy", "cross-family-art-coherence", "actual-review-profile-reset", "product-owner-slice-checkpoint", "project-closure-status"],
+      "builder_context": "isolated builder with exact-candidate surface packet and final-size optical audit",
+      "reviewer_context": "separate blind-first reviewer plus explicit product-owner slice decision",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "pause or the material runtime modal is required; ambiguous icons may retain concise accessible labels",
+      "token_cost": 1800,
+      "elapsed_minutes": 22,
+      "result_artifacts": ["reports/cross-surface-review.md", "reports/icon-optical-audit.json", "reports/owner-slice-approve.md"]
+    },
+    {
+      "id": "exact-review-route-positive",
+      "brief_path": "fixtures/brief-coherent-complete-game-b.md",
+      "godot_version": "4.x",
+      "composite_case": "new-2-5d-complete+localized-release-complete+desktop-hardware-release",
+      "contracts": ["cross-surface-production-craft", "optical-icon-family", "critical-action-copy", "cross-family-art-coherence", "actual-review-profile-reset", "product-owner-slice-checkpoint", "project-closure-status"],
+      "builder_context": "isolated builder resetting editor user data primary and backup after final capture",
+      "reviewer_context": "separate reviewer launched through the recorded Godot Editor Run modality",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "clean browser and editor profiles are separate records instead of duplicated claims",
+      "token_cost": 1650,
+      "elapsed_minutes": 20,
+      "result_artifacts": ["reports/review-profile-reset.md", "reports/clean-editor-first-boot.png", "reports/blind-action-review.md"]
+    },
+    {
+      "id": "last-bearing-owner-rejected-negative",
+      "brief_path": "fixtures/brief-last-bearing-postmortem.md",
+      "godot_version": "4.x",
+      "composite_case": "new-progression-heavy-complete+constrained-mobile-web+localized-release-complete",
+      "contracts": ["cross-surface-production-craft", "optical-icon-family", "critical-action-copy", "cross-family-art-coherence", "actual-review-profile-reset", "product-owner-slice-checkpoint", "project-closure-status"],
+      "builder_context": "builder whose custom scene-authored surfaces and coached state matrix previously received a false-positive PASS",
+      "reviewer_context": "product owner and new blind-first postmortem context reviewing raw candidate surfaces",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "pause was four equal rectangles with optically mismatched icons and no resume hierarchy",
+        "atmospheric action copy did not predict new game restart retry or next step",
+        "painterly world flat UI wireframes trajectory strips and VFX did not form one asset family",
+        "custom settings remained a crowded repeated-card dashboard",
+        "coached progression review overinterpreted faint generic nodes and abstract mappings",
+        "pause was absent from the decisive review packet",
+        "bulk content preceded product-owner approval of the representative core loop"
+      ],
+      "expected_gate_for_each_defect": {
+        "pause was four equal rectangles with optically mismatched icons and no resume hierarchy": "cross_surface_production_craft_review",
+        "atmospheric action copy did not predict new game restart retry or next step": "critical_action_comprehension_review",
+        "painterly world flat UI wireframes trajectory strips and VFX did not form one asset family": "cross_family_art_coherence_review",
+        "custom settings remained a crowded repeated-card dashboard": "cross_surface_production_craft_review",
+        "coached progression review overinterpreted faint generic nodes and abstract mappings": "progression_visual_comprehension_review",
+        "pause was absent from the decisive review packet": "cross_surface_production_craft_review",
+        "bulk content preceded product-owner approval of the representative core loop": "product_owner_slice_approval"
+      },
+      "false_positive_burden": "the old authored/custom/state-present evidence is intentionally preserved as insufficient",
+      "token_cost": 1400,
+      "elapsed_minutes": 17,
+      "result_artifacts": ["D:/Temp/codex-clipboard-2adcc1f1-d0d6-4422-ac77-c51eef071a1c.png", "output/playwright/ui-remediation/candidate-exact-menu.png", "output/playwright/ui-remediation/candidate-exact-map-clean.png", "output/playwright/ui-remediation/candidate-exact-result.png"]
+    },
+    {
+      "id": "seeded-editor-and-closure-misreport-negative",
+      "brief_path": "fixtures/brief-review-route-and-closure-postmortem.md",
+      "godot_version": "4.x",
+      "composite_case": "new-progression-heavy-complete+constrained-mobile-web+localized-release-complete",
+      "contracts": ["cross-surface-production-craft", "optical-icon-family", "critical-action-copy", "cross-family-art-coherence", "actual-review-profile-reset", "product-owner-slice-checkpoint", "project-closure-status"],
+      "builder_context": "builder that cleaned only Playwright storage and continued after explicit owner cancellation",
+      "reviewer_context": "separate owner route using Godot Editor Run and explicit project-close message",
+      "first_pass_verdict": "blocked",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "browser profile was clean while editor user data backup restored seeded progress and skipped onboarding",
+        "agent claimed READY and proposed more repair work after the owner explicitly closed the project"
+      ],
+      "expected_gate_for_each_defect": {
+        "browser profile was clean while editor user data backup restored seeded progress and skipped onboarding": "clean_shipping_state",
+        "agent claimed READY and proposed more repair work after the owner explicitly closed the project": "project_closed_user_rejected"
+      },
+      "false_positive_burden": "closure preserves failed gates without treating them as authorized repair work",
+      "token_cost": 900,
+      "elapsed_minutes": 9,
+      "result_artifacts": ["reports/web-clean-editor-seeded.md", "reports/editor-user-data-trace.json", "reports/project-closure-scorecard.json"]
+    }
+  ]
+}

@@ -18,9 +18,13 @@
 | Content-duration claim versus authored/playtested depth | NOT TESTED | Unrecorded |
 | App icon/main-menu semantic identity at final size | NOT TESTED | Unrecorded |
 | Main-menu wordmark, copy necessity, and authored composition | NOT TESTED | Unrecorded |
+| Cross-surface menu/pause/settings/HUD/result/secondary-surface production craft | NOT TESTED | Unrecorded |
+| Critical action copy predicts resume/restart/retry/new/next/return/purchase/loss exactly | NOT TESTED | Unrecorded |
+| Critical icon family is recognizable, optically aligned, and coherent at final size | NOT TESTED | Unrecorded |
 | Settings controls form an authored game-specific family rather than native/default scaffolding | NOT TESTED | Unrecorded |
 | Menu/HUD/result/map/upgrade surfaces communicate visually rather than through repeated labeled rectangles | NOT TESTED | Unrecorded |
 | Production-art integrity across quiet, normal, dense interaction, VFX peak, and result states | NOT TESTED | Unrecorded |
+| Cross-family world/UI/telegraph/tutorial/VFX integration | NOT TESTED | Unrecorded |
 | Gameplay HUD glanceability, information density, icon family, and objective/prompt hierarchy | NOT TESTED | Unrecorded |
 | Aim/trajectory/route/intent telegraph direction, contacts, endpoint, validity, and art-family fit | NOT TESTED | Unrecorded |
 | Responsive integrity | NOT TESTED | Unrecorded |
@@ -53,10 +57,26 @@ Review the raw artifacts before reading the builder's desired verdict. For a com
 | State ID | Raw artifact | Observed hierarchy/contact/VFX/depth defects | PASS / FAIL / NOT TESTED |
 |---|---|---|---|
 | `main_menu` | | | NOT TESTED |
+| `pause_or_runtime_modal` | | | NOT TESTED |
 | `settings` | | | NOT TESTED |
 | `normal_gameplay` | | | NOT TESTED |
 | `dense_interaction` | | | NOT TESTED |
 | `result` | | | NOT TESTED |
+
+Review these as one exact candidate, not as unrelated good-looking screens. Attach `assets/cross-surface-production-craft-review.template.md`. Scene-authored/custom controls, equal node rects, and shared colors do not pass cross-surface hierarchy, optical alignment, icon family, or craft by themselves.
+
+## Blind first-read calibration
+
+Before reading implementation notes, expected icon/progression mappings, designer narration, or the builder's desired verdict, record:
+
+| Question | First answer, uncertainty, and wrong guesses | Explanation revealed later | PASS / FAIL / NOT TESTED |
+|---|---|---|---|
+| What does each critical icon depict and which action/state does it predict at actual final size? | | | NOT TESTED |
+| What exact effect does each menu, pause, and result action have? | | | NOT TESTED |
+| Which actions retain or lose progress, restart, advance, return, create a new save, or purchase? | | | NOT TESTED |
+| What is the current progression state, next reachable goal, cost, consequence, and new decision? | | | NOT TESTED |
+
+Later study may diagnose defects but cannot overwrite the first-read record or retroactively create a PASS.
 
 When characters are expected to move, review the separate raw normal-speed motion artifact. Deterministic pose/state assertions are supporting evidence and cannot replace watching idle, locomotion, and context action through the production camera.
 
@@ -83,6 +103,10 @@ Use the separate `gameplay-hud-glanceability-review` inventory and annotated raw
 | Which controls still look like native/default Godot scaffolding despite functioning correctly? | | NOT TESTED |
 | Do menu, result, map/selector, upgrade/shop, and progression surfaces use hierarchy and visible state art instead of large text panels and repeated rectangles? | | NOT TESTED |
 | Is the text-heaviest supported surface still understandable at a brief glance and under representative localization? | | NOT TESTED |
+| Does the actual pause/runtime modal establish a clear resume/primary hierarchy rather than equal rectangles? | | NOT TESTED |
+| Are custom widgets still visually crowded, obscure, or dashboard-like despite no longer using native Godot art? | | NOT TESTED |
+| Do critical icons have coherent visible-pixel weight, padding, optical center, baseline, and filtering at final size? | | NOT TESTED |
+| Can every consequential action be predicted exactly from its copy/icon without atmospheric overinterpretation? | | NOT TESTED |
 
 ## Telegraph craft questions
 
@@ -94,7 +118,7 @@ Use the separate `gameplay-hud-glanceability-review` inventory and annotated raw
 
 ## Progression visual-comprehension questions
 
-When progression is material, use the separate five-state matrix and answer without builder narration or spreadsheet knowledge.
+When progression is material, use the separate five-state matrix. First answer under a short blind first-glance budget from neutrally named raw states; do not show intended mappings, state names, builder narration, or spreadsheet knowledge until the answers are locked.
 
 | Question | Raw observation | PASS / FAIL / NOT TESTED |
 |---|---|---|

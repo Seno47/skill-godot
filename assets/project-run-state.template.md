@@ -10,6 +10,7 @@ Keep this living file short. Update it in place after a meaningful playable chec
 - Current source revision or project hash:
 - Current build ID / artifact:
 - Godot executable and version:
+- Project disposition (`active` or explicit `user_closed`): active
 
 ## Current playable truth
 
@@ -17,6 +18,7 @@ Keep this living file short. Update it in place after a meaningful playable chec
 - Core loop states actually reached:
 - Builder-reviewed raw capture(s):
 - Applicable independent/human gates already passed:
+- Product-owner representative-slice decision / build / content boundary:
 - Known broken, placeholder, or NOT TESTED states:
 
 ## Durable decisions
@@ -60,3 +62,4 @@ Keep this living file short. Update it in place after a meaningful playable chec
 - Scenes/resources/scripts/assets changed since the last verified checkpoint:
 - Evidence added or invalidated:
 - Latest honest completion label:
+- If explicitly closed: owner context, reason, preserved failure packet, and `PROJECT_CLOSED / USER_REJECTED` terminal:

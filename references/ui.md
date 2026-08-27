@@ -33,6 +33,7 @@ Absolute offsets are appropriate for deliberate fixed-size elements, fine art-di
 - Preserve contrast and readability over every gameplay background; add a designed backdrop/scrim where necessary.
 - Do not ship default Godot controls as finished UI when the brief calls for a designed interface.
 - Inspect actual sliders, tracks, thumbs, switches, checkboxes, option buttons, scrollbars, and focus/disabled states in the target build. Native/default-looking `HSlider`, `VSlider`, `CheckButton`, `CheckBox`, or other control art remains scaffolding until the shared `Theme`/scene-authored presentation makes it one readable game-specific family; functioning values and persistence do not pass surface craft.
+- Custom and scene-authored controls receive no automatic quality credit. A dashboard of repeated outlined rows/cards, obscure state glyphs, weak descriptions, inconsistent padding/weight, or unclear pressed/disabled states remains unfinished even when every value persists and no native Godot pixels remain.
 - Treat `StyleBox` content margins, expand margins, border width, theme constants, and the control's runtime minimum size as different mechanisms. An expand margin draws outside the control rect and can be clipped without increasing its hit target; do not use it as hidden layout spacing.
 
 ## Interaction and input
@@ -52,6 +53,7 @@ Absolute offsets are appropriate for deliberate fixed-size elements, fine art-di
 ## Information architecture and feedback
 
 - Give the most important current decision/action the strongest hierarchy.
+- Name standard consequential actions so an uncoached player can predict the exact result: resume, restart, retry, next/continue, return, new game/save, purchase, discard, and exit must not be hidden behind an atmospheric synonym. Theme language may be secondary. In menu, pause, and result states, copy and icon must predict the same effect and make progress loss/retention clear.
 - Remove decorative labels, cards, icons, and meters that do not improve comprehension.
 - Audit the whole interface flow—menu, settings, HUD, result, map/selector, upgrades/shop, and progression surfaces—for what is communicated visually versus only through text. Repeated identical labeled rectangles, large text panels, and localized tables do not become finished UI merely because their layout, touch targets, and transactions are correct. Prefer authored state art, icons, meters, spatial grouping, maps, world cues, and visible before/after change while retaining concise accessible text where symbols are not yet learned.
 - Prefer progressive disclosure to a wall of equally weighted controls.
@@ -73,6 +75,10 @@ Review content semantics as well as localization and layout. Repeated selection 
 
 For ordinary sequential numbering, prefer `1`, `2`, `3` over decorative `01`, `02`, `03`. Leading zeros need an actual diegetic, archival, timer/code, fixed-width, or art-direction rationale; they are not a default polish treatment.
 
+For a complete game/slice, review the whole interface family together with `assets/cross-surface-production-craft-review.template.md` and [production-craft-and-product-approval.md](production-craft-and-product-approval.md). The raw packet includes main menu, pause/runtime modal, settings, ordinary play/HUD, result/failure, the text-heaviest secondary surface, and critical icons from one exact candidate. A polished menu cannot cover an unfinished pause/result; shared colors and aligned rectangles cannot cover missing hierarchy.
+
+Audit visible pixels in addition to nodes. For critical icons and compound actions, compare source/viewBox bounds, rendered rects, final-size alpha/pixel bounds, optical center, internal padding, baseline, filtering/halo, and visible weight against neighboring family members. `scripts/icon_optical_audit.py` provides repeatable raster alpha metrics; independent final-size judgment still decides whether nominally centered assets look aligned and coherent.
+
 Choose a navigation model before building a large selector. Record item count, expected revisit/comparison behavior, supported input, and narrow-screen reachability; then choose scrolling, pagination, chapters, search/filter, or a combination. Pagination needs visible current/total position, deterministic previous/next behavior, focus restoration, and no unreachable tail. Do not universalize one page size—derive rows/columns from the supported viewport matrix and touch targets.
 
 Long localized card titles are content, not incidental overflow. Give name and status separate authored regions when both matter, test representative long strings on the narrowest viewport, and prefer a bounded two-line wrap when it preserves identity. Ellipsis is acceptable only when the full identity remains available and choices stay distinguishable.
@@ -85,6 +91,9 @@ Inspect at minimum:
 
 - default, hover/focus, pressed, disabled, selected, error, empty, loading, and overflow states that exist in the feature;
 - raw main-menu, settings, text-heaviest result/map/upgrade surface, and ordinary gameplay captures for a complete game; identify which meanings remain text-only and whether repeated labeled rectangles dominate the hierarchy;
+- the same exact candidate's pause/runtime modal and result/failure beside its menu, settings, ordinary HUD, and text-heaviest secondary surface; reject cross-screen hierarchy, typography, rectangle/card, control-state, and icon-family drift;
+- blind first-read prediction of every critical menu/pause/result action and critical icon before implementation notes, expected mappings, or builder verdicts are shown; record uncertainty and wrong guesses rather than allowing later explanation to overwrite them;
+- intrinsic/rendered/visible-alpha bounds, optical center, padding, baseline, filtering/halo, and relative weight for critical icons and icon-plus-label groups at actual final size;
 - pointer-open and keyboard/gamepad-open focus flows as separate cases, plus mouse, controller, and touch interaction required by the target;
 - narrow/wide and low/high resolution extremes;
 - source-to-runtime aspect ratios for icons, illustrations, portraits, and thumbnails inside `Container` nodes;

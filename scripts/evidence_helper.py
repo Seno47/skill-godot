@@ -20,6 +20,9 @@ CAPTURE_TEMPLATE = ROOT / "assets" / "capture-manifest.template.json"
 REVIEW_TEMPLATE = ROOT / "assets" / "independent-ux-review.template.md"
 YANDEX_CHECKLIST_TEMPLATE = ROOT / "assets" / "yandex-release-checklist.template.md"
 MENU_REVIEW_TEMPLATE = ROOT / "assets" / "menu-identity-craft-review.template.md"
+CROSS_SURFACE_CRAFT_REVIEW_TEMPLATE = ROOT / "assets" / "cross-surface-production-craft-review.template.md"
+REVIEW_PROFILE_RESET_TEMPLATE = ROOT / "assets" / "review-profile-reset.template.md"
+PRODUCT_OWNER_SLICE_TEMPLATE = ROOT / "assets" / "product-owner-slice-decision.template.md"
 PRODUCTION_ART_REVIEW_TEMPLATE = ROOT / "assets" / "production-art-state-review.template.md"
 MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
 HUD_REVIEW_TEMPLATE = ROOT / "assets" / "gameplay-hud-glanceability-review.template.md"
@@ -78,6 +81,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--capture-manifest-output", help="Also instantiate the canonical capture manifest.")
     parser.add_argument("--review-output", help="Also instantiate the independent review template.")
     parser.add_argument("--menu-review-output", help="Also instantiate the menu identity craft review.")
+    parser.add_argument(
+        "--cross-surface-craft-review-output",
+        help="Also instantiate the cross-surface production craft review.",
+    )
+    parser.add_argument(
+        "--review-profile-reset-output",
+        help="Also instantiate the exact human-review modality reset record.",
+    )
+    parser.add_argument(
+        "--product-owner-slice-output",
+        help="Also instantiate the product-owner vertical-slice decision record.",
+    )
     parser.add_argument(
         "--hud-review-output",
         help="Also instantiate the gameplay HUD glanceability review.",
@@ -254,6 +269,7 @@ def prepare_evidence(
             "gates": {},
             "scores": {},
             "run_metadata": {},
+            "project_disposition": {"status": "active"},
             "limitations": [],
         }
     else:
@@ -269,6 +285,7 @@ def prepare_evidence(
         "gates",
         "scores",
         "run_metadata",
+        "project_disposition",
         "limitations",
     }
     unknown = sorted(set(result) - allowed_top_level)
@@ -277,9 +294,42 @@ def prepare_evidence(
     gates = result.setdefault("gates", {})
     scores = result.setdefault("scores", {})
     metadata = result.setdefault("run_metadata", {})
+    disposition = result.setdefault("project_disposition", {"status": "active"})
     limitations = result.setdefault("limitations", [])
     if not isinstance(gates, dict) or not isinstance(scores, dict) or not isinstance(metadata, dict):
         raise EvidenceHelperError("gates, scores, and run_metadata must be objects")
+    if not isinstance(disposition, dict) or disposition.get("status") not in {"active", "user_closed"}:
+        raise EvidenceHelperError("project_disposition must be an object with status active or user_closed")
+    if disposition.get("status") == "active" and set(disposition) != {"status"}:
+        raise EvidenceHelperError("active project_disposition may contain only status")
+    if disposition.get("status") == "user_closed":
+        required_disposition = {
+            "status",
+            "decision_owner",
+            "context",
+            "reason",
+            "continue_authorized",
+        }
+        if set(disposition) != required_disposition:
+            raise EvidenceHelperError(
+                "user_closed project_disposition must contain status, decision_owner, context, "
+                "reason, and continue_authorized only"
+            )
+        if disposition.get("decision_owner") not in {"user", "product_owner"}:
+            raise EvidenceHelperError(
+                "user_closed project_disposition.decision_owner must be user or product_owner"
+            )
+        if any(
+            not isinstance(disposition.get(field), str) or not disposition[field].strip()
+            for field in ("context", "reason")
+        ):
+            raise EvidenceHelperError(
+                "user_closed project_disposition context and reason must be non-empty strings"
+            )
+        if disposition.get("continue_authorized") is not False:
+            raise EvidenceHelperError(
+                "user_closed project_disposition.continue_authorized must be false"
+            )
     if not isinstance(limitations, list) or any(not isinstance(item, str) for item in limitations):
         raise EvidenceHelperError("limitations must be an array of strings")
 
@@ -389,6 +439,9 @@ def main() -> int:
                 args.capture_manifest_output,
                 args.review_output,
                 args.menu_review_output,
+                args.cross_surface_craft_review_output,
+                args.review_profile_reset_output,
+                args.product_owner_slice_output,
                 args.hud_review_output,
                 args.art_direction_selection_output,
                 args.progression_balance_review_output,
@@ -443,6 +496,21 @@ def main() -> int:
             copy_template(REVIEW_TEMPLATE, output_path(args.review_output))
         if args.menu_review_output:
             copy_template(MENU_REVIEW_TEMPLATE, output_path(args.menu_review_output))
+        if args.cross_surface_craft_review_output:
+            copy_template(
+                CROSS_SURFACE_CRAFT_REVIEW_TEMPLATE,
+                output_path(args.cross_surface_craft_review_output),
+            )
+        if args.review_profile_reset_output:
+            copy_template(
+                REVIEW_PROFILE_RESET_TEMPLATE,
+                output_path(args.review_profile_reset_output),
+            )
+        if args.product_owner_slice_output:
+            copy_template(
+                PRODUCT_OWNER_SLICE_TEMPLATE,
+                output_path(args.product_owner_slice_output),
+            )
         if args.hud_review_output:
             copy_template(HUD_REVIEW_TEMPLATE, output_path(args.hud_review_output))
         if args.art_direction_selection_output:

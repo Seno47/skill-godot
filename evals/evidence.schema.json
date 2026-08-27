@@ -28,6 +28,9 @@
     "run_metadata": {
       "type": "object"
     },
+    "project_disposition": {
+      "$ref": "#/$defs/project_disposition"
+    },
     "limitations": {
       "type": "array",
       "items": {
@@ -51,7 +54,7 @@
       "required": ["role", "context"],
       "properties": {
         "role": {
-          "enum": ["builder", "independent", "human", "provider"]
+          "enum": ["builder", "independent", "human", "provider", "product_owner"]
         },
         "context": {
           "type": "string",
@@ -85,6 +88,44 @@
           "minLength": 1
         }
       }
+    },
+    "project_disposition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "const": "active"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "decision_owner", "context", "reason", "continue_authorized"],
+          "properties": {
+            "status": {
+              "const": "user_closed"
+            },
+            "decision_owner": {
+              "enum": ["user", "product_owner"]
+            },
+            "context": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "continue_authorized": {
+              "const": false
+            }
+          }
+        }
+      ]
     },
     "gate": {
       "type": "object",

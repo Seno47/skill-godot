@@ -43,7 +43,7 @@
   "profiles": [
     {
       "id": "clean_shipping",
-      "provenance": "release-like build after explicit browser storage and Godot user data reset",
+      "provenance": "release-like build after resetting every actual handoff/review modality after the final builder run",
       "storage_reset_method": "unrecorded",
       "seed_method": null,
       "expected_defaults": {},
@@ -57,6 +57,17 @@
       "seed_method": "unrecorded",
       "expected_defaults": null,
       "verified_defaults": null,
+      "result": "not_tested"
+    }
+  ],
+  "review_modalities": [
+    {
+      "id": "actual_human_review_route",
+      "launch_path": "unrecorded: Godot Editor Run, exported build, browser profile/origin, device app/account, or other exact route",
+      "state_locations": [],
+      "primary_and_backup_reset_after_last_builder_run": null,
+      "clean_first_boot_artifact": "unrecorded",
+      "loaded_state_trace": "unrecorded",
       "result": "not_tested"
     }
   ],
@@ -85,6 +96,15 @@
       "states": ["pointer-open settings", "keyboard/gamepad-open settings", "settings top", "settings scrolled", "mute and accessibility descriptions"],
       "viewport_ids": ["extreme_narrow", "near_square", "short_height_landscape", "wide"],
       "checks": ["pointer-open has no false selection", "keyboard/gamepad-open has visible meaningful focus", "focus art is not clipped", "scrollbar is visibly thick and contrasted at real overflow", "touch/drag probe changes scroll position", "compound rows remain readable", "long localization", "no detached controls"],
+      "artifacts": [],
+      "result": "not_tested"
+    },
+    {
+      "id": "cross_surface_production_craft",
+      "profile": "clean_shipping",
+      "states": ["main menu", "pause or runtime modal", "settings", "ordinary HUD/core play", "result or failure", "text-heaviest secondary surface", "critical icon family at actual final size"],
+      "viewport_ids": ["extreme_narrow", "near_square", "short_height_landscape", "wide"],
+      "checks": ["same exact candidate", "blind first-read before designer intent", "critical action outcome prediction", "visible-alpha optical bounds and family weight", "custom widgets judged for craft rather than provenance", "cross-surface hierarchy and icon family"],
       "artifacts": [],
       "result": "not_tested"
     },

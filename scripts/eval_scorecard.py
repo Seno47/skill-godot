@@ -112,6 +112,52 @@ def resolve_artifact_root(evidence_path: Path, run_metadata: Any) -> Path:
     return root.resolve()
 
 
+def validate_project_disposition(value: Any) -> dict[str, Any]:
+    if value is None:
+        return {"status": "active"}
+    if not isinstance(value, dict):
+        raise ScorecardError("project_disposition must be an object")
+    status = value.get("status")
+    if status == "active":
+        if set(value) != {"status"}:
+            raise ScorecardError("active project_disposition may contain only status")
+        return {"status": "active"}
+    if status != "user_closed":
+        raise ScorecardError("project_disposition.status must be active or user_closed")
+    required = {"status", "decision_owner", "context", "reason", "continue_authorized"}
+    unknown = sorted(set(value) - required)
+    missing = sorted(required - set(value))
+    if missing:
+        raise ScorecardError(
+            f"user_closed project_disposition is missing: {', '.join(missing)}"
+        )
+    if unknown:
+        raise ScorecardError(
+            f"user_closed project_disposition has unsupported keys: {', '.join(unknown)}"
+        )
+    if value.get("decision_owner") not in {"user", "product_owner"}:
+        raise ScorecardError(
+            "user_closed project_disposition.decision_owner must be user or product_owner"
+        )
+    for field in ("context", "reason"):
+        field_value = value.get(field)
+        if not isinstance(field_value, str) or not field_value.strip():
+            raise ScorecardError(
+                f"user_closed project_disposition.{field} must be a non-empty string"
+            )
+    if value.get("continue_authorized") is not False:
+        raise ScorecardError(
+            "user_closed project_disposition.continue_authorized must be false"
+        )
+    return {
+        "status": "user_closed",
+        "decision_owner": value["decision_owner"],
+        "context": value["context"].strip(),
+        "reason": value["reason"].strip(),
+        "continue_authorized": False,
+    }
+
+
 def validate_pass_artifacts(
     gate_id: str,
     artifacts: list[dict[str, Any]],
@@ -203,6 +249,7 @@ def main() -> int:
             raise ScorecardError(str(exc)) from exc
         if evidence.get("case_id") != case_id:
             raise ScorecardError("evidence.case_id does not match --case")
+        project_disposition = validate_project_disposition(evidence.get("project_disposition"))
 
         gate_evidence = evidence.get("gates")
         score_evidence = evidence.get("scores")
@@ -511,6 +558,9 @@ def main() -> int:
             responsibility_status = "ready_for_human_test"
         else:
             responsibility_status = "builder_work_remaining"
+        if project_disposition["status"] == "user_closed":
+            verdict = "closed"
+            responsibility_status = "project_closed_user_rejected"
 
         baseline_score = None
         if args.baseline:
@@ -544,9 +594,13 @@ def main() -> int:
             "external_deferred_quality_floors": external_deferred_quality_floors,
             "responsibility_status": responsibility_status,
             "builder_completion_status": (
-                "complete"
-                if responsibility_status in {"ready_for_human_test", "publication_certified"}
-                else "incomplete"
+                "closed"
+                if responsibility_status == "project_closed_user_rejected"
+                else (
+                    "complete"
+                    if responsibility_status in {"ready_for_human_test", "publication_certified"}
+                    else "incomplete"
+                )
             ),
             "publication_status": (
                 "certified" if responsibility_status == "publication_certified" else "not_certified"
@@ -562,6 +616,7 @@ def main() -> int:
             "warnings": warnings,
             "artifact_root": str(artifact_root),
             "run_metadata": evidence.get("run_metadata", {}),
+            "project_disposition": project_disposition,
             "limitations": evidence.get("limitations", []),
             "acceptance_owner_definitions": owner_definitions,
             "optional_user_preference_policy": rubric.get("optional_user_preference_policy"),
@@ -616,7 +671,7 @@ def main() -> int:
                 )
             for warning in warnings:
                 print(f"[WARN] {warning}")
-        return 1 if verdict in {"blocked", "fail"} else 0
+        return 1 if verdict in {"blocked", "fail", "closed"} else 0
     except ScorecardError as exc:
         print(f"[ERROR] {exc}", file=sys.stderr)
         return 2

@@ -700,6 +700,16 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] forward-eval", completed.stdout)
 
+    def test_product_craft_and_closure_have_positive_and_negative_fixtures(self) -> None:
+        completed = run_script(
+            "forward_eval_audit.py",
+            "--matrix",
+            str(ROOT / "tests" / "fixtures" / "product-craft-closure-forward-eval.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] forward-eval", completed.stdout)
+
 
 class GenreRubricTests(unittest.TestCase):
     def test_rubric_case_and_score_cap_references_are_closed(self) -> None:
@@ -903,6 +913,12 @@ class GenreRubricTests(unittest.TestCase):
                 str(temp / "evidence.json"),
                 "--menu-review-output",
                 str(temp / "menu-review.md"),
+                "--cross-surface-craft-review-output",
+                str(temp / "cross-surface-review.md"),
+                "--review-profile-reset-output",
+                str(temp / "review-profile.md"),
+                "--product-owner-slice-output",
+                str(temp / "owner-slice.md"),
                 "--hud-review-output",
                 str(temp / "hud-review.md"),
                 "--art-direction-selection-output",
@@ -916,6 +932,9 @@ class GenreRubricTests(unittest.TestCase):
             )
             evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
             menu = (temp / "menu-review.md").read_text(encoding="utf-8")
+            cross_surface = (temp / "cross-surface-review.md").read_text(encoding="utf-8")
+            review_profile = (temp / "review-profile.md").read_text(encoding="utf-8")
+            owner_slice = (temp / "owner-slice.md").read_text(encoding="utf-8")
             hud = (temp / "hud-review.md").read_text(encoding="utf-8")
             direction = (temp / "art-direction-selection.md").read_text(encoding="utf-8")
             run_state = (temp / "project-run-state.md").read_text(encoding="utf-8")
@@ -926,7 +945,19 @@ class GenreRubricTests(unittest.TestCase):
         self.assertIn("production_art_integrity_evidence", evidence["gates"])
         self.assertIn("gameplay_hud_glanceability_review", evidence["gates"])
         self.assertIn("art_direction_selection_evidence", evidence["gates"])
+        self.assertIn("cross_surface_production_craft_review", evidence["gates"])
+        self.assertIn("critical_action_comprehension_review", evidence["gates"])
+        self.assertIn("cross_family_art_coherence_review", evidence["gates"])
+        self.assertIn("product_owner_slice_approval", evidence["gates"])
+        self.assertEqual(
+            evidence["gates"]["product_owner_slice_approval"]["reviewer"]["role"],
+            "product_owner",
+        )
+        self.assertEqual(evidence["project_disposition"], {"status": "active"})
         self.assertIn("Menu Identity Craft Review", menu)
+        self.assertIn("Cross-surface Production Craft Review", cross_surface)
+        self.assertIn("Actual Review-modality Profile Reset", review_profile)
+        self.assertIn("Product-owner Slice Decision", owner_slice)
         self.assertIn("Gameplay HUD Glanceability Review", hud)
         self.assertIn("Art Direction Selection Contract", direction)
         self.assertIn("Project Run State", run_state)
