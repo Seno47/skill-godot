@@ -51,7 +51,7 @@
       "required": ["role", "context"],
       "properties": {
         "role": {
-          "enum": ["builder", "independent", "human"]
+          "enum": ["builder", "independent", "human", "provider"]
         },
         "context": {
           "type": "string",

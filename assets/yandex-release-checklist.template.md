@@ -4,8 +4,11 @@
 - Ads decision: none / conservative / aggressive-but-compliant / unrecorded
 - Hosting: Yandex archive / custom domain / unrecorded
 - Evidence manifest: unrecorded
+- Responsibility status: BUILDER_WORK_REMAINING / BUILDER_COMPLETE_READY_FOR_HUMAN_TEST / PUBLICATION_CERTIFIED
+- External evidence boundary: none / concise unresolved human-provider-account check
 
 Do not change `NOT TESTED` to `PASS` without an artifact or named manual observation.
+Do not translate external `NOT TESTED` rows into a user task list. Builder-owned failures mean continue working; external-only pending rows permit `BUILDER_COMPLETE_READY_FOR_HUMAN_TEST` but not `PUBLICATION_CERTIFIED`.
 
 | Area | Check | PASS / FAIL / NOT TESTED | Evidence |
 |---|---|---|---|

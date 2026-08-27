@@ -348,6 +348,132 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("verdict=pass", completed.stdout)
         self.assertIn("score=100.00/100", completed.stdout)
 
+    def test_eval_scorecard_reports_publication_certified_responsibility(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "scorecard.json"
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "existing-project-feature",
+                "--evidence",
+                str(ROOT / "tests" / "fixtures" / "eval_evidence.json"),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("responsibility=publication_certified", completed.stdout)
+        self.assertEqual(report["responsibility_status"], "publication_certified")
+        self.assertEqual(report["builder_completion_status"], "complete")
+        self.assertEqual(report["publication_status"], "certified")
+
+    def test_eval_scorecard_reports_ready_when_only_external_review_is_pending(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed audio and builder-owned runtime checks"],
+        }
+        source["gates"]["independent_ux_review"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: independent review is external to the builder run"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("verdict=blocked", completed.stdout)
+        self.assertIn("responsibility=ready_for_human_test", completed.stdout)
+        self.assertEqual(report["builder_owned_unresolved_gate_count"], 0)
+        self.assertEqual(report["external_pending_gates"], ["independent_ux_review"])
+        self.assertEqual(report["builder_completion_status"], "complete")
+        self.assertEqual(report["publication_status"], "not_certified")
+
+    def test_eval_scorecard_keeps_missing_builder_gate_as_builder_work(self) -> None:
+        source = load_eval_evidence()
+        source["gates"]["engine_clean"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: builder did not run the available engine check"],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "existing-project-feature",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("responsibility=builder_work_remaining", completed.stdout)
+        self.assertEqual(report["builder_owned_unresolved_gates"], ["engine_clean"])
+        self.assertEqual(report["builder_completion_status"], "incomplete")
+
+    def test_eval_scorecard_returns_failed_external_review_to_builder(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "constrained-mobile-web"
+        source["scores"]["audio_direction_quality"] = {
+            "score": 3,
+            "evidence": ["fixture: licensed audio and target-build checks"],
+        }
+        source["gates"]["independent_ux_review"] = {
+            "status": "fail",
+            "evidence": ["fixture: reviewer found an actionable clipped control"],
+            "reviewer": {
+                "role": "independent",
+                "context": "separate fixture reviewer context",
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "constrained-mobile-web",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("responsibility=builder_work_remaining", completed.stdout)
+        self.assertEqual(report["external_failed_gates"], ["independent_ux_review"])
+        self.assertEqual(report["builder_completion_status"], "incomplete")
+
     def test_evidence_helper_migrates_new_gates_and_instantiates_manifest(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"

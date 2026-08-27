@@ -282,7 +282,7 @@ def prepare_evidence(
     owner_default = rubric.get("acceptance_owner_default", "builder")
     owner_definitions = rubric.get(
         "acceptance_owner_definitions",
-        {"builder": "", "independent": "", "human": ""},
+        {"builder": "", "independent": "", "human": "", "provider": ""},
     )
     if not isinstance(owner_definitions, dict) or owner_default not in owner_definitions:
         raise EvidenceHelperError("Rubric acceptance owner definitions/default are invalid")

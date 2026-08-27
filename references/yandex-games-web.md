@@ -79,3 +79,5 @@ At minimum verify:
 - saves, mute/mixer state, focus loss, platform pause/resume, and ads do not duplicate audio, advance simulation, or lose progress.
 
 Official sources: [Testing](https://yandex.com/dev/games/doc/en/console/test-game), [Debug panel](https://yandex.com/dev/games/doc/en/console/debug-panel), and [Draft archive requirements](https://yandex.com/dev/games/doc/en/console/add-new-game/draft).
+
+Separate the builder candidate from platform publication. If the exact Web build, archive, local/proxy lifecycle, browser QA, clean/seeded profiles, responsive matrix, and every other available builder-owned check pass, report `BUILDER_COMPLETE / READY_FOR_HUMAN_TEST`. Leave unavailable account-only draft, provider, moderation, or human evidence `NOT TESTED` and state that boundary once. Use `PUBLICATION_CERTIFIED` only after those checks pass on the unchanged candidate. Do not finish by telling the user to open the Yandex dashboard, upload the ZIP, or perform a test; the user decides whether to start that external workflow.

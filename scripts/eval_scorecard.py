@@ -212,7 +212,7 @@ def main() -> int:
         owner_default = rubric.get("acceptance_owner_default", "builder")
         owner_definitions = rubric.get(
             "acceptance_owner_definitions",
-            {"builder": "", "independent": "", "human": ""},
+            {"builder": "", "independent": "", "human": "", "provider": ""},
         )
         if not isinstance(owner_definitions, dict) or not owner_definitions:
             raise ScorecardError("rubric.acceptance_owner_definitions must be a non-empty object")
@@ -388,6 +388,7 @@ def main() -> int:
             result["weighted_points"] = round(adjusted_points, 3)
 
         quality_floor_failures: list[dict[str, Any]] = []
+        submitted_quality_floor_failures: list[dict[str, Any]] = []
         minimum_scores = case_definition.get("minimum_scores", {})
         if not isinstance(minimum_scores, dict):
             raise ScorecardError(f"Case {case_id}.minimum_scores must be an object")
@@ -407,12 +408,24 @@ def main() -> int:
                 )
             result = dimension_results[dimension_id]
             actual_score = result.get("score") if result.get("status") == "scored" else None
+            submitted_actual_score = (
+                result.get("submitted_score") if result.get("status") == "scored" else None
+            )
             if actual_score is None or actual_score < required_score:
                 quality_floor_failures.append(
                     {
                         "id": dimension_id,
                         "minimum_score": required_score,
                         "actual_score": actual_score,
+                        "status": result.get("status"),
+                    }
+                )
+            if submitted_actual_score is None or submitted_actual_score < required_score:
+                submitted_quality_floor_failures.append(
+                    {
+                        "id": dimension_id,
+                        "minimum_score": required_score,
+                        "actual_score": submitted_actual_score,
                         "status": result.get("status"),
                     }
                 )
@@ -429,6 +442,36 @@ def main() -> int:
             verdict = "conditional"
         else:
             verdict = "fail"
+
+        builder_unresolved_gates = [
+            gate["id"]
+            for gate in gates
+            if gate["acceptance_owner"] == "builder" and gate["status"] != "pass"
+        ]
+        external_failed_gates = [
+            gate["id"]
+            for gate in gates
+            if gate["acceptance_owner"] != "builder" and gate["status"] == "fail"
+        ]
+        external_pending_gates = [
+            gate["id"]
+            for gate in gates
+            if gate["acceptance_owner"] != "builder" and gate["status"] == "not_tested"
+        ]
+        builder_quality_ready = (
+            not submitted_quality_floor_failures
+            and submitted_score_100 >= thresholds.get("pass", 85)
+        )
+        if verdict == "pass":
+            responsibility_status = "publication_certified"
+        elif (
+            not builder_unresolved_gates
+            and not external_failed_gates
+            and builder_quality_ready
+        ):
+            responsibility_status = "ready_for_human_test"
+        else:
+            responsibility_status = "builder_work_remaining"
 
         baseline_score = None
         if args.baseline:
@@ -454,6 +497,23 @@ def main() -> int:
             ),
             "quality_floor_failure_count": len(quality_floor_failures),
             "quality_floor_failures": quality_floor_failures,
+            "submitted_quality_floor_failure_count": len(submitted_quality_floor_failures),
+            "submitted_quality_floor_failures": submitted_quality_floor_failures,
+            "responsibility_status": responsibility_status,
+            "builder_completion_status": (
+                "complete"
+                if responsibility_status in {"ready_for_human_test", "publication_certified"}
+                else "incomplete"
+            ),
+            "publication_status": (
+                "certified" if responsibility_status == "publication_certified" else "not_certified"
+            ),
+            "builder_owned_unresolved_gate_count": len(builder_unresolved_gates),
+            "builder_owned_unresolved_gates": builder_unresolved_gates,
+            "external_pending_gate_count": len(external_pending_gates),
+            "external_pending_gates": external_pending_gates,
+            "external_failed_gate_count": len(external_failed_gates),
+            "external_failed_gates": external_failed_gates,
             "gates": gates,
             "dimensions": dimensions,
             "warnings": warnings,
@@ -462,15 +522,19 @@ def main() -> int:
             "limitations": evidence.get("limitations", []),
             "acceptance_owner_definitions": owner_definitions,
             "optional_user_preference_policy": rubric.get("optional_user_preference_policy"),
+            "responsibility_status_policy": rubric.get("responsibility_status_policy"),
         }
         if args.json_output:
             output = Path(args.json_output).expanduser().resolve()
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(
-            f"[RESULT] case={case_id} verdict={verdict} score={score_100:.2f}/100 "
+            f"[RESULT] case={case_id} verdict={verdict} "
+            f"responsibility={responsibility_status} score={score_100:.2f}/100 "
             f"submitted={submitted_score_100:.2f}/100 caps={len(score_caps_applied)} "
             f"blocking_gates={report['blocking_gate_count']} "
+            f"builder_unresolved={report['builder_owned_unresolved_gate_count']} "
+            f"external_pending={report['external_pending_gate_count']} "
             f"gate_validation_failures={report['gate_validation_failure_count']} "
             f"quality_floor_failures={report['quality_floor_failure_count']}"
         )

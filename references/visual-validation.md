@@ -85,4 +85,4 @@ The building agent must first own routine rendered QA, including bind/T-pose det
 
 For a complete fixed-camera isometric case, use `assets/isometric-complete-review.template.md`; the early rendered art verdict must precede bulk level authoring, and the final review must include the density/composition matrix rather than only the best-looking frame.
 
-At handoff, identify the states and resolutions inspected, the independent reviewer/context, and any visual state not reached.
+At handoff, identify the states and resolutions inspected, the independent reviewer/context, and any visual state not reached. If builder-owned visual QA is complete and only the required independent verdict is unavailable, the candidate may be `BUILDER_COMPLETE / READY_FOR_HUMAN_TEST` but is not `PUBLICATION_CERTIFIED`; do not call it vaguely unready or turn the missing verdict into a screenshot checklist for the user.

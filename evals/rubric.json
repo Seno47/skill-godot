@@ -19,9 +19,15 @@
   "acceptance_owner_definitions": {
     "builder": "The implementing agent owns objective routine acceptance, fixes failures before handoff, and may pass the gate with deterministic and target-build evidence.",
     "independent": "A person or genuinely separate evaluation context that did not build the flow must supply the final gate verdict after builder-owned QA passes.",
-    "human": "A human perceptual signoff explicitly required by the gate is necessary; automated or structural evidence is supporting only."
+    "human": "A human perceptual signoff explicitly required by the gate is necessary; automated or structural evidence is supporting only.",
+    "provider": "An external store, platform, service, certification process, or authorized account owner supplies the final observation after the builder prepares and verifies the exact candidate."
   },
   "optional_user_preference_policy": "User preference feedback may refine taste after blocking acceptance passes, but routine defects must not be deferred to the user unless the brief explicitly makes that preference an acceptance requirement.",
+  "responsibility_status_policy": {
+    "builder_work_remaining": "Continue autonomously; do not hand off a repair or QA checklist.",
+    "ready_for_human_test": "All available and authorized builder-owned work passes on the exact candidate, no known external-review failure remains unfixed, and only genuinely external evidence is pending.",
+    "publication_certified": "The exact candidate passes all builder, independent, human, provider, quality-floor, and publication gates."
+  },
   "blocking_gates": [
     {
       "id": "engine_clean",

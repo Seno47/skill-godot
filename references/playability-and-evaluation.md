@@ -101,8 +101,21 @@ Use the `acceptance_owner` attached to an applicable rubric gate:
 - **builder:** objective routine acceptance that the implementing agent must autonomously exercise, inspect, and fix before handoff. Deterministic contracts, target-build runs, recordings, logs, and builder observations are valid evidence. Examples include clean import, restart, production character motion, input routing, collision, and attachment following.
 - **independent:** comprehension, semantic reading, or visual/UX judgment that explicitly needs a person or genuinely separate evaluation context that did not build the flow. The builder still performs its own QA first; independence is a second acceptance layer, not a substitute for it.
 - **human:** irreducibly perceptual signoff explicitly named by the rubric, such as representative audio listening. Automation and builder triage prepare the evidence but cannot promote the gate.
+- **provider:** an external store, platform, service, certification process, or account owner supplies the final observation. The builder still prepares and verifies the exact candidate and every locally reproducible path first.
 
 Optional user preference feedback is outside these blocking ownership classes unless the brief explicitly elevates it into acceptance. Ask for it to refine taste—animation weight/personality, tone, pacing preference—not to discover a bind/T-pose, missing locomotion, broken attachment, clipped UI, or other routine production defect. When a separate evaluator is available, use that evaluation context for required independent gates rather than making the user execute a QA checklist.
+
+## Separate builder completion from publication certification
+
+Use responsibility-scoped status instead of one ambiguous "ready/not ready" label:
+
+- **Builder work remaining:** any applicable builder-owned gate is `FAIL` or `NOT TESTED` despite available authorized tooling; a routine defect is known; an independent/human/provider review returned `FAIL` and its actionable defects are not fixed; the exact candidate or evidence packet is missing; or the builder's own submitted quality floor is below the case requirement. Continue autonomously. Do not hand off a repair checklist.
+- **`BUILDER_COMPLETE / READY_FOR_HUMAN_TEST`:** every applicable builder-owned gate passes on the exact candidate, the builder inspected the required raw states and motion, no known external-review failure remains unfixed, and the candidate plus review packet are ready. Required independent, human, provider, hardware, account, upload, or moderation evidence may remain `NOT TESTED` when it is genuinely outside the available authority or environment.
+- **`PUBLICATION_CERTIFIED`:** the exact same candidate also passes every applicable external blocking gate and the final score/floors. Changing the candidate after certification invalidates affected evidence.
+
+A `NOT TESTED` external gate is an evidence boundary, not delegated labor. Report it in one concise sentence, for example: "Publication certification is not claimed because representative human audio listening is external to this run." Do not end with instructions to open a console, upload an archive, run a human test, or publish unless the user explicitly asks for that workflow. Once the builder is complete, the user chooses whether to test, upload, or publish.
+
+If an external review returns a defect, ownership of the repair returns to the builder. Fix it, rerun affected builder gates, regenerate the candidate, and request only the narrow re-review that remains external. Do not ask the user to work through a general QA checklist.
 
 ## Evaluate in layers
 
@@ -151,7 +164,7 @@ The helper never turns generated placeholders into passing evidence. It labels u
 python <skill-dir>/scripts/eval_scorecard.py --rubric <skill-dir>/evals/rubric.json --case <case-id> --evidence <evidence.json> --summary --json-output <scorecard.json>
 ```
 
-The scorecard normalizes applicable weighted dimensions, reports each gate's acceptance owner, blocks completion on every failed/untested blocking gate, and applies rubric-defined dimension caps when missing evidence makes a high submitted score indefensible. Compare both `submitted_score_100` and adjusted `score_100`; a blocked case with optimistic scores is not near-perfect evidence. Keep fixture, brief, rubric, and evaluation protocol stable when comparing skill revisions.
+The scorecard normalizes applicable weighted dimensions, reports each gate's acceptance owner, blocks publication certification on every failed/untested blocking gate, and applies rubric-defined dimension caps when missing evidence makes a high submitted score indefensible. It also reports `responsibility_status`, builder-owned unresolved gates, and pending external gates. Compare both `submitted_score_100` and adjusted `score_100`; a publication-blocked case may still be `ready_for_human_test` when only legitimate external evidence is absent, but optimistic submitted scores never certify publication. Keep fixture, brief, rubric, and evaluation protocol stable when comparing skill revisions.
 
 ## Completion evidence
 
@@ -165,3 +178,5 @@ At handoff, distinguish:
 - not tested or dependent on unavailable hardware/tools.
 
 Never convert “not tested” into “works” because the scene or script looks plausible.
+
+Then emit exactly one successful responsibility status: `BUILDER_COMPLETE / READY_FOR_HUMAN_TEST` or `PUBLICATION_CERTIFIED`. If builder work remains, continue instead of ending with a list of actions for the user. Keep any external evidence boundary factual and concise; it is not the user's assigned checklist.
