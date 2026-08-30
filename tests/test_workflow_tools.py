@@ -720,6 +720,43 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] forward-eval", completed.stdout)
 
+    def test_environment_integrity_template_passes(self) -> None:
+        completed = run_script(
+            "environment_integrity_audit.py",
+            "--model",
+            str(ROOT / "assets" / "environment-integrity-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] environment-integrity", completed.stdout)
+
+    def test_environment_integrity_rejects_visual_fail_after_collision_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "environment-integrity.json"
+            completed = run_script(
+                "environment_integrity_audit.py",
+                "--model",
+                str(ROOT / "tests" / "fixtures" / "environment-integrity-negative.json"),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(
+            report["prior_structural_checks"],
+            {
+                "collision_coverage": "164/164",
+                "boundary_coverage": "180/180",
+                "collision_alignment_pass": True,
+            },
+        )
+        errors = "\n".join(report["errors"])
+        self.assertIn("unintentional transformed-volume overlap", errors)
+        self.assertIn("semantic surface ownership failed", errors)
+        self.assertIn("render-ground coverage/seam failure", errors)
+        self.assertIn("vertical clearance", errors)
+
 
 class GenreRubricTests(unittest.TestCase):
     def test_rubric_case_and_score_cap_references_are_closed(self) -> None:
@@ -803,15 +840,23 @@ class GenreRubricTests(unittest.TestCase):
                 str(temp / "evidence.json"),
                 "--high-angle-district-review-output",
                 str(temp / "high-angle-district-review.md"),
+                "--environment-integrity-review-output",
+                str(temp / "environment-integrity-review.md"),
             )
             evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
             review = (temp / "high-angle-district-review.md").read_text(encoding="utf-8")
+            integrity_review = (temp / "environment-integrity-review.md").read_text(encoding="utf-8")
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertEqual(
             evidence["gates"]["high_angle_3d_district_composition_evidence"]["reviewer"]["role"],
             "builder",
         )
         self.assertIn("Fixed/High-angle 3D District Review", review)
+        self.assertEqual(
+            evidence["gates"]["high_angle_environment_integrity_evidence"]["reviewer"]["role"],
+            "builder",
+        )
+        self.assertIn("High-angle 3D Environment Integrity Review", integrity_review)
 
     def test_progression_scaffold_instantiates_model_and_human_gates_and_review(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

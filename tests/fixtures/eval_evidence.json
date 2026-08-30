@@ -282,6 +282,20 @@
       "status": "pass",
       "evidence": ["fixture: independent start, typical, dense, elevation, and objective composition matrix"]
     },
+    "high_angle_environment_integrity_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: resolved final transforms, render-ground triangles, zero-error audit and target-build integrity close-ups"],
+      "reviewer": {"role": "builder", "context": "fixture builder environment-integrity review"},
+      "artifacts": [
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["environment_integrity_contract", "transformed_prop_occupancy", "semantic_surface_ownership"]},
+        {"path": "evidence-artifacts/progression-model.json", "kind": "report", "states": ["render_ground_coverage_and_seams", "vertical_clearance", "detected_class_closeups_and_resolution"]},
+        {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["transformed_prop_occupancy"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["semantic_surface_ownership"]},
+        {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["render_ground_coverage_and_seams"]},
+        {"path": "evidence-artifacts/vfx.png", "kind": "image", "states": ["vertical_clearance"]},
+        {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["detected_class_closeups_and_resolution", "environment_integrity_overview"]}
+      ]
+    },
     "responsive_layout_evidence": {
       "status": "pass",
       "evidence": ["fixture: reference, near-square, extreme-narrow, and wide captures"]

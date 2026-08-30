@@ -826,6 +826,23 @@
       }
     },
     {
+      "id": "high_angle_environment_integrity_evidence",
+      "cases": ["high-angle-3d-district-complete"],
+      "description": "Builder-owned exact target-scene contract and target-build close-ups prove visual environment integrity independently from gameplay collision: every visible prop requiring occupancy has one or more local volumes transformed by its full final Godot Transform3D and checked pairwise with exact, reasoned, raw-artifact-backed intentional exemptions; semantic classes such as trees, rocks, bushes, vehicles and road debris keep their entire transformed support footprint on authored allowed render surfaces rather than merely placing their origin legally; camera-visible ground regions are sampled against final render-mesh triangles, not a broad floor collider, to reject holes, wrong top surfaces and exposed substrate; and signs, wires, poles, towers, awnings and facade-adjacent volumes satisfy authored vertical-clearance rules. The audit has zero errors and raw shipping-build occupancy, surface-ownership, ground-seam, clearance, detected-class before/fixed/rerun and overview states agree. Complete collision, alignment, boundary, navigation, origin or scene-serialization checks do not pass visible penetrations, fused props, roadway nature footprints or surface seams.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 2, "image": 5},
+        "required_states": {
+          "environment_integrity_contract": ["report"],
+          "transformed_prop_occupancy": ["report", "image"],
+          "semantic_surface_ownership": ["report", "image"],
+          "render_ground_coverage_and_seams": ["report", "image"],
+          "vertical_clearance": ["report", "image"],
+          "detected_class_closeups_and_resolution": ["report", "image"],
+          "environment_integrity_overview": ["image"]
+        }
+      }
+    },
+    {
       "id": "localization_contract_evidence",
       "cases": ["localized-release-complete"],
       "description": "A versioned locale contract and target-build traces prove every required locale and fallback, plural branches, font/glyph coverage, placeholder preservation, live language switching, subtitle timing, directional/focus semantics when applicable, pseudolocalization, and dense/narrow overflow budgets. String-table presence or one wide screenshot does not pass.",
@@ -1285,6 +1302,10 @@
       "dimensions": {"visual_coherence": 1, "scene_resource_authorship": 2, "playability_and_ux": 2, "asset_pipeline": 2}
     },
     {
+      "gate": "high_angle_environment_integrity_evidence",
+      "dimensions": {"visual_coherence": 1, "scene_resource_authorship": 2, "technical_quality": 2, "asset_pipeline": 2}
+    },
+    {
       "gate": "save_data_integrity_evidence",
       "dimensions": {"gameplay_correctness": 1, "technical_quality": 1, "evidence_and_reproducibility": 2}
     },
@@ -1651,8 +1672,8 @@
     },
     {
       "id": "high-angle-3d-district-complete",
-      "brief": "Add a fail-closed production contract for a fixed/high-angle 3D district, urban arena, settlement or extraction route: visible boundaries and openings, block/landmark/depth hierarchy, functional story zones, controlled negative space and modular repetition, semantic architectural palette/material direction under exact gameplay lighting, plus comfortable bounded camera motion and restoration in the exact target build.",
-      "focus": ["visible boundary and collision agreement", "district block massing and depth layers", "primary and secondary landmarks", "view corridor and street termination", "functional environmental storytelling", "negative-space purpose", "multi-axis modular variation and visible-run budgets", "semantic zone function construction age story and adjacency material assignment", "dominant support accent screen-area hierarchy", "texture and facade roof trim preservation", "same-zone and cross-zone palette coherence under gameplay lighting", "frame-rate-independent follow and look-ahead", "safe framing and bounded pressure zoom", "camera volumes rails obstruction and restoration"],
+      "brief": "Add fail-closed production contracts for a fixed/high-angle 3D district, urban arena, settlement or extraction route: visible boundaries and openings, block/landmark/depth hierarchy, functional story zones, controlled negative space and modular repetition, semantic architectural palette/material direction under exact gameplay lighting, transformed full-footprint environment integrity independent of collision, plus comfortable bounded camera motion and restoration in the exact target build.",
+      "focus": ["visible boundary and collision agreement", "district block massing and depth layers", "primary and secondary landmarks", "view corridor and street termination", "functional environmental storytelling", "negative-space purpose", "multi-axis modular variation and visible-run budgets", "semantic zone function construction age story and adjacency material assignment", "dominant support accent screen-area hierarchy", "texture and facade roof trim preservation", "same-zone and cross-zone palette coherence under gameplay lighting", "full-transform prop occupancy", "semantic full-footprint surface ownership", "render-mesh ground coverage and seam sampling", "overhead and facade vertical clearance", "frame-rate-independent follow and look-ahead", "safe framing and bounded pressure zoom", "camera volumes rails obstruction and restoration"],
       "minimum_scores": {"playability_and_ux": 3, "visual_coherence": 3, "scene_resource_authorship": 3, "asset_pipeline": 3}
     },
     {

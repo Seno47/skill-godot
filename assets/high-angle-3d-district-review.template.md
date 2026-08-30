@@ -2,6 +2,8 @@
 
 Use this builder-owned gate with rubric modifier `high-angle-3d-district-complete`. It supplements the production-art, applicable isometric/spatial, genre, performance and independent review packets. Complete it against the exact target build before asking the owner or independent reviewer to inspect the district.
 
+Environment integrity is a separate blocking part of the same modifier. Also instantiate `assets/environment-integrity-contract.template.json` and `assets/environment-integrity-review.template.md`, run `scripts/environment_integrity_audit.py`, and link the zero-error report below. Collision and boundary coverage do not prove that visible props, surfaces and ground joins are clean.
+
 ## Candidate and declared budgets
 
 - Build/revision/hash:
@@ -12,6 +14,7 @@ Use this builder-owned gate with rubric modifier `high-angle-3d-district-complet
 - Exact `WorldEnvironment`, key-light/fog/tone-map profile and shipping lighting phases:
 - Raw capture and video root:
 - Builder/context:
+- Environment-integrity contract/report/review:
 
 | Camera metric | Declared budget | Measured states/result | PASS/FAIL/NOT TESTED |
 |---|---:|---|---|
@@ -152,6 +155,10 @@ Reject raw-velocity wobble, overshoot, stop/reverse lag, zoom pumping, rail snap
 - Flat override erases texture/PBR response or facade/roof/trim structure: PASS / FAIL / NOT TESTED
 - Accent colors have no semantic owner or dominate ordinary background mass: PASS / FAIL / NOT TESTED
 - Same-zone/cross-zone review is missing under exact gameplay lighting: PASS / FAIL / NOT TESTED
+- Prop origins/colliders pass but transformed visible footprints penetrate: PASS / FAIL / NOT TESTED
+- Tree/rock/bush support footprints cross road/sidewalk despite legal origins: PASS / FAIL / NOT TESTED
+- A broad floor collider is used to hide missing render-ground triangles or seams: PASS / FAIL / NOT TESTED
+- Sign/wire/pole/tower vertical clearance is unmeasured or visibly penetrates adjacent geometry: PASS / FAIL / NOT TESTED
 
 ## Builder-owned verdict
 
@@ -161,6 +168,7 @@ Reject raw-velocity wobble, overshoot, stop/reverse lag, zoom pumping, rail snap
 - Modular variation and visible repetition: PASS / FAIL / NOT TESTED
 - Architectural palette/material direction and lighting integration: PASS / FAIL / NOT TESTED
 - High-angle camera comfort, framing and restoration: PASS / FAIL / NOT TESTED
+- Separate `high_angle_environment_integrity_evidence`: PASS / FAIL / NOT TESTED
 - Overall `high_angle_3d_district_composition_evidence`: PASS / FAIL / NOT TESTED
 - Blocking defects and disposition:
 - Remaining evidence boundary:

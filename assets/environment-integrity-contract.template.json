@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "contract_id": "example-high-angle-environment-integrity",
+  "build_id": "replace-with-exact-target-build-id",
+  "scene_provenance": {
+    "source_kind": "resolved_target_scene",
+    "scene_path": "res://scenes/world/example_district.tscn",
+    "scene_revision": "replace-with-source-revision-or-scene-hash",
+    "exporter": "res://tests/environment_integrity_exporter.gd",
+    "visible_prop_query": "group:environment_integrity_visible"
+  },
+  "contract": {
+    "coordinate_system": "godot_xz_y_up",
+    "render_ground_source": "mesh_faces",
+    "horizontal_penetration_epsilon": 0.02,
+    "vertical_penetration_epsilon": 0.02,
+    "max_surface_sample_step": 0.25,
+    "max_ground_sample_step": 0.5,
+    "surface_height_epsilon": 0.02,
+    "max_surface_height_delta": 0.2,
+    "expected_visible_prop_count": 7,
+    "require_vertical_rule_exercise": true,
+    "prior_structural_checks": {
+      "collision_coverage": {"covered": 7, "total": 7},
+      "boundary_coverage": {"covered": 20, "total": 20},
+      "collision_alignment_pass": true
+    },
+    "surface_ownership_rules": [
+      {"prop_class": "vehicle", "allowed_surface_classes": ["road"]},
+      {"prop_class": "nature_tree", "allowed_surface_classes": ["grass", "soil"]}
+    ],
+    "vertical_clearance_rules": [
+      {"upper_class": "overhead_sign", "lower_class": "vehicle", "minimum_gap": 0.5},
+      {"upper_class": "utility_wire", "lower_class": "tank", "minimum_gap": 0.5}
+    ]
+  },
+  "instances": [
+    {
+      "id": "car-01",
+      "class": "vehicle",
+      "source_node": "World/Props/Car01",
+      "occupancy_required": true,
+      "surface_ownership_required": true,
+      "transform": {"basis_x": [0.70710678, 0, -0.70710678], "basis_y": [0, 1, 0], "basis_z": [0.70710678, 0, 0.70710678], "origin": [5, 0, 2]},
+      "volumes": [{"id": "body", "local_min": [-0.6, 0, -1], "local_max": [0.6, 1.2, 1]}],
+      "support_footprints": [{"id": "tires", "local_y": 0, "points": [[-0.55, -0.9], [0.55, -0.9], [0.55, 0.9], [-0.55, 0.9]], "sample_step": 0.25}]
+    },
+    {
+      "id": "tree-01",
+      "class": "nature_tree",
+      "source_node": "World/Nature/Tree01",
+      "occupancy_required": true,
+      "surface_ownership_required": true,
+      "transform": {"basis_x": [1, 0, 0], "basis_y": [0, 1, 0], "basis_z": [0, 0, 1], "origin": [2, 0, 6]},
+      "volumes": [{"id": "trunk-and-roots", "local_min": [-0.45, 0, -0.45], "local_max": [0.45, 3.2, 0.45]}],
+      "support_footprints": [{"id": "root-bed", "local_y": 0, "points": [[-0.4, -0.4], [0.4, -0.4], [0.4, 0.4], [-0.4, 0.4]], "sample_step": 0.2}]
+    },
+    {
+      "id": "clinic-building",
+      "class": "facade",
+      "source_node": "World/Buildings/Clinic",
+      "occupancy_required": true,
+      "surface_ownership_required": false,
+      "transform": {"basis_x": [1, 0, 0], "basis_y": [0, 1, 0], "basis_z": [0, 0, 1], "origin": [8, 0, 6]},
+      "volumes": [{"id": "shell", "local_min": [-1.2, 0, -1.2], "local_max": [1.2, 4, 1.2]}],
+      "support_footprints": []
+    },
+    {
+      "id": "clinic-sign",
+      "class": "overhead_sign",
+      "source_node": "World/Props/ClinicSign",
+      "occupancy_required": true,
+      "surface_ownership_required": false,
+      "transform": {"basis_x": [1, 0, 0], "basis_y": [0, 1, 0], "basis_z": [0, 0, 1], "origin": [5, 0, 2]},
+      "volumes": [{"id": "panel", "local_min": [-1.5, 3, -0.12], "local_max": [1.5, 3.5, 0.12]}],
+      "support_footprints": []
+    },
+    {
+      "id": "sign-pole",
+      "class": "pole",
+      "source_node": "World/Props/ClinicSign/Pole",
+      "occupancy_required": true,
+      "surface_ownership_required": false,
+      "transform": {"basis_x": [1, 0, 0], "basis_y": [0, 1, 0], "basis_z": [0, 0, 1], "origin": [3.7, 0, 2]},
+      "volumes": [{"id": "shaft", "local_min": [-0.08, 0, -0.08], "local_max": [0.08, 3.2, 0.08]}],
+      "support_footprints": []
+    },
+    {
+      "id": "tank-01",
+      "class": "tank",
+      "source_node": "World/Props/Tank01",
+      "occupancy_required": true,
+      "surface_ownership_required": false,
+      "transform": {"basis_x": [1, 0, 0], "basis_y": [0, 1, 0], "basis_z": [0, 0, 1], "origin": [8, 0, 2]},
+      "volumes": [{"id": "body", "local_min": [-0.8, 0, -0.8], "local_max": [0.8, 2, 0.8]}],
+      "support_footprints": []
+    },
+    {
+      "id": "wire-01",
+      "class": "utility_wire",
+      "source_node": "World/Utilities/Wire01",
+      "occupancy_required": true,
+      "surface_ownership_required": false,
+      "transform": {"basis_x": [1, 0, 0], "basis_y": [0, 1, 0], "basis_z": [0, 0, 1], "origin": [8, 0, 2]},
+      "volumes": [{"id": "span", "local_min": [-1.5, 3, -0.05], "local_max": [1.5, 3.1, 0.05]}],
+      "support_footprints": []
+    }
+  ],
+  "intentional_overlaps": [
+    {"instance_a": "clinic-sign", "volume_a": "panel", "instance_b": "sign-pole", "volume_b": "shaft", "checks": ["occupancy"], "reason": "Authored bolted sign-to-pole mount", "raw_artifact": "reports/raw/integrity/sign-mount-closeup.png"}
+  ],
+  "render_ground_triangles": [
+    {"id": "substrate-a", "source_kind": "render_mesh", "source_node": "World/Ground/Substrate", "surface_class": "substrate", "material_id": "earth", "vertices": [[0, -0.2, 0], [10, -0.2, 0], [10, -0.2, 8]]},
+    {"id": "substrate-b", "source_kind": "render_mesh", "source_node": "World/Ground/Substrate", "surface_class": "substrate", "material_id": "earth", "vertices": [[0, -0.2, 0], [10, -0.2, 8], [0, -0.2, 8]]},
+    {"id": "road-a", "source_kind": "render_mesh", "source_node": "World/Ground/Road", "surface_class": "road", "material_id": "asphalt", "vertices": [[0, 0, 0], [10, 0, 0], [10, 0, 4]]},
+    {"id": "road-b", "source_kind": "render_mesh", "source_node": "World/Ground/Road", "surface_class": "road", "material_id": "asphalt", "vertices": [[0, 0, 0], [10, 0, 4], [0, 0, 4]]},
+    {"id": "grass-a", "source_kind": "render_mesh", "source_node": "World/Ground/Grass", "surface_class": "grass", "material_id": "clinic-grass", "vertices": [[0, 0, 4], [10, 0, 4], [10, 0, 8]]},
+    {"id": "grass-b", "source_kind": "render_mesh", "source_node": "World/Ground/Grass", "surface_class": "grass", "material_id": "clinic-grass", "vertices": [[0, 0, 4], [10, 0, 8], [0, 0, 8]]}
+  ],
+  "ground_regions": [
+    {"id": "road-visible-region", "polygon": [[0.25, 0.25], [9.75, 0.25], [9.75, 3.75], [0.25, 3.75]], "probe_from_y": 2, "sample_step": 0.5, "expected_surface_classes": ["road"]},
+    {"id": "grass-visible-region", "polygon": [[0.25, 4.25], [9.75, 4.25], [9.75, 7.75], [0.25, 7.75]], "probe_from_y": 2, "sample_step": 0.5, "expected_surface_classes": ["grass", "soil"]}
+  ]
+}

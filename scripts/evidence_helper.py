@@ -25,6 +25,7 @@ REVIEW_PROFILE_RESET_TEMPLATE = ROOT / "assets" / "review-profile-reset.template
 PRODUCT_OWNER_SLICE_TEMPLATE = ROOT / "assets" / "product-owner-slice-decision.template.md"
 PRODUCTION_ART_REVIEW_TEMPLATE = ROOT / "assets" / "production-art-state-review.template.md"
 HIGH_ANGLE_DISTRICT_REVIEW_TEMPLATE = ROOT / "assets" / "high-angle-3d-district-review.template.md"
+ENVIRONMENT_INTEGRITY_REVIEW_TEMPLATE = ROOT / "assets" / "environment-integrity-review.template.md"
 MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
 HUD_REVIEW_TEMPLATE = ROOT / "assets" / "gameplay-hud-glanceability-review.template.md"
 ART_DIRECTION_SELECTION_TEMPLATE = ROOT / "assets" / "art-direction-selection.template.md"
@@ -190,6 +191,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--high-angle-district-review-output",
         help="Also instantiate the fixed/high-angle 3D district and camera review.",
+    )
+    parser.add_argument(
+        "--environment-integrity-review-output",
+        help="Also instantiate the high-angle 3D environment-integrity review.",
     )
     parser.add_argument(
         "--motion-review-output",
@@ -483,6 +488,7 @@ def main() -> int:
                 args.project_status_output,
                 args.production_art_review_output,
                 args.high_angle_district_review_output,
+                args.environment_integrity_review_output,
                 args.motion_review_output,
                 args.yandex_checklist_output,
             )
@@ -623,6 +629,11 @@ def main() -> int:
             copy_template(
                 HIGH_ANGLE_DISTRICT_REVIEW_TEMPLATE,
                 output_path(args.high_angle_district_review_output),
+            )
+        if args.environment_integrity_review_output:
+            copy_template(
+                ENVIRONMENT_INTEGRITY_REVIEW_TEMPLATE,
+                output_path(args.environment_integrity_review_output),
             )
         if args.motion_review_output:
             copy_template(MOTION_REVIEW_TEMPLATE, output_path(args.motion_review_output))
