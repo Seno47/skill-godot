@@ -31,8 +31,8 @@ Codex также может выбрать навык автоматически
 
 | Состав | Практическая польза |
 | --- | --- |
-| 61 профильное руководство | Архитектура сцен, выбор визуального стиля, 2D/3D/2.5D, UI, saves, accessibility, AI, жанры/network, difficulty/pacing, commerce/cloud/safety, resilience/upgrades, hardware, ассеты, performance и release |
-| 40 детерминированных Python-утилит | Аудиты проекта/ассетов, visual checks, genre-aware difficulty и system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive-пробы, композиция rubric, capture, бюджеты, scorecard и build size |
+| 63 профильных руководства | Архитектура сцен, выбор визуального стиля, 2D/3D/2.5D, high-angle районы, UI, saves, accessibility, AI, жанры/network, difficulty/pacing, commerce/cloud/safety, resilience/upgrades, hardware, ассеты, performance и release |
+| 41 детерминированная Python-утилита | Аудиты проекта/ассетов, visual checks, genre-aware difficulty и system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive-пробы, композиция rubric, capture, бюджеты, scorecard и build size |
 | 7 переиспользуемых Godot-проб | Тач-прокрутка, компоновка кнопок, third-person управление/HUD mouse routing/видимость, изометрическая проекция и навигация |
 | Правила scene-first | Постоянная композиция хранится в `.tscn` и ресурсах Godot, а не скрывается в больших runtime-скриптах |
 | Завершение по доказательствам | Scorecard сверяет владельца приёмки и реальные пути к скриншотам, видео и review, отклоняя PASS только на словах |
@@ -57,6 +57,7 @@ flowchart LR
 - **Визуальное направление:** требования пользователя остаются главнее скилла; для открытого брифа жизнеспособные 2D/3D/hybrid-направления сравниваются по gameplay-читаемости, идентичности, доступности цельных ассетов, устойчивости на всём объёме контента, нагрузке анимации/VFX, target-бюджетам, UI/localization/accessibility, правам, стоимости и сопровождению до массового производства.
 - **2D и 3D:** нативные паттерны сцен Godot и отдельные рекомендации для каждого измерения.
 - **2.5D и изометрия:** явный пространственный контракт для проекции, выбора клетки, сортировки, высоты, перекрытий, поиска пути и гибридного 2D/3D.
+- **Fixed/high-angle 3D-районы:** видимые городские/ландшафтные границы, massing кварталов, landmarks/view corridors, функциональные story-зоны, бюджеты модульной вариативности/повторов и измеримая камера follow/look-ahead/pressure zoom/volumes.
 - **Управление:** клавиатура, мышь, контроллер, camera-relative движение, orbit/capture recovery, тач, drag-жесты и проверка мобильных размеров.
 - **Долговечные системы:** versioned save envelope, атомарная запись, восстановление после прерывания/повреждения, миграции, idempotence и правила cloud/device conflict.
 - **AI и генерация:** честное восприятие, навигация/replan/crowd recovery, capacity evidence, именованные random streams, разрешимые seed cohorts, распределения, fallback и save/resume parity.
@@ -73,6 +74,8 @@ flowchart LR
 Гибридные задачи используют канонический rubric selector `base+modifier+...`. `rubric_case_plan.py`, `evidence_helper.py` и `eval_scorecard.py` разделяют одну fail-closed композицию: применимые gates объединяются, а для каждой score dimension берётся самый строгий floor. Поэтому удобный жанровый label не может незаметно отбросить localization, replay, mobile, LiveOps или release-обязательства, при этом нерелевантные руководства не загружаются в контекст.
 
 Для законченных 2.5D-игр теперь есть отдельный rubric case `new-2-5d-complete`. Он требует явную пространственную модель, raw-состояния quiet/normal/dense/VFX/result, видео production-анимации персонажа, проверку меню и semantic identity, читаемые глубину и контакты, независимую приёмку target build по UX/визуалу и человеческое прослушивание аудио. Наличие box/sphere/cylinder, shader quad или particles внутри `.tscn` доказывает редактируемую архитектуру, но не production-art.
+
+Для fixed/high-angle 3D-районов добавлен компонуемый modifier `high-angle-3d-district-complete` и руководство [`high-angle-3d-districts.md`](./references/high-angle-3d-districts.md). Шаблон [`high-angle-3d-district-review.template.md`](./assets/high-angle-3d-district-review.template.md) отклоняет забор по периметру, filler из контейнеров/клонов зданий, бессмысленный scatter и коридоры взгляда в пустоту; вместо этого он требует совпадение видимой границы с collision, иерархию района, многослойную вариативность и raw-видео полного восстановления камеры в normal speed.
 
 Жанровый слой теперь содержит условные production-контракты для файтингов, метроидваний, idle/clicker-экономик и квестовых систем, но не превращает чужие демо в универсальную архитектуру. Отдельный проверенный каталог экосистемы объясняет, когда шаблоны меню/настроек, UI-темы, portal bridge, combat-addon, шейдер или библиотека компонентов действительно полезны, экспериментальны, устарели, ограничены лицензией либо конфликтуют с владельцами систем текущего проекта.
 

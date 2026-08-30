@@ -1923,6 +1923,52 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertIn("verdict=pass", completed.stdout)
         self.assertIn("blocking_gates=0", completed.stdout)
 
+    def test_eval_high_angle_district_modifier_fails_closed_without_visual_and_motion_packet(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "high-angle-3d-district-complete"
+        source["scores"]["asset_pipeline"] = {
+            "score": 4,
+            "evidence": ["fixture: imported modular district kit"],
+        }
+        source["gates"]["high_angle_3d_district_composition_evidence"] = {
+            "status": "not_tested",
+            "evidence": ["fixture: collision navmesh prop counts and one still only"],
+            "reviewer": {"role": "builder", "context": "fixture builder context"},
+            "artifacts": [],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "high-angle-3d-district-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        gate = next(
+            item
+            for item in report["gates"]
+            if item["id"] == "high_angle_3d_district_composition_evidence"
+        )
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(gate["status"], "not_tested")
+        self.assertEqual(report["blocking_gate_count"], 1)
+        self.assertEqual(scores["visual_coherence"]["score"], 1)
+        self.assertEqual(scores["scene_resource_authorship"]["score"], 2)
+        self.assertEqual(scores["playability_and_ux"]["score"], 2)
+        self.assertEqual(scores["asset_pipeline"]["score"], 2)
+        self.assertEqual(report["verdict"], "blocked")
+
     def test_eval_complete_slice_accepts_solid_audio(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"

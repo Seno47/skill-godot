@@ -37,6 +37,7 @@ Reject the baseline when any representative state shows:
 - primitive-rounded characters against a painterly/realistic background, or any other camera-visible asset-family mismatch;
 - broken poses, detached action props, incoherent locomotion speed, or effects that do not originate/follow the action;
 - sparse repeated modules without the structural detail, landmarks, variation, or rhythm promised by the direction;
+- fixed/high-angle districts whose visible boundary is mainly one repeated fence/prop family, whose backdrop duplicates the same building silhouette, whose large empty areas have no declared play/composition function, or whose dressing is scatter rather than functional story clusters; when applicable attach `assets/high-angle-3d-district-review.template.md`;
 - empty prompt/HUD panels, placeholder text, default controls, debug markers, or presentation that exists only to fill space;
 - post-processing used to hide weak silhouettes, materials, VFX, or composition.
 - an aim, trajectory, ricochet, route, placement, area, or intent cue that is mathematically correct but still reads as raw `Line2D`/mesh/polygon/dots/arrows, omits direction/contact/endpoint/validity/consequence meaning, or clashes with the selected shape/material/motion language.

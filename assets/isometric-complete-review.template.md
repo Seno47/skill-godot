@@ -2,6 +2,8 @@
 
 Use this with the `new-isometric-fixed-camera-complete` rubric case. Preserve raw screenshots, hero-only masks, action traces, playtest notes, and build provenance. The builder may prepare evidence but cannot provide the independent final verdict.
 
+If the world is also a fixed/high-angle 3D district, urban arena, settlement, or extraction route, compose `high-angle-3d-district-complete` and attach `assets/high-angle-3d-district-review.template.md`. The density table below is not a substitute for visible boundary, view-corridor, modular-repetition, semantic-zone, or camera-motion evidence.
+
 ## Build and camera contract
 
 - Build/revision:

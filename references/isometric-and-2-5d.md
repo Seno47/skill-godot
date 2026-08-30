@@ -2,6 +2,8 @@
 
 Use this for isometric, dimetric, orthographic, or mixed 2D/3D gameplay. Also read the ordinary 2D or 3D production guide for the chosen rendering architecture.
 
+When the selected architecture is a fixed/high-angle 3D district, urban arena, settlement, or extraction route, also use [high-angle-3d-districts.md](high-angle-3d-districts.md). The generic density matrix below does not by itself prove visible urban boundaries, block massing, facade/skyline variation, functional story zones, view-corridor terminations, or comfortable camera motion.
+
 ## Choose the spatial architecture before building content
 
 Do not use “2.5D” as an implementation decision. Choose one primary spatial model and record it in a short project-owned spatial contract. Copy `assets/isometric-spatial-contract.template.md` when the project does not already document these decisions.
@@ -160,6 +162,7 @@ Validate in addition to ordinary engine, gameplay, and visual checks:
 12. **Onboarding state machine:** the shipping first-use flow makes the player perform every brief-required transition, including movement, pickup, context interaction, mechanism change, route traversal, height/lift, objective delivery, and recovery where applicable; feedback is distinct and overlays never cover the target.
 13. **Composition and duration:** the fixed-camera capture matrix rejects sparse/default-looking presentation, and the declared game duration is supported by authored puzzle/permutation counts plus uncoached playtest evidence.
 14. **Complete 2.5D production art:** for non-isometric complete 2.5D work, the quiet/normal/dense/VFX/result target-build matrix passes depth/contact, presentation-bridge, asset-family, authored-detail, and effects review; a matching raw normal-speed character-motion artifact exists when the focal actor moves.
+15. **High-angle 3D district contract:** when applicable, every contactable boundary has a visible cause, district zones/landmarks/view corridors/negative space have declared functions, visible modular runs stay inside the variation budget, and normal-speed camera evidence proves follow, look-ahead, zoom, volume/rail, obstruction and restoration behavior through `assets/high-angle-3d-district-review.template.md`.
 
 Copy/adapt these deterministic probes into the project test suite:
 

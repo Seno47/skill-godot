@@ -710,6 +710,16 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] forward-eval", completed.stdout)
 
+    def test_high_angle_district_and_camera_have_positive_and_negative_fixtures(self) -> None:
+        completed = run_script(
+            "forward_eval_audit.py",
+            "--matrix",
+            str(ROOT / "tests" / "fixtures" / "high-angle-district-forward-eval.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] forward-eval", completed.stdout)
+
 
 class GenreRubricTests(unittest.TestCase):
     def test_rubric_case_and_score_cap_references_are_closed(self) -> None:
@@ -760,6 +770,7 @@ class GenreRubricTests(unittest.TestCase):
             "assistive-accessibility-release": "assistive_accessibility_evidence",
             "new-2-5d-complete": "production_art_integrity_evidence",
             "new-isometric-fixed-camera-complete": "isometric_vertical_slice_art_review",
+            "high-angle-3d-district-complete": "high_angle_3d_district_composition_evidence",
             "ui-reference-integration": "reference_parity_evidence",
         }
         with tempfile.TemporaryDirectory() as directory:
@@ -778,6 +789,29 @@ class GenreRubricTests(unittest.TestCase):
                 self.assertEqual(completed.returncode, 0, completed.stdout)
                 evidence = json.loads(output.read_text(encoding="utf-8"))
                 self.assertIn(gate_id, evidence["gates"])
+
+    def test_high_angle_district_scaffold_instantiates_builder_gate_and_review(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            completed = run_script(
+                "evidence_helper.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-extraction-complete+high-angle-3d-district-complete",
+                "--output",
+                str(temp / "evidence.json"),
+                "--high-angle-district-review-output",
+                str(temp / "high-angle-district-review.md"),
+            )
+            evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
+            review = (temp / "high-angle-district-review.md").read_text(encoding="utf-8")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertEqual(
+            evidence["gates"]["high_angle_3d_district_composition_evidence"]["reviewer"]["role"],
+            "builder",
+        )
+        self.assertIn("Fixed/High-angle 3D District Review", review)
 
     def test_progression_scaffold_instantiates_model_and_human_gates_and_review(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

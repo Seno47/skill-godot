@@ -1,5 +1,7 @@
 # 3D Production
 
+For fixed/high-angle districts, arenas, settlements, urban/extraction routes, or cameras that use pressure zoom and authored volumes/rails, also read [high-angle-3d-districts.md](high-angle-3d-districts.md). Its visible-boundary, district-composition, modular-variation and camera-motion contract is stricter than the general guidance here.
+
 Use this for 3D gameplay/world work. Also read the UI guide for screen-space interfaces.
 
 ## Establish the 3D space

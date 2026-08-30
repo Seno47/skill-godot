@@ -802,6 +802,26 @@
       "description": "Independent raw target-build review of start/teaching, typical puzzle, densest mechanism/decor, highest elevation, and objective/result frames confirms focal hierarchy, purposeful foreground/midground/background structure, landmarks, route rhythm, controlled repetition, intentional negative space, and HUD/world balance; sparse tile rows, default-white lost characters, and nominal asset variety do not pass."
     },
     {
+      "id": "high_angle_3d_district_composition_evidence",
+      "cases": ["high-angle-3d-district-complete"],
+      "description": "Builder-owned exact target-build evidence proves fixed/high-angle 3D district or arena quality before owner/independent review: every contactable boundary has a visible urban/terrain cause and opening negative tests; block massing, primary/secondary landmarks, depth bands, view-corridor terminations and dominant negative space support declared decisions; functional zones use cause-response-consequence clusters rather than prop scatter; screen-filling modular families obey recorded multi-axis variation, adjacency and maximum visible-run budgets; and normal-speed motion proves frame-rate-independent follow/look-ahead, safe framing, bounded pressure zoom, camera-volume/rail blending, multi-point obstruction handling and full restoration. A perimeter fence, repeated containers/cars/crates, duplicated backdrop buildings, prop count, navmesh/scene validity, culling statistics, editor free-camera view or polished still does not pass.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 1, "image": 8, "video": 1},
+        "required_states": {
+          "district_boundary_zone_and_camera_contract": ["report"],
+          "entry_and_landmark": ["image"],
+          "typical_block": ["image"],
+          "boundary_contact": ["image"],
+          "opening_negative": ["image"],
+          "view_corridor_termination": ["image"],
+          "dense_interaction": ["image", "video"],
+          "objective_or_extraction": ["image", "video"],
+          "overview_and_repetition_overlay": ["image"],
+          "camera_motion_and_restoration": ["video"]
+        }
+      }
+    },
+    {
       "id": "localization_contract_evidence",
       "cases": ["localized-release-complete"],
       "description": "A versioned locale contract and target-build traces prove every required locale and fallback, plural branches, font/glyph coverage, placeholder preservation, live language switching, subtitle timing, directional/focus semantics when applicable, pseudolocalization, and dense/narrow overflow budgets. String-table presence or one wide screenshot does not pass.",
@@ -1257,6 +1277,10 @@
       "dimensions": {"visual_coherence": 1}
     },
     {
+      "gate": "high_angle_3d_district_composition_evidence",
+      "dimensions": {"visual_coherence": 1, "scene_resource_authorship": 2, "playability_and_ux": 2, "asset_pipeline": 2}
+    },
+    {
       "gate": "save_data_integrity_evidence",
       "dimensions": {"gameplay_correctness": 1, "technical_quality": 1, "evidence_and_reproducibility": 2}
     },
@@ -1620,6 +1644,12 @@
       "brief": "Create a complete fixed-camera isometric/orthographic game whose player moves, picks up and delivers a light/object, changes a context mechanism and route, traverses a height/lift transition, and can restart/recover, with the declared content duration supported by authored puzzles and uncoached play evidence.",
       "focus": ["production character motion", "early gameplay-size art slice", "hero/background separation", "silhouette and route readability", "multi-step interactive onboarding", "mechanism and height-state feedback", "fixed-camera density/composition", "authored puzzle permutations", "content-duration evidence", "human audio listening"],
       "minimum_scores": {"intent_and_scope": 3, "gameplay_correctness": 3, "playability_and_ux": 3, "visual_coherence": 3, "audio_direction_quality": 3, "asset_pipeline": 3}
+    },
+    {
+      "id": "high-angle-3d-district-complete",
+      "brief": "Add a fail-closed production contract for a fixed/high-angle 3D district, urban arena, settlement or extraction route: visible boundaries and openings, block/landmark/depth hierarchy, functional story zones, controlled negative space and modular repetition, plus comfortable bounded camera motion and restoration in the exact target build.",
+      "focus": ["visible boundary and collision agreement", "district block massing and depth layers", "primary and secondary landmarks", "view corridor and street termination", "functional environmental storytelling", "negative-space purpose", "multi-axis modular variation and visible-run budgets", "frame-rate-independent follow and look-ahead", "safe framing and bounded pressure zoom", "camera volumes rails obstruction and restoration"],
+      "minimum_scores": {"playability_and_ux": 3, "visual_coherence": 3, "scene_resource_authorship": 3, "asset_pipeline": 3}
     },
     {
       "id": "new-3d-generated-prop",
