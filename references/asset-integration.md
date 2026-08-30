@@ -56,6 +56,8 @@ Ready-made assets usually need art-direction work:
 
 Test adaptations beside existing hero and environment assets. A uniformly recolored pack can still clash in silhouette, scale, animation, and material behavior.
 
+Material assignment coverage is not an art-direction metric. For repeated architectural/environment kits, preserve meaningful facade/roof/trim slots and albedo/normal/roughness/AO detail, then resolve variants from zone, function, construction, age, story state and adjacency. Random instance hue cycling, flat whole-mesh overrides and a large unique-color count can all make a fully covered kit look less coherent. When a fixed/high-angle district is visible, use the semantic palette/material and exact-lighting evidence in `references/high-angle-3d-districts.md`.
+
 ## Turn files into Godot objects
 
 Create a wrapper or inherited scene when an asset represents a placeable/interactable concept. A typical 3D prop might be:

@@ -9,6 +9,7 @@ Use this builder-owned gate with rubric modifier `high-angle-3d-district-complet
 - Target platform, renderer, viewport range and performance budget:
 - Camera projection, angle and permitted rotation:
 - District plan / accepted art-direction anchor:
+- Exact `WorldEnvironment`, key-light/fog/tone-map profile and shipping lighting phases:
 - Raw capture and video root:
 - Builder/context:
 
@@ -79,6 +80,28 @@ Fail a corridor that ends in map void, a repeated fence/building row, flat billb
 
 Default warnings are `>=3` adjacent identical visible modules or `>=2` adjacent near-identical skyline masses. Any intentional exception needs raw-camera justification, believable endpoints/corners and functional rhythm.
 
+## Architectural palette and material grammar
+
+Do not pass this section from material coverage, distinct-hue counts, isolated swatches or editor previews. Use approximate visible screen area and raw target-build frames under the exact shipping lighting.
+
+| Zone/profile | Function/story state | Construction/age drivers | Dominant family + visible-area band | Support family + band | Accent owner + maximum band | Rendered value/saturation/roughness envelope | Same-zone raw frame | Cross-zone raw frame | PASS/FAIL/NOT TESTED |
+|---|---|---|---|---|---|---|---|---|---|
+| | | | | | | | | | NOT TESTED |
+
+| Building/style family | Facade material/slot | Roof material/slot | Trim/openings/signage | Preserved albedo/normal/ORM/detail | Weathering/damage masks and physical cause | Permitted story overrides | PASS/FAIL/NOT TESTED |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | NOT TESTED |
+
+- Semantic assignment data (`zone`, `function`, `construction`, `age`, `story_state`, resolved profile/variant):
+- Same-block/terrace/campus material continuity rule:
+- Saturated-neighbor/checkerboard exclusion and observed worst run:
+- Cross-zone transition cause (shared support family or explicit physical/story boundary):
+- Dominant/support/accent approximate visible-area result under gameplay lighting:
+- Texture/material-slot preservation check; whole-node flat overrides:
+- Gameplay-camera detail proof for facade/roof/trim separation and localized grime/wear:
+- Alternate shipping-lighting phases that materially change the palette:
+- Exceptions and authored reason:
+
 ## Exact target-build visual state matrix
 
 Use the ordinary HUD and final camera. A free-editor-camera image does not pass.
@@ -94,6 +117,9 @@ Use the ordinary HUD and final camera. A free-editor-camera image does not pass.
 | Objective/extraction | destination hierarchy, approach and active state | | | NOT TESTED |
 | Overview/max zoom | skyline repetition, boundary reveal and return framing | | | NOT TESTED |
 | Repetition overlay | source scene/variant identity at gameplay camera | | | NOT TESTED |
+| Same-zone palette/material cluster | coherent adjacency, dominant/support/accent hierarchy, no rainbow/checkerboard | | | NOT TESTED |
+| Cross-zone palette transition | readable material/story change with a visible cause | | | NOT TESTED |
+| Gameplay-size material detail | source texture/PBR response, facade/roof/trim split and localized weathering survive final lighting/filtering | | | NOT TESTED |
 
 ## Camera motion matrix
 
@@ -121,6 +147,11 @@ Reject raw-velocity wobble, overshoot, stop/reverse lag, zoom pumping, rail snap
 - Dominant empty region without named gameplay/composition purpose: PASS / FAIL / NOT TESTED
 - View corridor ending in void/billboard/fog/clones: PASS / FAIL / NOT TESTED
 - Static beauty frame used instead of camera-motion proof: PASS / FAIL / NOT TESTED
+- 100% material coverage or hue/variant count used as palette-quality proof: PASS / FAIL / NOT TESTED
+- Opaque per-instance flood-fill/random hue cycling creates checkerboard/rainbow adjacency: PASS / FAIL / NOT TESTED
+- Flat override erases texture/PBR response or facade/roof/trim structure: PASS / FAIL / NOT TESTED
+- Accent colors have no semantic owner or dominate ordinary background mass: PASS / FAIL / NOT TESTED
+- Same-zone/cross-zone review is missing under exact gameplay lighting: PASS / FAIL / NOT TESTED
 
 ## Builder-owned verdict
 
@@ -128,6 +159,7 @@ Reject raw-velocity wobble, overshoot, stop/reverse lag, zoom pumping, rail snap
 - District hierarchy, depth and view corridors: PASS / FAIL / NOT TESTED
 - Functional/story density and negative space: PASS / FAIL / NOT TESTED
 - Modular variation and visible repetition: PASS / FAIL / NOT TESTED
+- Architectural palette/material direction and lighting integration: PASS / FAIL / NOT TESTED
 - High-angle camera comfort, framing and restoration: PASS / FAIL / NOT TESTED
 - Overall `high_angle_3d_district_composition_evidence`: PASS / FAIL / NOT TESTED
 - Blocking defects and disposition:

@@ -98,6 +98,59 @@ Define a variation grammar, not random transforms:
 
 Default audit warnings—change only with a recorded visual reason—are three or more adjacent identical modules with the same visible silhouette/material treatment, or two adjacent skyline/backdrop masses at nearly the same screen size, rotation and roofline. Intentional row houses, barriers or industrial repetition may exceed this only when endpoints/corners, facade rhythm, use, wear and skyline variation make the repetition believable in raw gameplay frames.
 
+## Author an architectural palette and material grammar
+
+Material coverage is an import/integration fact, not art direction. Assigning an opaque override to every building, maximizing distinct hues, or cycling blue/green/rust/ochre by instance can score 100% coverage while turning the district into a random checkerboard. Do not use per-instance hue cycling or unconstrained `Color.from_hsv()` as the production variation policy.
+
+Define typed zone and building-style profiles before bulk facade assignment. Resolve each building from semantic drivers in this order, with controlled local variance last:
+
+1. substrate/construction system: brick, concrete, render/plaster, stone, corrugated metal, timber, glass;
+2. function: residential, civic, commercial, industrial, utility, transit, medical, military or brief-specific use;
+3. age and renovation phase: original block, repaired addition, recent infill, abandoned shell;
+4. occupation and story state: inhabited, evacuated, fortified, burned, flooded, relief-controlled, looted or contaminated;
+5. block ownership, adjacency, exposure and weather path: one terrace/factory/campus normally shares a base family before individual exceptions;
+6. a bounded variant selected deterministically from the permitted family.
+
+For every visible district/zone, declare a dominant, support and accent family plus value, saturation, roughness and emissive envelopes under the exact shipping `WorldEnvironment`, key lights, fog and tone mapping. Judge proportions by approximate visible screen area in the gameplay camera, not by building count or palette swatch count. A useful first hypothesis is 60–75% dominant, 20–35% support and no more than roughly 5–10% high-saturation/emissive accent; this is not a universal aesthetic rule. Change it deliberately for a bright, toy-like, factional or surreal brief, record the new bands, and still prove that the focal accent remains scarce enough to mean something. Source HSV/RGB values alone do not predict the rendered result.
+
+Preserve material structure instead of flood filling the mesh:
+
+- keep facade, roof, trim/openings, signage and damage/emergency layers separate where the source asset supports them;
+- preserve useful albedo, normal, roughness/metallic/AO or ORM maps and original texture scale; in Godot, `StandardMaterial3D.albedo_color` multiplies the albedo texture, so a restrained tint can adapt a source without erasing it;
+- use material/texture masks, vertex colors, decals, detail albedo/normal, or authored shader parameters for localized variation rather than a whole-building opaque color override;
+- place grime at bases, recesses, drainage paths and high-contact areas; place edge wear on exposed edges; place soot, flood marks, repairs, boards and emergency paint where the building's story causes them. Random full-surface grunge is not storytelling;
+- keep roof, trim and facade value separation readable at gameplay size, but do not outline every building with a high-contrast trim merely to satisfy a metric.
+
+Adjacency is part of the palette. Within one block or construction cluster, maintain family continuity and vary roofline, trim, wear, signage or renovation state before jumping to an unrelated facade hue. Prevent alternating saturated neighbors and rainbow/checkerboard runs. Across zones, make the transition gradual through shared support materials or intentionally abrupt at a legible boundary such as a rail cut, fire line, checkpoint, ownership change or construction-era break. Repeating one accent can identify a faction/emergency route; distributing every accent evenly destroys that meaning.
+
+Prefer wrapper scenes and typed resources such as `DistrictMaterialProfile.tres` and `BuildingStyle.tres`. Store zone ID, function, construction, age, story state, facade/roof/trim materials, permitted variants and adjacency exclusions as inspectable data. An `@tool` resolver may apply surface overrides deterministically, but it must preserve imported surface slots and record the resolved profile/variant. Avoid a node-wide `material_override` when it collapses distinct facade, roof and trim surfaces. Example production shape:
+
+```gdscript
+@tool
+func apply_style(style: BuildingStyle) -> void:
+    facade.set_surface_override_material(style.facade_slot, style.facade_material)
+    roof.set_surface_override_material(style.roof_slot, style.roof_material)
+    trim.set_surface_override_material(style.trim_slot, style.trim_material)
+    set_meta(&"district_material_profile", style.profile_id)
+    set_meta(&"building_story_state", style.story_state)
+```
+
+The concrete node split and surface indices are project-owned; the semantic assignment and inspectable provenance are mandatory when this contract applies.
+
+### Palette/material acceptance
+
+Capture raw same-zone and cross-zone frames at ordinary gameplay size under the exact target-build lighting. The same-zone frame must show enough adjacent buildings to expose checkerboard distribution; the cross-zone frame must show the transition and its physical/story cause. Also preserve one gameplay-camera detail frame proving texture, roof/trim separation and weathering survive the final distance/filtering. If shipping lighting materially changes by phase, capture each phase that changes palette readability.
+
+Record approximate visible dominant/support/accent area, rendered value/saturation samples, adjacent-family runs, profile/story IDs and any exceptions. These are diagnostic measurements, not automatic approval. Fail the builder gate when:
+
+- 100% material coverage or a high hue/variant count is offered as proof of coherence;
+- facade colors alternate randomly by instance, produce a rainbow/checkerboard block, or ignore zone/function/story adjacency;
+- a flat tint discards the original texture, material response, facade/roof/trim separation or useful age/detail information;
+- accents occupy ordinary background mass, compete with landmarks/gameplay telegraphs, or have no semantic owner;
+- same-zone buildings lack a shared construction/material history, or cross-zone change has no readable transition/cause;
+- the declared palette collapses, clips, muddies or becomes fluorescent under the actual world lighting, fog or tone mapping;
+- only isolated swatches, editor material previews, node counts or coverage percentages are supplied instead of raw gameplay-camera evidence.
+
 Use imported assets through wrapper scenes. A useful Godot hierarchy is:
 
 ```text
@@ -216,6 +269,9 @@ Before owner or independent review, capture the exact target build with the ordi
 8. at least one camera volume/rail entry, overlap or edge, exit and restoration;
 9. quiet -> accelerate -> stop -> reverse -> dense pressure -> quiet camera motion at normal speed;
 10. repetition overlay or annotated captures naming visible source scene/variant IDs.
+11. a same-zone palette/material cluster under exact gameplay lighting;
+12. a cross-zone palette transition whose physical/story cause is visible;
+13. a gameplay-camera material-detail frame showing texture preservation, facade/roof/trim separation and localized weathering.
 
 Fill the template's ledgers and declare PASS/FAIL/NOT TESTED for every row. The builder must fail the gate when:
 
@@ -224,6 +280,8 @@ Fill the template's ledgers and declare PASS/FAIL/NOT TESTED for every row. The 
 - a large empty region has no gameplay/compositional function;
 - props are uniformly scattered rather than forming functional/story clusters;
 - repeated modules exceed the declared run/adjacency budget in the raw camera frame;
+- palette/material assignment alternates unrelated hues by instance, creates a checkerboard/rainbow block, or treats coverage/variant count as quality evidence;
+- flat overrides erase source texture/material structure, or dominant/support/accent roles collapse under shipping lighting;
 - the primary landmark disappears at required decisions with no secondary wayfinding anchor;
 - a view corridor ends in map void, cloned backdrop rows or a flat billboard;
 - colliders stop the player before the visible boundary or close a visible opening;
@@ -243,3 +301,7 @@ Do not increase density until the map passes. First fix massing, hierarchy, zone
 - [Joel Burgess, Modular Level Design (GDC)](https://media.gdcvault.com/gdc2016/Presentations/Burgess_Joel_Modular%20Level%20Design.pdf): kit planning and iterative modular level production.
 - [Muller et al., Procedural Modeling of Buildings](https://doi.org/10.1145/1141911.1141931): hierarchical mass, facade and detail rules rather than flat random variation.
 - [Vinson, Design Guidelines for Landmarks to Support Navigation in Virtual Environments](https://arxiv.org/abs/cs/0304001): landmark design and placement for virtual wayfinding.
+- [Godot StandardMaterial3D](https://docs.godotengine.org/en/stable/tutorials/3d/standard_material_3d.html): albedo color/texture multiplication, detail layers, vertex color and ORM/PBR material channels used to preserve surface information while adapting a kit.
+- [Epic, Physically Based Materials](https://dev.epicgames.com/documentation/en-us/unreal-engine/physically-based-materials?application_version=4.27): measured base-color examples and bounded PBR inputs; use them as physical reference, then judge the stylized result under the project's own lighting.
+- [Taylor, Agents of Mayhem: Total World Domination (GDC 2017)](https://media.gdcvault.com/gdc2017/Presentations/Taylor_James_Agents_of_Mayhem.pdf): environment palette developed with lighting to separate gameplay subjects while retaining a vibrant world.
+- [Adobe Substance 3D Painter generators and curvature masks](https://experienceleague.adobe.com/en/docs/substance-3d-painter/using/effects/generator): topology-aware Position/Curvature/World Space Normal masks for localized layers rather than random whole-surface tint; the same principle can be baked into textures or implemented in a project shader.

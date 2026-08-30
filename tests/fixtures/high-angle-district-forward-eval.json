@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
-  "skill_commit": "post-map006-high-angle-district-contract",
+  "skill_commit": "post-map007-semantic-material-direction-contract",
   "required_contracts": [
     "high-angle-district-composition",
+    "high-angle-architectural-material-direction",
     "high-angle-action-camera"
   ],
   "scenarios": [
@@ -11,7 +12,7 @@
       "brief_path": "fixtures/brief-high-angle-evacuation-district.md",
       "godot_version": "4.x",
       "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
-      "contracts": ["high-angle-district-composition", "high-angle-action-camera"],
+      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera"],
       "builder_context": "isolated builder with the district modifier, final camera and exact target-build capture packet",
       "reviewer_context": "separate raw-artifact reviewer who receives no intended landmark or prop mapping before first read",
       "first_pass_verdict": "pass",
@@ -19,7 +20,7 @@
       "negative_fixture": false,
       "user_found_defects": [],
       "expected_gate_for_each_defect": {},
-      "false_positive_burden": "requires one boundary ledger, eight raw states, one repetition overlay and a normal-speed camera recording; does not force urban form on unrelated 3D cases",
+      "false_positive_burden": "requires one combined district/material ledger, same-zone and cross-zone gameplay-lighting frames, eleven total raw images, one repetition overlay and a normal-speed camera recording; does not force urban form on unrelated 3D cases",
       "token_cost": 1700,
       "elapsed_minutes": 24,
       "result_artifacts": ["reports/high-angle-district-review.md", "reports/raw/district-boundary-contact.png", "reports/raw/district-camera-motion.mp4"]
@@ -29,7 +30,7 @@
       "brief_path": "fixtures/brief-compact-industrial-extraction.md",
       "godot_version": "4.x",
       "composite_case": "new-extraction-complete+high-angle-3d-district-complete+desktop-hardware-release",
-      "contracts": ["high-angle-district-composition", "high-angle-action-camera"],
+      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera"],
       "builder_context": "isolated builder using visible rail cuts, block massing, functional clusters and declared camera budgets",
       "reviewer_context": "separate reviewer comparing raw entry typical dense extraction overview and motion states",
       "first_pass_verdict": "pass",
@@ -37,7 +38,7 @@
       "negative_fixture": false,
       "user_found_defects": [],
       "expected_gate_for_each_defect": {},
-      "false_positive_burden": "low-prop intentional industrial areas pass when negative space and boundaries have recorded functions; asset-count minimum is not required",
+      "false_positive_burden": "low-prop intentional industrial areas pass when negative space and boundaries have recorded functions and the restrained construction palette is coherent under gameplay lighting; neither asset-count nor hue-count minimum is required",
       "token_cost": 1450,
       "elapsed_minutes": 20,
       "result_artifacts": ["reports/high-angle-industrial-review.md", "reports/raw/industrial-repetition-overlay.png", "reports/raw/industrial-camera-restore.mp4"]
@@ -69,6 +70,34 @@
       "token_cost": 1100,
       "elapsed_minutes": 13,
       "result_artifacts": ["reports/map-006-production-art.md", "reports/raw/map-006-gameplay.png", "reports/raw/map-006-repetition-overlay.png"]
+    },
+    {
+      "id": "map007-random-flood-fill-negative",
+      "brief_path": "fixtures/brief-map007-material-postmortem.md",
+      "godot_version": "4.x",
+      "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
+      "contracts": ["high-angle-architectural-material-direction"],
+      "builder_context": "builder whose structural facade probe reports opaque material assignment on 74 of 74 buildings and several distinct hue variants",
+      "reviewer_context": "separate raw gameplay-camera reviewer comparing adjacent same-zone buildings and the cross-zone transition under exact target-build lighting",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "all buildings have materials but per-instance blue green rust and ochre flood fills create a random checkerboard",
+        "single opaque overrides erase facade texture roof trim separation and believable construction history",
+        "hue coverage and variant counts are presented as proof although assignment ignores zone function age story and adjacency",
+        "no same-zone or cross-zone raw gameplay-lighting frame demonstrates a coherent atmosphere"
+      ],
+      "expected_gate_for_each_defect": {
+        "all buildings have materials but per-instance blue green rust and ochre flood fills create a random checkerboard": "high_angle_3d_district_composition_evidence",
+        "single opaque overrides erase facade texture roof trim separation and believable construction history": "high_angle_3d_district_composition_evidence",
+        "hue coverage and variant counts are presented as proof although assignment ignores zone function age story and adjacency": "high_angle_3d_district_composition_evidence",
+        "no same-zone or cross-zone raw gameplay-lighting frame demonstrates a coherent atmosphere": "high_angle_3d_district_composition_evidence"
+      },
+      "false_positive_burden": "semantic material review is scoped to repeated visible architectural/environment families; it accepts deliberate monochrome or saturated styles when their role bands, adjacency and exact-lighting result are authored rather than random",
+      "token_cost": 900,
+      "elapsed_minutes": 10,
+      "result_artifacts": ["reports/map-007-material-direction.md", "reports/raw/map-007-same-zone.png", "reports/raw/map-007-cross-zone.png"]
     },
     {
       "id": "static-beauty-camera-pumping-negative",

@@ -1969,6 +1969,85 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(scores["asset_pipeline"]["score"], 2)
         self.assertEqual(report["verdict"], "blocked")
 
+    def test_eval_high_angle_district_material_direction_states_fail_closed(self) -> None:
+        artifacts = [
+            {
+                "path": "evidence-artifacts/report.md",
+                "kind": "report",
+                "states": [
+                    "district_boundary_zone_and_camera_contract",
+                    "architectural_palette_and_material_contract",
+                ],
+            },
+            {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["entry_and_landmark"]},
+            {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["typical_block"]},
+            {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["boundary_contact"]},
+            {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["opening_negative"]},
+            {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["view_corridor_termination"]},
+            {"path": "evidence-artifacts/vfx.png", "kind": "image", "states": ["dense_interaction"]},
+            {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["objective_or_extraction"]},
+            {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["overview_and_repetition_overlay"]},
+            {"path": "evidence-artifacts/material-same-zone.png", "kind": "image", "states": ["same_zone_palette_cluster"]},
+            {"path": "evidence-artifacts/material-cross-zone.png", "kind": "image", "states": ["cross_zone_palette_transition"]},
+            {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["texture_preserving_material_detail"]},
+            {
+                "path": "evidence-artifacts/motion.avi",
+                "kind": "video",
+                "states": ["dense_interaction", "objective_or_extraction", "camera_motion_and_restoration"],
+            },
+        ]
+
+        def run_with(candidate_artifacts: list[dict]) -> tuple[subprocess.CompletedProcess[str], dict]:
+            source = load_eval_evidence()
+            source["case_id"] = "high-angle-3d-district-complete"
+            source["scores"]["asset_pipeline"] = {
+                "score": 4,
+                "evidence": ["fixture: semantic architectural material profiles and target-build raw states"],
+            }
+            source["gates"]["high_angle_3d_district_composition_evidence"] = {
+                "status": "pass",
+                "evidence": ["fixture: complete district composition camera and semantic material packet"],
+                "reviewer": {"role": "builder", "context": "fixture builder district review"},
+                "artifacts": candidate_artifacts,
+            }
+            with tempfile.TemporaryDirectory() as directory:
+                evidence_path = Path(directory) / "evidence.json"
+                report_path = Path(directory) / "scorecard.json"
+                evidence_path.write_text(json.dumps(source), encoding="utf-8")
+                completed = run_script(
+                    "eval_scorecard.py",
+                    "--rubric",
+                    str(ROOT / "evals" / "rubric.json"),
+                    "--case",
+                    "high-angle-3d-district-complete",
+                    "--evidence",
+                    str(evidence_path),
+                    "--json-output",
+                    str(report_path),
+                    "--summary",
+                )
+                report = json.loads(report_path.read_text(encoding="utf-8"))
+            return completed, report
+
+        completed, report = run_with(artifacts)
+        gate = next(item for item in report["gates"] if item["id"] == "high_angle_3d_district_composition_evidence")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertEqual(gate["status"], "pass")
+        self.assertEqual(gate["validation_failures"], [])
+
+        missing_same_zone = [
+            {**item, "states": [state for state in item["states"] if state != "same_zone_palette_cluster"]}
+            for item in artifacts
+        ]
+        completed, report = run_with(missing_same_zone)
+        gate = next(item for item in report["gates"] if item["id"] == "high_angle_3d_district_composition_evidence")
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(gate["status"], "fail")
+        self.assertTrue(
+            any("same_zone_palette_cluster" in failure for failure in gate["validation_failures"]),
+            gate["validation_failures"],
+        )
+
     def test_eval_complete_slice_accepts_solid_audio(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"
