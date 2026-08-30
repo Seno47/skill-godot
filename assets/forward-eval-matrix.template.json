@@ -21,6 +21,7 @@
     "high-angle-action-camera",
     "high-angle-environment-integrity",
     "high-angle-environment-coverage",
+    "resolved-scene-dependency-provenance",
     "2.5d",
     "procedural",
     "strategy",

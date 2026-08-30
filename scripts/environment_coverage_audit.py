@@ -28,6 +28,10 @@ from environment_integrity_audit import (
     vec2,
     vec3,
 )
+from resolved_scene_provenance_audit import (
+    ProvenanceError,
+    validate_scene_provenance_reference,
+)
 
 
 @dataclass(frozen=True)
@@ -206,15 +210,15 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         raise ContractError("schema_version must be 1")
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
-    provenance = obj(model.get("scene_provenance"), "scene_provenance")
-    if text(provenance.get("source_kind"), "scene_provenance.source_kind") != "resolved_target_scene":
-        raise ContractError("scene_provenance.source_kind must be resolved_target_scene")
-    scene_path = text(provenance.get("scene_path"), "scene_provenance.scene_path")
-    text(provenance.get("scene_revision"), "scene_provenance.scene_revision")
-    text(provenance.get("exporter"), "scene_provenance.exporter")
-    text(provenance.get("visible_prop_query"), "scene_provenance.visible_prop_query")
-    text(provenance.get("static_collider_query"), "scene_provenance.static_collider_query")
-    text(provenance.get("occluder_query"), "scene_provenance.occluder_query")
+    raw_provenance = obj(model.get("scene_provenance"), "scene_provenance")
+    try:
+        provenance = validate_scene_provenance_reference(raw_provenance)
+    except ProvenanceError as exc:
+        raise ContractError(str(exc)) from exc
+    scene_path = provenance["scene_path"]
+    text(raw_provenance.get("visible_prop_query"), "scene_provenance.visible_prop_query")
+    text(raw_provenance.get("static_collider_query"), "scene_provenance.static_collider_query")
+    text(raw_provenance.get("occluder_query"), "scene_provenance.occluder_query")
 
     contract = obj(model.get("contract"), "contract")
     if text(contract.get("coordinate_system"), "contract.coordinate_system") != "godot_xz_y_up":
@@ -740,6 +744,18 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         "status": "pass" if not errors else "fail",
         "contract_id": contract_id,
         "build_id": build_id,
+        "scene_provenance": {
+            "source_kind": provenance["source_kind"],
+            "scene_path": scene_path,
+            "revision_kind": provenance["revision_kind"],
+            "dependency_closure_digest": provenance["dependency_closure_digest"],
+            "manifest_path": provenance["manifest_path"],
+            "manifest_sha256": provenance["manifest_sha256"],
+            "exporter": provenance["exporter"],
+            "exporter_sha256": provenance["exporter_sha256"],
+            "export_preset": provenance["export_preset"],
+            "export_preset_sha256": provenance["export_preset_sha256"],
+        },
         "surface_zone_count": len(zones),
         "surface_cell_count": len(zone_samples),
         "observed_adjacency_count": len(observed_adjacency),

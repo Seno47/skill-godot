@@ -5,8 +5,14 @@
   "scene_provenance": {
     "source_kind": "resolved_target_scene",
     "scene_path": "res://scenes/world/example_district.tscn",
-    "scene_revision": "replace-with-source-revision-or-scene-hash",
+    "revision_kind": "resolved_dependency_closure_sha256",
+    "dependency_closure_digest": "336a8090eba0a90d6ceebf017d3bdce06c99af9ed9a0872cb7df266a98ff7e5f",
+    "manifest_path": "reports/resolved-scene-provenance.json",
+    "manifest_sha256": "9b9aa37b0e55ecfb42a5614e3509828605a7f8e85045257cb576da632448d6bf",
     "exporter": "res://tests/environment_coverage_exporter.gd",
+    "exporter_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "export_preset": "Windows Desktop",
+    "export_preset_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
     "visible_prop_query": "group:environment_integrity_visible",
     "static_collider_query": "all enabled StaticBody3D/CollisionShape3D shape owners",
     "occluder_query": "group:camera_occluder_collision_root"

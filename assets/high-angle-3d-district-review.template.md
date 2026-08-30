@@ -2,7 +2,7 @@
 
 Use this builder-owned gate with rubric modifier `high-angle-3d-district-complete`. It supplements the production-art, applicable isometric/spatial, genre, performance and independent review packets. Complete it against the exact target build before asking the owner or independent reviewer to inspect the district.
 
-Environment integrity is a separate blocking part of the same modifier. Also instantiate both environment contract JSON templates plus `assets/environment-integrity-review.template.md`, run `scripts/environment_integrity_audit.py` and `scripts/environment_coverage_audit.py`, and link both zero-error reports below. Collision and boundary coverage do not prove local contacts, whole-map surface topology, survey coverage, collider/render-shell parity or production occluder aliases.
+Environment integrity is a separate blocking part of the same modifier. Also instantiate `assets/resolved-scene-provenance.template.json`, both environment contract JSON templates and `assets/environment-integrity-review.template.md`; run `scripts/resolved_scene_provenance_audit.py` linked to both contracts before `scripts/environment_integrity_audit.py` and `scripts/environment_coverage_audit.py`; and link all three zero-error reports below. Collision and boundary coverage do not prove dependency-closure identity, local contacts, whole-map surface topology, survey coverage, collider/render-shell parity or production occluder aliases.
 
 ## Candidate and declared budgets
 
@@ -79,6 +79,8 @@ Fail a corridor that ends in map void, a repeated fence/building row, flat billb
 - Tint/rotation-only changes excluded from independent-axis count:
 - Adjacent skyline/backdrop clones at similar size/rotation/roofline:
 - Deterministic seed/resolved scene provenance when generated:
+- Root scene / dependency-closure digest / manifest SHA-256:
+- Recursive/runtime dependency count and evidence exporter/preset hashes:
 - Repetition overlay or annotated source scene/variant IDs:
 
 Default warnings are `>=3` adjacent identical visible modules or `>=2` adjacent near-identical skyline masses. Any intentional exception needs raw-camera justification, believable endpoints/corners and functional rhythm.

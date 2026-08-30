@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "manifest_id": "old-clinic-map-008-v19-stale",
+  "build_id": "old-clinic-map-008-v19",
+  "source_kind": "resolved_target_scene",
+  "root_scene": "res://scenes/maps/OldClinicDistrict.tscn",
+  "engine_version": "4.6.stable",
+  "export_preset_selector": "Windows Desktop",
+  "dependency_discovery": {
+    "method": "godot_resource_loader_recursive",
+    "direct_dependencies": [
+      "res://scenes/maps/EvacArrival.tscn",
+      "res://scenes/maps/OldClinicPerimeterAndFill.tscn",
+      "res://scenes/maps/OldClinicUrbanInfill.tscn"
+    ],
+    "recursive_dependencies": [
+      "res://scenes/maps/EvacArrival.tscn",
+      "res://scenes/maps/OldClinicPerimeterAndFill.tscn",
+      "res://scenes/maps/OldClinicUrbanInfill.tscn"
+    ],
+    "runtime_dependency_paths": [],
+    "declared_dependency_count": 3
+  },
+  "entries": [
+    {"path": "res://scenes/maps/EvacArrival.tscn", "kind": "scene", "bytes": 3000, "sha256": "1111111111111111111111111111111111111111111111111111111111111111"},
+    {"path": "res://scenes/maps/OldClinicDistrict.tscn", "kind": "root_scene", "bytes": 8192, "sha256": "5b81236f00000000000000000000000000000000000000000000000000000000"},
+    {"path": "res://scenes/maps/OldClinicPerimeterAndFill.tscn", "kind": "scene", "bytes": 7024, "sha256": "9999999999999999999999999999999999999999999999999999999999999999"},
+    {"path": "res://scenes/maps/OldClinicUrbanInfill.tscn", "kind": "scene", "bytes": 6500, "sha256": "3333333333333333333333333333333333333333333333333333333333333333"}
+  ],
+  "toolchain_inputs": [
+    {"role": "export_presets", "path": "res://export_presets.cfg", "bytes": 900, "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"role": "exporter_script", "path": "res://tests/resolved_scene_provenance_exporter.gd", "bytes": 4000, "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"role": "project_settings", "path": "res://project.godot", "bytes": 1200, "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+  ],
+  "closure_digest": "70502be8e1e432f811d9517a88d0b37cd3a67630af7db0d4595483563a3195ff"
+}

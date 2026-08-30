@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "manifest_id": "old-clinic-root-only-negative",
+  "build_id": "old-clinic-map-008-v18",
+  "source_kind": "resolved_target_scene",
+  "root_scene": "res://scenes/maps/OldClinicDistrict.tscn",
+  "engine_version": "4.6.stable",
+  "export_preset_selector": "Windows Desktop",
+  "dependency_discovery": {
+    "method": "godot_resource_loader_recursive",
+    "direct_dependencies": ["res://scenes/maps/OldClinicPerimeterAndFill.tscn"],
+    "recursive_dependencies": [
+      "res://scenes/maps/EvacArrival.tscn",
+      "res://scenes/maps/OldClinicPerimeterAndFill.tscn",
+      "res://scenes/maps/OldClinicUrbanInfill.tscn"
+    ],
+    "runtime_dependency_paths": [],
+    "declared_dependency_count": 3
+  },
+  "entries": [
+    {"path": "res://scenes/maps/OldClinicDistrict.tscn", "kind": "root_scene", "bytes": 8192, "sha256": "5b81236f00000000000000000000000000000000000000000000000000000000"}
+  ],
+  "toolchain_inputs": [
+    {"role": "export_presets", "path": "res://export_presets.cfg", "bytes": 900, "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"role": "exporter_script", "path": "res://tests/environment_coverage_exporter.gd", "bytes": 4000, "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"role": "project_settings", "path": "res://project.godot", "bytes": 1200, "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+  ],
+  "closure_digest": "5a654a27650aee577e3171433c7d65ccba52c5f340c11e22d3bba039fd4dc121"
+}

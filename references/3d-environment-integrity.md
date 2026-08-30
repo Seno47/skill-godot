@@ -2,7 +2,32 @@
 
 Use this contract for dense 3D dressing, especially fixed/high-angle districts where the shipping camera exposes contacts, silhouettes and ground coverage. It closes a different question from gameplay collision: collision coverage proves that gameplay has physical boundaries; environment integrity proves that visible objects do not penetrate one another, belong to the surface they occupy, clear overhead structures, and cover the rendered ground without holes.
 
-For `high-angle-3d-district-complete`, this is a builder-owned blocking gate. Instantiate `assets/environment-integrity-contract.template.json` and `assets/environment-integrity-review.template.md`, export the resolved target-scene geometry, then run:
+For `high-angle-3d-district-complete`, this is a builder-owned blocking gate. Instantiate `assets/resolved-scene-provenance.template.json`, both environment contract templates and `assets/environment-integrity-review.template.md`. First copy `assets/godot-tests/resolved_scene_provenance_exporter.gd` into the project, adapt its runtime/tool inputs and export the dependency closure:
+
+```bash
+godot --headless --path . \
+  --script res://tests/resolved_scene_provenance_exporter.gd -- \
+  --root-scene res://scenes/world/OldClinicDistrict.tscn \
+  --output reports/resolved-scene-provenance.json \
+  --build-id old-clinic-map-008-v19 \
+  --export-preset "Windows Desktop" \
+  --tool-input environment_integrity_exporter=res://tests/environment_integrity_exporter.gd \
+  --tool-input environment_coverage_exporter=res://tests/environment_coverage_exporter.gd
+```
+
+Then independently recompute and, in the source workspace, verify every declared file hash. Link both exact evidence contracts so a passing manifest cannot belong to a different build/exporter:
+
+```bash
+python scripts/resolved_scene_provenance_audit.py \
+  --manifest reports/resolved-scene-provenance.json \
+  --project . \
+  --evidence-contract reports/environment-integrity-contract.json \
+  --evidence-contract reports/environment-coverage-contract.json \
+  --json-output reports/resolved-scene-provenance-audit.json \
+  --summary
+```
+
+After that, export the resolved target-scene geometry and run:
 
 ```bash
 python scripts/environment_integrity_audit.py \
@@ -24,9 +49,26 @@ python scripts/environment_coverage_audit.py \
 
 The coverage audit prevents a curated set of good contacts or one permissive ground polygon from hiding defects elsewhere in the playable footprint.
 
+## Bind evidence to the resolved dependency closure
+
+A SHA-256 of only the root `.tscn` is not a candidate revision. Instantiated sub-scenes, external materials, meshes, scripts and imported source assets can change without modifying that root file. For `source_kind: resolved_target_scene`, record:
+
+- the canonical `res://` root scene;
+- direct and recursive paths returned by Godot `ResourceLoader.get_dependencies()` after import, resolving both plain paths and `UID::type::fallback_path` strings;
+- production resources loaded indirectly at runtime through an explicit stable registry/`--runtime-dependency` ledger;
+- sorted path, kind, byte count and SHA-256 for the root plus every discovered/runtime dependency;
+- Godot version, exact export-preset selector, whole `export_presets.cfg` hash, `project.godot` hash, provenance-exporter hash and every geometry/evidence exporter hash;
+- a closure digest recomputed from the canonical sorted records, plus the SHA-256 of the completed manifest itself.
+
+The two environment contracts must use `revision_kind: resolved_dependency_closure_sha256` and repeat the same closure digest, manifest hash, exporter path/hash and export-preset selector/hash. `resolved_scene_provenance_audit.py --evidence-contract ...` verifies those links. A legacy `scene_revision`, a root-only entry while discovered dependencies exist, missing runtime-loaded production resources, stale closure digest, unhashed exporter/preset or a contract referring to a different manifest fails closed.
+
+The dependency set may safely be a documented superset (for example, include disabled external variants) but may not omit any resource that can participate in the exact resolved candidate. Resource paths assembled dynamically in scripts are not discoverable merely by walking serialized resource dependencies; enumerate them explicitly or export an equivalent project-owned runtime registry. For packed/exported-only evidence, an exported-project manifest is acceptable only when it gives equivalent canonical dependency/tool hashes and binds them to the exact PCK/ZIP/executable artifact hash; a source root hash is not an exported-build manifest.
+
+When comparing candidates, preserve the prior manifest and pass it as `--baseline`. If the root scene hash stays constant but one nested dependency changes, the computed closure digest must change. The bundled v18/v19 regression fixture encodes exactly this case and rejects a v19 report that reuses the v18 digest.
+
 ## Author resolved occupancy, not origin checks
 
-Have a project-owned exporter traverse the final instantiated target scene using a stable group/query and emit the scene path, scene revision/hash, exporter path and resolved visible-prop count. Do not curate only the props already suspected of failing. Give every visible prop that can penetrate another prop one or more local occupancy boxes. Use multiple boxes for an L-shaped building, tower legs, a lamp head/shaft, a vehicle body, or geometry with a deliberate opening. A single oversized AABB creates false positives around empty holes; an origin test creates false negatives around every wide or rotated prop.
+Have a project-owned exporter traverse the final instantiated target scene using a stable group/query and emit the scene path, dependency-closure digest, manifest/exporter hashes and resolved visible-prop count. Do not curate only the props already suspected of failing. Give every visible prop that can penetrate another prop one or more local occupancy boxes. Use multiple boxes for an L-shaped building, tower legs, a lamp head/shaft, a vehicle body, or geometry with a deliberate opening. A single oversized AABB creates false positives around empty holes; an origin test creates false negatives around every wide or rotated prop.
 
 Export the final `global_transform` as Godot basis columns plus origin and transform all eight box corners. The audit builds the transformed XZ convex footprint, preserves the transformed vertical range, and applies a separating-axis test plus Y penetration. This covers translation, rotation, non-uniform scale and parent transforms. For `MultiMeshInstance3D`, compose the node transform with every instance transform and emit a stable instance ID.
 
@@ -190,3 +232,6 @@ The gate fails when either audit has an error, a visible prop is missing require
 - [Godot `CollisionObject3D`](https://docs.godotengine.org/en/stable/classes/class_collisionobject3d.html) exposes shape-owner enumeration needed to audit every resolved collider instead of only named child nodes.
 - [Godot groups](https://docs.godotengine.org/en/stable/tutorials/scripting/groups.html) provide stable production registries for visible props and camera occluders.
 - [Godot `Camera3D`](https://docs.godotengine.org/en/stable/classes/class_camera3d.html) provides projection rays and frustum utilities used to derive deterministic shipping-camera survey coverage.
+- [Godot `ResourceLoader.get_dependencies()`](https://docs.godotengine.org/en/stable/classes/class_resourceloader.html#class-resourceloader-method-get-dependencies) exposes direct resource dependencies and documents both plain-path and UID/fallback-path result forms used by the recursive exporter.
+- [Godot `FileAccess.get_sha256()`](https://docs.godotengine.org/en/stable/classes/class_fileaccess.html#class-fileaccess-method-get-sha256) hashes source inputs in the editor workspace and returns an empty string on failure, which the exporter treats as blocking.
+- [Godot `ProjectSettings.globalize_path()`](https://docs.godotengine.org/en/stable/classes/class_projectsettings.html#class-projectsettings-method-globalize-path) explains source-workspace path resolution and its exported-project limitation; this is why exact packed-build provenance needs an exported-project manifest/artifact hash rather than assuming source paths survive unchanged in a PCK.

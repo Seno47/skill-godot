@@ -8,7 +8,16 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 - Composite rubric selector:
 - Exact target executable/export:
 - Target camera, viewport, renderer and lighting:
-- Resolved scene/exporter revision:
+- Resolved root scene SHA-256 (diagnostic only):
+- Resolved dependency-closure digest (candidate revision):
+- Dependency manifest path + SHA-256:
+- Provenance exporter path + SHA-256:
+- Geometry/coverage exporter paths + SHA-256:
+- Export preset selector + `export_presets.cfg` SHA-256:
+- Godot version + `project.godot` SHA-256:
+- Recursive `ResourceLoader` dependencies / explicit runtime dependencies:
+- Filesystem or exported-project manifest verification result:
+- Baseline comparison when nested dependencies changed:
 - Resolved visible-prop group/query and skipped-node ledger:
 - Contract JSON:
 - Audit JSON/stdout:
@@ -31,6 +40,25 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 | Shipping-camera survey cells/captures | | | NOT TESTED |
 | All enabled static colliders / visible shells | | | NOT TESTED |
 | Production occluder collision roots / alias traces | | | NOT TESTED |
+| Root + recursive/runtime dependency entries | | | NOT TESTED |
+| Toolchain inputs (preset/project/provenance + evidence exporters) | | | NOT TESTED |
+
+## Resolved dependency-closure provenance
+
+| Input class | Canonical paths/records | Count | Hash verification | PASS/FAIL/NOT TESTED |
+|---|---|---:|---|---|
+| Root scene | | 1 | | NOT TESTED |
+| Direct/recursive `ResourceLoader` dependencies | | | | NOT TESTED |
+| Runtime-loaded production dependencies | | | | NOT TESTED |
+| Provenance and evidence exporters | | | | NOT TESTED |
+| Project settings and selected export preset | | | | NOT TESTED |
+
+- Root SHA-256:
+- Computed closure digest:
+- Manifest SHA-256:
+- Both evidence contracts match build/root/closure/manifest/exporter/preset:
+- Root unchanged but nested dependency changed comparison (if applicable):
+- Equivalent exported-project manifest + exact artifact hash (only when source-workspace verification is unavailable):
 
 ## Transformed prop-to-prop occupancy
 
@@ -149,6 +177,7 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 | `all_static_collider_visible_shell` | | | | NOT TESTED |
 | `production_occluder_aliases` | | | | NOT TESTED |
 | `surface_object_pair_relationships` | | | | NOT TESTED |
+| `resolved_dependency_closure_provenance` | | | | NOT TESTED |
 
 ## Regression-negative rejection
 
@@ -162,6 +191,8 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 - Enabled static collider lacks corresponding visible shell/hero-radius silhouette: PASS / FAIL / NOT TESTED
 - Production occluder fixture passes but a resolved collision root lacks an alias/visual mapping or restoration trace: PASS / FAIL / NOT TESTED
 - Surface class is mechanically allowed but its topmost face physically fuses with a vehicle/pole/curb pair: PASS / FAIL / NOT TESTED
+- Root `.tscn` SHA is unchanged while a nested instantiated scene changes, but the candidate reuses the prior closure digest: PASS / FAIL / NOT TESTED
+- `resolved_target_scene` supplies only `scene_revision`/root hash or omits a discovered/runtime dependency, exporter or preset input: PASS / FAIL / NOT TESTED
 
 ## Builder-owned verdict
 
@@ -176,6 +207,7 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 - All-enabled collider/render-shell hero-radius parity: PASS / FAIL / NOT TESTED
 - Production occluder aliases and fade/restoration: PASS / FAIL / NOT TESTED
 - Topmost surface/object-pair constraints: PASS / FAIL / NOT TESTED
+- Resolved dependency-closure provenance and contract linkage: PASS / FAIL / NOT TESTED
 - Overall `high_angle_environment_integrity_evidence`: PASS / FAIL / NOT TESTED
 - Blocking defects and disposition:
 - Remaining evidence boundary:

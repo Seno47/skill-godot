@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -809,6 +810,207 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertIn("lacks an authored transition/cause rule", completed.stdout)
 
+    def test_resolved_scene_provenance_template_passes(self) -> None:
+        completed = run_script(
+            "resolved_scene_provenance_audit.py",
+            "--manifest",
+            str(ROOT / "assets" / "resolved-scene-provenance.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] resolved-scene-provenance", completed.stdout)
+
+    def test_resolved_scene_provenance_links_both_environment_contracts(self) -> None:
+        completed = run_script(
+            "resolved_scene_provenance_audit.py",
+            "--manifest",
+            str(ROOT / "assets" / "resolved-scene-provenance.template.json"),
+            "--evidence-contract",
+            str(ROOT / "assets" / "environment-integrity-contract.template.json"),
+            "--evidence-contract",
+            str(ROOT / "assets" / "environment-coverage-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] resolved-scene-provenance", completed.stdout)
+
+    def test_resolved_scene_provenance_rejects_mismatched_evidence_contract(self) -> None:
+        contract = load_asset_json("environment-integrity-contract.template.json")
+        contract["scene_provenance"]["dependency_closure_digest"] = "f" * 64
+        with tempfile.TemporaryDirectory() as directory:
+            contract_path = Path(directory) / "mismatched-contract.json"
+            contract_path.write_text(json.dumps(contract), encoding="utf-8")
+            completed = run_script(
+                "resolved_scene_provenance_audit.py",
+                "--manifest",
+                str(ROOT / "assets" / "resolved-scene-provenance.template.json"),
+                "--evidence-contract",
+                str(contract_path),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("dependency_closure_digest does not match", completed.stdout)
+
+    def test_resolved_scene_provenance_rejects_root_only_digest(self) -> None:
+        completed = run_script(
+            "resolved_scene_provenance_audit.py",
+            "--manifest",
+            str(
+                ROOT
+                / "tests"
+                / "fixtures"
+                / "resolved-scene-provenance-root-only-negative.json"
+            ),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("root-file-only digest is invalid", completed.stdout)
+        self.assertIn("dependency closure entries are missing", completed.stdout)
+
+    def test_nested_dependency_mutation_changes_closure_with_same_root_hash(self) -> None:
+        baseline_path = (
+            ROOT / "tests" / "fixtures" / "resolved-scene-provenance-v18.json"
+        )
+        candidate_path = (
+            ROOT / "tests" / "fixtures" / "resolved-scene-provenance-v19.json"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "provenance-comparison.json"
+            completed = run_script(
+                "resolved_scene_provenance_audit.py",
+                "--manifest",
+                str(candidate_path),
+                "--baseline",
+                str(baseline_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        comparison = report["baseline_comparison"]
+        self.assertTrue(comparison["root_scene_sha256_same"])
+        self.assertFalse(comparison["dependency_closure_digest_same"])
+        self.assertTrue(comparison["candidate_content_changed_beyond_root"])
+
+    def test_nested_dependency_mutation_rejects_stale_closure_digest(self) -> None:
+        completed = run_script(
+            "resolved_scene_provenance_audit.py",
+            "--manifest",
+            str(
+                ROOT
+                / "tests"
+                / "fixtures"
+                / "resolved-scene-provenance-v19-stale-negative.json"
+            ),
+            "--baseline",
+            str(ROOT / "tests" / "fixtures" / "resolved-scene-provenance-v18.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("closure_digest mismatch", completed.stdout)
+
+    def test_project_verification_detects_dependency_file_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            files = {
+                "project.godot": "[application]\nconfig/name=\"Fixture\"\n",
+                "export_presets.cfg": "[preset.0]\nname=\"Windows Desktop\"\n",
+                "root.tscn": "[gd_scene format=3]\n[node name=\"Root\" type=\"Node\"]\n",
+                "nested.tres": "[gd_resource type=\"Resource\" format=3]\n[resource]\n",
+                "exporter.gd": "extends SceneTree\n",
+            }
+            for relative, content in files.items():
+                (project / relative).write_text(content, encoding="utf-8")
+
+            def record(relative: str, kind: str, role: str | None = None) -> dict[str, object]:
+                path = project / relative
+                item: dict[str, object] = {
+                    "path": f"res://{relative}",
+                    "bytes": path.stat().st_size,
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                }
+                item["role" if role else "kind"] = role or kind
+                return item
+
+            manifest = {
+                "schema_version": 1,
+                "manifest_id": "filesystem-verification-fixture",
+                "build_id": "fixture-v1",
+                "source_kind": "resolved_target_scene",
+                "root_scene": "res://root.tscn",
+                "engine_version": "4.x",
+                "export_preset_selector": "Windows Desktop",
+                "dependency_discovery": {
+                    "method": "godot_resource_loader_recursive",
+                    "direct_dependencies": ["res://nested.tres"],
+                    "recursive_dependencies": ["res://nested.tres"],
+                    "runtime_dependency_paths": [],
+                    "declared_dependency_count": 1,
+                },
+                "entries": [
+                    record("nested.tres", "resource"),
+                    record("root.tscn", "root_scene"),
+                ],
+                "toolchain_inputs": [
+                    record("export_presets.cfg", "", "export_presets"),
+                    record("exporter.gd", "", "exporter_script"),
+                    record("project.godot", "", "project_settings"),
+                ],
+                "closure_digest": "0" * 64,
+            }
+            manifest_path = project / "manifest.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            digest_run = run_script(
+                "resolved_scene_provenance_audit.py",
+                "--manifest",
+                str(manifest_path),
+                "--print-computed-digest",
+            )
+            manifest["closure_digest"] = digest_run.stdout.splitlines()[0]
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+            passing = run_script(
+                "resolved_scene_provenance_audit.py",
+                "--manifest",
+                str(manifest_path),
+                "--project",
+                str(project),
+                "--summary",
+            )
+            (project / "nested.tres").write_text("mutated nested dependency", encoding="utf-8")
+            failing = run_script(
+                "resolved_scene_provenance_audit.py",
+                "--manifest",
+                str(manifest_path),
+                "--project",
+                str(project),
+                "--summary",
+            )
+        self.assertEqual(passing.returncode, 0, passing.stdout)
+        self.assertEqual(failing.returncode, 1, failing.stdout)
+        self.assertIn("file SHA-256 mismatch for res://nested.tres", failing.stdout)
+
+    def test_environment_audits_reject_legacy_root_scene_revision(self) -> None:
+        for asset_name, script_name in (
+            ("environment-integrity-contract.template.json", "environment_integrity_audit.py"),
+            ("environment-coverage-contract.template.json", "environment_coverage_audit.py"),
+        ):
+            model = load_asset_json(asset_name)
+            provenance = model["scene_provenance"]
+            provenance.clear()
+            provenance.update(
+                {
+                    "source_kind": "resolved_target_scene",
+                    "scene_path": "res://scenes/world/example_district.tscn",
+                    "scene_revision": "root-file-sha256-only",
+                    "exporter": "res://tests/legacy_exporter.gd",
+                }
+            )
+            completed = run_contract(script_name, model)
+            self.assertEqual(completed.returncode, 2, completed.stdout)
+            self.assertIn("root-file provenance", completed.stdout)
+
 
 class GenreRubricTests(unittest.TestCase):
     def test_rubric_case_and_score_cap_references_are_closed(self) -> None:
@@ -894,10 +1096,15 @@ class GenreRubricTests(unittest.TestCase):
                 str(temp / "high-angle-district-review.md"),
                 "--environment-integrity-review-output",
                 str(temp / "environment-integrity-review.md"),
+                "--resolved-scene-provenance-output",
+                str(temp / "resolved-scene-provenance.json"),
             )
             evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
             review = (temp / "high-angle-district-review.md").read_text(encoding="utf-8")
             integrity_review = (temp / "environment-integrity-review.md").read_text(encoding="utf-8")
+            provenance = json.loads(
+                (temp / "resolved-scene-provenance.json").read_text(encoding="utf-8")
+            )
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertEqual(
             evidence["gates"]["high_angle_3d_district_composition_evidence"]["reviewer"]["role"],
@@ -909,6 +1116,8 @@ class GenreRubricTests(unittest.TestCase):
             "builder",
         )
         self.assertIn("High-angle 3D Environment Integrity Review", integrity_review)
+        self.assertEqual(provenance["source_kind"], "resolved_target_scene")
+        self.assertGreater(len(provenance["entries"]), 1)
 
     def test_progression_scaffold_instantiates_model_and_human_gates_and_review(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

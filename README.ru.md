@@ -32,7 +32,7 @@ Codex также может выбрать навык автоматически
 | Состав | Практическая польза |
 | --- | --- |
 | 64 профильных руководства | Архитектура сцен, выбор визуального стиля, 2D/3D/2.5D, high-angle районы и environment integrity, UI, saves, accessibility, AI, жанры/network, difficulty/pacing, commerce/cloud/safety, resilience/upgrades, hardware, ассеты, performance и release |
-| 43 детерминированные Python-утилиты | Аудиты проекта/ассетов, локальные и whole-map проверки prop/surface/ground/collider/camera, visual checks, genre-aware difficulty и system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive-пробы, композиция rubric, capture, бюджеты, scorecard и build size |
+| 44 детерминированные Python-утилиты | Аудиты проекта/ассетов, provenance resolved dependency closure, локальные и whole-map проверки prop/surface/ground/collider/camera, visual checks, genre-aware difficulty и system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive-пробы, композиция rubric, capture, бюджеты, scorecard и build size |
 | 7 переиспользуемых Godot-проб | Тач-прокрутка, компоновка кнопок, third-person управление/HUD mouse routing/видимость, изометрическая проекция и навигация |
 | Правила scene-first | Постоянная композиция хранится в `.tscn` и ресурсах Godot, а не скрывается в больших runtime-скриптах |
 | Завершение по доказательствам | Scorecard сверяет владельца приёмки и реальные пути к скриншотам, видео и review, отклоняя PASS только на словах |
@@ -57,7 +57,7 @@ flowchart LR
 - **Визуальное направление:** требования пользователя остаются главнее скилла; для открытого брифа жизнеспособные 2D/3D/hybrid-направления сравниваются по gameplay-читаемости, идентичности, доступности цельных ассетов, устойчивости на всём объёме контента, нагрузке анимации/VFX, target-бюджетам, UI/localization/accessibility, правам, стоимости и сопровождению до массового производства.
 - **2D и 3D:** нативные паттерны сцен Godot и отдельные рекомендации для каждого измерения.
 - **2.5D и изометрия:** явный пространственный контракт для проекции, выбора клетки, сортировки, высоты, перекрытий, поиска пути и гибридного 2D/3D.
-- **Fixed/high-angle 3D-районы:** композиция района, full-transform контакты, per-zone surface topology, zero-gap shipping-camera survey, all-static-collider/render-shell hero raster, production occluder aliases, clearance и измеримая камера.
+- **Fixed/high-angle 3D-районы:** dependency-closure идентичность кандидата, композиция района, full-transform контакты, per-zone surface topology, zero-gap shipping-camera survey, all-static-collider/render-shell hero raster, production occluder aliases, clearance и измеримая камера.
 - **Управление:** клавиатура, мышь, контроллер, camera-relative движение, orbit/capture recovery, тач, drag-жесты и проверка мобильных размеров.
 - **Долговечные системы:** versioned save envelope, атомарная запись, восстановление после прерывания/повреждения, миграции, idempotence и правила cloud/device conflict.
 - **AI и генерация:** честное восприятие, навигация/replan/crowd recovery, capacity evidence, именованные random streams, разрешимые seed cohorts, распределения, fallback и save/resume parity.
@@ -75,7 +75,7 @@ flowchart LR
 
 Для законченных 2.5D-игр теперь есть отдельный rubric case `new-2-5d-complete`. Он требует явную пространственную модель, raw-состояния quiet/normal/dense/VFX/result, видео production-анимации персонажа, проверку меню и semantic identity, читаемые глубину и контакты, независимую приёмку target build по UX/визуалу и человеческое прослушивание аудио. Наличие box/sphere/cylinder, shader quad или particles внутри `.tscn` доказывает редактируемую архитектуру, но не production-art.
 
-Для fixed/high-angle 3D-районов используется компонуемый modifier `high-angle-3d-district-complete`. Layered workflow [`3d-environment-integrity.md`](./references/3d-environment-integrity.md) запускает локальный geometry audit и whole-map coverage audit: финальные transforms/contact surfaces/clearance, single-family zones с transition/fallback budgets, полный shipping-camera tile coverage, каждый enabled static collider против visible mass, production occluder aliases и topmost surface/object-pair rules.
+Для fixed/high-angle 3D-районов используется компонуемый modifier `high-angle-3d-district-complete`. Layered workflow [`3d-environment-integrity.md`](./references/3d-environment-integrity.md) сначала связывает оба geometry report с рекурсивным ResourceLoader/runtime dependency-closure digest и hash проекта/exporter/preset, затем запускает локальный geometry audit и whole-map coverage audit: финальные transforms/contact surfaces/clearance, single-family zones с transition/fallback budgets, полный shipping-camera tile coverage, каждый enabled static collider против visible mass, production occluder aliases и topmost surface/object-pair rules.
 
 Жанровый слой теперь содержит условные production-контракты для файтингов, метроидваний, idle/clicker-экономик и квестовых систем, но не превращает чужие демо в универсальную архитектуру. Отдельный проверенный каталог экосистемы объясняет, когда шаблоны меню/настроек, UI-темы, portal bridge, combat-addon, шейдер или библиотека компонентов действительно полезны, экспериментальны, устарели, ограничены лицензией либо конфликтуют с владельцами систем текущего проекта.
 

@@ -2056,7 +2056,11 @@ class AuditorSmokeTests(unittest.TestCase):
             artifact["states"] = [
                 state
                 for state in artifact["states"]
-                if state != "shipping_camera_tiled_survey"
+                if state
+                not in {
+                    "shipping_camera_tiled_survey",
+                    "resolved_dependency_closure_provenance",
+                }
             ]
         source["gates"]["high_angle_3d_district_composition_evidence"] = {
             "status": "pass",
@@ -2104,6 +2108,13 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(gate["status"], "fail")
         self.assertTrue(
             any("shipping_camera_tiled_survey" in failure for failure in gate["validation_failures"]),
+            gate["validation_failures"],
+        )
+        self.assertTrue(
+            any(
+                "resolved_dependency_closure_provenance" in failure
+                for failure in gate["validation_failures"]
+            ),
             gate["validation_failures"],
         )
 

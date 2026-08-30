@@ -287,6 +287,7 @@
       "evidence": ["fixture: zero-error local and whole-map audits, complete shipping-camera survey, collider-shell raster, production occluder traces and target-build close-ups"],
       "reviewer": {"role": "builder", "context": "fixture builder environment-integrity review"},
       "artifacts": [
+        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance"]},
         {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["environment_integrity_contract", "transformed_prop_occupancy", "semantic_surface_ownership"]},
         {"path": "evidence-artifacts/progression-model.json", "kind": "report", "states": ["render_ground_coverage_and_seams", "vertical_clearance", "detected_class_closeups_and_resolution"]},
         {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["environment_coverage_contract", "surface_zone_topology", "shipping_camera_tiled_survey", "all_static_collider_visible_shell", "production_occluder_aliases", "surface_object_pair_relationships"]},

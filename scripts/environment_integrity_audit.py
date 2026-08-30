@@ -11,6 +11,11 @@ from pathlib import Path
 import sys
 from typing import Any
 
+from resolved_scene_provenance_audit import (
+    ProvenanceError,
+    validate_scene_provenance_reference,
+)
+
 
 class ContractError(RuntimeError):
     pass
@@ -333,14 +338,16 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         raise ContractError("schema_version must be 1")
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
-    provenance = obj(model.get("scene_provenance"), "scene_provenance")
-    if text(provenance.get("source_kind"), "scene_provenance.source_kind") != "resolved_target_scene":
-        raise ContractError("scene_provenance.source_kind must be resolved_target_scene")
-    scene_path = text(provenance.get("scene_path"), "scene_provenance.scene_path")
-    scene_revision = text(provenance.get("scene_revision"), "scene_provenance.scene_revision")
-    exporter = text(provenance.get("exporter"), "scene_provenance.exporter")
+    raw_provenance = obj(model.get("scene_provenance"), "scene_provenance")
+    try:
+        provenance = validate_scene_provenance_reference(raw_provenance)
+    except ProvenanceError as exc:
+        raise ContractError(str(exc)) from exc
+    scene_path = provenance["scene_path"]
+    closure_digest = provenance["dependency_closure_digest"]
+    exporter = provenance["exporter"]
     visible_prop_query = text(
-        provenance.get("visible_prop_query"), "scene_provenance.visible_prop_query"
+        raw_provenance.get("visible_prop_query"), "scene_provenance.visible_prop_query"
     )
     contract = obj(model.get("contract"), "contract")
     if text(contract.get("coordinate_system"), "contract.coordinate_system") != "godot_xz_y_up":
@@ -651,8 +658,14 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         "scene_provenance": {
             "source_kind": "resolved_target_scene",
             "scene_path": scene_path,
-            "scene_revision": scene_revision,
+            "revision_kind": provenance["revision_kind"],
+            "dependency_closure_digest": closure_digest,
+            "manifest_path": provenance["manifest_path"],
+            "manifest_sha256": provenance["manifest_sha256"],
             "exporter": exporter,
+            "exporter_sha256": provenance["exporter_sha256"],
+            "export_preset": provenance["export_preset"],
+            "export_preset_sha256": provenance["export_preset_sha256"],
             "visible_prop_query": visible_prop_query,
         },
         "instance_count": len(instances),

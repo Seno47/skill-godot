@@ -5,8 +5,14 @@
   "scene_provenance": {
     "source_kind": "resolved_target_scene",
     "scene_path": "res://scenes/maps/old_clinic.tscn",
-    "scene_revision": "fixture-old-clinic-shipping-revision",
+    "revision_kind": "resolved_dependency_closure_sha256",
+    "dependency_closure_digest": "0f080269a61903e552be28c95d9adcf5ed071ca360360997fadfd951540b1493",
+    "manifest_path": "reports/resolved-scene-provenance.json",
+    "manifest_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
     "exporter": "res://tests/environment_integrity_exporter.gd",
+    "exporter_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "export_preset": "Windows Desktop",
+    "export_preset_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "visible_prop_query": "group:environment_integrity_visible"
   },
   "contract": {

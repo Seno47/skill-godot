@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "skill_commit": "post-map008-whole-map-environment-coverage-contract",
+  "skill_commit": "post-map008-v19-resolved-dependency-closure-contract",
   "required_contracts": [
     "high-angle-district-composition",
     "high-angle-architectural-material-direction",
     "high-angle-action-camera",
     "high-angle-environment-integrity",
-    "high-angle-environment-coverage"
+    "high-angle-environment-coverage",
+    "resolved-scene-dependency-provenance"
   ],
   "scenarios": [
     {
@@ -14,7 +15,7 @@
       "brief_path": "fixtures/brief-high-angle-evacuation-district.md",
       "godot_version": "4.x",
       "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
-      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera", "high-angle-environment-integrity", "high-angle-environment-coverage"],
+      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera", "high-angle-environment-integrity", "high-angle-environment-coverage", "resolved-scene-dependency-provenance"],
       "builder_context": "isolated builder with the district modifier, final camera and exact target-build capture packet",
       "reviewer_context": "separate raw-artifact reviewer who receives no intended landmark or prop mapping before first read",
       "first_pass_verdict": "pass",
@@ -32,7 +33,7 @@
       "brief_path": "fixtures/brief-compact-industrial-extraction.md",
       "godot_version": "4.x",
       "composite_case": "new-extraction-complete+high-angle-3d-district-complete+desktop-hardware-release",
-      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera", "high-angle-environment-integrity", "high-angle-environment-coverage"],
+      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera", "high-angle-environment-integrity", "high-angle-environment-coverage", "resolved-scene-dependency-provenance"],
       "builder_context": "isolated builder using visible rail cuts, block massing, functional clusters and declared camera budgets",
       "reviewer_context": "separate reviewer comparing raw entry typical dense extraction overview and motion states",
       "first_pass_verdict": "pass",
@@ -160,6 +161,30 @@
       "token_cost": 980,
       "elapsed_minutes": 10,
       "result_artifacts": ["reports/environment-coverage-audit.json", "reports/raw/environment-coverage/contact-sheet.png", "reports/raw/environment-coverage/collider-shell-raster.png", "reports/raw/environment-coverage/production-occluders.mp4"]
+    },
+    {
+      "id": "old-clinic-v18-v19-root-hash-collision-negative",
+      "brief_path": "fixtures/resolved-scene-provenance-v19-stale-negative.json",
+      "godot_version": "4.x",
+      "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
+      "contracts": ["resolved-scene-dependency-provenance"],
+      "builder_context": "builder whose root OldClinicDistrict.tscn SHA-256 remains 5b81236f while nested perimeter and infill scenes are edited",
+      "reviewer_context": "independent deterministic manifest auditor comparing canonical v18 and v19 dependency closures and linked evidence contracts",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "v18 and v19 claim the same root-scene revision although an instantiated dependency collider and visual shell changed",
+        "the v19 report reuses the v18 closure digest after a nested dependency hash and byte count changed"
+      ],
+      "expected_gate_for_each_defect": {
+        "v18 and v19 claim the same root-scene revision although an instantiated dependency collider and visual shell changed": "high_angle_environment_integrity_evidence",
+        "the v19 report reuses the v18 closure digest after a nested dependency hash and byte count changed": "high_angle_environment_integrity_evidence"
+      },
+      "false_positive_burden": "the manifest hashes only the exact recursive/runtime dependency closure and report-shaping tool inputs; unchanged nested resources add stable records but do not require screenshots or duplicate visual review",
+      "token_cost": 240,
+      "elapsed_minutes": 2,
+      "result_artifacts": ["reports/resolved-scene-provenance-v18.json", "reports/resolved-scene-provenance-v19.json", "reports/resolved-scene-provenance-audit.json"]
     },
     {
       "id": "static-beauty-camera-pumping-negative",

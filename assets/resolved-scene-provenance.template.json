@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "manifest_id": "example-district-resolved-scene",
+  "build_id": "replace-with-exact-target-build-id",
+  "source_kind": "resolved_target_scene",
+  "root_scene": "res://scenes/world/example_district.tscn",
+  "engine_version": "4.6.stable",
+  "export_preset_selector": "Windows Desktop",
+  "dependency_discovery": {
+    "method": "godot_resource_loader_recursive",
+    "direct_dependencies": [
+      "res://materials/district_palette.tres",
+      "res://scenes/props/clinic_cluster.tscn"
+    ],
+    "recursive_dependencies": [
+      "res://assets/models/clinic_building.glb",
+      "res://materials/district_palette.tres",
+      "res://scenes/props/clinic_cluster.tscn"
+    ],
+    "runtime_dependency_paths": [
+      "res://scripts/district_runtime.gd"
+    ],
+    "declared_dependency_count": 4
+  },
+  "entries": [
+    {"path": "res://assets/models/clinic_building.glb", "kind": "asset", "bytes": 4096, "sha256": "1111111111111111111111111111111111111111111111111111111111111111"},
+    {"path": "res://materials/district_palette.tres", "kind": "resource", "bytes": 512, "sha256": "2222222222222222222222222222222222222222222222222222222222222222"},
+    {"path": "res://scenes/props/clinic_cluster.tscn", "kind": "scene", "bytes": 2048, "sha256": "3333333333333333333333333333333333333333333333333333333333333333"},
+    {"path": "res://scenes/world/example_district.tscn", "kind": "root_scene", "bytes": 1024, "sha256": "4444444444444444444444444444444444444444444444444444444444444444"},
+    {"path": "res://scripts/district_runtime.gd", "kind": "script", "bytes": 768, "sha256": "5555555555555555555555555555555555555555555555555555555555555555"}
+  ],
+  "toolchain_inputs": [
+    {"role": "environment_coverage_exporter", "path": "res://tests/environment_coverage_exporter.gd", "bytes": 4200, "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"role": "environment_integrity_exporter", "path": "res://tests/environment_integrity_exporter.gd", "bytes": 4100, "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"role": "export_presets", "path": "res://export_presets.cfg", "bytes": 900, "sha256": "6666666666666666666666666666666666666666666666666666666666666666"},
+    {"role": "exporter_script", "path": "res://tests/resolved_scene_provenance_exporter.gd", "bytes": 3500, "sha256": "7777777777777777777777777777777777777777777777777777777777777777"},
+    {"role": "project_settings", "path": "res://project.godot", "bytes": 1200, "sha256": "8888888888888888888888888888888888888888888888888888888888888888"}
+  ],
+  "closure_digest": "336a8090eba0a90d6ceebf017d3bdce06c99af9ed9a0872cb7df266a98ff7e5f"
+}
