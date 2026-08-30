@@ -757,6 +757,58 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("render-ground coverage/seam failure", errors)
         self.assertIn("vertical clearance", errors)
 
+    def test_environment_coverage_template_passes(self) -> None:
+        completed = run_script(
+            "environment_coverage_audit.py",
+            "--model",
+            str(ROOT / "assets" / "environment-coverage-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] environment-coverage", completed.stdout)
+
+    def test_environment_coverage_rejects_curated_pass_whole_map_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "environment-coverage.json"
+            completed = run_script(
+                "environment_coverage_audit.py",
+                "--model",
+                str(ROOT / "tests" / "fixtures" / "environment-coverage-negative.json"),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(report["survey_uncovered_cell_count"], 5)
+        self.assertGreater(report["invisible_blocked_sample_count"], 0)
+        errors = "\n".join(report["errors"])
+        self.assertIn("mixes semantic families", errors)
+        self.assertIn("fallback exposure ratio", errors)
+        self.assertIn("shipping-camera tiled survey", errors)
+        self.assertIn("visible-shell overlap ratio", errors)
+        self.assertIn("production occluder aliases miss collision roots", errors)
+        self.assertIn("surface/object pair", errors)
+
+    def test_environment_coverage_requires_every_observed_adjacency_rule(self) -> None:
+        source = json.loads(
+            (ROOT / "assets" / "environment-coverage-contract.template.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        source["surface_adjacency_rules"] = source["surface_adjacency_rules"][:1]
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "missing-adjacency.json"
+            model_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "environment_coverage_audit.py",
+                "--model",
+                str(model_path),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("lacks an authored transition/cause rule", completed.stdout)
+
 
 class GenreRubricTests(unittest.TestCase):
     def test_rubric_case_and_score_cap_references_are_closed(self) -> None:

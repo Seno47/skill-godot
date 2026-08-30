@@ -2048,7 +2048,7 @@ class AuditorSmokeTests(unittest.TestCase):
             gate["validation_failures"],
         )
 
-    def test_eval_high_angle_environment_integrity_fails_closed_without_render_ground_state(self) -> None:
+    def test_eval_high_angle_environment_integrity_fails_closed_without_whole_map_survey_state(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "high-angle-3d-district-complete"
         gate_evidence = source["gates"]["high_angle_environment_integrity_evidence"]
@@ -2056,7 +2056,7 @@ class AuditorSmokeTests(unittest.TestCase):
             artifact["states"] = [
                 state
                 for state in artifact["states"]
-                if state != "render_ground_coverage_and_seams"
+                if state != "shipping_camera_tiled_survey"
             ]
         source["gates"]["high_angle_3d_district_composition_evidence"] = {
             "status": "pass",
@@ -2103,7 +2103,7 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertEqual(gate["status"], "fail")
         self.assertTrue(
-            any("render_ground_coverage_and_seams" in failure for failure in gate["validation_failures"]),
+            any("shipping_camera_tiled_survey" in failure for failure in gate["validation_failures"]),
             gate["validation_failures"],
         )
 

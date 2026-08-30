@@ -1,6 +1,6 @@
 # 3D Production
 
-For fixed/high-angle districts, arenas, settlements, urban/extraction routes, or cameras that use pressure zoom and authored volumes/rails, also read [high-angle-3d-districts.md](high-angle-3d-districts.md) and [3d-environment-integrity.md](3d-environment-integrity.md). Their visible-boundary, district-composition, modular-variation, transformed-contact/surface/ground/clearance and camera-motion contracts are stricter than the general guidance here.
+For fixed/high-angle districts, arenas, settlements, urban/extraction routes, or cameras that use pressure zoom and authored volumes/rails, also read [high-angle-3d-districts.md](high-angle-3d-districts.md) and [3d-environment-integrity.md](3d-environment-integrity.md). Their visible-boundary, district-composition, whole-map survey, static-collider/render-shell, production-occluder, transformed-contact/surface/ground/clearance and camera-motion contracts are stricter than the general guidance here.
 
 Use this for 3D gameplay/world work. Also read the UI guide for screen-space interfaces.
 

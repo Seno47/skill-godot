@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "contract_id": "old-clinic-curated-pass-whole-map-fail",
+  "build_id": "shipping-build-before-map-008-v18",
+  "scene_provenance": {
+    "source_kind": "resolved_target_scene",
+    "scene_path": "res://scenes/maps/old_clinic.tscn",
+    "scene_revision": "fixture-old-clinic-pre-v18",
+    "exporter": "res://tests/environment_coverage_exporter.gd",
+    "visible_prop_query": "group:environment_integrity_visible",
+    "static_collider_query": "all enabled StaticBody3D/CollisionShape3D shape owners",
+    "occluder_query": "group:camera_occluder_collision_root"
+  },
+  "contract": {
+    "coordinate_system": "godot_xz_y_up",
+    "surface_zone_sample_step": 0.5,
+    "survey_cell_step": 2.0,
+    "surface_height_epsilon": 0.02,
+    "ground_probe_from_y": 6.0,
+    "expected_surface_cell_count": 121,
+    "expected_survey_cell_count": 9
+  },
+  "surface_families": {
+    "road": "transport",
+    "grass": "nature",
+    "curb": "transition",
+    "substrate": "fallback"
+  },
+  "playable_footprint": [[0.25, 0.25], [5.75, 0.25], [5.75, 5.75], [0.25, 5.75]],
+  "surface_zones": [
+    {
+      "id": "whole-map-any-surface",
+      "role": "primary",
+      "polygon": [[0.25, 0.25], [5.75, 0.25], [5.75, 5.75], [0.25, 5.75]],
+      "expected_surface_family": "mixed",
+      "expected_surface_classes": ["road", "grass", "curb"],
+      "fallback_surface_classes": ["substrate"],
+      "max_fallback_ratio": 0.05
+    }
+  ],
+  "surface_adjacency_rules": [],
+  "shipping_camera_survey": {
+    "required_coverage_ratio": 1.0,
+    "captures": [
+      {"id": "curated-south-west", "camera_node": "World/CameraRig/Camera3D", "camera_position": [1.5, 12, 1.5], "visible_footprint": [[0.25, 0.25], [3, 0.25], [3, 3], [0.25, 3]], "raw_artifact": "reports/raw/environment-coverage/curated-south-west.png"}
+    ]
+  },
+  "render_ground_triangles": [
+    {"id": "substrate-a", "source_kind": "render_mesh", "source_node": "World/Ground/Substrate", "surface_class": "substrate", "material_id": "earth", "vertices": [[0, -0.2, 0], [6, -0.2, 0], [6, -0.2, 6]]},
+    {"id": "substrate-b", "source_kind": "render_mesh", "source_node": "World/Ground/Substrate", "surface_class": "substrate", "material_id": "earth", "vertices": [[0, -0.2, 0], [6, -0.2, 6], [0, -0.2, 6]]},
+    {"id": "road-a", "source_kind": "render_mesh", "source_node": "World/Ground/Road", "surface_class": "road", "material_id": "asphalt", "vertices": [[0, 0, 0], [3, 0, 0], [3, 0, 6]]},
+    {"id": "road-b", "source_kind": "render_mesh", "source_node": "World/Ground/Road", "surface_class": "road", "material_id": "asphalt", "vertices": [[0, 0, 0], [3, 0, 6], [0, 0, 6]]},
+    {"id": "grass-lower-a", "source_kind": "render_mesh", "source_node": "World/Ground/GrassLower", "surface_class": "grass", "material_id": "grass", "vertices": [[3, 0, 0], [6, 0, 0], [6, 0, 4]]},
+    {"id": "grass-lower-b", "source_kind": "render_mesh", "source_node": "World/Ground/GrassLower", "surface_class": "grass", "material_id": "grass", "vertices": [[3, 0, 0], [6, 0, 4], [3, 0, 4]]},
+    {"id": "grass-t-stem-a", "source_kind": "render_mesh", "source_node": "World/Ground/GrassStem", "surface_class": "grass", "material_id": "grass", "vertices": [[3, 0, 4], [4, 0, 4], [4, 0, 6]]},
+    {"id": "grass-t-stem-b", "source_kind": "render_mesh", "source_node": "World/Ground/GrassStem", "surface_class": "grass", "material_id": "grass", "vertices": [[3, 0, 4], [4, 0, 6], [3, 0, 6]]},
+    {"id": "curb-fusion-a", "source_kind": "render_mesh", "source_node": "World/Ground/LongCurb", "surface_class": "curb", "material_id": "concrete", "vertices": [[2.75, 0.05, 0.5], [3.25, 0.05, 0.5], [3.25, 0.05, 2.5]]},
+    {"id": "curb-fusion-b", "source_kind": "render_mesh", "source_node": "World/Ground/LongCurb", "surface_class": "curb", "material_id": "concrete", "vertices": [[2.75, 0.05, 0.5], [3.25, 0.05, 2.5], [2.75, 0.05, 2.5]]}
+  ],
+  "collider_shell_audit": {
+    "hero_radius": 0.35,
+    "hero_base_y": 0.0,
+    "hero_height": 1.8,
+    "sample_step": 0.25,
+    "minimum_shell_overlap_ratio": 0.95,
+    "max_invisible_blocked_ratio": 0.0,
+    "expected_enabled_static_collider_count": 2,
+    "expected_visible_shell_count": 2,
+    "static_colliders": [
+      {"id": "traffic-pole-visible-collider", "source_node": "World/Traffic/Pole/StaticBody3D", "enabled": true, "blocks_hero": true, "variant_id": "traffic-active", "footprint": [[1, 1], [1.2, 1], [1.2, 1.2], [1, 1.2]], "min_y": 0, "max_y": 3, "render_shell_ids": ["traffic-pole-shell"]},
+      {"id": "traffic-pole-ghost-collider", "source_node": "World/Traffic/LegacyPole/StaticBody3D", "enabled": true, "blocks_hero": true, "variant_id": "traffic-active", "footprint": [[2, 1], [2.2, 1], [2.2, 1.2], [2, 1.2]], "min_y": 0, "max_y": 3, "render_shell_ids": ["traffic-pole-shell"]},
+      {"id": "traffic-alt-disabled-collider", "source_node": "World/Traffic/Alt/StaticBody3D", "enabled": false, "blocks_hero": true, "variant_id": "traffic-alt", "footprint": [[4, 1], [4.2, 1], [4.2, 1.2], [4, 1.2]], "min_y": 0, "max_y": 3, "render_shell_ids": ["traffic-alt-shell"]}
+    ],
+    "render_shells": [
+      {"id": "traffic-pole-shell", "source_node": "World/Traffic/Pole/Visual", "visible": true, "variant_id": "traffic-active", "footprint": [[1, 1], [1.2, 1], [1.2, 1.2], [1, 1.2]], "min_y": 0, "max_y": 3},
+      {"id": "traffic-alt-shell", "source_node": "World/Traffic/Alt/Visual", "visible": true, "variant_id": "traffic-alt", "footprint": [[4, 1], [4.2, 1], [4.2, 1.2], [4, 1.2]], "min_y": 0, "max_y": 3}
+    ]
+  },
+  "production_occluders": {
+    "source_kind": "resolved_production_scene",
+    "production_scene_path": "res://scenes/maps/old_clinic.tscn",
+    "fade_target": 0.72,
+    "restore_target": 0.0,
+    "tolerance": 0.01,
+    "expected_collision_roots": ["ClinicCollision", "RadioPlantCollision"],
+    "visual_roots": [
+      {"id": "clinic-visual", "source_node": "World/Clinic/Visual", "visible": true},
+      {"id": "radio-plant-visual", "source_node": "World/RadioPlant/Visual", "visible": true}
+    ],
+    "mappings": [
+      {"id": "clinic-occluder", "collision_root": "ClinicCollision", "aliases": ["Clinic", "ClinicAnnex"], "visual_root_ids": ["clinic-visual"]}
+    ],
+    "traces": [
+      {"mapping_id": "clinic-occluder", "source_kind": "resolved_production_scene", "observed_fade": 0.72, "observed_restore": 0.0, "raw_artifact": "reports/raw/environment-coverage/clinic-fade-restore.mp4"}
+    ]
+  },
+  "object_supports": [
+    {"id": "abandoned-pickup", "class": "vehicle", "support_polygon": [[2.6, 1.0], [3.4, 1.0], [3.4, 2.0], [2.6, 2.0]], "sample_step": 0.2, "probe_from_y": 2.0}
+  ],
+  "surface_object_pair_rules": [
+    {"object_class": "vehicle", "surface_class": "curb", "max_topmost_ratio": 0.0, "reason": "A long curb cannot pass through the pickup support footprint"}
+  ]
+}

@@ -13,6 +13,17 @@ python scripts/environment_integrity_audit.py \
 
 The command must return PASS. Collision coverage, boundary coverage, navigation, origins inside legal polygons, or one overview screenshot cannot substitute for it.
 
+Local integrity is only the first half of the gate. Also instantiate `assets/environment-coverage-contract.template.json` and run the whole-map contract:
+
+```bash
+python scripts/environment_coverage_audit.py \
+  --model reports/environment-coverage-contract.json \
+  --json-output reports/environment-coverage-audit.json \
+  --summary
+```
+
+The coverage audit prevents a curated set of good contacts or one permissive ground polygon from hiding defects elsewhere in the playable footprint.
+
 ## Author resolved occupancy, not origin checks
 
 Have a project-owned exporter traverse the final instantiated target scene using a stable group/query and emit the scene path, scene revision/hash, exporter path and resolved visible-prop count. Do not curate only the props already suspected of failing. Give every visible prop that can penetrate another prop one or more local occupancy boxes. Use multiple boxes for an L-shaped building, tower legs, a lamp head/shaft, a vehicle body, or geometry with a deliberate opening. A single oversized AABB creates false positives around empty holes; an origin test creates false negatives around every wide or rotated prop.
@@ -55,6 +66,71 @@ Author polygons for camera-visible road, sidewalk, plaza and terrain regions. Sa
 
 Use a sample step smaller than the smallest seam the shipping camera can reveal. Deterministic sampling finds holes; raw target-build close-ups remain required because z-fighting, shader displacement, decals, transparency, LOD and filtering can create defects outside this geometry model.
 
+### Partition the footprint into semantic zones
+
+Do not use one whole-map region that accepts road, sidewalk, grass, soil, concrete and fallback merely to reach 100% sample coverage. The whole-map coverage contract requires:
+
+- one declared playable footprint with no uncovered or multiply owned sample cells;
+- semantic surface families such as transport, pedestrian, nature, structural transition and fallback;
+- primary zones whose expected top-surface classes belong to exactly one family;
+- explicit transition zones for graded joins, or a hard-boundary rule with a visible physical/story cause;
+- a maximum fallback/substrate exposure ratio per zone;
+- every observed zone adjacency to match one exercised transition/cause rule.
+
+This rejects mechanically valid but visually arbitrary rectangular or T-shaped patchwork. A transition band must be wide enough for the declared sampling grid and visible in the shipping camera; an adjacency ledger cannot legalize a missing mesh or an unexplained material cut.
+
+### Check surface and object together
+
+Semantic permission is not physical permission. A vehicle may be generally allowed on `road` and `concrete`, yet a raised curb passing through its support footprint is still impossible. Add `surface_object_pair_rules` for relationships such as:
+
+- vehicle / curb or parking stop;
+- vehicle / painted island, pole foundation or sidewalk lip;
+- pole / road lane;
+- facade prop / roof or planter edge.
+
+The whole-map audit samples the object's support footprint, resolves the topmost render face, and caps the permitted ratio for the exact object-class/surface-class pair. Use ordinary occupancy volumes as well when the curb, pole or other surface feature has meaningful vertical mass.
+
+## Survey the complete footprint with the shipping camera
+
+Curated entry/dense/objective frames do not prove the spaces between them. Derive a deterministic grid over the declared playable footprint, move the actual shipping camera rig through authored survey positions, and export for every capture:
+
+- the exact camera node and world position;
+- the ground footprint visible through the final projection/angle;
+- a unique raw target-build image;
+- its tile/cell coverage in the contact sheet manifest.
+
+Every required grid cell must be covered by at least one raw frame; the default required ratio is `1.0`. Preserve a contact sheet for fast review, but retain the individual full-resolution captures. A contact sheet assembled from duplicate, free-camera or mismatched-build images fails.
+
+Use `Camera3D.project_ray_origin()` and `project_ray_normal()` at deterministic viewport sample points, or an equivalent project-owned projection method, to derive coverage. Do not estimate coverage only from camera focus positions. For multi-level maps, declare a footprint per relevant elevation or split the contract by layer.
+
+## Compare every enabled static collider with visible render mass
+
+Known-prop collision checks are insufficient. The exporter must enumerate every resolved `StaticBody3D`/shape owner in the production scene, including instantiated and generated children, then record disabled state symmetrically with its authored visual variant.
+
+For each enabled collider:
+
+- map it to one or more exact visible render-shell IDs;
+- compare sampled collider footprint/height with those shells;
+- raster the playable footprint at the declared hero radius and vertical body interval;
+- require every blocked hero-center sample to have visible mass explaining the obstruction;
+- reject enabled-collider/hidden-shell and disabled-collider/visible-shell variant mismatches.
+
+A duplicate traffic-light pole collider, old hidden wall or disabled visual variant therefore cannot remain as an invisible blocker merely because collision coverage is numerically complete. Overhead colliders outside the declared hero vertical interval still require render-shell parity but do not become false ground blockers. Camera-only proxies or deliberately invisible safety barriers need `blocks_hero: false` plus an exact reason/raw-artifact exemption; a hero-blocking collider can never use that exemption. Use multiple render-shell volumes for geometry with holes.
+
+In Godot, enumerate shape owners from the resolved `CollisionObject3D` rather than assuming one `CollisionShape3D` child or matching names. Record `CollisionShape3D.disabled`, final transforms and shape-owner ownership. Seed render shells from final visible `VisualInstance3D` bounds/mesh geometry, not collision shapes.
+
+## Resolve production occluder aliases, not synthetic names
+
+Synthetic obstruction fixtures can pass while the production collision and visual roots use different names. Export the exact production-scene collision-root set and maintain an inspectable mapping:
+
+```text
+production collision root -> stable aliases -> one or more production visual root IDs
+```
+
+Every expected collision root must be mapped, every target visual root must exist and be visible, aliases must be unique, and every mapping must have a production-scene trace proving the declared fade value and full restoration. A synthetic test scene, matching count, prefix heuristic or manually invoked fade method cannot replace resolved production names and real collision-driven dispatch.
+
+Prefer stable groups or authored IDs for lookup. Human-readable aliases handle imported/root-name differences but must not become fuzzy substring matching.
+
 Godot export sketch:
 
 ```gdscript
@@ -94,10 +170,14 @@ The deterministic report and visual evidence are one gate, not alternatives. Pre
 3. ground coverage/seams;
 4. vertical clearance;
 5. an ordinary environment-integrity overview.
+6. a complete shipping-camera tiled-survey contact sheet with zero uncovered cells;
+7. all-enabled-static-collider/render-shell and hero-radius raster overlays;
+8. production occluder alias fade/restoration motion;
+9. high-risk topmost-surface/object-pair contacts.
 
 For every defect class detected during the iteration, keep a representative before frame, the fixed after frame, and the clean rerun row. Do not crop away the contact context. If no defect was detected in a class, still capture its highest-risk representative state.
 
-The gate fails when the audit has an error, a visible prop is missing required proxies, a surface rule is unexercised, a detected class lacks before/fixed/rerun evidence, an exemption is vague or stale, or the raw build still shows fusion, penetration, floating contact, roadway nature props, or exposed substrate.
+The gate fails when either audit has an error, a visible prop is missing required proxies, one semantic zone accepts incompatible families, fallback exceeds its zone budget, any playable/survey cell is uncovered, an observed adjacency lacks a transition/cause, any enabled collider lacks visible shell/raster support, a disabled/hidden variant is asymmetric, a production occluder root or trace is missing, a surface/object rule fails, a detected class lacks before/fixed/rerun evidence, an exemption is vague/stale, or the raw build still shows fusion, penetration, floating contact, abrupt patchwork, roadway nature props, invisible blockers or exposed substrate.
 
 ## Engine references
 
@@ -107,3 +187,6 @@ The gate fails when the audit has an error, a visible prop is missing required p
 - [Godot `MeshDataTool`](https://docs.godotengine.org/en/stable/classes/class_meshdatatool.html) exposes mesh vertices and triangular faces for render-ground sampling.
 - [Godot ray-casting guide](https://docs.godotengine.org/en/stable/tutorials/physics/ray-casting.html) explains direct-space physics queries and global coordinates. These are useful supplemental runtime checks, but physics hits are not render-surface coverage proof.
 - [Godot `PhysicsDirectSpaceState3D`](https://docs.godotengine.org/en/stable/classes/class_physicsdirectspacestate3d.html) and [`PhysicsShapeQueryParameters3D`](https://docs.godotengine.org/en/stable/classes/class_physicsshapequeryparameters3d.html) cover runtime shape queries when testing gameplay clearance in addition to the render-integrity contract.
+- [Godot `CollisionObject3D`](https://docs.godotengine.org/en/stable/classes/class_collisionobject3d.html) exposes shape-owner enumeration needed to audit every resolved collider instead of only named child nodes.
+- [Godot groups](https://docs.godotengine.org/en/stable/tutorials/scripting/groups.html) provide stable production registries for visible props and camera occluders.
+- [Godot `Camera3D`](https://docs.godotengine.org/en/stable/classes/class_camera3d.html) provides projection rays and frustum utilities used to derive deterministic shipping-camera survey coverage.

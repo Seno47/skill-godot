@@ -4,7 +4,7 @@ Use this for fixed, mostly fixed, orthographic, isometric-looking, or high-angle
 
 This contract exists because a technically traversable map can still read as an empty test arena bordered by repeated fences, containers, and backdrop clones. More prop instances do not create a district. The level needs authored massing, hierarchy, functional zones, controlled visibility, and a camera whose motion preserves those decisions.
 
-For a complete game/slice where this condition materially applies, compose rubric modifier `high-angle-3d-district-complete` with the base genre/platform cases and instantiate `assets/high-angle-3d-district-review.template.md`. Also follow [3d-environment-integrity.md](3d-environment-integrity.md), instantiate `assets/environment-integrity-contract.template.json` plus `assets/environment-integrity-review.template.md`, and pass the deterministic integrity audit. District composition and collision coverage cannot certify prop contacts, surface ownership, render-ground seams or overhead clearance.
+For a complete game/slice where this condition materially applies, compose rubric modifier `high-angle-3d-district-complete` with the base genre/platform cases and instantiate `assets/high-angle-3d-district-review.template.md`. Also follow [3d-environment-integrity.md](3d-environment-integrity.md), instantiate both environment contract JSON templates plus `assets/environment-integrity-review.template.md`, and pass the local-integrity and whole-map-coverage audits. District composition and collision coverage cannot certify prop contacts, semantic zone topology, full shipping-camera coverage, collider/render-shell parity, production occluder aliases, ground seams or clearance.
 
 ## Lock the district contract before dressing
 
@@ -273,6 +273,7 @@ Before owner or independent review, capture the exact target build with the ordi
 12. a cross-zone palette transition whose physical/story cause is visible;
 13. a gameplay-camera material-detail frame showing texture preservation, facade/roof/trim separation and localized weathering.
 14. environment-integrity close-ups for transformed prop occupancy, full-footprint semantic surface ownership, visible ground coverage/seams and vertical clearance, plus a clean deterministic rerun.
+15. a deterministic shipping-camera tiled survey covering the complete playable footprint, all-enabled-static-collider/render-shell and hero-radius overlays, production occluder fade/restoration, and high-risk topmost surface/object pairs.
 
 Fill the template's ledgers and declare PASS/FAIL/NOT TESTED for every row. The builder must fail the gate when:
 
@@ -289,6 +290,7 @@ Fill the template's ledgers and declare PASS/FAIL/NOT TESTED for every row. The 
 - a beautiful still hides camera lag, overshoot, pressure zoom pumping, volume snapping, occlusion loss or failed restoration;
 - only prop counts, scene-tree validity, navmesh coverage, occlusion-culling statistics or editor free-camera screenshots are offered.
 - collision/boundary coverage passes while visible props penetrate one another, nature footprints cross authored road/sidewalk, a broad floor collider hides holes in the render meshes, or overhead structures lack measured clearance.
+- one broad semantic region accepts incompatible top surfaces, fallback/patchwork exceeds zone budgets, survey cells remain unseen, an enabled static collider lacks visible mass, a production collision root lacks a real visual alias/trace, or an allowed curb/concrete face still fuses with a vehicle.
 
 Do not increase density until the map passes. First fix massing, hierarchy, zone function, boundary causes, route termination and variation grammar; then add only the clusters that support them.
 

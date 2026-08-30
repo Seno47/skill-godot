@@ -12,6 +12,8 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 - Resolved visible-prop group/query and skipped-node ledger:
 - Contract JSON:
 - Audit JSON/stdout:
+- Whole-map coverage contract JSON:
+- Whole-map coverage audit JSON/stdout:
 - Raw capture root:
 - Builder/context:
 
@@ -25,6 +27,10 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 | Ground sample step / smallest visible seam | | | NOT TESTED |
 | Collision coverage (context only) | | | NOT TESTED |
 | Boundary coverage (context only) | | | NOT TESTED |
+| Playable surface-zone cells | | | NOT TESTED |
+| Shipping-camera survey cells/captures | | | NOT TESTED |
+| All enabled static colliders / visible shells | | | NOT TESTED |
+| Production occluder collision roots / alias traces | | | NOT TESTED |
 
 ## Transformed prop-to-prop occupancy
 
@@ -63,6 +69,60 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 - Triangular boundaries, T-junctions, decals/terrain joins and elevation changes sampled:
 - Shader/LOD/transparency risks not modeled by triangles reviewed visually:
 
+## Whole-map semantic surface topology
+
+| Zone | Role: primary/transition | Expected family/classes | Fallback classes + maximum ratio | Measured fallback | Adjacent zones | Authored transition/cause | Raw artifact | PASS/FAIL/NOT TESTED |
+|---|---|---|---|---:|---|---|---|---|
+| | | | | | | | | NOT TESTED |
+
+- Playable footprint cells owned by exactly one zone: / total
+- Uncovered or multiply owned cells:
+- Observed adjacency pairs / declared exercised rules:
+- Broad region accepting incompatible semantic families rejected:
+- Rectangular/T-shaped patchwork and abrupt joins reviewed at shipping scale:
+
+## Deterministic shipping-camera tiled survey
+
+| Survey tile/capture | Shipping camera node/position | Derived visible footprint | Covered cells | Raw full-resolution artifact | Contact-sheet position | PASS/FAIL/NOT TESTED |
+|---|---|---|---:|---|---|---|
+| | | | | | | NOT TESTED |
+
+- Required survey cells:
+- Covered cells:
+- Uncovered cells (must be zero):
+- Coverage ratio / required ratio:
+- Duplicate/free-camera/mismatched-build artifacts:
+
+## All enabled static colliders versus visible shells
+
+| Collider ID/source | Enabled | Variant | Mapped visible shell IDs | Footprint/height overlap ratio | Hero-radius invisible samples | Raw overlay | PASS/FAIL/NOT TESTED |
+|---|---|---|---|---:|---:|---|---|
+| | | | | | | | NOT TESTED |
+
+- Enabled static colliders enumerated / expected:
+- Visible render shells enumerated / expected:
+- Total hero-radius blocked samples:
+- Invisible blocked samples (must be zero unless exact boundary exemption):
+- Disabled collider/hidden render variant symmetry:
+
+## Production-scene occluder alias coverage
+
+| Production collision root | Stable aliases | Resolved visual root IDs | Observed fade | Observed restore | Raw production-scene trace | PASS/FAIL/NOT TESTED |
+|---|---|---|---:|---:|---|---|
+| | | | | | | NOT TESTED |
+
+- Expected collision roots / mapped roots:
+- Synthetic-only cases rejected:
+- Missing/ambiguous/fuzzy aliases:
+
+## Topmost surface/object-pair relationships
+
+| Object class/instance | Topmost surface class | Maximum permitted footprint ratio | Measured ratio | Physical rule | Raw contact artifact | PASS/FAIL/NOT TESTED |
+|---|---|---:|---:|---|---|---|
+| Vehicle / curb | | 0 | | | | NOT TESTED |
+| Vehicle / pole or parking stop | | | | | | NOT TESTED |
+| Pole / road lane | | | | | | NOT TESTED |
+
 ## Vertical clearance
 
 | Upper/lower classes and instances | XZ overlap | Required gap | Measured gap | Before raw close-up | Fixed raw close-up | Clean rerun | PASS/FAIL/NOT TESTED |
@@ -84,6 +144,11 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 | `vertical_clearance` | | | | NOT TESTED |
 | `detected_class_closeups_and_resolution` | | | | NOT TESTED |
 | `environment_integrity_overview` | | | | NOT TESTED |
+| `surface_zone_topology` | | | | NOT TESTED |
+| `shipping_camera_tiled_survey` | | | | NOT TESTED |
+| `all_static_collider_visible_shell` | | | | NOT TESTED |
+| `production_occluder_aliases` | | | | NOT TESTED |
+| `surface_object_pair_relationships` | | | | NOT TESTED |
 
 ## Regression-negative rejection
 
@@ -92,6 +157,11 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 - Broad floor collider is complete but visible triangular ground gaps expose substrate: PASS / FAIL / NOT TESTED
 - Intentional-overlap exemption lacks an exact pair, physical reason and raw artifact: PASS / FAIL / NOT TESTED
 - Audit PASS is claimed without raw target-build close-ups, or screenshots PASS without a clean audit rerun: PASS / FAIL / NOT TESTED
+- One broad ground region accepts incompatible surface families or hides excess fallback exposure: PASS / FAIL / NOT TESTED
+- Curated raw states leave playable survey cells uncovered: PASS / FAIL / NOT TESTED
+- Enabled static collider lacks corresponding visible shell/hero-radius silhouette: PASS / FAIL / NOT TESTED
+- Production occluder fixture passes but a resolved collision root lacks an alias/visual mapping or restoration trace: PASS / FAIL / NOT TESTED
+- Surface class is mechanically allowed but its topmost face physically fuses with a vehicle/pole/curb pair: PASS / FAIL / NOT TESTED
 
 ## Builder-owned verdict
 
@@ -101,6 +171,11 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 - Visible render-ground coverage/seams: PASS / FAIL / NOT TESTED
 - Vertical clearance: PASS / FAIL / NOT TESTED
 - Detected-class before/fixed/rerun packet: PASS / FAIL / NOT TESTED
+- Whole-map semantic zones, fallback and adjacency: PASS / FAIL / NOT TESTED
+- Zero-gap shipping-camera tiled survey: PASS / FAIL / NOT TESTED
+- All-enabled collider/render-shell hero-radius parity: PASS / FAIL / NOT TESTED
+- Production occluder aliases and fade/restoration: PASS / FAIL / NOT TESTED
+- Topmost surface/object-pair constraints: PASS / FAIL / NOT TESTED
 - Overall `high_angle_environment_integrity_evidence`: PASS / FAIL / NOT TESTED
 - Blocking defects and disposition:
 - Remaining evidence boundary:

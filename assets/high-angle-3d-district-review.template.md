@@ -2,7 +2,7 @@
 
 Use this builder-owned gate with rubric modifier `high-angle-3d-district-complete`. It supplements the production-art, applicable isometric/spatial, genre, performance and independent review packets. Complete it against the exact target build before asking the owner or independent reviewer to inspect the district.
 
-Environment integrity is a separate blocking part of the same modifier. Also instantiate `assets/environment-integrity-contract.template.json` and `assets/environment-integrity-review.template.md`, run `scripts/environment_integrity_audit.py`, and link the zero-error report below. Collision and boundary coverage do not prove that visible props, surfaces and ground joins are clean.
+Environment integrity is a separate blocking part of the same modifier. Also instantiate both environment contract JSON templates plus `assets/environment-integrity-review.template.md`, run `scripts/environment_integrity_audit.py` and `scripts/environment_coverage_audit.py`, and link both zero-error reports below. Collision and boundary coverage do not prove local contacts, whole-map surface topology, survey coverage, collider/render-shell parity or production occluder aliases.
 
 ## Candidate and declared budgets
 

@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "contract_id": "example-high-angle-environment-coverage",
+  "build_id": "replace-with-exact-target-build-id",
+  "scene_provenance": {
+    "source_kind": "resolved_target_scene",
+    "scene_path": "res://scenes/world/example_district.tscn",
+    "scene_revision": "replace-with-source-revision-or-scene-hash",
+    "exporter": "res://tests/environment_coverage_exporter.gd",
+    "visible_prop_query": "group:environment_integrity_visible",
+    "static_collider_query": "all enabled StaticBody3D/CollisionShape3D shape owners",
+    "occluder_query": "group:camera_occluder_collision_root"
+  },
+  "contract": {
+    "coordinate_system": "godot_xz_y_up",
+    "surface_zone_sample_step": 0.5,
+    "survey_cell_step": 2.0,
+    "surface_height_epsilon": 0.02,
+    "ground_probe_from_y": 6.0,
+    "expected_surface_cell_count": 285,
+    "expected_survey_cell_count": 20
+  },
+  "surface_families": {
+    "road": "transport",
+    "curb": "transition",
+    "grass": "nature",
+    "substrate": "fallback"
+  },
+  "playable_footprint": [[0.25, 0.25], [9.75, 0.25], [9.75, 7.75], [0.25, 7.75]],
+  "surface_zones": [
+    {
+      "id": "road-zone",
+      "role": "primary",
+      "polygon": [[0.25, 0.25], [9.75, 0.25], [9.75, 3.75], [0.25, 3.75]],
+      "expected_surface_family": "transport",
+      "expected_surface_classes": ["road"],
+      "fallback_surface_classes": ["substrate"],
+      "max_fallback_ratio": 0.0
+    },
+    {
+      "id": "curb-transition",
+      "role": "transition",
+      "polygon": [[0.25, 3.75], [9.75, 3.75], [9.75, 4.75], [0.25, 4.75]],
+      "expected_surface_family": "transition",
+      "expected_surface_classes": ["curb"],
+      "fallback_surface_classes": ["substrate"],
+      "max_fallback_ratio": 0.0
+    },
+    {
+      "id": "clinic-green",
+      "role": "primary",
+      "polygon": [[0.25, 4.75], [9.75, 4.75], [9.75, 7.75], [0.25, 7.75]],
+      "expected_surface_family": "nature",
+      "expected_surface_classes": ["grass"],
+      "fallback_surface_classes": ["substrate"],
+      "max_fallback_ratio": 0.0
+    }
+  ],
+  "surface_adjacency_rules": [
+    {
+      "zone_a": "road-zone",
+      "zone_b": "curb-transition",
+      "mode": "transition_band",
+      "cause": "Raised curb material and mesh separate road from pedestrian/green space",
+      "raw_artifact": "reports/raw/environment-coverage/road-curb-transition.png"
+    },
+    {
+      "zone_a": "curb-transition",
+      "zone_b": "clinic-green",
+      "mode": "transition_band",
+      "cause": "Authored curb-to-soil verge",
+      "raw_artifact": "reports/raw/environment-coverage/curb-grass-transition.png"
+    }
+  ],
+  "shipping_camera_survey": {
+    "required_coverage_ratio": 1.0,
+    "captures": [
+      {"id": "south-west", "camera_node": "World/CameraRig/Camera3D", "camera_position": [2.5, 12, 2], "visible_footprint": [[0.25, 0.25], [5, 0.25], [5, 4], [0.25, 4]], "raw_artifact": "reports/raw/environment-coverage/survey-south-west.png"},
+      {"id": "south-east", "camera_node": "World/CameraRig/Camera3D", "camera_position": [7.5, 12, 2], "visible_footprint": [[5, 0.25], [9.75, 0.25], [9.75, 4], [5, 4]], "raw_artifact": "reports/raw/environment-coverage/survey-south-east.png"},
+      {"id": "north-west", "camera_node": "World/CameraRig/Camera3D", "camera_position": [2.5, 12, 6], "visible_footprint": [[0.25, 4], [5, 4], [5, 7.75], [0.25, 7.75]], "raw_artifact": "reports/raw/environment-coverage/survey-north-west.png"},
+      {"id": "north-east", "camera_node": "World/CameraRig/Camera3D", "camera_position": [7.5, 12, 6], "visible_footprint": [[5, 4], [9.75, 4], [9.75, 7.75], [5, 7.75]], "raw_artifact": "reports/raw/environment-coverage/survey-north-east.png"}
+    ]
+  },
+  "render_ground_triangles": [
+    {"id": "substrate-a", "source_kind": "render_mesh", "source_node": "World/Ground/Substrate", "surface_class": "substrate", "material_id": "earth", "vertices": [[0, -0.2, 0], [10, -0.2, 0], [10, -0.2, 8]]},
+    {"id": "substrate-b", "source_kind": "render_mesh", "source_node": "World/Ground/Substrate", "surface_class": "substrate", "material_id": "earth", "vertices": [[0, -0.2, 0], [10, -0.2, 8], [0, -0.2, 8]]},
+    {"id": "road-a", "source_kind": "render_mesh", "source_node": "World/Ground/Road", "surface_class": "road", "material_id": "asphalt", "vertices": [[0, 0, 0], [10, 0, 0], [10, 0, 3.75]]},
+    {"id": "road-b", "source_kind": "render_mesh", "source_node": "World/Ground/Road", "surface_class": "road", "material_id": "asphalt", "vertices": [[0, 0, 0], [10, 0, 3.75], [0, 0, 3.75]]},
+    {"id": "curb-a", "source_kind": "render_mesh", "source_node": "World/Ground/Curb", "surface_class": "curb", "material_id": "concrete-curb", "vertices": [[0, 0.02, 3.75], [10, 0.02, 3.75], [10, 0.02, 4.75]]},
+    {"id": "curb-b", "source_kind": "render_mesh", "source_node": "World/Ground/Curb", "surface_class": "curb", "material_id": "concrete-curb", "vertices": [[0, 0.02, 3.75], [10, 0.02, 4.75], [0, 0.02, 4.75]]},
+    {"id": "grass-a", "source_kind": "render_mesh", "source_node": "World/Ground/Grass", "surface_class": "grass", "material_id": "clinic-grass", "vertices": [[0, 0, 4.75], [10, 0, 4.75], [10, 0, 8]]},
+    {"id": "grass-b", "source_kind": "render_mesh", "source_node": "World/Ground/Grass", "surface_class": "grass", "material_id": "clinic-grass", "vertices": [[0, 0, 4.75], [10, 0, 8], [0, 0, 8]]}
+  ],
+  "collider_shell_audit": {
+    "hero_radius": 0.35,
+    "hero_base_y": 0.0,
+    "hero_height": 1.8,
+    "sample_step": 0.25,
+    "minimum_shell_overlap_ratio": 0.95,
+    "max_invisible_blocked_ratio": 0.0,
+    "expected_enabled_static_collider_count": 3,
+    "expected_visible_shell_count": 2,
+    "static_colliders": [
+      {"id": "clinic-collider", "source_node": "World/Buildings/Clinic/StaticBody3D", "enabled": true, "blocks_hero": true, "variant_id": "clinic-active", "footprint": [[6.8, 4.8], [9.2, 4.8], [9.2, 7.2], [6.8, 7.2]], "min_y": 0, "max_y": 4, "render_shell_ids": ["clinic-shell"]},
+      {"id": "traffic-pole-collider", "source_node": "World/Props/TrafficLight/Pole/StaticBody3D", "enabled": true, "blocks_hero": true, "variant_id": "traffic-active", "footprint": [[3.6, 1.9], [3.8, 1.9], [3.8, 2.1], [3.6, 2.1]], "min_y": 0, "max_y": 3.2, "render_shell_ids": ["traffic-pole-shell"]},
+      {"id": "traffic-pole-alt-collider", "source_node": "World/Props/TrafficLightAlt/Pole/StaticBody3D", "enabled": false, "blocks_hero": true, "variant_id": "traffic-alt", "footprint": [[4.6, 1.9], [4.8, 1.9], [4.8, 2.1], [4.6, 2.1]], "min_y": 0, "max_y": 3.2, "render_shell_ids": ["traffic-pole-alt-shell"]},
+      {"id": "camera-open-hole-proxy", "source_node": "World/CameraCollision/OpenHoleProxy", "enabled": true, "blocks_hero": false, "variant_id": "camera-proxy-open-hole", "footprint": [[8.8, 3.8], [9.2, 3.8], [9.2, 4.2], [8.8, 4.2]], "min_y": 2.5, "max_y": 4.0, "render_shell_ids": [], "visibility_exemption": {"reason": "Camera-only proxy is authored around an open facade hole and cannot block the hero", "raw_artifact": "reports/raw/environment-coverage/camera-proxy-open-hole.png"}}
+    ],
+    "render_shells": [
+      {"id": "clinic-shell", "source_node": "World/Buildings/Clinic/Visual", "visible": true, "variant_id": "clinic-active", "footprint": [[6.8, 4.8], [9.2, 4.8], [9.2, 7.2], [6.8, 7.2]], "min_y": 0, "max_y": 4},
+      {"id": "traffic-pole-shell", "source_node": "World/Props/TrafficLight/Pole/Visual", "visible": true, "variant_id": "traffic-active", "footprint": [[3.6, 1.9], [3.8, 1.9], [3.8, 2.1], [3.6, 2.1]], "min_y": 0, "max_y": 3.2},
+      {"id": "traffic-pole-alt-shell", "source_node": "World/Props/TrafficLightAlt/Pole/Visual", "visible": false, "variant_id": "traffic-alt", "footprint": [[4.6, 1.9], [4.8, 1.9], [4.8, 2.1], [4.6, 2.1]], "min_y": 0, "max_y": 3.2}
+    ]
+  },
+  "production_occluders": {
+    "source_kind": "resolved_production_scene",
+    "production_scene_path": "res://scenes/world/example_district.tscn",
+    "fade_target": 0.72,
+    "restore_target": 0.0,
+    "tolerance": 0.01,
+    "expected_collision_roots": ["ClinicCollision"],
+    "visual_roots": [
+      {"id": "clinic-visual-root", "source_node": "World/Buildings/Clinic/Visual", "visible": true}
+    ],
+    "mappings": [
+      {"id": "clinic-occluder", "collision_root": "ClinicCollision", "aliases": ["Clinic", "ClinicAnnex"], "visual_root_ids": ["clinic-visual-root"]}
+    ],
+    "traces": [
+      {"mapping_id": "clinic-occluder", "source_kind": "resolved_production_scene", "observed_fade": 0.72, "observed_restore": 0.0, "raw_artifact": "reports/raw/environment-coverage/clinic-fade-restore.mp4"}
+    ]
+  },
+  "object_supports": [
+    {"id": "parked-car", "class": "vehicle", "support_polygon": [[4.4, 1.0], [5.6, 1.0], [5.6, 3.0], [4.4, 3.0]], "sample_step": 0.25, "probe_from_y": 2.0}
+  ],
+  "surface_object_pair_rules": [
+    {"object_class": "vehicle", "surface_class": "curb", "max_topmost_ratio": 0.0, "reason": "Vehicle support may not fuse with the raised curb even when concrete is otherwise semantically allowed"}
+  ]
+}

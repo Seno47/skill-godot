@@ -828,15 +828,21 @@
     {
       "id": "high_angle_environment_integrity_evidence",
       "cases": ["high-angle-3d-district-complete"],
-      "description": "Builder-owned exact target-scene contract and target-build close-ups prove visual environment integrity independently from gameplay collision: every visible prop requiring occupancy has one or more local volumes transformed by its full final Godot Transform3D and checked pairwise with exact, reasoned, raw-artifact-backed intentional exemptions; semantic classes such as trees, rocks, bushes, vehicles and road debris keep their entire transformed support footprint on authored allowed render surfaces rather than merely placing their origin legally; camera-visible ground regions are sampled against final render-mesh triangles, not a broad floor collider, to reject holes, wrong top surfaces and exposed substrate; and signs, wires, poles, towers, awnings and facade-adjacent volumes satisfy authored vertical-clearance rules. The audit has zero errors and raw shipping-build occupancy, surface-ownership, ground-seam, clearance, detected-class before/fixed/rerun and overview states agree. Complete collision, alignment, boundary, navigation, origin or scene-serialization checks do not pass visible penetrations, fused props, roadway nature footprints or surface seams.",
+      "description": "Builder-owned local and whole-map exact target-scene contracts plus target-build evidence prove visual environment integrity independently from gameplay collision. The local audit resolves full Godot transforms, full support footprints, render-mesh ground faces, vertical clearance and exact intentional exemptions. The whole-map audit partitions every playable cell into one semantic surface family or authored transition; caps fallback exposure; requires every observed adjacency to have an exercised transition/cause; tile-surveys the complete footprint through the shipping camera with zero uncovered cells; compares every enabled static collider and hero-radius blocked sample with visible render mass while excluding disabled/hidden variants symmetrically; resolves every production collision-root alias to visible occluders and proves fade/restoration in the production scene; and constrains impossible topmost surface/object pairs such as curb-through-vehicle contacts. Both audits have zero errors and the raw survey/contact/raster/motion packet agrees. Complete collision/alignment/boundary/navigation, 100% samples in one permissive region, curated screenshots or synthetic obstruction fixtures do not pass patchwork, invisible blockers, missing occluders or impossible fusions.",
       "artifact_requirements": {
-        "minimum_by_kind": {"report": 2, "image": 5},
+        "minimum_by_kind": {"report": 3, "image": 8, "video": 1},
         "required_states": {
           "environment_integrity_contract": ["report"],
+          "environment_coverage_contract": ["report"],
           "transformed_prop_occupancy": ["report", "image"],
           "semantic_surface_ownership": ["report", "image"],
           "render_ground_coverage_and_seams": ["report", "image"],
           "vertical_clearance": ["report", "image"],
+          "surface_zone_topology": ["report", "image"],
+          "shipping_camera_tiled_survey": ["report", "image"],
+          "all_static_collider_visible_shell": ["report", "image"],
+          "production_occluder_aliases": ["report", "video"],
+          "surface_object_pair_relationships": ["report", "image"],
           "detected_class_closeups_and_resolution": ["report", "image"],
           "environment_integrity_overview": ["image"]
         }
