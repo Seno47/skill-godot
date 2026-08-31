@@ -810,6 +810,50 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertIn("lacks an authored transition/cause rule", completed.stdout)
 
+    def test_streetscape_semantics_template_passes(self) -> None:
+        completed = run_script(
+            "streetscape_semantics_audit.py",
+            "--model",
+            str(ROOT / "assets" / "streetscape-semantics-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] streetscape-semantics", completed.stdout)
+
+    def test_streetscape_semantics_rejects_old_geometry_pass_candidate(self) -> None:
+        fixture = ROOT / "tests" / "fixtures" / "streetscape-semantics-old-clinic-negative.json"
+        source = json.loads(fixture.read_text(encoding="utf-8"))
+        self.assertEqual(
+            source["prior_geometry_gates"],
+            {
+                "resolved_scene_provenance": "pass",
+                "environment_integrity_audit": "pass",
+                "environment_coverage_audit": "pass",
+            },
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "streetscape.json"
+            completed = run_script(
+                "streetscape_semantics_audit.py",
+                "--model",
+                str(fixture),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        errors = "\n".join(report["errors"])
+        self.assertIn("does not connect two known sidewalk nodes", errors)
+        self.assertIn("disconnected gap", errors)
+        self.assertIn("road-building forbidden-surface ratio", errors)
+        self.assertIn("hydrant-in-lane forbidden-surface ratio", errors)
+        self.assertIn("misoriented-signal orientation", errors)
+        self.assertIn("without an authored incident closure", errors)
+        self.assertIn("materialized visible-area ratio", errors)
+        self.assertIn("reachable pocket/contact", errors)
+        self.assertIn("shipping-camera road survey misses junctions", errors)
+
     def test_resolved_scene_provenance_template_passes(self) -> None:
         completed = run_script(
             "resolved_scene_provenance_audit.py",
@@ -820,7 +864,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] resolved-scene-provenance", completed.stdout)
 
-    def test_resolved_scene_provenance_links_both_environment_contracts(self) -> None:
+    def test_resolved_scene_provenance_links_environment_and_streetscape_contracts(self) -> None:
         completed = run_script(
             "resolved_scene_provenance_audit.py",
             "--manifest",
@@ -829,6 +873,8 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             str(ROOT / "assets" / "environment-integrity-contract.template.json"),
             "--evidence-contract",
             str(ROOT / "assets" / "environment-coverage-contract.template.json"),
+            "--evidence-contract",
+            str(ROOT / "assets" / "streetscape-semantics-contract.template.json"),
             "--summary",
         )
         self.assertEqual(completed.returncode, 0, completed.stdout)
@@ -995,6 +1041,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         for asset_name, script_name in (
             ("environment-integrity-contract.template.json", "environment_integrity_audit.py"),
             ("environment-coverage-contract.template.json", "environment_coverage_audit.py"),
+            ("streetscape-semantics-contract.template.json", "streetscape_semantics_audit.py"),
         ):
             model = load_asset_json(asset_name)
             provenance = model["scene_provenance"]
@@ -1096,12 +1143,15 @@ class GenreRubricTests(unittest.TestCase):
                 str(temp / "high-angle-district-review.md"),
                 "--environment-integrity-review-output",
                 str(temp / "environment-integrity-review.md"),
+                "--streetscape-semantics-review-output",
+                str(temp / "streetscape-semantics-review.md"),
                 "--resolved-scene-provenance-output",
                 str(temp / "resolved-scene-provenance.json"),
             )
             evidence = json.loads((temp / "evidence.json").read_text(encoding="utf-8"))
             review = (temp / "high-angle-district-review.md").read_text(encoding="utf-8")
             integrity_review = (temp / "environment-integrity-review.md").read_text(encoding="utf-8")
+            streetscape_review = (temp / "streetscape-semantics-review.md").read_text(encoding="utf-8")
             provenance = json.loads(
                 (temp / "resolved-scene-provenance.json").read_text(encoding="utf-8")
             )
@@ -1116,6 +1166,11 @@ class GenreRubricTests(unittest.TestCase):
             "builder",
         )
         self.assertIn("High-angle 3D Environment Integrity Review", integrity_review)
+        self.assertEqual(
+            evidence["gates"]["high_angle_streetscape_semantics_evidence"]["reviewer"]["role"],
+            "builder",
+        )
+        self.assertIn("High-angle Road and Streetscape Semantics Review", streetscape_review)
         self.assertEqual(provenance["source_kind"], "resolved_target_scene")
         self.assertGreater(len(provenance["entries"]), 1)
 

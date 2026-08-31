@@ -2,7 +2,7 @@
 
 Use this contract for dense 3D dressing, especially fixed/high-angle districts where the shipping camera exposes contacts, silhouettes and ground coverage. It closes a different question from gameplay collision: collision coverage proves that gameplay has physical boundaries; environment integrity proves that visible objects do not penetrate one another, belong to the surface they occupy, clear overhead structures, and cover the rendered ground without holes.
 
-For `high-angle-3d-district-complete`, this is a builder-owned blocking gate. Instantiate `assets/resolved-scene-provenance.template.json`, both environment contract templates and `assets/environment-integrity-review.template.md`. First copy `assets/godot-tests/resolved_scene_provenance_exporter.gd` into the project, adapt its runtime/tool inputs and export the dependency closure:
+For `high-angle-3d-district-complete`, this is a builder-owned blocking gate. Instantiate `assets/resolved-scene-provenance.template.json`, both environment contract templates and `assets/environment-integrity-review.template.md`. When roads/sidewalks/intersections or street furniture exist, also use [road-and-streetscape-semantics.md](road-and-streetscape-semantics.md); geometry coverage cannot certify street topology or placement meaning. First copy `assets/godot-tests/resolved_scene_provenance_exporter.gd` into the project, adapt its runtime/tool inputs and export the dependency closure:
 
 ```bash
 godot --headless --path . \
@@ -12,10 +12,11 @@ godot --headless --path . \
   --build-id old-clinic-map-008-v19 \
   --export-preset "Windows Desktop" \
   --tool-input environment_integrity_exporter=res://tests/environment_integrity_exporter.gd \
-  --tool-input environment_coverage_exporter=res://tests/environment_coverage_exporter.gd
+  --tool-input environment_coverage_exporter=res://tests/environment_coverage_exporter.gd \
+  --tool-input streetscape_semantics_exporter=res://tests/streetscape_semantics_exporter.gd
 ```
 
-Then independently recompute and, in the source workspace, verify every declared file hash. Link both exact evidence contracts so a passing manifest cannot belong to a different build/exporter:
+Then independently recompute and, in the source workspace, verify every declared file hash. Link every applicable exact evidence contract so a passing manifest cannot belong to a different build/exporter:
 
 ```bash
 python scripts/resolved_scene_provenance_audit.py \
@@ -23,6 +24,7 @@ python scripts/resolved_scene_provenance_audit.py \
   --project . \
   --evidence-contract reports/environment-integrity-contract.json \
   --evidence-contract reports/environment-coverage-contract.json \
+  --evidence-contract reports/streetscape-semantics-contract.json \
   --json-output reports/resolved-scene-provenance-audit.json \
   --summary
 ```
@@ -60,7 +62,7 @@ A SHA-256 of only the root `.tscn` is not a candidate revision. Instantiated sub
 - Godot version, exact export-preset selector, whole `export_presets.cfg` hash, `project.godot` hash, provenance-exporter hash and every geometry/evidence exporter hash;
 - a closure digest recomputed from the canonical sorted records, plus the SHA-256 of the completed manifest itself.
 
-The two environment contracts must use `revision_kind: resolved_dependency_closure_sha256` and repeat the same closure digest, manifest hash, exporter path/hash and export-preset selector/hash. `resolved_scene_provenance_audit.py --evidence-contract ...` verifies those links. A legacy `scene_revision`, a root-only entry while discovered dependencies exist, missing runtime-loaded production resources, stale closure digest, unhashed exporter/preset or a contract referring to a different manifest fails closed.
+Every environment/streetscape contract must use `revision_kind: resolved_dependency_closure_sha256` and repeat the same closure digest, manifest hash and export-preset selector/hash while naming its own hashed exporter. `resolved_scene_provenance_audit.py --evidence-contract ...` verifies those links. A legacy `scene_revision`, a root-only entry while discovered dependencies exist, missing runtime-loaded production resources, stale closure digest, unhashed exporter/preset or a contract referring to a different manifest fails closed.
 
 The dependency set may safely be a documented superset (for example, include disabled external variants) but may not omit any resource that can participate in the exact resolved candidate. Resource paths assembled dynamically in scripts are not discoverable merely by walking serialized resource dependencies; enumerate them explicitly or export an equivalent project-owned runtime registry. For packed/exported-only evidence, an exported-project manifest is acceptable only when it gives equivalent canonical dependency/tool hashes and binds them to the exact PCK/ZIP/executable artifact hash; a source root hash is not an exported-build manifest.
 

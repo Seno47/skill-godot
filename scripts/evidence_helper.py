@@ -26,6 +26,7 @@ PRODUCT_OWNER_SLICE_TEMPLATE = ROOT / "assets" / "product-owner-slice-decision.t
 PRODUCTION_ART_REVIEW_TEMPLATE = ROOT / "assets" / "production-art-state-review.template.md"
 HIGH_ANGLE_DISTRICT_REVIEW_TEMPLATE = ROOT / "assets" / "high-angle-3d-district-review.template.md"
 ENVIRONMENT_INTEGRITY_REVIEW_TEMPLATE = ROOT / "assets" / "environment-integrity-review.template.md"
+STREETSCAPE_SEMANTICS_REVIEW_TEMPLATE = ROOT / "assets" / "streetscape-semantics-review.template.md"
 RESOLVED_SCENE_PROVENANCE_TEMPLATE = ROOT / "assets" / "resolved-scene-provenance.template.json"
 MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
 HUD_REVIEW_TEMPLATE = ROOT / "assets" / "gameplay-hud-glanceability-review.template.md"
@@ -196,6 +197,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--environment-integrity-review-output",
         help="Also instantiate the high-angle 3D environment-integrity review.",
+    )
+    parser.add_argument(
+        "--streetscape-semantics-review-output",
+        help="Also instantiate the high-angle road and streetscape semantics review.",
     )
     parser.add_argument(
         "--resolved-scene-provenance-output",
@@ -494,6 +499,7 @@ def main() -> int:
                 args.production_art_review_output,
                 args.high_angle_district_review_output,
                 args.environment_integrity_review_output,
+                args.streetscape_semantics_review_output,
                 args.resolved_scene_provenance_output,
                 args.motion_review_output,
                 args.yandex_checklist_output,
@@ -640,6 +646,11 @@ def main() -> int:
             copy_template(
                 ENVIRONMENT_INTEGRITY_REVIEW_TEMPLATE,
                 output_path(args.environment_integrity_review_output),
+            )
+        if args.streetscape_semantics_review_output:
+            copy_template(
+                STREETSCAPE_SEMANTICS_REVIEW_TEMPLATE,
+                output_path(args.streetscape_semantics_review_output),
             )
         if args.resolved_scene_provenance_output:
             copy_template(

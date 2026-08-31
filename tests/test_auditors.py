@@ -2118,6 +2118,73 @@ class AuditorSmokeTests(unittest.TestCase):
             gate["validation_failures"],
         )
 
+    def test_eval_high_angle_streetscape_fails_closed_without_facade_boundary_and_junction_states(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "high-angle-3d-district-complete"
+        source["gates"]["high_angle_3d_district_composition_evidence"] = {
+            "status": "pass",
+            "evidence": ["fixture: complete district composition, material, and camera packet"],
+            "reviewer": {"role": "builder", "context": "fixture builder district review"},
+            "artifacts": [
+                {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["district_boundary_zone_and_camera_contract", "architectural_palette_and_material_contract"]},
+                {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["entry_and_landmark"]},
+                {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["typical_block"]},
+                {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["boundary_contact"]},
+                {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["opening_negative"]},
+                {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["view_corridor_termination"]},
+                {"path": "evidence-artifacts/vfx.png", "kind": "image", "states": ["dense_interaction"]},
+                {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["objective_or_extraction"]},
+                {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["overview_and_repetition_overlay"]},
+                {"path": "evidence-artifacts/material-same-zone.png", "kind": "image", "states": ["same_zone_palette_cluster"]},
+                {"path": "evidence-artifacts/material-cross-zone.png", "kind": "image", "states": ["cross_zone_palette_transition"]},
+                {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["texture_preserving_material_detail"]},
+                {"path": "evidence-artifacts/motion.avi", "kind": "video", "states": ["dense_interaction", "objective_or_extraction", "camera_motion_and_restoration"]},
+            ],
+        }
+        gate_evidence = source["gates"]["high_angle_streetscape_semantics_evidence"]
+        removed = {
+            "facade_material_completeness",
+            "visible_boundary_reachability",
+            "shipping_camera_road_junction_survey",
+        }
+        for artifact in gate_evidence["artifacts"]:
+            artifact["states"] = [state for state in artifact["states"] if state not in removed]
+        with tempfile.TemporaryDirectory() as directory:
+            evidence_path = Path(directory) / "evidence.json"
+            report_path = Path(directory) / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "high-angle-3d-district-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            self.assertTrue(report_path.is_file(), completed.stdout)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        gate = next(
+            item
+            for item in report["gates"]
+            if item["id"] == "high_angle_streetscape_semantics_evidence"
+        )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(gate["status"], "fail")
+        for state in removed:
+            self.assertTrue(
+                any(state in failure for failure in gate["validation_failures"]),
+                gate["validation_failures"],
+            )
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(scores["visual_coherence"]["score"], 1)
+        self.assertEqual(scores["gameplay_correctness"]["score"], 2)
+        self.assertEqual(scores["playability_and_ux"]["score"], 2)
+        self.assertEqual(scores["technical_quality"]["score"], 2)
+
     def test_eval_complete_slice_accepts_solid_audio(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "constrained-mobile-web"

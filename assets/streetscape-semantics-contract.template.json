@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "contract_id": "example-high-angle-streetscape-semantics",
+  "build_id": "replace-with-exact-target-build-id",
+  "scene_provenance": {
+    "source_kind": "resolved_target_scene",
+    "scene_path": "res://scenes/world/example_district.tscn",
+    "revision_kind": "resolved_dependency_closure_sha256",
+    "dependency_closure_digest": "2531337569225debc32bff67eea105287b3d51b08001f7b7fbada50c4fe44d00",
+    "manifest_path": "reports/resolved-scene-provenance.json",
+    "manifest_sha256": "13d51ed6b4b0a4451f866fe65c04079769f0a693dceff8ea3731d0524ed31266",
+    "exporter": "res://tests/streetscape_semantics_exporter.gd",
+    "exporter_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "export_preset": "Windows Desktop",
+    "export_preset_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+    "streetscape_query": "groups:road_semantic_surface,road_lane,junction,street_object,boundary_cause",
+    "visible_surface_query": "all visible MeshInstance3D surfaces with resolved mesh/override material"
+  },
+  "contract": {
+    "coordinate_system": "godot_xz_y_up",
+    "footprint_sample_step": 0.2,
+    "graph_sample_step": 0.25,
+    "node_tolerance": 0.2,
+    "expected_surface_region_count": 9,
+    "expected_placed_object_count": 5,
+    "expected_visible_building_count": 1,
+    "expected_junction_count": 1,
+    "expected_approach_count": 1
+  },
+  "surface_regions": [
+    {"id": "lane-west", "class": "travel_lane", "polygon": [[0, 4], [4.5, 4], [4.5, 6], [0, 6]]},
+    {"id": "junction-center", "class": "intersection", "polygon": [[4.5, 4], [5.5, 4], [5.5, 6], [4.5, 6]]},
+    {"id": "lane-east", "class": "travel_lane", "polygon": [[5.5, 4], [10, 4], [10, 6], [5.5, 6]]},
+    {"id": "crosswalk-main", "class": "crosswalk", "polygon": [[4.6, 4], [5.4, 4], [5.4, 6], [4.6, 6]]},
+    {"id": "sidewalk-south", "class": "sidewalk_clear", "polygon": [[0, 2.5], [10, 2.5], [10, 4], [0, 4]]},
+    {"id": "sidewalk-north", "class": "sidewalk_clear", "polygon": [[0, 6], [10, 6], [10, 7], [0, 7]]},
+    {"id": "curb-north", "class": "curb", "polygon": [[0, 6], [10, 6], [10, 6.25], [0, 6.25]]},
+    {"id": "furnishing-north", "class": "furnishing_zone", "polygon": [[0, 7], [10, 7], [10, 8], [0, 8]]},
+    {"id": "frontage-north", "class": "frontage", "polygon": [[0, 8], [10, 8], [10, 10], [0, 10]]}
+  ],
+  "road_graph": {
+    "nodes": [
+      {"id": "west-entry", "position": [0, 5], "kind": "boundary"},
+      {"id": "junction-main", "position": [5, 5], "kind": "junction"},
+      {"id": "east-exit", "position": [10, 5], "kind": "boundary"}
+    ],
+    "lanes": [
+      {"id": "west-in", "from": "west-entry", "to": "junction-main", "status": "open", "allowed_surface_classes": ["travel_lane", "intersection", "crosswalk"]},
+      {"id": "east-out", "from": "junction-main", "to": "east-exit", "status": "open", "allowed_surface_classes": ["travel_lane", "intersection", "crosswalk"]}
+    ],
+    "junctions": [
+      {"id": "main", "center": [5, 5], "inbound_lane_ids": ["west-in"], "outbound_lane_ids": ["east-out"], "legal_movements": [{"from": "west-in", "to": "east-out"}]}
+    ],
+    "approaches": [
+      {"id": "west-approach", "junction_id": "main", "inbound_lane_ids": ["west-in"], "travel_direction": [1, 0]}
+    ],
+    "sidewalk_nodes": [
+      {"id": "south-crossing", "position": [5, 4]},
+      {"id": "north-crossing", "position": [5, 6]},
+      {"id": "south-west", "position": [0, 3.25]},
+      {"id": "south-east", "position": [10, 3.25]},
+      {"id": "north-west", "position": [0, 6.5]},
+      {"id": "north-east", "position": [10, 6.5]}
+    ],
+    "sidewalk_segments": [
+      {"id": "south-west-run", "from": "south-west", "to": "south-crossing"},
+      {"id": "south-east-run", "from": "south-crossing", "to": "south-east"},
+      {"id": "north-west-run", "from": "north-west", "to": "north-crossing"},
+      {"id": "north-east-run", "from": "north-crossing", "to": "north-east"}
+    ],
+    "crosswalks": [
+      {"id": "main-crosswalk", "junction_id": "main", "from_sidewalk_node": "south-crossing", "to_sidewalk_node": "north-crossing", "approach_ids": ["west-approach"], "polygon": [[4.6, 4], [5.4, 4], [5.4, 6], [4.6, 6]]}
+    ],
+    "stop_lines": [
+      {"id": "west-stop", "approach_id": "west-approach", "start": [4, 4.3], "end": [4, 5.7], "perpendicular_tolerance_degrees": 5}
+    ],
+    "lane_divider_chains": [
+      {"id": "west-centerline", "maximum_gap": 0.05, "segments": [{"start": [0.25, 5], "end": [2, 5]}, {"start": [2, 5], "end": [3.75, 5]}]}
+    ],
+    "area_markings": [
+      {"id": "east-parking-bay", "class": "parking", "polygon": [[7, 4.1], [8.5, 4.1], [8.5, 4.5], [7, 4.5]], "forbidden_surface_classes": ["intersection", "crosswalk"]}
+    ]
+  },
+  "placement_profiles": [
+    {"id": "building-frontage", "allowed_surface_classes": ["frontage"], "forbidden_surface_classes": ["travel_lane", "intersection", "sidewalk_clear", "crosswalk"], "minimum_allowed_ratio": 1.0, "maximum_forbidden_ratio": 0.0, "allow_forbidden_with_closure": false, "street_furniture": false},
+    {"id": "hydrant-furnishing", "allowed_surface_classes": ["furnishing_zone"], "forbidden_surface_classes": ["travel_lane", "intersection", "sidewalk_clear", "crosswalk"], "minimum_allowed_ratio": 1.0, "maximum_forbidden_ratio": 0.0, "allow_forbidden_with_closure": false, "street_furniture": true, "minimum_curb_setback": 0.4, "maximum_curb_setback": 1.6, "minimum_junction_clearance": 1.0, "approach_required": false, "maximum_approach_distance": 0.0, "orientation_mode": "none", "orientation_tolerance_degrees": 0},
+    {"id": "signal-sidewalk", "allowed_surface_classes": ["sidewalk_clear"], "forbidden_surface_classes": ["travel_lane", "intersection", "crosswalk"], "minimum_allowed_ratio": 1.0, "maximum_forbidden_ratio": 0.0, "allow_forbidden_with_closure": false, "street_furniture": true, "minimum_curb_setback": 0.1, "maximum_curb_setback": 0.8, "minimum_junction_clearance": 0.5, "approach_required": true, "maximum_approach_distance": 1.8, "orientation_mode": "face_oncoming", "orientation_tolerance_degrees": 10},
+    {"id": "parked-vehicle", "allowed_surface_classes": ["travel_lane"], "forbidden_surface_classes": ["intersection", "crosswalk", "sidewalk_clear"], "minimum_allowed_ratio": 1.0, "maximum_forbidden_ratio": 0.0, "allow_forbidden_with_closure": true, "street_furniture": false},
+    {"id": "boundary-mass", "allowed_surface_classes": ["frontage"], "forbidden_surface_classes": ["travel_lane", "intersection", "sidewalk_clear", "crosswalk"], "minimum_allowed_ratio": 1.0, "maximum_forbidden_ratio": 0.0, "allow_forbidden_with_closure": false, "street_furniture": false}
+  ],
+  "placed_objects": [
+    {"id": "clinic-building", "class": "building", "source_node": "World/Buildings/Clinic", "profile_id": "building-frontage", "footprint": [[1, 8.4], [4, 8.4], [4, 9.8], [1, 9.8]], "anchor": [2.5, 9.1], "forward": [0, -1], "zone_id": "clinic-block"},
+    {"id": "hydrant-west", "class": "hydrant", "source_node": "World/Streets/HydrantWest", "profile_id": "hydrant-furnishing", "footprint": [[1.9, 7.25], [2.1, 7.25], [2.1, 7.45], [1.9, 7.45]], "anchor": [2, 7.35], "forward": [0, -1], "zone_id": "clinic-block"},
+    {"id": "signal-main", "class": "traffic_signal", "source_node": "World/Streets/SignalMain", "profile_id": "signal-sidewalk", "footprint": [[5.7, 6.35], [5.9, 6.35], [5.9, 6.55], [5.7, 6.55]], "anchor": [5.8, 6.45], "forward": [-1, 0], "approach_id": "west-approach", "zone_id": "clinic-block"},
+    {"id": "parked-car", "class": "vehicle", "source_node": "World/Streets/ParkedCar", "profile_id": "parked-vehicle", "footprint": [[7, 4.6], [8.2, 4.6], [8.2, 5.4], [7, 5.4]], "anchor": [7.6, 5], "forward": [1, 0], "zone_id": "clinic-block"},
+    {"id": "clinic-wall", "class": "boundary_structure", "source_node": "World/Boundary/ClinicWall", "profile_id": "boundary-mass", "footprint": [[8.5, 8.2], [9.8, 8.2], [9.8, 9.8], [8.5, 9.8]], "anchor": [9.15, 9], "forward": [-1, 0], "zone_id": "clinic-block"}
+  ],
+  "incident_closures": [],
+  "building_style_profiles": [
+    {"id": "clinic-weathered", "required_visible_roles": ["facade", "roof", "trim"], "forbidden_material_ids": ["default", "unpainted", "missing"], "allowed_zone_ids": ["clinic-block"], "allowed_story_states": ["evacuated", "occupied"], "minimum_materialized_visible_area_ratio": 1.0}
+  ],
+  "visible_buildings": [
+    {"object_id": "clinic-building", "style_profile_id": "clinic-weathered", "zone_id": "clinic-block", "function": "medical", "story_state": "evacuated", "visible_surface_area": 100.0, "visible_surface_slots": [
+      {"id": "facade-main", "role": "facade", "visible_area": 65.0, "material_id": "clinic-plaster-weathered", "source_kind": "mesh_surface_material"},
+      {"id": "roof-main", "role": "roof", "visible_area": 25.0, "material_id": "clinic-roof-oxidized", "source_kind": "surface_override_material"},
+      {"id": "trim-main", "role": "trim", "visible_area": 10.0, "material_id": "clinic-trim-painted", "source_kind": "mesh_surface_material"}
+    ]}
+  ],
+  "boundary_reachability": {
+    "origin": [0, 0],
+    "cell_size": 0.5,
+    "width": 8,
+    "height": 6,
+    "player_start_cells": [[1, 2]],
+    "outside_cells": [],
+    "nonwalkable_cells": [],
+    "visible_blocker_cells": [[6, 0], [6, 1], [6, 2], [6, 3], [6, 4], [6, 5]],
+    "safety_blocker_cells": [[7, 0], [7, 1], [7, 2], [7, 3], [7, 4], [7, 5]],
+    "expected_reachable_cell_count": 36,
+    "max_reachable_safety_contact_cells": 0,
+    "visible_boundary_causes": [
+      {"id": "clinic-wall-east", "object_ids": ["clinic-wall"], "visible_cells": [[6, 0], [6, 1], [6, 2], [6, 3], [6, 4], [6, 5]], "safety_cells": [[7, 0], [7, 1], [7, 2], [7, 3], [7, 4], [7, 5]], "maximum_contact_distance_cells": 1, "raw_artifact": "reports/raw/streetscape/boundary-contact.png"}
+    ]
+  },
+  "road_junction_survey": {
+    "required_junction_ids": ["main"],
+    "required_approach_ids": ["west-approach"],
+    "required_surface_region_ids": ["lane-west", "junction-center", "lane-east", "crosswalk-main", "sidewalk-south", "sidewalk-north", "curb-north", "furnishing-north", "frontage-north"],
+    "captures": [
+      {"id": "main-junction", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "camera_node": "World/CameraRig/Camera3D", "covered_junction_ids": ["main"], "covered_approach_ids": ["west-approach"], "covered_surface_region_ids": ["lane-west", "junction-center", "lane-east", "crosswalk-main", "sidewalk-south", "sidewalk-north", "curb-north", "furnishing-north", "frontage-north"], "raw_artifact": "reports/raw/streetscape/main-junction.png"}
+    ],
+    "required_state_ids": ["road_graph_and_markings", "building_road_setback", "facade_material_completeness", "street_furniture_placement", "incident_closure_or_clear_route", "visible_boundary_reachability", "road_junction_overview"],
+    "candidate_states": [
+      {"id": "road_graph_and_markings", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/road-graph.png"},
+      {"id": "building_road_setback", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/building-setback.png"},
+      {"id": "facade_material_completeness", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/facade-surfaces.png"},
+      {"id": "street_furniture_placement", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/furniture.png"},
+      {"id": "incident_closure_or_clear_route", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/clear-route.png"},
+      {"id": "visible_boundary_reachability", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/boundary-raster.png"},
+      {"id": "road_junction_overview", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/junction-overview.png"}
+    ],
+    "detected_defect_classes": [],
+    "defect_resolutions": []
+  }
+}

@@ -10,6 +10,7 @@ extends SceneTree
 ##   --runtime-dependency res://path/to/resource.tres
 ## Add each evidence exporter/auditor input that shapes the resolved report with:
 ##   --tool-input environment_coverage_exporter=res://tests/environment_coverage_exporter.gd
+##   --tool-input streetscape_semantics_exporter=res://tests/streetscape_semantics_exporter.gd
 
 const DIGEST_HEADER := "skill-godot-resolved-scene-closure-v1"
 var _failed := false

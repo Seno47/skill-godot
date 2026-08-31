@@ -302,6 +302,24 @@
         {"path": "evidence-artifacts/motion.avi", "kind": "video", "states": ["production_occluder_aliases"]}
       ]
     },
+    "high_angle_streetscape_semantics_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: same-closure zero-error road/junction/facade/furniture/boundary audit plus complete target-build junction survey"],
+      "reviewer": {"role": "builder", "context": "fixture builder streetscape-semantics review"},
+      "artifacts": [
+        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "streetscape_semantics_contract", "road_graph_and_markings", "building_road_setback"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["streetscape_semantics_audit", "facade_material_completeness", "street_furniture_placement", "incident_closure_or_clear_route"]},
+        {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_boundary_reachability", "shipping_camera_road_junction_survey", "detected_class_resolution_or_clean_baseline"]},
+        {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["road_graph_and_markings"]},
+        {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["building_road_setback"]},
+        {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["facade_material_completeness"]},
+        {"path": "evidence-artifacts/vfx.png", "kind": "image", "states": ["street_furniture_placement"]},
+        {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["incident_closure_or_clear_route"]},
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_boundary_reachability"]},
+        {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["shipping_camera_road_junction_survey", "streetscape_semantics_overview"]},
+        {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["detected_class_resolution_or_clean_baseline"]}
+      ]
+    },
     "responsive_layout_evidence": {
       "status": "pass",
       "evidence": ["fixture: reference, near-square, extreme-narrow, and wide captures"]

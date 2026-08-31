@@ -850,6 +850,28 @@
       }
     },
     {
+      "id": "high_angle_streetscape_semantics_evidence",
+      "cases": ["high-angle-3d-district-complete"],
+      "description": "Builder-owned exact resolved-scene road/streetscape contract and raw target-build survey prove that geometry which passes provenance, collision, environment integrity and coverage also forms a coherent street system. The audit binds to the same dependency closure and checks lane/junction/legal-movement/approach topology; continuous dividers, stop-line order, sidewalk-connected crosswalks and parking exclusions; full building/vehicle/furniture footprints against narrow forbidden road/intersection/crosswalk/sidewalk classes; per-visible-area facade/roof/trim material-slot completeness with zone/function/story profiles; hydrant/signal/sign/pole curb, junction, approach and orientation budgets; topology-changing incident closures with cue ownership and alternate routes; and a production hero-radius flood-fill in which visible boundary causes contact/precede every safety-wall cell and leave no reachable hidden-wall pocket. A deterministic shipping-camera survey covers every junction/approach plus current building, facade, furniture, closure and boundary states, and preserves before/fixed/clean-rerun artifacts for every detected class. Root/material counts, origin legality, broad concrete/road regions, 100% building-node overrides, navigation/collision coverage, environment-audit PASS, or cars named as a boundary do not pass semantic street errors.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"report": 3, "image": 8},
+        "required_states": {
+          "resolved_dependency_closure_provenance": ["report"],
+          "streetscape_semantics_contract": ["report"],
+          "streetscape_semantics_audit": ["report"],
+          "road_graph_and_markings": ["report", "image"],
+          "building_road_setback": ["report", "image"],
+          "facade_material_completeness": ["report", "image"],
+          "street_furniture_placement": ["report", "image"],
+          "incident_closure_or_clear_route": ["report", "image"],
+          "visible_boundary_reachability": ["report", "image"],
+          "shipping_camera_road_junction_survey": ["report", "image"],
+          "detected_class_resolution_or_clean_baseline": ["report", "image"],
+          "streetscape_semantics_overview": ["image"]
+        }
+      }
+    },
+    {
       "id": "localization_contract_evidence",
       "cases": ["localized-release-complete"],
       "description": "A versioned locale contract and target-build traces prove every required locale and fallback, plural branches, font/glyph coverage, placeholder preservation, live language switching, subtitle timing, directional/focus semantics when applicable, pseudolocalization, and dense/narrow overflow budgets. String-table presence or one wide screenshot does not pass.",
@@ -1313,6 +1335,10 @@
       "dimensions": {"visual_coherence": 1, "scene_resource_authorship": 2, "technical_quality": 2, "asset_pipeline": 2}
     },
     {
+      "gate": "high_angle_streetscape_semantics_evidence",
+      "dimensions": {"gameplay_correctness": 2, "playability_and_ux": 2, "visual_coherence": 1, "scene_resource_authorship": 2, "technical_quality": 2}
+    },
+    {
       "gate": "save_data_integrity_evidence",
       "dimensions": {"gameplay_correctness": 1, "technical_quality": 1, "evidence_and_reproducibility": 2}
     },
@@ -1679,8 +1705,8 @@
     },
     {
       "id": "high-angle-3d-district-complete",
-      "brief": "Add fail-closed production contracts for a fixed/high-angle 3D district, urban arena, settlement or extraction route: visible boundaries and openings, block/landmark/depth hierarchy, functional story zones, controlled negative space and modular repetition, semantic architectural palette/material direction under exact gameplay lighting, transformed full-footprint environment integrity independent of collision, plus comfortable bounded camera motion and restoration in the exact target build.",
-      "focus": ["visible boundary and collision agreement", "district block massing and depth layers", "primary and secondary landmarks", "view corridor and street termination", "functional environmental storytelling", "negative-space purpose", "multi-axis modular variation and visible-run budgets", "semantic zone function construction age story and adjacency material assignment", "dominant support accent screen-area hierarchy", "texture and facade roof trim preservation", "same-zone and cross-zone palette coherence under gameplay lighting", "full-transform prop occupancy", "semantic full-footprint surface ownership", "render-mesh ground coverage and seam sampling", "overhead and facade vertical clearance", "frame-rate-independent follow and look-ahead", "safe framing and bounded pressure zoom", "camera volumes rails obstruction and restoration"],
+      "brief": "Add fail-closed production contracts for a fixed/high-angle 3D district, urban arena, settlement or extraction route: visible boundaries and openings, block/landmark/depth hierarchy, functional story zones, controlled negative space and modular repetition, semantic architectural palette/material direction under exact gameplay lighting, transformed full-footprint environment integrity independent of collision, coherent road/junction/sidewalk/facade/furniture/boundary semantics, plus comfortable bounded camera motion and restoration in the exact target build.",
+      "focus": ["visible boundary and collision agreement", "district block massing and depth layers", "primary and secondary landmarks", "view corridor and street termination", "functional environmental storytelling", "negative-space purpose", "multi-axis modular variation and visible-run budgets", "semantic zone function construction age story and adjacency material assignment", "dominant support accent screen-area hierarchy", "texture and facade roof trim preservation", "same-zone and cross-zone palette coherence under gameplay lighting", "full-transform prop occupancy", "semantic full-footprint surface ownership", "render-mesh ground coverage and seam sampling", "overhead and facade vertical clearance", "lane junction approach sidewalk crosswalk and marking topology", "building vehicle and furniture forbidden-surface footprints", "per-visible-surface facade roof trim completeness", "street-furniture setback association and orientation", "incident-closure alternate routes", "visible-boundary reachability without safety-wall pockets", "frame-rate-independent follow and look-ahead", "safe framing and bounded pressure zoom", "camera volumes rails obstruction and restoration"],
       "minimum_scores": {"playability_and_ux": 3, "visual_coherence": 3, "scene_resource_authorship": 3, "asset_pipeline": 3}
     },
     {

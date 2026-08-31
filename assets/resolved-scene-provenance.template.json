@@ -34,7 +34,8 @@
     {"role": "environment_integrity_exporter", "path": "res://tests/environment_integrity_exporter.gd", "bytes": 4100, "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
     {"role": "export_presets", "path": "res://export_presets.cfg", "bytes": 900, "sha256": "6666666666666666666666666666666666666666666666666666666666666666"},
     {"role": "exporter_script", "path": "res://tests/resolved_scene_provenance_exporter.gd", "bytes": 3500, "sha256": "7777777777777777777777777777777777777777777777777777777777777777"},
-    {"role": "project_settings", "path": "res://project.godot", "bytes": 1200, "sha256": "8888888888888888888888888888888888888888888888888888888888888888"}
+    {"role": "project_settings", "path": "res://project.godot", "bytes": 1200, "sha256": "8888888888888888888888888888888888888888888888888888888888888888"},
+    {"role": "streetscape_semantics_exporter", "path": "res://tests/streetscape_semantics_exporter.gd", "bytes": 4300, "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
   ],
-  "closure_digest": "336a8090eba0a90d6ceebf017d3bdce06c99af9ed9a0872cb7df266a98ff7e5f"
+  "closure_digest": "2531337569225debc32bff67eea105287b3d51b08001f7b7fbada50c4fe44d00"
 }
