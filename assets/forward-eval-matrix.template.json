@@ -22,6 +22,7 @@
     "high-angle-environment-integrity",
     "high-angle-environment-coverage",
     "resolved-scene-dependency-provenance",
+    "streetscape-resolved-evidence-v3",
     "junction-sidewalk-curb-continuity",
     "crosswalk-road-detail-priority",
     "strict-visible-contact-plausibility",

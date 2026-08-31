@@ -274,6 +274,7 @@ Before owner or independent review, capture the exact target build with the ordi
 13. a gameplay-camera material-detail frame showing texture preservation, facade/roof/trim separation and localized weathering.
 14. environment-integrity close-ups for transformed prop occupancy, full-footprint semantic surface ownership, visible ground coverage/seams and vertical clearance, plus a clean deterministic rerun.
 15. a deterministic shipping-camera tiled survey covering the complete playable footprint, all-enabled-static-collider/render-shell and hero-radius overlays, production occluder fade/restoration, and high-risk topmost surface/object pairs.
+16. for streets, an exporter-owned complete visible-mesh inventory, real surface/material provenance, rendered facade/roof/trim pixel masks, every boundary-road termination and every visible canopy/awning/support contact.
 
 Fill the template's ledgers and declare PASS/FAIL/NOT TESTED for every row. The builder must fail the gate when:
 
@@ -291,6 +292,7 @@ Fill the template's ledgers and declare PASS/FAIL/NOT TESTED for every row. The 
 - only prop counts, scene-tree validity, navmesh coverage, occlusion-culling statistics or editor free-camera screenshots are offered.
 - collision/boundary coverage passes while visible props penetrate one another, nature footprints cross authored road/sidewalk, a broad floor collider hides holes in the render meshes, or overhead structures lack measured clearance.
 - one broad semantic region accepts incompatible top surfaces, fallback/patchwork exceeds zone budgets, survey cells remain unseen, an enabled static collider lacks visible mass, a production collision root lacks a real visual alias/trace, or an allowed curb/concrete face still fuses with a vehicle.
+- a streetscape adapter invents facade/roof/trim slots or area percentages, omits a visible lamp/pole/support class, validates only resource colors instead of target-build pixels, leaves a road at a bare rectangular cut/inside a facade, or leaves an awning/support visibly floating.
 
 Do not increase density until the map passes. First fix massing, hierarchy, zone function, boundary causes, route termination and variation grammar; then add only the clusters that support them.
 

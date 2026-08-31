@@ -12,7 +12,7 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Streetscape exporter path + SHA-256:
 - Selected export preset + SHA-256:
 - Contract JSON / audit JSON:
-- Contract schema (must be v2) / migration source if applicable:
+- Contract schema (must be v3) / migration source if applicable:
 - Road profile: scale, traffic convention, stylization, hero radius:
 - Raw capture root:
 - Prior provenance/environment-integrity/environment-coverage results:
@@ -28,7 +28,11 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 | Visible road details near crossings | | | | NOT TESTED |
 | Full-footprint placed objects | | | | NOT TESTED |
 | Visible buildings / material slots | | | | NOT TESTED |
+| Exporter-owned visible mesh instances / classifications | | | | NOT TESTED |
 | Street furniture with profiles | | | | NOT TESTED |
+| Street-furniture subclasses | | | | NOT TESTED |
+| Canopy/awning/support structures / contacts | | | | NOT TESTED |
+| Boundary lane endpoints / terminations | | | | NOT TESTED |
 | Incident closures | | | | NOT TESTED |
 | Boundary raster cells / causes | | | | NOT TESTED |
 | Shipping-camera junction captures | | | | NOT TESTED |
@@ -44,6 +48,16 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Disconnected or floating markings:
 - Crosswalks ending outside clear pedestrian routes:
 - Signals/signs without exact movement ownership:
+
+## Boundary road terminations
+
+| Boundary node / lanes | Kind: continuation/turn/cul-de-sac/closure | Resolved surface/cap/cause | Endpoint outside buildings | Marking-stop budget | Raw close-up | Verdict |
+|---|---|---|---|---|---|---|
+| | | | | | | NOT TESTED |
+
+- Every boundary-kind lane node has exactly one record:
+- Continued-offmap surface remains present beyond the node:
+- No bare rectangular cut, lane endpoint inside a facade, or marking running into the edge:
 
 ## Sidewalk/curb junction continuity
 
@@ -84,9 +98,13 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 | | | | | | | | NOT TESTED |
 
 - Every camera-visible surface slot exported:
-- Effective material source recorded per slot:
+- Every role is tied to a real mesh instance/surface index or resolved shader-mask subregion:
+- Effective material source recorded per slot and agrees with the exporter-owned manifest:
+- Adapter did not invent role IDs or percentage areas:
 - Required facade/roof/trim roles present:
 - Node-wide override did not hide missing/default surfaces:
+- Hashed target-build raw frame and resolved surface-ID masks cover every visible building/role:
+- Rendered value/chroma envelopes and role-to-role DeltaE pass under shipping lighting:
 - Numeric completeness and rendered art-direction review both pass:
 
 ## Street furniture
@@ -99,6 +117,18 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Signals control the correct approach and face oncoming traffic/movement:
 - Signs/poles are not camera-facing decoration detached from road semantics:
 - Damaged/fallen exceptions are exact and visually legible:
+- Exporter-owned mesh traversal is classified exactly once:
+- Expected/exported counts for lamp, worklight, utility-pole, hydrant, signal, sign and project subclasses:
+
+## Canopy / awning / support contact
+
+| Structure / mesh IDs | Support mode | Resolved vertex/support samples | Max / measured gap | Mount IDs if applicable | Raw close-up | Verdict |
+|---|---|---:|---:|---|---|---|
+| | | | | | | NOT TESTED |
+
+- Every visible support-class mesh covered exactly once:
+- Ground-supported structures meet topmost render ground, not merely a collision floor:
+- Facade-mounted/suspended structures name and contact their resolved mounts:
 
 ## Incident closures
 
@@ -137,11 +167,15 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 | State | Raw artifact | Build match | Observation | Verdict |
 |---|---|---|---|---|
 | `road_graph_and_markings` | | | | NOT TESTED |
+| `lane_endpoint_terminations` | | | | NOT TESTED |
 | `junction_sidewalk_curb_continuity` | | | | NOT TESTED |
 | `crosswalk_road_detail_priority` | | | | NOT TESTED |
 | `building_road_setback` | | | | NOT TESTED |
+| `visible_mesh_inventory_completeness` | | | | NOT TESTED |
 | `facade_material_completeness` | | | | NOT TESTED |
+| `rendered_facade_material_evidence` | | | | NOT TESTED |
 | `street_furniture_placement` | | | | NOT TESTED |
+| `support_structure_contacts` | | | | NOT TESTED |
 | `incident_closure_or_clear_route` | | | | NOT TESTED |
 | `visible_boundary_reachability` | | | | NOT TESTED |
 | `road_junction_overview` | | | | NOT TESTED |
@@ -160,10 +194,15 @@ Every audit- or survey-detected class needs an exact sequence. If no class was f
 - Cars are named as a boundary while a reachable pocket touches the safety wall: PASS / FAIL / NOT TESTED
 - Building root is legal but full support/mass occupies road/sidewalk: PASS / FAIL / NOT TESTED
 - Building material coverage is nominally complete but a visible slot is default/unpainted or a required role is absent: PASS / FAIL / NOT TESTED
+- Adapter synthesizes facade/roof/trim IDs or 70/20/10 areas from fewer real mesh surfaces: PASS / FAIL / NOT TESTED
+- Resource materials are non-null but target-build pixels collapse to gray/default or fail role separation: PASS / FAIL / NOT TESTED
 - Lane dividers/stop/crosswalk/parking marks do not form a coherent junction approach: PASS / FAIL / NOT TESTED
 - Road-mouth inner corner or T-opposite sidewalk exposes terrain/fallback because the slab/band stops short: PASS / FAIL / NOT TESTED
 - Storm drain/repair/cover footprint fragments crosswalk markings: PASS / FAIL / NOT TESTED
 - Hydrant/signal/sign/pole violates its surface, setback, approach or orientation profile: PASS / FAIL / NOT TESTED
+- Lamp/worklight/utility-pole/support mesh is visible but absent from the adapter classification: PASS / FAIL / NOT TESTED
+- Road boundary endpoint has a bare cut, enters a building or lacks an authored termination: PASS / FAIL / NOT TESTED
+- Awning/canopy/support exceeds the resolved support-gap budget: PASS / FAIL / NOT TESTED
 - Incident prop blocks road/sidewalk without graph closure, cue ownership and alternate path: PASS / FAIL / NOT TESTED
 - Selected screenshots leave junctions/approaches uncovered: PASS / FAIL / NOT TESTED
 

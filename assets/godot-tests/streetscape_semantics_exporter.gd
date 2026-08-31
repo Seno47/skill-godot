@@ -14,8 +14,10 @@ extends SceneTree
 ## It must read the instantiated production scene's final transforms, mesh surfaces,
 ## collision/hero-radius raster, semantic resources/groups, approach-side and
 ## T-opposite sidewalk/curb continuity bands, every visible road-detail footprint,
-## and the raw-artifact manifest. Derive these from final production transforms;
-## do not hand-type only the intersections already selected for screenshots.
+## lane-boundary terminations, support contacts, rendered surface-ID masks and the
+## raw-artifact manifest. The exporter itself injects the complete visible mesh and
+## effective-material manifest after traversing the resolved scene; the adapter may
+## classify it but cannot omit lamps, supports or inconvenient mesh surfaces.
 
 
 func _initialize() -> void:
@@ -72,8 +74,8 @@ func _run() -> void:
 		_fail("adapter export_streetscape_semantics must return Dictionary")
 		return
 	var contract: Dictionary = raw
-	if contract.get("schema_version") != 2:
-		_fail("adapter result schema_version must be 2")
+	if contract.get("schema_version") != 3:
+		_fail("adapter result schema_version must be 3")
 		return
 	if String(contract.get("build_id", "")) != String(options.build_id):
 		_fail("adapter result build_id does not match --build-id")
@@ -88,6 +90,11 @@ func _run() -> void:
 	if String(provenance.get("scene_path", "")) != scene_path:
 		_fail("scene_provenance.scene_path must match the instantiated production scene")
 		return
+	var visible_mesh_manifest := _collect_visible_mesh_manifest(root)
+	if visible_mesh_manifest.is_empty():
+		_fail("resolved production scene has no visible mesh instances")
+		return
+	contract["resolved_visible_mesh_manifest"] = visible_mesh_manifest
 
 	var output_path := String(options.output)
 	if not output_path.begins_with("res://") and not output_path.begins_with("user://"):
@@ -107,6 +114,66 @@ func _run() -> void:
 		String(options.build_id), scene_path, output_path
 	])
 	quit(0)
+
+
+func _collect_visible_mesh_manifest(root: Node) -> Array[Dictionary]:
+	var meshes: Array[Dictionary] = []
+	var candidates: Array[Node] = []
+	candidates.append_array(root.find_children("*", "MeshInstance3D", true, false))
+	candidates.append_array(root.find_children("*", "MultiMeshInstance3D", true, false))
+	for candidate in candidates:
+		if not (candidate is GeometryInstance3D) or not candidate.is_visible_in_tree():
+			continue
+		var geometry := candidate as GeometryInstance3D
+		var mesh_instance := candidate as MeshInstance3D
+		var multi_mesh_instance := candidate as MultiMeshInstance3D
+		var mesh: Mesh = null
+		if mesh_instance != null:
+			mesh = mesh_instance.mesh
+		elif multi_mesh_instance != null and multi_mesh_instance.multimesh != null:
+			mesh = multi_mesh_instance.multimesh.mesh
+		if mesh == null or mesh.get_surface_count() <= 0:
+			continue
+		var node_path := String(root.get_path_to(candidate))
+		var surfaces: Array[Dictionary] = []
+		for surface_index in mesh.get_surface_count():
+			var material: Material = null
+			var source_kind := "missing"
+			if geometry.material_override != null:
+				material = geometry.material_override
+				source_kind = "node_material_override"
+			elif mesh_instance != null and mesh_instance.get_surface_override_material(surface_index) != null:
+				material = mesh_instance.get_surface_override_material(surface_index)
+				source_kind = "surface_override_material"
+			else:
+				material = mesh.surface_get_material(surface_index)
+				if material != null:
+					source_kind = "mesh_surface_material"
+			surfaces.append({
+				"surface_index": surface_index,
+				"effective_material_id": _resource_id(
+					material, "%s::surface-%d::missing" % [node_path, surface_index]
+				),
+				"material_source_kind": source_kind,
+			})
+		meshes.append({
+			"id": node_path,
+			"node_path": node_path,
+			"mesh_resource_id": _resource_id(mesh, "%s::runtime-mesh" % node_path),
+			"surface_count": mesh.get_surface_count(),
+			"surfaces": surfaces,
+		})
+	meshes.sort_custom(func(first: Dictionary, second: Dictionary) -> bool:
+		return String(first.id) < String(second.id)
+	)
+	return meshes
+
+
+func _resource_id(resource: Resource, fallback: String) -> String:
+	if resource == null:
+		return fallback
+	var path := String(resource.resource_path)
+	return path if not path.is_empty() else fallback
 
 
 func _parse_args(args: PackedStringArray) -> Dictionary:

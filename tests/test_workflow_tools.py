@@ -844,19 +844,19 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] streetscape-semantics", completed.stdout)
 
-    def test_streetscape_semantics_v1_requires_junction_migration(self) -> None:
+    def test_streetscape_semantics_v2_requires_resolved_evidence_migration(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
-        model["schema_version"] = 1
+        model["schema_version"] = 2
         with tempfile.TemporaryDirectory() as directory:
-            model_path = Path(directory) / "streetscape-v1.json"
+            model_path = Path(directory) / "streetscape-v2.json"
             model_path.write_text(json.dumps(model), encoding="utf-8")
             completed = run_script(
                 "streetscape_semantics_audit.py", "--model", str(model_path), "--summary"
             )
         self.assertEqual(completed.returncode, 2, completed.stdout)
-        self.assertIn("migrate junction continuity", completed.stdout)
+        self.assertIn("re-export resolved mesh inventory", completed.stdout)
 
-    def test_streetscape_semantics_rejects_old_geometry_pass_candidate(self) -> None:
+    def test_streetscape_semantics_rejects_legacy_v2_candidate_before_semantic_claims(self) -> None:
         fixture = ROOT / "tests" / "fixtures" / "streetscape-semantics-old-clinic-negative.json"
         source = json.loads(fixture.read_text(encoding="utf-8"))
         self.assertEqual(
@@ -868,27 +868,85 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             },
         )
         with tempfile.TemporaryDirectory() as directory:
-            report_path = Path(directory) / "streetscape.json"
             completed = run_script(
                 "streetscape_semantics_audit.py",
                 "--model",
                 str(fixture),
+                "--summary",
+            )
+        self.assertEqual(completed.returncode, 2, completed.stdout)
+        self.assertIn("schema_version must be 3", completed.stdout)
+
+    def test_streetscape_v21_evidence_shaping_false_pass_is_rejected(self) -> None:
+        fixture = json.loads(
+            (
+                ROOT
+                / "tests"
+                / "fixtures"
+                / "streetscape-v21-evidence-shaping-negative.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(fixture["prior_claimed_result"]["status"], "pass")
+        model = load_asset_json("streetscape-semantics-contract.template.json")
+
+        clinic_mesh = next(
+            item for item in model["resolved_visible_mesh_manifest"]
+            if item["id"] == "clinic-building-mesh"
+        )
+        clinic_mesh["surface_count"] = 2
+        clinic_mesh["surfaces"] = [
+            {"surface_index": 0, "effective_material_id": "gray-override", "material_source_kind": "node_material_override"},
+            {"surface_index": 1, "effective_material_id": "gray-override", "material_source_kind": "node_material_override"},
+        ]
+        building = model["visible_buildings"][0]
+        for index, slot in enumerate(building["visible_surface_slots"]):
+            slot["surface_index"] = min(index, 1)
+            slot["material_id"] = "gray-override"
+            slot["material_source_kind"] = "node_material_override"
+            slot["role_source_kind"] = "authored_surface_profile"
+            slot["area_source_kind"] = "resolved_mesh_triangles"
+        model["visible_mesh_classifications"] = [
+            item for item in model["visible_mesh_classifications"]
+            if item["mesh_instance_id"] != "street-light-east-mesh"
+        ]
+        model["surface_regions"][0]["polygon"] = [[0, 4], [4.5, 4], [4.5, 6], [0, 6]]
+        east_exit = next(item for item in model["road_graph"]["nodes"] if item["id"] == "east-exit")
+        east_exit["position"] = [2.5, 9.1]
+        support = model["support_contacts"][0]
+        support["lowest_visible_y"] = 0.8
+        support["contact_samples"] = [
+            {"support_y": 0.8, "ground_y": 0.0, "gap": 0.8},
+            {"support_y": 0.8, "ground_y": 0.0, "gap": 0.8},
+        ]
+        rendered_capture = model["rendered_material_evidence"]["captures"][0]
+        rendered_capture["raw_artifact"] = "assets/streetscape-rendered-material-example/gray-material.ppm"
+        rendered_capture["raw_sha256"] = "65675a6e4be7a52244486f806d4230d604f23392c71661116a4bb514bf1a412f"
+
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "v21-shaped-pass.json"
+            report_path = Path(directory) / "v21-shaped-pass-report.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "streetscape_semantics_audit.py",
+                "--model",
+                str(model_path),
                 "--json-output",
                 str(report_path),
                 "--summary",
             )
+            self.assertTrue(report_path.is_file(), completed.stdout)
             report = json.loads(report_path.read_text(encoding="utf-8"))
         self.assertEqual(completed.returncode, 1, completed.stdout)
         errors = "\n".join(report["errors"])
-        self.assertIn("does not connect two known sidewalk nodes", errors)
-        self.assertIn("disconnected gap", errors)
-        self.assertIn("road-building forbidden-surface ratio", errors)
-        self.assertIn("hydrant-in-lane forbidden-surface ratio", errors)
-        self.assertIn("misoriented-signal orientation", errors)
-        self.assertIn("without an authored incident closure", errors)
-        self.assertIn("materialized visible-area ratio", errors)
-        self.assertIn("reachable pocket/contact", errors)
-        self.assertIn("shipping-camera road survey misses junctions", errors)
+        self.assertIn("fabricates multiple semantic slots", errors)
+        self.assertIn("node-wide material override", errors)
+        self.assertIn("rendered mean chroma", errors)
+        self.assertIn("separation DeltaE", errors)
+        self.assertIn("visible mesh classifications do not exactly cover", errors)
+        self.assertIn("street-furniture class inventory is incomplete", errors)
+        self.assertIn("bare cutoff", errors)
+        self.assertIn("lies inside building footprint", errors)
+        self.assertIn("floats above its render support", errors)
 
     def test_old_clinic_v20_junction_and_crosswalk_gaps_fail_while_v21_passes(self) -> None:
         regression = json.loads(
@@ -907,6 +965,8 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             capture["build_id"] = broken["build_id"]
         for state in broken["road_junction_survey"]["candidate_states"]:
             state["build_id"] = broken["build_id"]
+        for capture in broken["rendered_material_evidence"]["captures"]:
+            capture["build_id"] = broken["build_id"]
         broken["junction_corner_continuity"]["runs"][1]["path"] = [[4, 2.55], [6, 2.55]]
         drain = next(item for item in broken["placed_objects"] if item["id"] == "storm-drain-east")
         drain.update(

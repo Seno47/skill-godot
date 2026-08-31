@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "id": "old-clinic-v21-evidence-shaping-negative",
+  "base_contract": "assets/streetscape-semantics-contract.template.json",
+  "prior_claimed_result": {
+    "schema_version": 2,
+    "status": "pass",
+    "junctions": 6,
+    "objects": 105,
+    "buildings": 79,
+    "reachable_pockets": 0,
+    "errors": 0
+  },
+  "mutations": [
+    "derive three facade roof trim slots from two resolved mesh surfaces with one node-wide override and synthetic percentage areas",
+    "render facade roof and trim masks from one nearly gray target-build image outside the locked value chroma and DeltaE envelopes",
+    "leave a resolved street-light mesh unclassified so the adapter inventory omits an ordinary visible furniture subclass",
+    "stop a continued-offmap road surface exactly at its boundary node with no resolved continuation cap",
+    "place a lane boundary endpoint inside a building footprint",
+    "report an awning support whose lowest visible vertices remain 0.8 world units above the render-ground support"
+  ],
+  "expected_gate": "high_angle_streetscape_semantics_evidence",
+  "expected_status": "fail",
+  "raw_user_artifacts": [
+    "D:/Temp/codex-clipboard-f7066ee6-6081-4a75-9bf2-aac8f41523ec.png",
+    "D:/Temp/codex-clipboard-83d93c6f-fb58-42e2-aa91-fe399cd76778.png",
+    "D:/Temp/codex-clipboard-9b51291d-07ca-43b4-810c-8b732a716a73.png",
+    "D:/Temp/codex-clipboard-e192e6da-2b63-4ce8-84c9-8f94021bccfd.png"
+  ]
+}

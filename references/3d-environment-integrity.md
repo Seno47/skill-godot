@@ -230,6 +230,8 @@ upper.min_y - lower.max_y >= minimum_gap
 
 Use the actual clearance needed by the lower object, its animation and the shipping camera read. A wire touching a tank, a sign entering a facade, a lamp shaft through a car or a tower frame entering a roof fails even when every prop has a correct collider.
 
+Clearance does not prove support. When roads/streetscape exist, the schema-v3 streetscape layer separately enumerates every visible canopy/awning/support mesh from the exporter-owned scene traversal and proves ground, facade-mount or suspension contact from resolved vertices to render surfaces. A floating awning can pass every overhead-clearance rule and must still fail the support-contact gate.
+
 ## Raw target-build close-up matrix
 
 The deterministic report and visual evidence are one gate, not alternatives. Preserve exact shipping-build close-ups at the final camera, lighting and viewport for:
