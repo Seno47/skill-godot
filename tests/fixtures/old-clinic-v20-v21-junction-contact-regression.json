@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "prior_gates": {
+    "environment_integrity_audit": "pass",
+    "environment_coverage_audit": "pass",
+    "streetscape_semantics_audit": "pass"
+  },
+  "v20": {
+    "build_id": "old-clinic-map-008-v20",
+    "junction_defects": [
+      {
+        "class": "sidewalk-curb-junction-continuity",
+        "description": "Road-mouth inner corners expose 0.72 by 0.72 terrain squares because sidewalk slabs and the perpendicular band do not close.",
+        "raw_artifacts": [
+          "D:/Temp/codex-clipboard-dd37d8cf-23a2-4c06-bcb0-800c8bd294be.png",
+          "D:/Temp/codex-clipboard-530fbf61-8621-41b5-b8df-7b99f425c65f.png"
+        ]
+      },
+      {
+        "class": "crosswalk-road-detail-priority",
+        "description": "A storm-drain bed crosses high-visibility crosswalk stripes and cuts brown gaps through the marking.",
+        "raw_artifact": "reports/evidence/map-008-v20/state-crosswalk-drain-gap.png"
+      }
+    ],
+    "contact_defect": {
+      "class": "vehicle-barrier-penetration-hidden-by-exemption",
+      "instances": ["NorthAbandonedPickup/body", "NorthAccidentCordonEast/panel"],
+      "reported_penetration_range": [0.09, 0.2],
+      "invalid_reason": "intentionally braced against abandoned pickup bumper",
+      "raw_artifact": "D:/Temp/codex-clipboard-4bb94c18-1352-4998-be74-67b6d730f41b.png"
+    }
+  },
+  "v21": {
+    "build_id": "old-clinic-map-008-v21",
+    "junction_artifact": "C:/Users/xo4yk/Documents/ChatGPT/rogue-like/reports/evidence/map-008-v21/state-crossroads-final.png",
+    "contact_artifact": "C:/Users/xo4yk/Documents/ChatGPT/rogue-like/reports/evidence/map-008-v21/state-north-edge-cordon-clearance.png",
+    "expected_streetscape_status": "pass",
+    "expected_environment_status": "pass"
+  }
+}

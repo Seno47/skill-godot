@@ -743,6 +743,18 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] environment-integrity", completed.stdout)
 
+    def test_environment_integrity_v1_requires_contact_migration(self) -> None:
+        model = load_asset_json("environment-integrity-contract.template.json")
+        model["schema_version"] = 1
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "environment-v1.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "environment_integrity_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 2, completed.stdout)
+        self.assertIn("migrate intentional contacts", completed.stdout)
+
     def test_environment_integrity_rejects_visual_fail_after_collision_pass(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             report_path = Path(directory) / "environment-integrity.json"
@@ -832,6 +844,18 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] streetscape-semantics", completed.stdout)
 
+    def test_streetscape_semantics_v1_requires_junction_migration(self) -> None:
+        model = load_asset_json("streetscape-semantics-contract.template.json")
+        model["schema_version"] = 1
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "streetscape-v1.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "streetscape_semantics_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 2, completed.stdout)
+        self.assertIn("migrate junction continuity", completed.stdout)
+
     def test_streetscape_semantics_rejects_old_geometry_pass_candidate(self) -> None:
         fixture = ROOT / "tests" / "fixtures" / "streetscape-semantics-old-clinic-negative.json"
         source = json.loads(fixture.read_text(encoding="utf-8"))
@@ -865,6 +889,219 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("materialized visible-area ratio", errors)
         self.assertIn("reachable pocket/contact", errors)
         self.assertIn("shipping-camera road survey misses junctions", errors)
+
+    def test_old_clinic_v20_junction_and_crosswalk_gaps_fail_while_v21_passes(self) -> None:
+        regression = json.loads(
+            (
+                ROOT
+                / "tests"
+                / "fixtures"
+                / "old-clinic-v20-v21-junction-contact-regression.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(regression["prior_gates"]["streetscape_semantics_audit"], "pass")
+        fixed = load_asset_json("streetscape-semantics-contract.template.json")
+        broken = json.loads(json.dumps(fixed))
+        broken["build_id"] = regression["v20"]["build_id"]
+        for capture in broken["road_junction_survey"]["captures"]:
+            capture["build_id"] = broken["build_id"]
+        for state in broken["road_junction_survey"]["candidate_states"]:
+            state["build_id"] = broken["build_id"]
+        broken["junction_corner_continuity"]["runs"][1]["path"] = [[4, 2.55], [6, 2.55]]
+        drain = next(item for item in broken["placed_objects"] if item["id"] == "storm-drain-east")
+        drain.update(
+            {
+                "footprint": [[4.75, 4.45], [5.15, 4.45], [5.15, 4.75], [4.75, 4.75]],
+                "anchor": [4.95, 4.6],
+            }
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            broken_path = Path(directory) / "v20-streetscape.json"
+            fixed_path = Path(directory) / "v21-streetscape.json"
+            broken_path.write_text(json.dumps(broken), encoding="utf-8")
+            fixed_path.write_text(json.dumps(fixed), encoding="utf-8")
+            broken_run = run_script(
+                "streetscape_semantics_audit.py", "--model", str(broken_path), "--summary"
+            )
+            fixed_run = run_script(
+                "streetscape_semantics_audit.py", "--model", str(fixed_path), "--summary"
+            )
+        self.assertEqual(broken_run.returncode, 1, broken_run.stdout)
+        self.assertIn("inner-corner/band failure", broken_run.stdout)
+        self.assertIn("road detail storm-drain-east crosswalk clearance", broken_run.stdout)
+        self.assertEqual(fixed_run.returncode, 0, fixed_run.stdout)
+
+    def test_t_junction_requires_explicit_opposite_sidewalk_continuity(self) -> None:
+        broken = load_asset_json("streetscape-semantics-contract.template.json")
+        broken["road_graph"]["junctions"][0]["kind"] = "t"
+        fixed = json.loads(json.dumps(broken))
+        fixed["junction_corner_continuity"]["runs"].append(
+            {
+                "id": "main-t-opposite",
+                "role": "main:t_opposite_continuous",
+                "junction_id": "main",
+                "clear_width": 0.5,
+                "path": [[0.5, 6.5], [9.5, 6.5]],
+                "transition_contracts": [],
+                "raw_artifact": "reports/raw/streetscape/main-t-opposite.png",
+            }
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            broken_path = Path(directory) / "t-missing.json"
+            fixed_path = Path(directory) / "t-complete.json"
+            broken_path.write_text(json.dumps(broken), encoding="utf-8")
+            fixed_path.write_text(json.dumps(fixed), encoding="utf-8")
+            broken_run = run_script(
+                "streetscape_semantics_audit.py", "--model", str(broken_path), "--summary"
+            )
+            fixed_run = run_script(
+                "streetscape_semantics_audit.py", "--model", str(fixed_path), "--summary"
+            )
+        self.assertEqual(broken_run.returncode, 1, broken_run.stdout)
+        self.assertIn("main:t_opposite_continuous", broken_run.stdout)
+        self.assertEqual(fixed_run.returncode, 0, fixed_run.stdout)
+
+    def test_junction_terrain_transition_requires_bounded_authored_contract(self) -> None:
+        broken = load_asset_json("streetscape-semantics-contract.template.json")
+        run = broken["junction_corner_continuity"]["runs"][1]
+        run["path"] = [[4, 2.55], [6, 2.55]]
+        fixed = json.loads(json.dumps(broken))
+        fixed["junction_corner_continuity"]["runs"][1]["transition_contracts"] = [
+            {
+                "id": "south-authored-cutout",
+                "kind": "authored_cutout",
+                "polygon": [[3.7, 2.2], [6.3, 2.2], [6.3, 2.9], [3.7, 2.9]],
+                "allowed_top_surface_classes": ["terrain", "sidewalk_clear"],
+                "raw_artifact": "reports/raw/streetscape/south-authored-cutout.png",
+            }
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            broken_path = Path(directory) / "transition-unowned.json"
+            fixed_path = Path(directory) / "transition-authored.json"
+            broken_path.write_text(json.dumps(broken), encoding="utf-8")
+            fixed_path.write_text(json.dumps(fixed), encoding="utf-8")
+            broken_run = run_script(
+                "streetscape_semantics_audit.py", "--model", str(broken_path), "--summary"
+            )
+            fixed_run = run_script(
+                "streetscape_semantics_audit.py", "--model", str(fixed_path), "--summary"
+            )
+        self.assertEqual(broken_run.returncode, 1, broken_run.stdout)
+        self.assertIn("inner-corner/band failure", broken_run.stdout)
+        self.assertEqual(fixed_run.returncode, 0, fixed_run.stdout)
+
+    def test_old_clinic_v20_vehicle_cordon_exemption_fails_while_v21_clearance_passes(self) -> None:
+        regression = json.loads(
+            (
+                ROOT
+                / "tests"
+                / "fixtures"
+                / "old-clinic-v20-v21-junction-contact-regression.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(regression["prior_gates"]["environment_integrity_audit"], "pass")
+        fixed = load_asset_json("environment-integrity-contract.template.json")
+        broken = json.loads(json.dumps(fixed))
+        broken["build_id"] = regression["v20"]["build_id"]
+        broken["contract"]["expected_visible_prop_count"] += 1
+        broken["instances"].append(
+            {
+                "id": "north-accident-cordon-east",
+                "class": "cordon",
+                "source_node": "World/Props/NorthAccidentCordonEast",
+                "occupancy_required": True,
+                "surface_ownership_required": False,
+                "transform": {
+                    "basis_x": [1, 0, 0],
+                    "basis_y": [0, 1, 0],
+                    "basis_z": [0, 0, 1],
+                    "origin": [6.132, 0, 2],
+                },
+                "volumes": [
+                    {"id": "panel", "local_min": [-0.2, 0, -0.8], "local_max": [0.2, 0.9, 0.8]}
+                ],
+                "support_footprints": [],
+            }
+        )
+        broken["intentional_overlaps"].append(
+            {
+                "instance_a": "car-01",
+                "volume_a": "body",
+                "instance_b": "north-accident-cordon-east",
+                "volume_b": "panel",
+                "checks": ["occupancy"],
+                "reason": regression["v20"]["contact_defect"]["invalid_reason"],
+                "contact_mode": "braced",
+                "reported_horizontal_penetration": 0.2,
+                "reported_vertical_penetration": 0.9,
+                "contact_normal_xz": [1, 0],
+                "interface_geometry_ids": [],
+                "raw_artifact": regression["v20"]["contact_defect"]["raw_artifact"],
+            }
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            broken_path = Path(directory) / "v20-environment.json"
+            fixed_path = Path(directory) / "v21-environment.json"
+            broken_path.write_text(json.dumps(broken), encoding="utf-8")
+            fixed_path.write_text(json.dumps(fixed), encoding="utf-8")
+            broken_run = run_script(
+                "environment_integrity_audit.py", "--model", str(broken_path), "--summary"
+            )
+            fixed_run = run_script(
+                "environment_integrity_audit.py", "--model", str(fixed_path), "--summary"
+            )
+        self.assertEqual(broken_run.returncode, 1, broken_run.stdout)
+        self.assertIn("strict contact rule vehicle-barrier-visible-contact", broken_run.stdout)
+        self.assertEqual(fixed_run.returncode, 0, fixed_run.stdout)
+
+    def test_strict_vehicle_barrier_contact_allows_authored_deformed_interface(self) -> None:
+        model = load_asset_json("environment-integrity-contract.template.json")
+        model["contract"]["expected_visible_prop_count"] += 1
+        model["instances"].append(
+            {
+                "id": "cordon-deformed",
+                "class": "cordon",
+                "source_node": "World/Props/CordonDeformed",
+                "occupancy_required": True,
+                "surface_ownership_required": False,
+                "transform": {
+                    "basis_x": [1, 0, 0],
+                    "basis_y": [0, 1, 0],
+                    "basis_z": [0, 0, 1],
+                    "origin": [6.132, 0, 2],
+                },
+                "volumes": [
+                    {"id": "panel", "local_min": [-0.2, 0, -0.8], "local_max": [0.2, 0.9, 0.8]}
+                ],
+                "support_footprints": [],
+            }
+        )
+        model["intentional_overlaps"].append(
+            {
+                "instance_a": "car-01",
+                "volume_a": "body",
+                "instance_b": "cordon-deformed",
+                "volume_b": "panel",
+                "checks": ["occupancy"],
+                "reason": "Dedicated bent foot and crushed bumper interface",
+                "contact_mode": "deformed_connector",
+                "reported_horizontal_penetration": 0.2,
+                "reported_vertical_penetration": 0.9,
+                "contact_normal_xz": [1, 0],
+                "interface_geometry_ids": ["World/Props/CordonDeformed/BentFoot", "World/Props/Car01/CrushedBumper"],
+                "raw_artifact": "reports/raw/integrity/deformed-cordon-interface.png",
+            }
+        )
+        model["resolved_interface_geometry_ids"].extend(
+            ["World/Props/CordonDeformed/BentFoot", "World/Props/Car01/CrushedBumper"]
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "deformed-contact.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "environment_integrity_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
 
     def test_visible_first_boundary_template_passes(self) -> None:
         completed = run_script(

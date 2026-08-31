@@ -12,7 +12,10 @@ extends SceneTree
 ## referenced by, or serialized inside the production scene. It must implement:
 ##   export_streetscape_semantics(build_id: String, scene_path: String) -> Dictionary
 ## It must read the instantiated production scene's final transforms, mesh surfaces,
-## collision/hero-radius raster, semantic resources/groups, and raw-artifact manifest.
+## collision/hero-radius raster, semantic resources/groups, approach-side and
+## T-opposite sidewalk/curb continuity bands, every visible road-detail footprint,
+## and the raw-artifact manifest. Derive these from final production transforms;
+## do not hand-type only the intersections already selected for screenshots.
 
 
 func _initialize() -> void:
@@ -69,8 +72,8 @@ func _run() -> void:
 		_fail("adapter export_streetscape_semantics must return Dictionary")
 		return
 	var contract: Dictionary = raw
-	if contract.get("schema_version") != 1:
-		_fail("adapter result schema_version must be 1")
+	if contract.get("schema_version") != 2:
+		_fail("adapter result schema_version must be 2")
 		return
 	if String(contract.get("build_id", "")) != String(options.build_id):
 		_fail("adapter result build_id does not match --build-id")

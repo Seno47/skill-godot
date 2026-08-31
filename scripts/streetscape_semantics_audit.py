@@ -78,6 +78,8 @@ class PlacementProfile:
     maximum_approach_distance: float
     orientation_mode: str
     orientation_tolerance_degrees: float
+    road_detail: bool
+    minimum_crosswalk_clearance: float
 
 
 @dataclass(frozen=True)
@@ -151,6 +153,72 @@ def sample_segment(start: Vec2, end: Vec2, step: float) -> list[Vec2]:
     ]
 
 
+def sample_polyline_band(path: list[Vec2], step: float, clear_width: float) -> list[Vec2]:
+    result: list[Vec2] = []
+    half_width = clear_width / 2.0
+    for start, end in zip(path, path[1:]):
+        dx, dz = end[0] - start[0], end[1] - start[1]
+        length = hypot(dx, dz)
+        if length <= 1e-10:
+            raise ContractError("junction continuity path contains a zero-length segment")
+        normal = (-dz / length, dx / length)
+        for point in sample_segment(start, end, step):
+            result.extend(
+                (
+                    (point[0] - normal[0] * half_width, point[1] - normal[1] * half_width),
+                    point,
+                    (point[0] + normal[0] * half_width, point[1] + normal[1] * half_width),
+                )
+            )
+    return result
+
+
+def segments_intersect(first_start: Vec2, first_end: Vec2, second_start: Vec2, second_end: Vec2) -> bool:
+    def orientation(a: Vec2, b: Vec2, c: Vec2) -> float:
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+
+    values = (
+        orientation(first_start, first_end, second_start),
+        orientation(first_start, first_end, second_end),
+        orientation(second_start, second_end, first_start),
+        orientation(second_start, second_end, first_end),
+    )
+    epsilon = 1e-9
+    if values[0] * values[1] < -epsilon and values[2] * values[3] < -epsilon:
+        return True
+    return any(
+        abs(value) <= epsilon and point_segment_distance(point, start, end) <= epsilon
+        for value, point, start, end in (
+            (values[0], second_start, first_start, first_end),
+            (values[1], second_end, first_start, first_end),
+            (values[2], first_start, second_start, second_end),
+            (values[3], first_end, second_start, second_end),
+        )
+    )
+
+
+def polygon_distance(first: tuple[Vec2, ...], second: tuple[Vec2, ...]) -> float:
+    if any(point_in_polygon(point, list(second)) for point in first) or any(
+        point_in_polygon(point, list(first)) for point in second
+    ):
+        return 0.0
+    if any(
+        segments_intersect(
+            start,
+            first[(index + 1) % len(first)],
+            other,
+            second[(other_index + 1) % len(second)],
+        )
+        for index, start in enumerate(first)
+        for other_index, other in enumerate(second)
+    ):
+        return 0.0
+    return min(
+        min(point_polygon_distance(point, second) for point in first),
+        min(point_polygon_distance(point, first) for point in second),
+    )
+
+
 def surface_classes_at(point: Vec2, regions: list[SurfaceRegion]) -> set[str]:
     return {
         region.surface_class
@@ -201,8 +269,8 @@ def unique_cells(
 
 
 def audit(model: dict[str, Any]) -> dict[str, Any]:
-    if model.get("schema_version") != 1:
-        raise ContractError("schema_version must be 1")
+    if model.get("schema_version") != 2:
+        raise ContractError("schema_version must be 2; migrate junction continuity and road-detail priority")
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
     raw_provenance = obj(model.get("scene_provenance"), "scene_provenance")
@@ -212,6 +280,13 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         raise ContractError(str(exc)) from exc
     text(raw_provenance.get("streetscape_query"), "scene_provenance.streetscape_query")
     text(raw_provenance.get("visible_surface_query"), "scene_provenance.visible_surface_query")
+    junction_continuity_query = text(
+        raw_provenance.get("junction_continuity_query"),
+        "scene_provenance.junction_continuity_query",
+    )
+    road_detail_query = text(
+        raw_provenance.get("road_detail_query"), "scene_provenance.road_detail_query"
+    )
 
     settings = obj(model.get("contract"), "contract")
     if text(settings.get("coordinate_system"), "contract.coordinate_system") != "godot_xz_y_up":
@@ -245,6 +320,9 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     )
     expected_approaches = integer(
         settings.get("expected_approach_count"), "contract.expected_approach_count", 1
+    )
+    expected_road_details = integer(
+        settings.get("expected_road_detail_count"), "contract.expected_road_detail_count"
     )
 
     errors: list[str] = []
@@ -314,12 +392,16 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
 
     junction_centers: dict[str, Vec2] = {}
     junction_lanes: dict[str, tuple[set[str], set[str]]] = {}
+    junction_kinds: dict[str, str] = {}
     for index, raw in enumerate(array(graph.get("junctions"), "road_graph.junctions", nonempty=True)):
         item = obj(raw, f"road_graph.junctions[{index}]")
         junction_id = text(item.get("id"), f"road_graph.junctions[{index}].id")
         if junction_id in junction_centers:
             raise ContractError(f"duplicate junction {junction_id}")
         center = vec2(item.get("center"), f"junction {junction_id}.center")
+        junction_kind = text(item.get("kind"), f"junction {junction_id}.kind")
+        if junction_kind not in {"cross", "t", "other"}:
+            raise ContractError(f"junction {junction_id}.kind must be cross, t, or other")
         inbound = strings(item.get("inbound_lane_ids"), f"junction {junction_id}.inbound_lane_ids", nonempty=True)
         outbound = strings(item.get("outbound_lane_ids"), f"junction {junction_id}.outbound_lane_ids", nonempty=True)
         for lane_id in sorted(inbound | outbound):
@@ -336,6 +418,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 )
         junction_centers[junction_id] = center
         junction_lanes[junction_id] = inbound, outbound
+        junction_kinds[junction_id] = junction_kind
     if len(junction_centers) != expected_junctions:
         errors.append(f"junction manifest has {len(junction_centers)}; expected {expected_junctions}")
 
@@ -386,6 +469,150 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             if wrong:
                 errors.append(f"sidewalk segment {segment_id} leaves the clear pedestrian route")
         sidewalk_segments.append((segment_id, start, end))
+
+    continuity = obj(model.get("junction_corner_continuity"), "junction_corner_continuity")
+    continuity_step = number(
+        continuity.get("maximum_sample_spacing"),
+        "junction_corner_continuity.maximum_sample_spacing",
+        minimum=1e-6,
+    )
+    minimum_clear_width = number(
+        continuity.get("minimum_clear_width"),
+        "junction_corner_continuity.minimum_clear_width",
+        minimum=1e-6,
+    )
+    allowed_corner_surfaces = strings(
+        continuity.get("allowed_top_surface_classes"),
+        "junction_corner_continuity.allowed_top_surface_classes",
+        nonempty=True,
+    )
+    forbidden_corner_surfaces = strings(
+        continuity.get("forbidden_top_surface_classes"),
+        "junction_corner_continuity.forbidden_top_surface_classes",
+        nonempty=True,
+    )
+    unknown_corner_surfaces = sorted(
+        (allowed_corner_surfaces | forbidden_corner_surfaces) - known_surface_classes
+    )
+    if unknown_corner_surfaces:
+        raise ContractError(
+            "junction corner continuity uses unknown surfaces: "
+            + ", ".join(unknown_corner_surfaces)
+        )
+    required_continuity_roles = {
+        f"{approach_id}:{side}_return"
+        for approach_id in approaches
+        for side in ("left", "right")
+    } | {
+        f"{junction_id}:t_opposite_continuous"
+        for junction_id, kind in junction_kinds.items()
+        if kind == "t"
+    }
+    absence_roles: set[str] = set()
+    for index, raw in enumerate(
+        array(continuity.get("sidewalk_absences"), "junction_corner_continuity.sidewalk_absences")
+    ):
+        item = obj(raw, f"junction_corner_continuity.sidewalk_absences[{index}]")
+        role = text(item.get("role"), f"sidewalk absence {index}.role")
+        if role not in required_continuity_roles or role in absence_roles:
+            raise ContractError(f"sidewalk absence {role} is duplicate or does not name a required junction side")
+        text(item.get("reason"), f"sidewalk absence {role}.reason")
+        text(item.get("raw_artifact"), f"sidewalk absence {role}.raw_artifact")
+        absence_roles.add(role)
+    required_continuity_roles -= absence_roles
+
+    continuity_roles: set[str] = set()
+    continuity_sample_count = 0
+    continuity_issue_count = 0
+    for index, raw in enumerate(array(continuity.get("runs"), "junction_corner_continuity.runs")):
+        item = obj(raw, f"junction_corner_continuity.runs[{index}]")
+        run_id = text(item.get("id"), f"junction continuity run {index}.id")
+        role = text(item.get("role"), f"junction continuity run {run_id}.role")
+        junction_id = text(item.get("junction_id"), f"junction continuity run {run_id}.junction_id")
+        if junction_id not in junction_centers:
+            errors.append(f"junction continuity run {run_id} references unknown junction {junction_id}")
+        if role in continuity_roles:
+            raise ContractError(f"duplicate junction continuity role {role}")
+        continuity_roles.add(role)
+        if role.endswith(":t_opposite_continuous"):
+            if role != f"{junction_id}:t_opposite_continuous" or junction_kinds.get(junction_id) != "t":
+                errors.append(f"junction continuity run {run_id} has an invalid T-junction opposite-side role")
+        else:
+            approach_id = text(item.get("approach_id"), f"junction continuity run {run_id}.approach_id")
+            if approach_id not in approaches or approaches[approach_id].junction_id != junction_id:
+                errors.append(f"junction continuity run {run_id} references the wrong approach/junction pair")
+            if role not in {f"{approach_id}:left_return", f"{approach_id}:right_return"}:
+                errors.append(f"junction continuity run {run_id} has an invalid approach-side role")
+        path = [
+            vec2(value, f"junction continuity run {run_id}.path[{point_index}]")
+            for point_index, value in enumerate(
+                array(item.get("path"), f"junction continuity run {run_id}.path", nonempty=True)
+            )
+        ]
+        if len(path) < 2:
+            raise ContractError(f"junction continuity run {run_id}.path needs at least two points")
+        clear_width = number(
+            item.get("clear_width"), f"junction continuity run {run_id}.clear_width", minimum=1e-6
+        )
+        if clear_width + 1e-9 < minimum_clear_width:
+            errors.append(f"junction continuity run {run_id} clear width is below the project contract")
+        text(item.get("raw_artifact"), f"junction continuity run {run_id}.raw_artifact")
+        transitions: list[tuple[str, tuple[Vec2, ...], set[str]]] = []
+        for transition_index, raw_transition in enumerate(
+            array(item.get("transition_contracts"), f"junction continuity run {run_id}.transition_contracts")
+        ):
+            transition = obj(raw_transition, f"junction continuity run {run_id}.transition_contracts[{transition_index}]")
+            transition_id = text(transition.get("id"), f"junction transition {run_id}/{transition_index}.id")
+            transition_kind = text(transition.get("kind"), f"junction transition {run_id}/{transition_id}.kind")
+            if transition_kind not in {"curb_ramp", "blended_transition", "authored_cutout"}:
+                raise ContractError(f"junction transition {run_id}/{transition_id} has unsupported kind")
+            transition_allowed = strings(
+                transition.get("allowed_top_surface_classes"),
+                f"junction transition {run_id}/{transition_id}.allowed_top_surface_classes",
+                nonempty=True,
+            )
+            unknown = sorted(transition_allowed - known_surface_classes)
+            if unknown:
+                raise ContractError(
+                    f"junction transition {run_id}/{transition_id} uses unknown surfaces: {', '.join(unknown)}"
+                )
+            text(transition.get("raw_artifact"), f"junction transition {run_id}/{transition_id}.raw_artifact")
+            transitions.append(
+                (
+                    transition_id,
+                    polygon(transition.get("polygon"), f"junction transition {run_id}/{transition_id}.polygon"),
+                    transition_allowed,
+                )
+            )
+        local_issues: list[str] = []
+        for point in sample_polyline_band(path, continuity_step, clear_width):
+            continuity_sample_count += 1
+            classes = surface_classes_at(point, regions)
+            matching = [value for value in transitions if point_in_polygon(point, list(value[1]))]
+            if len(matching) > 1:
+                local_issues.append(f"multiple transition contracts at ({point[0]:.3g},{point[1]:.3g})")
+                continue
+            if matching:
+                _, _, transition_allowed = matching[0]
+                if not (classes & transition_allowed) or (classes & forbidden_corner_surfaces) - transition_allowed:
+                    local_issues.append(f"transition top surface mismatch at ({point[0]:.3g},{point[1]:.3g})")
+            elif not (classes & allowed_corner_surfaces) or classes & forbidden_corner_surfaces:
+                local_issues.append(
+                    f"unclosed sidewalk/curb return at ({point[0]:.3g},{point[1]:.3g}); "
+                    f"surfaces={','.join(sorted(classes)) or 'none'}"
+                )
+        if local_issues:
+            continuity_issue_count += len(local_issues)
+            errors.append(
+                f"junction continuity run {run_id} has {len(local_issues)} inner-corner/band failure(s): "
+                + "; ".join(local_issues[:5])
+            )
+    if continuity_roles != required_continuity_roles:
+        errors.append(
+            "junction corner continuity roles do not match declared approaches/T-sides; "
+            f"missing={','.join(sorted(required_continuity_roles - continuity_roles)) or 'none'} "
+            f"extra={','.join(sorted(continuity_roles - required_continuity_roles)) or 'none'}"
+        )
 
     crosswalks: dict[str, dict[str, Any]] = {}
     for index, raw in enumerate(array(graph.get("crosswalks"), "road_graph.crosswalks", nonempty=True)):
@@ -520,14 +747,24 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             number(item.get("maximum_approach_distance"), f"placement profile {profile_id}.maximum_approach_distance", minimum=0.0) if furniture else 0.0,
             text(item.get("orientation_mode"), f"placement profile {profile_id}.orientation_mode") if furniture else "none",
             number(item.get("orientation_tolerance_degrees"), f"placement profile {profile_id}.orientation_tolerance_degrees", minimum=0.0) if furniture else 0.0,
+            boolean(item.get("road_detail"), f"placement profile {profile_id}.road_detail"),
+            number(item.get("minimum_crosswalk_clearance"), f"placement profile {profile_id}.minimum_crosswalk_clearance", minimum=0.0),
         )
         if furniture and profiles[profile_id].maximum_curb_setback < profiles[profile_id].minimum_curb_setback:
             raise ContractError(f"placement profile {profile_id} curb setback maximum is below minimum")
         if profiles[profile_id].orientation_mode not in {"none", "with_travel", "face_oncoming"}:
             raise ContractError(f"placement profile {profile_id} has unknown orientation_mode")
+        if profiles[profile_id].road_detail:
+            if "crosswalk" not in profiles[profile_id].forbidden_surface_classes:
+                errors.append(f"road-detail profile {profile_id} does not forbid crosswalk surfaces")
+            if profiles[profile_id].maximum_forbidden_ratio > 0.0:
+                errors.append(f"road-detail profile {profile_id} permits crosswalk overlap")
+            if profiles[profile_id].allow_forbidden_with_closure:
+                errors.append(f"road-detail profile {profile_id} cannot use a closure to cut crosswalk markings")
 
     placed_objects: dict[str, PlacedObject] = {}
     object_surface_results: dict[str, tuple[int, int, int]] = {}
+    road_detail_count = 0
     for index, raw in enumerate(array(model.get("placed_objects"), "placed_objects", nonempty=True)):
         item = obj(raw, f"placed_objects[{index}]")
         object_id = text(item.get("id"), f"placed_objects[{index}].id")
@@ -591,6 +828,18 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         if missing_count:
             errors.append(f"placed object {object_id} has {missing_count} footprint sample(s) outside semantic surfaces")
         object_surface_results[object_id] = (len(samples), forbidden_count, missing_count)
+
+        if profile.road_detail:
+            road_detail_count += 1
+            crosswalk_regions = [region for region in regions if region.surface_class == "crosswalk"]
+            nearest_crosswalk = min(
+                (polygon_distance(shape, region.shape) for region in crosswalk_regions),
+                default=float("inf"),
+            )
+            if nearest_crosswalk + 1e-9 < profile.minimum_crosswalk_clearance:
+                errors.append(
+                    f"road detail {object_id} crosswalk clearance {nearest_crosswalk:.3f} is below profile budget"
+                )
 
         if profile.street_furniture:
             curb_distance = nearest_region_distance(anchor, regions, {"curb"})
@@ -747,6 +996,8 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             errors.append(f"visible building {building_id} lacks required visible roles: {', '.join(missing_roles)}")
     if len(buildings_seen) != expected_buildings:
         errors.append(f"visible building manifest has {len(buildings_seen)}; expected {expected_buildings}")
+    if road_detail_count != expected_road_details:
+        errors.append(f"road-detail manifest has {road_detail_count}; expected {expected_road_details}")
 
     raster = obj(model.get("boundary_reachability"), "boundary_reachability")
     width = integer(raster.get("width"), "boundary_reachability.width", 2)
@@ -897,12 +1148,18 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             "exporter_sha256": provenance["exporter_sha256"],
             "export_preset": provenance["export_preset"],
             "export_preset_sha256": provenance["export_preset_sha256"],
+            "junction_continuity_query": junction_continuity_query,
+            "road_detail_query": road_detail_query,
         },
         "surface_region_count": len(regions),
         "lane_count": len(lanes),
         "junction_count": len(junction_centers),
         "approach_count": len(approaches),
+        "junction_continuity_run_count": len(continuity_roles),
+        "junction_continuity_sample_count": continuity_sample_count,
+        "junction_continuity_issue_count": continuity_issue_count,
         "placed_object_count": len(placed_objects),
+        "road_detail_count": road_detail_count,
         "visible_building_count": len(buildings_seen),
         "incident_closure_count": len(closures),
         "reachable_cell_count": len(reachable),

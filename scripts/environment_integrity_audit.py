@@ -236,15 +236,34 @@ def polygon_axes(polygon: tuple[Vec2, ...]) -> list[Vec2]:
 
 
 def strict_overlap_depth(a: tuple[Vec2, ...], b: tuple[Vec2, ...]) -> float:
+    return strict_overlap_info(a, b)[0]
+
+
+def strict_overlap_info(a: tuple[Vec2, ...], b: tuple[Vec2, ...]) -> tuple[float, Vec2]:
     minimum = float("inf")
+    minimum_axis: Vec2 = (0.0, 0.0)
     for axis in polygon_axes(a) + polygon_axes(b):
         projected_a = [point[0] * axis[0] + point[1] * axis[1] for point in a]
         projected_b = [point[0] * axis[0] + point[1] * axis[1] for point in b]
         overlap = min(max(projected_a), max(projected_b)) - max(min(projected_a), min(projected_b))
         if overlap <= 0.0:
-            return 0.0
-        minimum = min(minimum, overlap)
-    return 0.0 if minimum == float("inf") else minimum
+            return 0.0, (0.0, 0.0)
+        if overlap < minimum:
+            minimum = overlap
+            minimum_axis = axis
+    if minimum == float("inf"):
+        return 0.0, (0.0, 0.0)
+    center_a = (
+        sum(point[0] for point in a) / len(a),
+        sum(point[1] for point in a) / len(a),
+    )
+    center_b = (
+        sum(point[0] for point in b) / len(b),
+        sum(point[1] for point in b) / len(b),
+    )
+    if (center_b[0] - center_a[0]) * minimum_axis[0] + (center_b[1] - center_a[1]) * minimum_axis[1] < 0.0:
+        minimum_axis = (-minimum_axis[0], -minimum_axis[1])
+    return minimum, minimum_axis
 
 
 def pair_key(instance_a: str, volume_a: str, instance_b: str, volume_b: str) -> tuple[tuple[str, str], tuple[str, str]]:
@@ -334,8 +353,8 @@ def top_surface_at(
 
 
 def audit(model: dict[str, Any]) -> dict[str, Any]:
-    if model.get("schema_version") != 1:
-        raise ContractError("schema_version must be 1")
+    if model.get("schema_version") != 2:
+        raise ContractError("schema_version must be 2; migrate intentional contacts and interface provenance")
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
     raw_provenance = obj(model.get("scene_provenance"), "scene_provenance")
@@ -348,6 +367,10 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     exporter = provenance["exporter"]
     visible_prop_query = text(
         raw_provenance.get("visible_prop_query"), "scene_provenance.visible_prop_query"
+    )
+    contact_interface_query = text(
+        raw_provenance.get("contact_interface_query"),
+        "scene_provenance.contact_interface_query",
     )
     contract = obj(model.get("contract"), "contract")
     if text(contract.get("coordinate_system"), "contract.coordinate_system") != "godot_xz_y_up":
@@ -363,6 +386,11 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     max_surface_height_delta = number(contract.get("max_surface_height_delta"), "contract.max_surface_height_delta", minimum=0.0)
     expected_visible_prop_count = integer(contract.get("expected_visible_prop_count"), "contract.expected_visible_prop_count", 1)
     require_rule_exercise = boolean(contract.get("require_vertical_rule_exercise"), "contract.require_vertical_rule_exercise")
+    contact_measurement_tolerance = number(
+        contract.get("contact_measurement_tolerance"),
+        "contract.contact_measurement_tolerance",
+        minimum=0.0,
+    )
 
     structural = obj(contract.get("prior_structural_checks"), "contract.prior_structural_checks")
     collision = obj(structural.get("collision_coverage"), "prior_structural_checks.collision_coverage")
@@ -400,9 +428,65 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             )
         )
 
+    strict_contact_rules: list[dict[str, Any]] = []
+    for index, raw in enumerate(array(contract.get("strict_contact_pair_rules"), "contract.strict_contact_pair_rules")):
+        rule = obj(raw, f"strict_contact_pair_rules[{index}]")
+        rule_id = text(rule.get("id"), f"strict_contact_pair_rules[{index}].id")
+        strict_contact_rules.append(
+            {
+                "id": rule_id,
+                "class_group_a": strings(
+                    rule.get("class_group_a"),
+                    f"strict contact rule {rule_id}.class_group_a",
+                    nonempty=True,
+                ),
+                "class_group_b": strings(
+                    rule.get("class_group_b"),
+                    f"strict contact rule {rule_id}.class_group_b",
+                    nonempty=True,
+                ),
+                "maximum_undeformed_render_penetration": number(
+                    rule.get("maximum_undeformed_render_penetration"),
+                    f"strict contact rule {rule_id}.maximum_undeformed_render_penetration",
+                    minimum=0.0,
+                ),
+                "maximum_deformed_render_penetration": number(
+                    rule.get("maximum_deformed_render_penetration"),
+                    f"strict contact rule {rule_id}.maximum_deformed_render_penetration",
+                    minimum=0.0,
+                ),
+                "minimum_contact_normal_alignment": number(
+                    rule.get("minimum_contact_normal_alignment"),
+                    f"strict contact rule {rule_id}.minimum_contact_normal_alignment",
+                    minimum=0.0,
+                ),
+                "allowed_modes": strings(
+                    rule.get("allowed_modes"),
+                    f"strict contact rule {rule_id}.allowed_modes",
+                    nonempty=True,
+                ),
+            }
+        )
+        if strict_contact_rules[-1]["minimum_contact_normal_alignment"] > 1.0:
+            raise ContractError(f"strict contact rule {rule_id} normal alignment must be <= 1")
+        if (
+            strict_contact_rules[-1]["maximum_deformed_render_penetration"]
+            < strict_contact_rules[-1]["maximum_undeformed_render_penetration"]
+        ):
+            raise ContractError(f"strict contact rule {rule_id} deformed budget is below undeformed budget")
+        if horizontal_epsilon > strict_contact_rules[-1]["maximum_undeformed_render_penetration"]:
+            raise ContractError(
+                f"strict contact rule {rule_id} undeformed budget is below the audit penetration resolution"
+            )
+
     exemption_checks = {"occupancy", "vertical_clearance"}
+    resolved_interface_geometry_ids = strings(
+        model.get("resolved_interface_geometry_ids"),
+        "resolved_interface_geometry_ids",
+    )
     exemptions: dict[tuple[tuple[str, str], tuple[str, str]], set[str]] = {}
     exemption_meta: dict[tuple[tuple[str, str], tuple[str, str]], str] = {}
+    exemption_contacts: dict[tuple[tuple[str, str], tuple[str, str]], dict[str, Any]] = {}
     for index, raw in enumerate(array(model.get("intentional_overlaps"), "intentional_overlaps")):
         item = obj(raw, f"intentional_overlaps[{index}]")
         key = pair_key(
@@ -419,8 +503,41 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             raise ContractError(f"intentional_overlaps[{index}] has unknown checks: {', '.join(unknown)}")
         reason = text(item.get("reason"), f"intentional_overlaps[{index}].reason")
         artifact = text(item.get("raw_artifact"), f"intentional_overlaps[{index}].raw_artifact")
+        contact_mode = text(item.get("contact_mode"), f"intentional_overlaps[{index}].contact_mode")
+        reported_horizontal = number(
+            item.get("reported_horizontal_penetration"),
+            f"intentional_overlaps[{index}].reported_horizontal_penetration",
+            minimum=0.0,
+        )
+        reported_vertical = number(
+            item.get("reported_vertical_penetration"),
+            f"intentional_overlaps[{index}].reported_vertical_penetration",
+            minimum=0.0,
+        )
+        contact_normal = vec2(item.get("contact_normal_xz"), f"intentional_overlaps[{index}].contact_normal_xz")
+        normal_length = hypot(contact_normal[0], contact_normal[1])
+        if normal_length <= 1e-10:
+            raise ContractError(f"intentional_overlaps[{index}].contact_normal_xz must not be zero")
+        contact_normal = (contact_normal[0] / normal_length, contact_normal[1] / normal_length)
+        interface_geometry_ids = strings(
+            item.get("interface_geometry_ids"),
+            f"intentional_overlaps[{index}].interface_geometry_ids",
+        )
+        unknown_interfaces = sorted(interface_geometry_ids - resolved_interface_geometry_ids)
+        if unknown_interfaces:
+            errors.append(
+                f"intentional_overlaps[{index}] references unresolved interface geometry: "
+                + ", ".join(unknown_interfaces)
+            )
         exemptions[key] = checks
         exemption_meta[key] = f"{reason} ({artifact})"
+        exemption_contacts[key] = {
+            "contact_mode": contact_mode,
+            "reported_horizontal": reported_horizontal,
+            "reported_vertical": reported_vertical,
+            "contact_normal": contact_normal,
+            "interface_geometry_ids": interface_geometry_ids,
+        }
 
     volumes: list[Volume] = []
     supports: list[SupportFootprint] = []
@@ -531,18 +648,85 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         )
 
     used_exemptions: set[tuple[tuple[tuple[str, str], tuple[str, str]], str]] = set()
+    strict_contact_issue_count = 0
     overlap_issues = 0
     for first_index, first in enumerate(volumes):
         for second in volumes[first_index + 1 :]:
             if first.instance_id == second.instance_id:
                 continue
-            horizontal = strict_overlap_depth(first.footprint, second.footprint)
+            horizontal, contact_axis = strict_overlap_info(first.footprint, second.footprint)
             vertical = min(first.max_y, second.max_y) - max(first.min_y, second.min_y)
             if horizontal <= horizontal_epsilon or vertical <= vertical_epsilon:
                 continue
             key = pair_key(first.instance_id, first.volume_id, second.instance_id, second.volume_id)
             if "occupancy" in exemptions.get(key, set()):
                 used_exemptions.add((key, "occupancy"))
+                contact = exemption_contacts[key]
+                if abs(contact["reported_horizontal"] - horizontal) > contact_measurement_tolerance:
+                    strict_contact_issue_count += 1
+                    errors.append(
+                        f"intentional contact {first.instance_id}/{first.volume_id} vs "
+                        f"{second.instance_id}/{second.volume_id} reports horizontal penetration "
+                        f"{contact['reported_horizontal']:.4g} but resolved geometry is {horizontal:.4g}"
+                    )
+                if abs(contact["reported_vertical"] - vertical) > contact_measurement_tolerance:
+                    strict_contact_issue_count += 1
+                    errors.append(
+                        f"intentional contact {first.instance_id}/{first.volume_id} vs "
+                        f"{second.instance_id}/{second.volume_id} reports vertical penetration "
+                        f"{contact['reported_vertical']:.4g} but resolved geometry is {vertical:.4g}"
+                    )
+                normal_alignment = abs(
+                    contact["contact_normal"][0] * contact_axis[0]
+                    + contact["contact_normal"][1] * contact_axis[1]
+                )
+                matching_rules = [
+                    rule
+                    for rule in strict_contact_rules
+                    if (
+                        first.prop_class in rule["class_group_a"]
+                        and second.prop_class in rule["class_group_b"]
+                    )
+                    or (
+                        second.prop_class in rule["class_group_a"]
+                        and first.prop_class in rule["class_group_b"]
+                    )
+                ]
+                if len(matching_rules) > 1:
+                    raise ContractError(
+                        f"intentional contact {first.prop_class}/{second.prop_class} matches multiple strict rules"
+                    )
+                if matching_rules:
+                    rule = matching_rules[0]
+                    mode = contact["contact_mode"]
+                    if mode not in rule["allowed_modes"]:
+                        strict_contact_issue_count += 1
+                        errors.append(
+                            f"strict contact rule {rule['id']} forbids mode {mode} for "
+                            f"{first.instance_id}/{second.instance_id}"
+                        )
+                    if normal_alignment + 1e-12 < rule["minimum_contact_normal_alignment"]:
+                        strict_contact_issue_count += 1
+                        errors.append(
+                            f"strict contact rule {rule['id']} contact-normal alignment {normal_alignment:.4f} is too low"
+                        )
+                    if mode == "deformed_connector":
+                        if not contact["interface_geometry_ids"]:
+                            strict_contact_issue_count += 1
+                            errors.append(
+                                f"strict contact rule {rule['id']} requires separate damaged/deformed interface geometry"
+                            )
+                        if horizontal > rule["maximum_deformed_render_penetration"] + 1e-12:
+                            strict_contact_issue_count += 1
+                            errors.append(
+                                f"strict contact rule {rule['id']} deformed penetration {horizontal:.4g} exceeds budget"
+                            )
+                    elif horizontal > rule["maximum_undeformed_render_penetration"] + 1e-12:
+                        strict_contact_issue_count += 1
+                        errors.append(
+                            f"strict contact rule {rule['id']} undeformed vehicle/barrier penetration "
+                            f"{horizontal:.4g} exceeds {rule['maximum_undeformed_render_penetration']:.4g}"
+                        )
                 continue
             overlap_issues += 1
             errors.append(
@@ -667,6 +851,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             "export_preset": provenance["export_preset"],
             "export_preset_sha256": provenance["export_preset_sha256"],
             "visible_prop_query": visible_prop_query,
+            "contact_interface_query": contact_interface_query,
         },
         "instance_count": len(instances),
         "volume_count": len(volumes),
@@ -675,6 +860,9 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         "ground_sample_count": ground_samples,
         "clearance_check_count": clearance_checks,
         "intentional_exemption_count": len(exemptions),
+        "resolved_interface_geometry_count": len(resolved_interface_geometry_ids),
+        "strict_contact_rule_count": len(strict_contact_rules),
+        "strict_contact_issue_count": strict_contact_issue_count,
         "unintentional_overlap_count": overlap_issues,
         "surface_issue_count": surface_issues,
         "ground_issue_count": ground_issues,

@@ -40,6 +40,8 @@ python scripts/environment_integrity_audit.py \
 
 The command must return PASS. Collision coverage, boundary coverage, navigation, origins inside legal polygons, or one overview screenshot cannot substitute for it.
 
+The local integrity contract is schema v2. Migrate v1 by adding the contact measurement tolerance, strict pair rules, resolved contact-interface query/manifest, and measured fields to every intentional overlap, then re-export and rerun. Renaming the schema without regenerating resolved measurements is not a migration.
+
 Local integrity is only the first half of the gate. Also instantiate `assets/environment-coverage-contract.template.json` and run the whole-map contract:
 
 ```bash
@@ -72,14 +74,22 @@ When comparing candidates, preserve the prior manifest and pass it as `--baselin
 
 Have a project-owned exporter traverse the final instantiated target scene using a stable group/query and emit the scene path, dependency-closure digest, manifest/exporter hashes and resolved visible-prop count. Do not curate only the props already suspected of failing. Give every visible prop that can penetrate another prop one or more local occupancy boxes. Use multiple boxes for an L-shaped building, tower legs, a lamp head/shaft, a vehicle body, or geometry with a deliberate opening. A single oversized AABB creates false positives around empty holes; an origin test creates false negatives around every wide or rotated prop.
 
+Also export every mount/damage/deformation mesh reachable through the declared `contact_interface_query`; `interface_geometry_ids` in an exemption must resolve against that manifest. A plausible-looking path string is not evidence that connector geometry exists.
+
 Export the final `global_transform` as Godot basis columns plus origin and transform all eight box corners. The audit builds the transformed XZ convex footprint, preserves the transformed vertical range, and applies a separating-axis test plus Y penetration. This covers translation, rotation, non-uniform scale and parent transforms. For `MultiMeshInstance3D`, compose the node transform with every instance transform and emit a stable instance ID.
 
 An intentional contact or authored mount needs an exact instance/volume pair exemption with:
 
 - the checks being exempted (`occupancy` and/or `vertical_clearance`);
 - a concrete physical reason;
+- the contact mode, measured horizontal/Y penetration and XZ contact normal;
+- any separate interface, mount, damage or deformation geometry IDs;
 - a raw target-build close-up;
 - a still-current overlap. Stale exemptions fail, and class-wide ignores are forbidden.
+
+The exporter supplies measurements; the auditor recomputes them from the resolved volumes and rejects a mismatch. High-risk class pairs use `strict_contact_pair_rules`. For `vehicle` against `fence`, `barrier` or `cordon`, `touch`, `braced` and `seated` modes permit only the project epsilon for numerical contact—an exact reason cannot excuse visible render-shell penetration. A larger overlap needs `deformed_connector`, a bounded damaged-contact budget and named connector/deformation geometry that visually explains the interface. Preserve the close-up at gameplay lighting. This prevents `intentionally braced against bumper` from turning a 0.09–0.20 m intersection into a PASS.
+
+Use Godot's [`PhysicsDirectSpaceState3D.get_rest_info()`](https://docs.godotengine.org/en/stable/classes/class_physicsdirectspacestate3d.html) when runtime contact point/normal evidence helps, but keep the render-volume separating-axis measurement because gameplay collision alone does not prove visible plausibility.
 
 If a visible instance genuinely does not participate in occupancy, `occupancy_required: false` also needs its own reason and raw artifact. A bare opt-out is a contract error.
 
@@ -234,10 +244,11 @@ The deterministic report and visual evidence are one gate, not alternatives. Pre
 8. production occluder alias fade/restoration motion;
 9. high-risk topmost-surface/object-pair contacts.
 10. the whole-perimeter visible-first contact sheet plus exact detected-span close-ups.
+11. every strict intentional-contact pair, including the undeformed-clear or authored-deformation interface state.
 
 For every defect class detected during the iteration, keep a representative before frame, the fixed after frame, and the clean rerun row. Do not crop away the contact context. If no defect was detected in a class, still capture its highest-risk representative state.
 
-The gate fails when any applicable audit has an error, a visible prop is missing required proxies, one semantic zone accepts incompatible families, fallback exceeds its zone budget, any playable/survey/perimeter sample is uncovered, an observed adjacency lacks a transition/cause, any enabled collider lacks visible shell/raster support, a safety wall is contacted before its mapped visible cause, visible-to-safety clearance is too small, a disabled/hidden variant is asymmetric, a production occluder root or trace is missing, a surface/object rule fails, a detected class lacks before/fixed/rerun evidence, an exemption is vague/stale, or the raw build still shows fusion, penetration, floating contact, abrupt patchwork, roadway nature props, invisible blockers or exposed substrate.
+The gate fails when any applicable audit has an error, a visible prop is missing required proxies, one semantic zone accepts incompatible families, fallback exceeds its zone budget, any playable/survey/perimeter sample is uncovered, an observed adjacency lacks a transition/cause, any enabled collider lacks visible shell/raster support, a safety wall is contacted before its mapped visible cause, visible-to-safety clearance is too small, a disabled/hidden variant is asymmetric, a production occluder root or trace is missing, a surface/object rule fails, a detected class lacks before/fixed/rerun evidence, an exemption is vague/stale, a strict contact exceeds its undeformed/deformed budget or lacks a plausible interface, or the raw build still shows fusion, penetration, floating contact, abrupt patchwork, roadway nature props, invisible blockers or exposed substrate.
 
 ## Engine references
 

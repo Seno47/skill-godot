@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "contract_id": "example-high-angle-environment-integrity",
   "build_id": "replace-with-exact-target-build-id",
   "scene_provenance": {
@@ -13,17 +13,19 @@
     "exporter_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "export_preset": "Windows Desktop",
     "export_preset_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
-    "visible_prop_query": "group:environment_integrity_visible"
+    "visible_prop_query": "group:environment_integrity_visible",
+    "contact_interface_query": "group:environment_contact_interface"
   },
   "contract": {
     "coordinate_system": "godot_xz_y_up",
     "render_ground_source": "mesh_faces",
-    "horizontal_penetration_epsilon": 0.02,
+    "horizontal_penetration_epsilon": 0.005,
     "vertical_penetration_epsilon": 0.02,
     "max_surface_sample_step": 0.25,
     "max_ground_sample_step": 0.5,
     "surface_height_epsilon": 0.02,
     "max_surface_height_delta": 0.2,
+    "contact_measurement_tolerance": 0.005,
     "expected_visible_prop_count": 7,
     "require_vertical_rule_exercise": true,
     "prior_structural_checks": {
@@ -38,6 +40,9 @@
     "vertical_clearance_rules": [
       {"upper_class": "overhead_sign", "lower_class": "vehicle", "minimum_gap": 0.5},
       {"upper_class": "utility_wire", "lower_class": "tank", "minimum_gap": 0.5}
+    ],
+    "strict_contact_pair_rules": [
+      {"id": "vehicle-barrier-visible-contact", "class_group_a": ["vehicle"], "class_group_b": ["barrier", "fence", "cordon"], "maximum_undeformed_render_penetration": 0.01, "maximum_deformed_render_penetration": 0.2, "minimum_contact_normal_alignment": 0.9, "allowed_modes": ["touch", "braced", "seated", "deformed_connector"]}
     ]
   },
   "instances": [
@@ -112,8 +117,9 @@
       "support_footprints": []
     }
   ],
+  "resolved_interface_geometry_ids": ["World/Props/ClinicSign/Bolts"],
   "intentional_overlaps": [
-    {"instance_a": "clinic-sign", "volume_a": "panel", "instance_b": "sign-pole", "volume_b": "shaft", "checks": ["occupancy"], "reason": "Authored bolted sign-to-pole mount", "raw_artifact": "reports/raw/integrity/sign-mount-closeup.png"}
+    {"instance_a": "clinic-sign", "volume_a": "panel", "instance_b": "sign-pole", "volume_b": "shaft", "checks": ["occupancy"], "reason": "Authored bolted sign-to-pole mount", "contact_mode": "authored_mount", "reported_horizontal_penetration": 0.16, "reported_vertical_penetration": 0.2, "contact_normal_xz": [0, 1], "interface_geometry_ids": ["World/Props/ClinicSign/Bolts"], "raw_artifact": "reports/raw/integrity/sign-mount-closeup.png"}
   ],
   "render_ground_triangles": [
     {"id": "substrate-a", "source_kind": "render_mesh", "source_node": "World/Ground/Substrate", "surface_class": "substrate", "material_id": "earth", "vertices": [[0, -0.2, 0], [10, -0.2, 0], [10, -0.2, 8]]},

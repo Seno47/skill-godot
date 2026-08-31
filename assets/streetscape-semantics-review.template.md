@@ -12,6 +12,7 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Streetscape exporter path + SHA-256:
 - Selected export preset + SHA-256:
 - Contract JSON / audit JSON:
+- Contract schema (must be v2) / migration source if applicable:
 - Road profile: scale, traffic convention, stylization, hero radius:
 - Raw capture root:
 - Prior provenance/environment-integrity/environment-coverage results:
@@ -23,6 +24,8 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 | Semantic surface regions | | | | NOT TESTED |
 | Lanes / junctions / approaches | | | | NOT TESTED |
 | Sidewalk nodes / crossings | | | | NOT TESTED |
+| Junction-side continuity runs / band samples | | | | NOT TESTED |
+| Visible road details near crossings | | | | NOT TESTED |
 | Full-footprint placed objects | | | | NOT TESTED |
 | Visible buildings / material slots | | | | NOT TESTED |
 | Street furniture with profiles | | | | NOT TESTED |
@@ -41,6 +44,27 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Disconnected or floating markings:
 - Crosswalks ending outside clear pedestrian routes:
 - Signals/signs without exact movement ownership:
+
+## Sidewalk/curb junction continuity
+
+| Junction / approach / side | Role: left/right return or T-opposite | Clear band width | Center + edge samples | Terrain/fallback/unowned samples | Bounded ramp/cutout contract | Raw artifact | Verdict |
+|---|---|---:|---:|---:|---|---|---|
+| | | | | | | | NOT TESTED |
+
+- Every declared approach has both return roles or an exact sidewalk-absence record:
+- Every T-junction opposite side remains continuous without a false road-mouth gap:
+- Transition exceptions are bounded polygons with permitted surfaces, not prose-only waivers:
+- Smallest detectable inner-corner hole / sample spacing:
+
+## Crosswalk priority over road details
+
+| Detail | Resolved full footprint | Crosswalk forbidden | Minimum / measured clearance | Crossing marking remains continuous | Raw close-up | Verdict |
+|---|---|---|---|---|---|---|
+| Storm drain / cover / repair bed / trench | | | | | | NOT TESTED |
+
+- Expected / exported visible road-detail count:
+- Road-detail profile cannot use closure exemption to cut a crossing:
+- Integrated in-crossing detail, if any, is authored as part of the crossing surface:
 
 ## Full-footprint forbidden-surface audit
 
@@ -113,6 +137,8 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 | State | Raw artifact | Build match | Observation | Verdict |
 |---|---|---|---|---|
 | `road_graph_and_markings` | | | | NOT TESTED |
+| `junction_sidewalk_curb_continuity` | | | | NOT TESTED |
+| `crosswalk_road_detail_priority` | | | | NOT TESTED |
 | `building_road_setback` | | | | NOT TESTED |
 | `facade_material_completeness` | | | | NOT TESTED |
 | `street_furniture_placement` | | | | NOT TESTED |
@@ -135,6 +161,8 @@ Every audit- or survey-detected class needs an exact sequence. If no class was f
 - Building root is legal but full support/mass occupies road/sidewalk: PASS / FAIL / NOT TESTED
 - Building material coverage is nominally complete but a visible slot is default/unpainted or a required role is absent: PASS / FAIL / NOT TESTED
 - Lane dividers/stop/crosswalk/parking marks do not form a coherent junction approach: PASS / FAIL / NOT TESTED
+- Road-mouth inner corner or T-opposite sidewalk exposes terrain/fallback because the slab/band stops short: PASS / FAIL / NOT TESTED
+- Storm drain/repair/cover footprint fragments crosswalk markings: PASS / FAIL / NOT TESTED
 - Hydrant/signal/sign/pole violates its surface, setback, approach or orientation profile: PASS / FAIL / NOT TESTED
 - Incident prop blocks road/sidewalk without graph closure, cue ownership and alternate path: PASS / FAIL / NOT TESTED
 - Selected screenshots leave junctions/approaches uncovered: PASS / FAIL / NOT TESTED
@@ -142,8 +170,9 @@ Every audit- or survey-detected class needs an exact sequence. If no class was f
 ## Builder verdict
 
 - Deterministic audit status / error count:
+- Junction sidewalk/curb band continuity:
+- Crosswalk/road-detail priority:
 - Raw review status:
 - Blocking defects:
 - Final gate: PASS / FAIL / NOT TESTED
 - Exact rerun command:
-

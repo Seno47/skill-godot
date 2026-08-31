@@ -20,6 +20,7 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 - Baseline comparison when nested dependencies changed:
 - Resolved visible-prop group/query and skipped-node ledger:
 - Contract JSON:
+- Local contract schema (must be v2) / migration source if applicable:
 - Audit JSON/stdout:
 - Whole-map coverage contract JSON:
 - Whole-map coverage audit JSON/stdout:
@@ -62,15 +63,18 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 
 ## Transformed prop-to-prop occupancy
 
-| Pair/class | Full transformed volumes | Horizontal/Y penetration | Intentional? exact exemption + reason | Before raw close-up | Fixed raw close-up | Clean rerun | PASS/FAIL/NOT TESTED |
-|---|---|---:|---|---|---|---|---|
-| | | | | | | | NOT TESTED |
+| Pair/class | Full transformed volumes | Horizontal/Y penetration | Contact mode + XZ normal | Interface/mount/deformation geometry | Before raw close-up | Fixed raw close-up | Clean rerun | PASS/FAIL/NOT TESTED |
+|---|---|---:|---|---|---|---|---|---|
+| | | | | | | | | NOT TESTED |
 
 - Complex/open shapes decomposed instead of one coarse AABB:
 - MultiMesh per-instance transforms resolved:
 - Render/collision shell differences recorded:
 - Any non-participating visible instance has an exact reason and raw-artifact exemption:
 - Stale or class-wide exemptions present:
+- Vehicle↔fence/barrier/cordon undeformed penetration stays within epsilon:
+- Larger intentional penetration has bounded `deformed_connector` mode and visible interface geometry:
+- Exported penetration/contact normal matches the auditor's resolved measurement:
 
 ## Semantic prop-to-surface ownership
 
@@ -167,6 +171,7 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 | Required state | Raw artifact | Build match | Builder observation | PASS/FAIL/NOT TESTED |
 |---|---|---|---|---|
 | `transformed_prop_occupancy` | | | | NOT TESTED |
+| `intentional_contact_plausibility` | | | | NOT TESTED |
 | `semantic_surface_ownership` | | | | NOT TESTED |
 | `render_ground_coverage_and_seams` | | | | NOT TESTED |
 | `vertical_clearance` | | | | NOT TESTED |
@@ -185,6 +190,7 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 - Every prop origin is legal but a tree/rock/bush support footprint crosses road/sidewalk: PASS / FAIL / NOT TESTED
 - Broad floor collider is complete but visible triangular ground gaps expose substrate: PASS / FAIL / NOT TESTED
 - Intentional-overlap exemption lacks an exact pair, physical reason and raw artifact: PASS / FAIL / NOT TESTED
+- Vehicle/barrier exemption has persuasive prose but exceeds undeformed penetration epsilon or lacks deformed connector geometry: PASS / FAIL / NOT TESTED
 - Audit PASS is claimed without raw target-build close-ups, or screenshots PASS without a clean audit rerun: PASS / FAIL / NOT TESTED
 - One broad ground region accepts incompatible surface families or hides excess fallback exposure: PASS / FAIL / NOT TESTED
 - Curated raw states leave playable survey cells uncovered: PASS / FAIL / NOT TESTED
@@ -198,6 +204,7 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 
 - Deterministic environment-integrity audit: PASS / FAIL / NOT TESTED
 - Transformed full-footprint occupancy: PASS / FAIL / NOT TESTED
+- Strict intentional-contact plausibility: PASS / FAIL / NOT TESTED
 - Semantic surface ownership: PASS / FAIL / NOT TESTED
 - Visible render-ground coverage/seams: PASS / FAIL / NOT TESTED
 - Vertical clearance: PASS / FAIL / NOT TESTED

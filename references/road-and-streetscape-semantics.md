@@ -11,6 +11,8 @@ python <skill-dir>/scripts/streetscape_semantics_audit.py \
 
 This is a separate builder-owned blocking gate. Passing dependency provenance, collision, environment integrity, whole-map surface coverage, navigation, or a curated screenshot does not prove that roads behave and read as roads. The streetscape report must use the same `build_id`, resolved dependency-closure manifest, selected export preset and exporter hashes as the other candidate reports. Add the streetscape exporter to the provenance manifest toolchain inputs and link this contract through `resolved_scene_provenance_audit.py --evidence-contract`.
 
+Contract schema v2 is fail-closed. Migrate v1 by adding junction kinds, `junction_corner_continuity`, `expected_road_detail_count`, per-profile `road_detail`/crosswalk-clearance fields, the two provenance queries, and the two raw candidate states from the current template. Do not relabel an old report as v2 without re-exporting the resolved scene.
+
 ## Calibrate a project road profile, not a legal claim
 
 Real street guidance supplies useful relationships, but one country's dimension table is not a universal game scale. Declare the game's unit scale, hero radius, camera, degree of stylization, traffic convention, road hierarchy, sidewalk/furnishing/frontage classes, curb/junction budgets and any deliberately ruined or improvised condition. Then keep those relationships internally coherent.
@@ -31,6 +33,8 @@ Do not hand-type a simplified JSON that disagrees with the map. Copy/adapt `asse
 
 - every semantic render surface polygon: travel lane, parking lane/bay, intersection, crosswalk, sidewalk clear path, curb, furnishing/buffer zone, frontage, median/island, closure treatment and project-specific variants;
 - lane, junction, legal-movement, approach, sidewalk and crossing graphs;
+- every declared approach-side/T-side continuity band from a stable `junction_continuity_query`, plus an exact absence ledger;
+- every visible drain, cover, trench and repair footprint from a stable `road_detail_query`, including non-colliding decals/beds;
 - full transformed support footprints for buildings, vehicles, wrecks, tanks/trucks, furniture and visible boundary causes;
 - every camera-visible building mesh surface, effective material and approximate visible area;
 - resolved anchor/forward vectors and approach association for street furniture;
@@ -65,6 +69,20 @@ Every lane endpoint must resolve to a declared node and remain on a permitted tr
 Every crosswalk connects two known sidewalk nodes, belongs to the relevant junction/approaches, and lies on crossing/intersection render surfaces. A stripe texture floating across an unrelated curb or ending in a prop cluster fails. Stop lines are approach-specific, approximately perpendicular to travel, upstream of the crossing/junction, and supported by the project's traffic convention. Signals/signs point at the movement they control. Parking bays/dividers must not continue through junction or crosswalk space.
 
 Check lane-divider chains for endpoint continuity and surface ownership. Do not accept a high material-coverage percentage when road markings stop randomly, duplicate, cross each other at T-junctions, or describe impossible movements. Raw target-build junction frames must show the relationship at gameplay size.
+
+### Close every sidewalk/curb junction band
+
+A connected pedestrian graph can still hide a visible square hole beside the road mouth. For every declared approach, export separate left- and right-return center paths plus the clear band width. For every T-junction, also export the uninterrupted opposite-side sidewalk run; do not invent a full-width opening across the side that has no road. `streetscape_semantics_audit.py` samples the center and both band edges at the declared maximum spacing. Every sample must land on the authored top-surface family (`sidewalk_clear`, curb/return, crossing or a project equivalent), never bare terrain, fallback, substrate, carriageway or an unowned cell.
+
+An approach side without pedestrian circulation needs an exact absence record, reason and raw state. A curb ramp, blended transition or deliberate cutout is not a blanket exception: declare its bounded polygon, permitted top-surface classes and raw close-up. The exception applies only inside that polygon. A prose note such as `sidewalk ends here` cannot legalize a 0.72 m corner void or a false 9.6 m T-side gap.
+
+This game-scale contract follows the durable continuity relationship in the U.S. Access Board's [PROWAG scoping requirements](https://www.access-board.gov/prowag/scoping.html) and [technical requirements](https://www.access-board.gov/prowag/technical.html): pedestrian access routes, crossings and curb transitions form a connected route. It is not a claim that fictional dimensions meet a jurisdiction's accessibility law.
+
+### Give crosswalk markings priority over road details
+
+Export every visible storm drain, utility cover, repair bed, trench, inset grate and similar road-detail footprint—not only physics obstacles. Mark its placement profile `road_detail: true`, forbid crosswalk surfaces, set a project-scaled minimum crosswalk clearance and declare the exact expected count. The audit rejects an omitted detail manifest, a footprint that touches the protected crossing band, or a profile that allows a closure to cut the zebra. If the art direction genuinely needs an integrated cover inside a crossing, author one coherent crossing asset/material treatment and represent it as the crossing's own surface rather than layering a brown repair rectangle over the stripes.
+
+The [FHWA MUTCD 11th Edition, Part 3](https://highways.dot.gov/media/111806) defines crosswalk markings as a deliberate marking system. In this workflow, that motivates a visual-priority contract: incidental road furniture must not fragment the crossing's readable pattern. It does not impose U.S. marking dimensions on the game.
 
 ## Full-footprint placement, not origin legality
 
@@ -140,6 +158,8 @@ Then run the separate whole-perimeter visible-first layer from [3d-environment-i
 Tile-survey the complete road/junction footprint with the shipping camera, final lighting, ordinary HUD and target build. Every junction and approach appears in at least one declared full-resolution capture. The candidate packet must include:
 
 - road graph, lanes, dividers, stop lines, crossings and parking;
+- every approach-side sidewalk/curb return and any T-side continuous run at gameplay size;
+- crosswalks together with nearby drains, repairs, covers and other road details;
 - building-to-road/sidewalk setbacks;
 - upper/lower facade, roof and trim material completeness;
 - hydrants, signals, signs, poles and junction approaches;
@@ -158,6 +178,8 @@ Reject the candidate when any of these are true:
 - a building origin is in its parcel while its transformed support footprint occupies road/sidewalk;
 - every building node has a material but a visible floor/facade/roof/trim slot is default or unpainted;
 - dividers, stop lines, crossing stripes or parking marks do not form a connected approach/junction topology;
+- a declared road-mouth corner or T-side run exposes terrain/fallback because the sidewalk/curb band stops short;
+- a storm drain, repair bed or utility detail cuts through crosswalk markings or was omitted from the resolved detail count;
 - a hydrant, pole, signal or sign uses the wrong semantic surface, setback, approach or orientation;
 - a wreck/tanker/truck/sign blocks a junction or sidewalk without a topology-changing authored closure and alternate route;
 - the deterministic audit PASS is claimed without a complete shipping-camera road survey, or screenshots look plausible without a clean audit rerun.
