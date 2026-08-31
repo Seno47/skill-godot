@@ -64,6 +64,15 @@
         {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["clean_first_boot"]}
       ]
     },
+    "shipping_package_hygiene_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: QA/report adapters are toolchain-only and exact package forbidden-marker scan has zero matches"],
+      "reviewer": {"role": "builder", "context": "fixture builder shipping package hygiene audit"},
+      "artifacts": [
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["production_dependency_qa_separation", "forbidden_marker_scan"]},
+        {"path": "evidence-artifacts/build.zip", "kind": "build", "states": ["forbidden_marker_scan", "exact_shipping_package"]}
+      ]
+    },
     "semantic_identity_review": {
       "status": "pass",
       "evidence": ["fixture: blind independent app-icon and main-menu mark reading at actual final sizes"],
@@ -318,6 +327,18 @@
         {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_boundary_reachability"]},
         {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["shipping_camera_road_junction_survey", "streetscape_semantics_overview"]},
         {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["detected_class_resolution_or_clean_baseline"]}
+      ]
+    },
+    "high_angle_visible_first_boundary_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: same-closure whole-perimeter production capsule trace has mapped visible first hits and safety clearance"],
+      "reviewer": {"role": "builder", "context": "fixture builder visible-first perimeter audit"},
+      "artifacts": [
+        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "visible_first_boundary_contract"]},
+        {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_first_boundary_audit"]},
+        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["whole_perimeter_sample_trace"]},
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_first_contact_sheet"]},
+        {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["detected_span_closeups_or_clean_baseline"]}
       ]
     },
     "responsive_layout_evidence": {

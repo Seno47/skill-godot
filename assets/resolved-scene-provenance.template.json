@@ -35,7 +35,10 @@
     {"role": "export_presets", "path": "res://export_presets.cfg", "bytes": 900, "sha256": "6666666666666666666666666666666666666666666666666666666666666666"},
     {"role": "exporter_script", "path": "res://tests/resolved_scene_provenance_exporter.gd", "bytes": 3500, "sha256": "7777777777777777777777777777777777777777777777777777777777777777"},
     {"role": "project_settings", "path": "res://project.godot", "bytes": 1200, "sha256": "8888888888888888888888888888888888888888888888888888888888888888"},
-    {"role": "streetscape_semantics_exporter", "path": "res://tests/streetscape_semantics_exporter.gd", "bytes": 4300, "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+    {"role": "streetscape_semantics_adapter", "path": "res://scripts/qa/streetscape_evidence_adapter.gd", "bytes": 5200, "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
+    {"role": "streetscape_semantics_exporter", "path": "res://tests/streetscape_semantics_exporter.gd", "bytes": 4300, "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+    {"role": "visible_first_boundary_adapter", "path": "res://scripts/qa/visible_first_boundary_adapter.gd", "bytes": 4800, "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"},
+    {"role": "visible_first_boundary_exporter", "path": "res://tests/visible_first_boundary_probe.gd", "bytes": 4400, "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"}
   ],
-  "closure_digest": "2531337569225debc32bff67eea105287b3d51b08001f7b7fbada50c4fe44d00"
+  "closure_digest": "eaa5f438700c44c8cf1e244bec663322a9ab9b7543b03f17829efeba04505826"
 }

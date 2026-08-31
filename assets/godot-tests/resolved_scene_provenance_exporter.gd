@@ -11,8 +11,12 @@ extends SceneTree
 ## Add each evidence exporter/auditor input that shapes the resolved report with:
 ##   --tool-input environment_coverage_exporter=res://tests/environment_coverage_exporter.gd
 ##   --tool-input streetscape_semantics_exporter=res://tests/streetscape_semantics_exporter.gd
+## Evidence adapters/exporters must be injected by the headless QA process. Never attach
+## res://tests/, res://scripts/qa/, or res://reports/ resources to the production scene;
+## dependency-based export can pack referenced resources despite an exclude filter.
 
 const DIGEST_HEADER := "skill-godot-resolved-scene-closure-v1"
+const QA_ONLY_PRODUCTION_PREFIXES := ["res://reports/", "res://scripts/qa/", "res://tests/"]
 var _failed := false
 
 
@@ -41,6 +45,11 @@ func _initialize() -> void:
 		if not discovered.has(path):
 			discovered.append(path)
 	discovered.sort()
+	for path in discovered:
+		for prefix in QA_ONLY_PRODUCTION_PREFIXES:
+			if path.begins_with(prefix):
+				_fail("production dependency closure contains QA/report-only path: %s" % path)
+				return
 
 	var entries: Array[Dictionary] = []
 	entries.append(_file_record(root_scene, "root_scene"))

@@ -18,6 +18,7 @@ class ProvenanceError(RuntimeError):
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 REQUIRED_TOOL_ROLES = {"exporter_script", "export_presets", "project_settings"}
+QA_ONLY_PRODUCTION_PREFIXES = ("res://reports/", "res://scripts/qa/", "res://tests/")
 
 
 def parse_args() -> argparse.Namespace:
@@ -246,6 +247,17 @@ def parse_manifest(data: dict[str, Any], *, project: Path | None = None) -> tupl
     if (direct or recursive or runtime) and entry_paths == [root_scene]:
         errors.append(
             "root-file-only digest is invalid because the resolved scene declares dependencies"
+        )
+    qa_dependencies = [
+        path
+        for path in discovered
+        if any(path.startswith(prefix) for prefix in QA_ONLY_PRODUCTION_PREFIXES)
+    ]
+    if qa_dependencies:
+        errors.append(
+            "production dependency closure contains QA/report-only paths; inject evidence "
+            "adapters transiently and keep them in toolchain_inputs instead: "
+            + ", ".join(qa_dependencies)
         )
     root_entries = [item for item in entries if item["path"] == root_scene]
     if len(root_entries) != 1 or root_entries[0]["kind"] != "root_scene":

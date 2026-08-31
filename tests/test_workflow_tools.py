@@ -410,6 +410,18 @@ class AINavigationContractTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertIn("does not handle unreachable target", completed.stdout)
 
+    def test_repeated_same_side_recovery_loop_fails(self) -> None:
+        completed = run_script(
+            "ai_navigation_probe.py",
+            "--model",
+            str(ROOT / "tests" / "fixtures" / "ai-navigation-repeated-side-negative.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("repeats failed recovery candidate", completed.stdout)
+        self.assertIn("selects only by stable instance ID", completed.stdout)
+        self.assertIn("exhausts recovery", completed.stdout)
+
 
 class ProceduralGenerationContractTests(unittest.TestCase):
     def test_template_passes(self) -> None:
@@ -854,6 +866,142 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("reachable pocket/contact", errors)
         self.assertIn("shipping-camera road survey misses junctions", errors)
 
+    def test_visible_first_boundary_template_passes(self) -> None:
+        completed = run_script(
+            "visible_first_boundary_audit.py",
+            "--model",
+            str(ROOT / "assets" / "visible-first-boundary-contract.template.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] visible-first-boundary", completed.stdout)
+
+    def test_visible_first_boundary_rejects_exact_v20_misses_after_floodfill_pass(self) -> None:
+        fixture = json.loads(
+            (
+                ROOT
+                / "tests"
+                / "fixtures"
+                / "visible-first-boundary-old-clinic-v20-negative.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(fixture["prior_gates"]["boundary_reachability_pockets"], 0)
+        model = load_asset_json("visible-first-boundary-contract.template.json")
+        model["contract"].update(
+            {
+                "hero_radius": 0.5,
+                "maximum_sample_spacing": 1.0,
+                "expected_span_count": 4,
+                "expected_sample_count": fixture["total_sample_count"],
+            }
+        )
+        cause_id = "district-visible-perimeter"
+        object_id = "district-perimeter-art"
+        collider_id = "World/Boundary/VisiblePerimeterCollider"
+        render_shell_id = "World/Boundary/VisiblePerimeterShell"
+        model["visible_cause_mappings"] = [
+            {
+                "id": cause_id,
+                "object_ids": [object_id],
+                "collider_ids": [collider_id],
+                "render_shell_ids": [render_shell_id],
+            }
+        ]
+        model["safety_boundary_collider_ids"] = [
+            f"World/Boundary/{span['id'].title()}Safety" for span in fixture["spans"]
+        ]
+        model["declared_perimeter_spans"] = []
+        model["samples"] = []
+        for span in fixture["spans"]:
+            safety_id = f"World/Boundary/{span['id'].title()}Safety"
+            sample_count = span["sample_count"]
+            start = span["start"]
+            end = span["end"]
+            failures = {tuple(position) for position in span["invisible_first_positions"]}
+            model["declared_perimeter_spans"].append(
+                {
+                    "id": span["id"],
+                    "start": start,
+                    "end": end,
+                    "outward_direction": span["outward_direction"],
+                    "sample_spacing": 1.0,
+                    "expected_sample_count": sample_count,
+                    "safety_backstop_required": True,
+                    "safety_boundary_collider_ids": [safety_id],
+                    "raw_overview_artifact": f"reports/raw/boundary/{span['id']}.png",
+                }
+            )
+            for index in range(sample_count):
+                ratio = index / (sample_count - 1)
+                origin = [
+                    round(start[0] + (end[0] - start[0]) * ratio, 6),
+                    round(start[1] + (end[1] - start[1]) * ratio, 6),
+                ]
+                visible_hit = {
+                    "distance": 0.5,
+                    "kind": "visible_cause",
+                    "cause_id": cause_id,
+                    "object_id": object_id,
+                    "collider_id": collider_id,
+                    "render_shell_id": render_shell_id,
+                }
+                safety_hit = {
+                    "distance": 1.2,
+                    "kind": "safety_boundary",
+                    "collider_id": safety_id,
+                }
+                if tuple(origin) in failures:
+                    safety_hit["distance"] = 0.25
+                    hits = [safety_hit, visible_hit]
+                else:
+                    hits = [visible_hit, safety_hit]
+                model["samples"].append(
+                    {
+                        "id": f"{span['id']}-{index:03d}",
+                        "span_id": span["id"],
+                        "sample_index": index,
+                        "origin": origin,
+                        "direction": span["outward_direction"],
+                        "probe_kind": "capsule_sweep",
+                        "probe_radius": 0.5,
+                        "probe_height": 1.8,
+                        "ordered_hits": hits,
+                    }
+                )
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "visible-first-v20.json"
+            report_path = Path(directory) / "visible-first-v20-report.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "visible_first_boundary_audit.py",
+                "--model",
+                str(model_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(report["perimeter_sample_count"], 180)
+        self.assertEqual(
+            report["invisible_first_hit_count"], fixture["expected_invisible_first_count"]
+        )
+        self.assertIn("contacts an invisible safety boundary", completed.stdout)
+
+    def test_shipping_package_hygiene_rejects_qa_adapter_even_when_excluded(self) -> None:
+        fixture = ROOT / "tests" / "fixtures" / "shipping-pck-qa-adapter-negative.pck"
+        completed = run_script(
+            "build_size_audit.py",
+            "--artifact",
+            f"windows-release={fixture}",
+            "--forbid-marker",
+            "windows-release=res://scripts/qa/",
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("forbidden shipping marker", completed.stdout)
+        self.assertIn("streetscape_evidence_adapter.gd", fixture.read_text(encoding="utf-8"))
+
     def test_resolved_scene_provenance_template_passes(self) -> None:
         completed = run_script(
             "resolved_scene_provenance_audit.py",
@@ -912,6 +1060,45 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 1, completed.stdout)
         self.assertIn("root-file-only digest is invalid", completed.stdout)
         self.assertIn("dependency closure entries are missing", completed.stdout)
+
+    def test_resolved_scene_provenance_rejects_qa_adapter_as_production_dependency(self) -> None:
+        manifest = load_asset_json("resolved-scene-provenance.template.json")
+        qa_path = "res://scripts/qa/streetscape_evidence_adapter.gd"
+        manifest["dependency_discovery"]["direct_dependencies"].append(qa_path)
+        manifest["dependency_discovery"]["direct_dependencies"].sort()
+        manifest["dependency_discovery"]["recursive_dependencies"].append(qa_path)
+        manifest["dependency_discovery"]["recursive_dependencies"].sort()
+        manifest["dependency_discovery"]["declared_dependency_count"] += 1
+        manifest["entries"].append(
+            {"path": qa_path, "kind": "script", "bytes": 123, "sha256": "9" * 64}
+        )
+        manifest["entries"].sort(key=lambda item: item["path"])
+        lines = [
+            "skill-godot-resolved-scene-closure-v1",
+            f"source_kind\t{manifest['source_kind']}",
+            f"root_scene\t{manifest['root_scene']}",
+            f"engine_version\t{manifest['engine_version']}",
+            f"export_preset_selector\t{manifest['export_preset_selector']}",
+        ]
+        lines.extend(
+            f"entry\t{item['path']}\t{item['kind']}\t{item['bytes']}\t{item['sha256']}"
+            for item in manifest["entries"]
+        )
+        lines.extend(
+            f"tool\t{item['role']}\t{item['path']}\t{item['bytes']}\t{item['sha256']}"
+            for item in manifest["toolchain_inputs"]
+        )
+        manifest["closure_digest"] = hashlib.sha256(
+            ("\n".join(lines) + "\n").encode("utf-8")
+        ).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "qa-production-dependency.json"
+            path.write_text(json.dumps(manifest), encoding="utf-8")
+            completed = run_script(
+                "resolved_scene_provenance_audit.py", "--manifest", str(path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("production dependency closure contains QA/report-only paths", completed.stdout)
 
     def test_nested_dependency_mutation_changes_closure_with_same_root_hash(self) -> None:
         baseline_path = (

@@ -30,6 +30,7 @@ Exercise authored fixtures and real levels for:
 - spawn/idle/patrol, chase, attack telegraph/commit/recovery, disengage and return;
 - narrow doors, corners, slopes, drops, jump/climb links, moving obstacles and multiple locomotion maps;
 - blocked route and replan, unreachable or deleted target, actor displacement/teleport and nav-map rebake/update;
+- repeated failure against the same facade/obstacle: first recovery side blocked, next attempt changes candidate or proves a changed/revalidated environment, then recovers or escalates within a declared budget;
 - crowd crossing, doorway contention, formation break, priority agents and deadlock recovery;
 - pause/time-scale/save-load/scene transition without decision or cooldown drift;
 - off-screen sleep/wake and target-capacity load.
@@ -40,7 +41,9 @@ Run:
 python <skill-dir>/scripts/ai_navigation_probe.py --model reports/ai-navigation-contract.json --summary --json-output reports/ai-navigation-audit.json
 ```
 
-The probe checks archetype/scenario coverage, fairness boundaries, perception results, route/replan/unreachable handling, stuck/deadlock counts, telegraph/reaction budgets, pause stability, off-screen cadence, and capacity performance. It does not certify fun, personality, tactics, animation quality, or whether the player can read intent.
+The probe checks archetype/scenario coverage, fairness boundaries, perception results, route/replan/unreachable handling, repeated-recovery candidate memory, stuck/deadlock counts, telegraph/reaction budgets, pause stability, off-screen cadence, and capacity performance. It does not certify fun, personality, tactics, animation quality, or whether the player can read intent.
+
+Stuck recovery must be stateful. Record the obstacle/environment revision, attempted side/waypoint, selection basis, measured progress and terminal recovery/escalation. A stable instance-ID hash that chooses the same blocked side after every no-progress timeout is a loop, not recovery. Retain failed candidates for the current geometry revision, prefer an untried valid candidate, and cap attempts before a declared replan, backtrack, safe reset or target abandonment. A candidate may be retried only after the relevant geometry/path state changed and was revalidated. Run the sequence through the production movement/physics path against an adjacent facade, not by directly invoking the selector.
 
 ## Human-facing acceptance
 
@@ -50,4 +53,4 @@ Primary Godot references:
 
 - [Using NavigationServer](https://docs.godotengine.org/en/stable/tutorials/navigation/navigation_using_navigationservers.html)
 - [NavigationServer2D](https://docs.godotengine.org/en/stable/classes/class_navigationserver2d.html)
-
+- [Using NavigationAgents](https://docs.godotengine.org/en/stable/tutorials/navigation/navigation_using_navigationagents.html) documents that navigation supplies path state while the project remains responsible for physical movement and its recovery behavior.

@@ -1,18 +1,21 @@
 extends SceneTree
 
-## Exact resolved-scene exporter shell for the streetscape semantics contract.
-## Copy into the game project, provide a scene-owned adapter node, then run:
-## godot --headless --path . --script res://tests/streetscape_semantics_exporter.gd -- \
-##   --scene res://scenes/world/District.tscn \
-##   --adapter-script res://scripts/qa/streetscape_evidence_adapter.gd \
-##   --build-id district-target-v1 \
-##   --output reports/streetscape-semantics-contract.json
+## Exact resolved-scene visible-first perimeter exporter shell.
+## The production scene remains untouched. A project-owned QA adapter is loaded only
+## by this headless process, added transiently after scene instantiation, and recorded
+## as a provenance toolchain input rather than a production dependency.
 ##
-## The adapter script is loaded only by this QA process and must NOT be attached to,
-## referenced by, or serialized inside the production scene. It must implement:
-##   export_streetscape_semantics(build_id: String, scene_path: String) -> Dictionary
-## It must read the instantiated production scene's final transforms, mesh surfaces,
-## collision/hero-radius raster, semantic resources/groups, and raw-artifact manifest.
+## godot --headless --path . --script res://tests/visible_first_boundary_probe.gd -- \
+##   --scene res://scenes/world/District.tscn \
+##   --adapter-script res://scripts/qa/visible_first_boundary_adapter.gd \
+##   --build-id district-target-v1 \
+##   --output reports/visible-first-boundary-contract.json
+##
+## The adapter must implement:
+##   export_visible_first_boundary(build_id: String, scene_path: String) -> Dictionary
+## It must enumerate every enabled perimeter/safety collider from the instantiated
+## production scene and issue PhysicsDirectSpaceState3D capsule sweeps or full-width
+## ray bundles after at least one physics frame.
 
 
 func _initialize() -> void:
@@ -27,10 +30,13 @@ func _run() -> void:
 			return
 
 	var scene_path := String(options.scene)
-	if not scene_path.begins_with("res://"):
-		_fail("--scene must use a res:// path")
+	var adapter_path := String(options.adapter_script)
+	if not scene_path.begins_with("res://") or not adapter_path.begins_with("res://"):
+		_fail("--scene and --adapter-script must use res:// paths")
 		return
-	var packed := ResourceLoader.load(scene_path, "PackedScene", ResourceLoader.CACHE_MODE_REPLACE_DEEP) as PackedScene
+	var packed := ResourceLoader.load(
+		scene_path, "PackedScene", ResourceLoader.CACHE_MODE_REPLACE_DEEP
+	) as PackedScene
 	if packed == null:
 		_fail("could not load production scene: %s" % scene_path)
 		return
@@ -43,30 +49,26 @@ func _run() -> void:
 	await process_frame
 	await physics_frame
 
-	var adapter_path := String(options.adapter_script)
-	if not adapter_path.begins_with("res://"):
-		_fail("--adapter-script must use a res:// path")
-		return
 	var adapter_script := ResourceLoader.load(
 		adapter_path, "Script", ResourceLoader.CACHE_MODE_REPLACE_DEEP
 	) as Script
 	if adapter_script == null:
-		_fail("could not load transient streetscape adapter: %s" % adapter_path)
+		_fail("could not load transient boundary adapter: %s" % adapter_path)
 		return
 	var adapter := Node3D.new()
-	adapter.name = "TransientStreetscapeEvidenceAdapter"
+	adapter.name = "TransientVisibleFirstBoundaryAdapter"
 	adapter.set_script(adapter_script)
 	root.add_child(adapter)
 	await process_frame
 	await physics_frame
-	if not adapter.has_method("export_streetscape_semantics"):
-		_fail("adapter must implement export_streetscape_semantics(build_id, scene_path)")
+	if not adapter.has_method("export_visible_first_boundary"):
+		_fail("adapter must implement export_visible_first_boundary(build_id, scene_path)")
 		return
 	var raw: Variant = adapter.call(
-		"export_streetscape_semantics", String(options.build_id), scene_path
+		"export_visible_first_boundary", String(options.build_id), scene_path
 	)
 	if not raw is Dictionary:
-		_fail("adapter export_streetscape_semantics must return Dictionary")
+		_fail("adapter export_visible_first_boundary must return Dictionary")
 		return
 	var contract: Dictionary = raw
 	if contract.get("schema_version") != 1:
@@ -100,7 +102,7 @@ func _run() -> void:
 		return
 	output.store_string(JSON.stringify(contract, "  ") + "\n")
 	output.close()
-	print("[PASS] streetscape-semantics-export build=%s scene=%s output=%s" % [
+	print("[PASS] visible-first-boundary-export build=%s scene=%s output=%s" % [
 		String(options.build_id), scene_path, output_path
 	])
 	quit(0)

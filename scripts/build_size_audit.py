@@ -82,6 +82,16 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help="Maximum artifact size as PROFILE=MB; repeatable.",
     )
+    parser.add_argument(
+        "--forbid-marker",
+        action="append",
+        type=lambda value: parse_pair(value, "--forbid-marker"),
+        default=[],
+        help=(
+            "Fail when UTF-8 marker bytes occur in the exact artifact, a ZIP member, "
+            "or an exported path; use PROFILE=TEXT and repeat as needed."
+        ),
+    )
     parser.add_argument("--baseline", help="Previous JSON report from this script.")
     parser.add_argument("--json-output", help="Write the full current JSON report.")
     parser.add_argument("--top", type=int, default=10, help="Top contributor count per profile.")
@@ -153,7 +163,105 @@ def summarize_entries(entries: Iterable[tuple[str, int]]) -> tuple[dict[str, int
     return dict(sorted(categories.items())), normalized_entries
 
 
-def analyze_artifact(name: str, raw_path: str) -> dict[str, Any]:
+def scan_stream_for_markers(
+    stream: Any,
+    markers: list[str],
+    member: str,
+) -> list[dict[str, Any]]:
+    encoded = {marker: marker.encode("utf-8") for marker in markers}
+    if not encoded:
+        return []
+    maximum_length = max(len(value) for value in encoded.values())
+    found: set[str] = set()
+    matches: list[dict[str, Any]] = []
+    tail = b""
+    consumed = 0
+    while True:
+        chunk = stream.read(1024 * 1024)
+        if not chunk:
+            break
+        payload = tail + chunk
+        payload_start = consumed - len(tail)
+        for marker, marker_bytes in encoded.items():
+            if marker in found:
+                continue
+            offset = payload.find(marker_bytes)
+            if offset >= 0:
+                found.add(marker)
+                matches.append(
+                    {"marker": marker, "member": member, "byte_offset": payload_start + offset}
+                )
+        tail = payload[-(maximum_length - 1) :] if maximum_length > 1 else b""
+        consumed += len(chunk)
+        if len(found) == len(encoded):
+            break
+    return matches
+
+
+def scan_artifact_for_markers(path: Path, markers: list[str]) -> list[dict[str, Any]]:
+    if not markers:
+        return []
+    matches: list[dict[str, Any]] = []
+    if path.is_dir():
+        for current, directories, files in os.walk(path, followlinks=False):
+            current_path = Path(current)
+            directories[:] = [
+                name for name in directories if not (current_path / name).is_symlink()
+            ]
+            for name in files:
+                file_path = current_path / name
+                if file_path.is_symlink():
+                    continue
+                relative = file_path.relative_to(path).as_posix()
+                for marker in markers:
+                    if marker in relative:
+                        matches.append({"marker": marker, "member": relative, "byte_offset": None})
+                try:
+                    with file_path.open("rb") as stream:
+                        matches.extend(scan_stream_for_markers(stream, markers, relative))
+                except OSError as exc:
+                    raise AuditError(f"Could not scan artifact member {relative}: {exc}") from exc
+    elif zipfile.is_zipfile(path):
+        try:
+            with zipfile.ZipFile(path) as archive:
+                for info in archive.infolist():
+                    if info.is_dir():
+                        continue
+                    member = info.filename.replace("\\", "/")
+                    for marker in markers:
+                        if marker in member:
+                            matches.append({"marker": marker, "member": member, "byte_offset": None})
+                    with archive.open(info, "r") as stream:
+                        matches.extend(scan_stream_for_markers(stream, markers, member))
+        except (OSError, zipfile.BadZipFile) as exc:
+            raise AuditError(f"Could not scan archive {path}: {exc}") from exc
+    else:
+        try:
+            with path.open("rb") as stream:
+                matches.extend(scan_stream_for_markers(stream, markers, path.name))
+        except OSError as exc:
+            raise AuditError(f"Could not scan artifact {path}: {exc}") from exc
+    unique = {
+        (item["marker"], item["member"], item["byte_offset"]): item for item in matches
+    }
+    return [
+        item
+        for item in sorted(
+            unique.values(),
+            key=lambda value: (
+                value["marker"],
+                value["member"],
+                -1 if value["byte_offset"] is None else value["byte_offset"],
+            ),
+        )
+    ]
+
+
+def analyze_artifact(
+    name: str,
+    raw_path: str,
+    forbidden_markers: list[str] | None = None,
+) -> dict[str, Any]:
     path = Path(raw_path).expanduser().resolve()
     if not path.exists():
         raise AuditError(f"Artifact not found for {name}: {path}")
@@ -180,6 +288,7 @@ def analyze_artifact(name: str, raw_path: str) -> dict[str, Any]:
         raise AuditError(f"Unsupported artifact type for {name}: {path}")
 
     categories, normalized_entries = summarize_entries(entries)
+    marker_matches = scan_artifact_for_markers(path, forbidden_markers or [])
     return {
         "path": str(path),
         "mode": mode,
@@ -188,6 +297,9 @@ def analyze_artifact(name: str, raw_path: str) -> dict[str, Any]:
         "file_count": len(entries),
         "categories": categories,
         "largest": normalized_entries,
+        "forbidden_markers": forbidden_markers or [],
+        "forbidden_marker_matches": marker_matches,
+        "package_hygiene_status": "fail" if marker_matches else "pass",
         "warnings": warnings,
     }
 
@@ -248,10 +360,23 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+    forbidden_markers: dict[str, list[str]] = defaultdict(list)
+    for profile, marker in args.forbid_marker:
+        if profile not in artifacts:
+            print(
+                f"[ERROR] Forbidden-marker profile has no artifact: {profile}",
+                file=sys.stderr,
+            )
+            return 2
+        if marker not in forbidden_markers[profile]:
+            forbidden_markers[profile].append(marker)
 
     try:
         baseline = load_baseline(args.baseline)
-        profiles = {name: analyze_artifact(name, path) for name, path in artifacts.items()}
+        profiles = {
+            name: analyze_artifact(name, path, forbidden_markers.get(name, []))
+            for name, path in artifacts.items()
+        }
     except AuditError as exc:
         print(f"[ERROR] {exc}", file=sys.stderr)
         return 2
@@ -263,7 +388,7 @@ def main() -> int:
         profile["budget_status"] = (
             "fail" if budget_bytes is not None and profile["total_bytes"] > budget_bytes else "pass"
         )
-        if profile["budget_status"] == "fail":
+        if profile["budget_status"] == "fail" or profile["package_hygiene_status"] == "fail":
             failures += 1
         previous = baseline_size(baseline, name)
         profile["baseline_bytes"] = previous
@@ -274,7 +399,11 @@ def main() -> int:
             else None
         )
 
-        status = "FAIL" if profile["budget_status"] == "fail" else "PASS"
+        status = (
+            "FAIL"
+            if profile["budget_status"] == "fail" or profile["package_hygiene_status"] == "fail"
+            else "PASS"
+        )
         pieces = [f"[{status}] {name}: {format_size(profile['total_bytes'])}"]
         if budget_bytes is not None:
             pieces.append(f"budget {format_size(budget_bytes)}")
@@ -298,6 +427,13 @@ def main() -> int:
                 print(f"[INFO] {name} top: {format_size(item['bytes'])} {item['path']}")
         for warning in profile["warnings"]:
             print(f"[WARN] {name}: {warning}")
+        for match in profile["forbidden_marker_matches"]:
+            location = match["member"]
+            if match["byte_offset"] is not None:
+                location += f"@{match['byte_offset']}"
+            print(
+                f"[ERROR] {name}: forbidden shipping marker {match['marker']!r} in {location}"
+            )
 
     report = {"schema_version": SCHEMA_VERSION, "profiles": profiles}
     if args.json_output:
@@ -309,7 +445,7 @@ def main() -> int:
             return 2
 
     if failures:
-        print(f"[FAIL] {failures} build-size budget failure(s)", file=sys.stderr)
+        print(f"[FAIL] {failures} build-size/package-hygiene failure(s)", file=sys.stderr)
         return 1
     print(f"[PASS] {len(profiles)} artifact profile(s)")
     return 0

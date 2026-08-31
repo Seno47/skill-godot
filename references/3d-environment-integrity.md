@@ -163,6 +163,21 @@ A duplicate traffic-light pole collider, old hidden wall or disabled visual vari
 
 In Godot, enumerate shape owners from the resolved `CollisionObject3D` rather than assuming one `CollisionShape3D` child or matching names. Record `CollisionShape3D.disabled`, final transforms and shape-owner ownership. Seed render shells from final visible `VisualInstance3D` bounds/mesh geometry, not collision shapes.
 
+## Prove visible-first contact along the whole perimeter
+
+Collider/render-shell parity and a flood-fill with zero reachable safety-wall pockets still do not prove contact order at every point. A broad invisible wall may protrude in front of a truck, facade or cordon for a few meters while every grid cell remains unreachable from behind. Whenever a high-angle map keeps a safety-only blocker behind visible boundary art, instantiate `assets/visible-first-boundary-contract.template.json`, export it with a transient QA adapter through `assets/godot-tests/visible_first_boundary_probe.gd`, then run:
+
+```bash
+python <skill-dir>/scripts/visible_first_boundary_audit.py \
+  --model reports/visible-first-boundary-contract.json \
+  --json-output reports/visible-first-boundary-audit.json \
+  --summary
+```
+
+Declare every enabled perimeter span, not just road corridors or the places already visible in curated captures. Deterministically sample each span from endpoint to endpoint with spacing no greater than the production hero diameter, point each query inward-to-outward, and preserve exact ordered hits. A production-size capsule sweep is preferred. A ray implementation passes only as a full-width bundle whose lateral gaps are no larger than the declared hero-radius budget; one center ray cannot represent a character body.
+
+Every probe must contact a collider mapped to an exact visible cause and render shell first. A safety-only collider may appear only behind that cause and beyond the declared clearance margin. The resolved manifest must enumerate every safety collider and visible mapping, every span/sample index must be exercised, and openings/exits must remain declared open rather than being silently treated as closed boundary. Bind the trace, span close-ups and exporter to the same build and dependency-closure digest. Zero reachable pockets, `180/180 blocked`, a visible object name, or an export-preset exclusion does not substitute for first-hit ownership.
+
 ## Resolve production occluder aliases, not synthetic names
 
 Synthetic obstruction fixtures can pass while the production collision and visual roots use different names. Export the exact production-scene collision-root set and maintain an inspectable mapping:
@@ -218,10 +233,11 @@ The deterministic report and visual evidence are one gate, not alternatives. Pre
 7. all-enabled-static-collider/render-shell and hero-radius raster overlays;
 8. production occluder alias fade/restoration motion;
 9. high-risk topmost-surface/object-pair contacts.
+10. the whole-perimeter visible-first contact sheet plus exact detected-span close-ups.
 
 For every defect class detected during the iteration, keep a representative before frame, the fixed after frame, and the clean rerun row. Do not crop away the contact context. If no defect was detected in a class, still capture its highest-risk representative state.
 
-The gate fails when either audit has an error, a visible prop is missing required proxies, one semantic zone accepts incompatible families, fallback exceeds its zone budget, any playable/survey cell is uncovered, an observed adjacency lacks a transition/cause, any enabled collider lacks visible shell/raster support, a disabled/hidden variant is asymmetric, a production occluder root or trace is missing, a surface/object rule fails, a detected class lacks before/fixed/rerun evidence, an exemption is vague/stale, or the raw build still shows fusion, penetration, floating contact, abrupt patchwork, roadway nature props, invisible blockers or exposed substrate.
+The gate fails when any applicable audit has an error, a visible prop is missing required proxies, one semantic zone accepts incompatible families, fallback exceeds its zone budget, any playable/survey/perimeter sample is uncovered, an observed adjacency lacks a transition/cause, any enabled collider lacks visible shell/raster support, a safety wall is contacted before its mapped visible cause, visible-to-safety clearance is too small, a disabled/hidden variant is asymmetric, a production occluder root or trace is missing, a surface/object rule fails, a detected class lacks before/fixed/rerun evidence, an exemption is vague/stale, or the raw build still shows fusion, penetration, floating contact, abrupt patchwork, roadway nature props, invisible blockers or exposed substrate.
 
 ## Engine references
 

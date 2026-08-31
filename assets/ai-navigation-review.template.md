@@ -15,6 +15,7 @@
 | Perception boundary/occlusion |  |  |  |  |  |
 | Chase/attack telegraph |  |  |  |  |  |
 | Blocked/unreachable target |  |  |  |  |  |
+| Repeated same-obstacle recovery |  |  |  |  |  |
 | Crowd/doorway |  |  |  |  |  |
 | Disengage/return |  |  |  |  |  |
 | Pause/save/load |  |  |  |  |  |
@@ -26,5 +27,5 @@
 - `ai_behavior_readability_review`: `PASS / FAIL / NOT TESTED`
 - Unfair hidden information or rule bypass:
 - Stuck/jitter/deadlock/contact defects:
+- Failed side/candidate memory, alternate attempt and bounded escalation:
 - Blocking defects:
-

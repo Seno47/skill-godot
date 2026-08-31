@@ -16,6 +16,7 @@ ALLOWED_SCENARIOS = {
     "perception_boundary",
     "chase_route",
     "blocked_replan",
+    "repeated_recovery",
     "unreachable_target",
     "crowd_avoidance",
     "combat_telegraph",
@@ -116,6 +117,16 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     max_deadlocks = integer(contract.get("max_deadlocks"), "max_deadlocks")
     max_path = number(contract.get("max_path_ms"), "max_path_ms")
     max_replan = number(contract.get("max_replan_ms"), "max_replan_ms")
+    max_recovery_attempts = integer(
+        contract.get("max_recovery_attempts"), "max_recovery_attempts", 1
+    )
+    max_same_failed_candidate_retries = integer(
+        contract.get("max_same_failed_candidate_retries"),
+        "max_same_failed_candidate_retries",
+    )
+    minimum_recovery_progress = number(
+        contract.get("minimum_recovery_progress"), "minimum_recovery_progress"
+    )
     min_telegraph = number(contract.get("minimum_telegraph_ms"), "minimum_telegraph_ms")
     min_reaction = number(contract.get("minimum_reaction_ms"), "minimum_reaction_ms")
     max_tick = number(contract.get("max_capacity_tick_p95_ms"), "max_capacity_tick_p95_ms")
@@ -183,6 +194,95 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 errors.append(f"trace {trace_id} fails blocked-route replan")
             if number(trace.get("replan_ms"), f"trace {trace_id}.replan_ms") > max_replan:
                 errors.append(f"trace {trace_id} exceeds replan budget")
+        elif scenario == "repeated_recovery":
+            attempts = array(trace.get("recovery_attempts"), f"trace {trace_id}.recovery_attempts")
+            if not attempts:
+                raise ContractError(f"trace {trace_id}.recovery_attempts must not be empty")
+            if len(attempts) > max_recovery_attempts:
+                errors.append(
+                    f"trace {trace_id} recovery attempts {len(attempts)} exceed "
+                    f"{max_recovery_attempts}"
+                )
+            failed_counts: dict[tuple[str, str], int] = {}
+            saw_failure = False
+            terminal_outcome = "failed"
+            for attempt_index, raw_attempt in enumerate(attempts):
+                attempt = obj(
+                    raw_attempt,
+                    f"trace {trace_id}.recovery_attempts[{attempt_index}]",
+                )
+                candidate_id = text(
+                    attempt.get("candidate_id"),
+                    f"trace {trace_id} recovery attempt {attempt_index}.candidate_id",
+                )
+                environment_revision = text(
+                    attempt.get("environment_revision"),
+                    f"trace {trace_id} recovery attempt {attempt_index}.environment_revision",
+                )
+                selection_basis = text(
+                    attempt.get("selection_basis"),
+                    f"trace {trace_id} recovery attempt {attempt_index}.selection_basis",
+                )
+                if selection_basis == "stable_instance_id_only":
+                    errors.append(
+                        f"trace {trace_id} recovery attempt {attempt_index} selects only by stable instance ID"
+                    )
+                outcome = text(
+                    attempt.get("outcome"),
+                    f"trace {trace_id} recovery attempt {attempt_index}.outcome",
+                )
+                if outcome not in {"failed", "recovered", "escalated"}:
+                    raise ContractError(
+                        f"trace {trace_id} recovery attempt {attempt_index}.outcome is unsupported"
+                    )
+                progress = number(
+                    attempt.get("progress_distance"),
+                    f"trace {trace_id} recovery attempt {attempt_index}.progress_distance",
+                )
+                key = (candidate_id, environment_revision)
+                if failed_counts.get(key, 0) > max_same_failed_candidate_retries:
+                    errors.append(
+                        f"trace {trace_id} repeats failed recovery candidate {candidate_id} "
+                        f"without a changed/revalidated environment"
+                    )
+                if outcome == "failed":
+                    saw_failure = True
+                    failed_counts[key] = failed_counts.get(key, 0) + 1
+                elif outcome == "recovered":
+                    if progress < minimum_recovery_progress:
+                        errors.append(
+                            f"trace {trace_id} claims recovery below the progress floor"
+                        )
+                    if not boolean(
+                        attempt.get("target_progress_resumed"),
+                        f"trace {trace_id} recovery attempt {attempt_index}.target_progress_resumed",
+                    ):
+                        errors.append(
+                            f"trace {trace_id} recovery does not resume target progress"
+                        )
+                else:
+                    escalation = text(
+                        attempt.get("escalation"),
+                        f"trace {trace_id} recovery attempt {attempt_index}.escalation",
+                    )
+                    if escalation not in {"repath", "backtrack", "safe_reset", "abandon_target"}:
+                        errors.append(
+                            f"trace {trace_id} uses unsupported recovery escalation {escalation}"
+                        )
+                if outcome in {"recovered", "escalated"} and attempt_index != len(attempts) - 1:
+                    errors.append(
+                        f"trace {trace_id} continues attempts after terminal recovery outcome"
+                    )
+                terminal_outcome = outcome
+            if saw_failure and not boolean(
+                trace.get("failed_candidate_memory_observed"),
+                f"trace {trace_id}.failed_candidate_memory_observed",
+            ):
+                errors.append(f"trace {trace_id} does not retain failed recovery candidates")
+            if terminal_outcome not in {"recovered", "escalated"}:
+                errors.append(
+                    f"trace {trace_id} exhausts recovery without bounded recovery or escalation"
+                )
         elif scenario == "unreachable_target":
             if not boolean(trace.get("unreachable_handled"), f"trace {trace_id}.unreachable_handled"):
                 errors.append(f"trace {trace_id} does not handle unreachable target")

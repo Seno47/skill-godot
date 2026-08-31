@@ -34,8 +34,21 @@ Do not delete source assets or production files merely because an export is larg
 - Prefer dependency-based selected scenes/resources when the project's dynamic loading model is compatible and coverage is tested.
 - Include dynamically addressed non-resource/data files explicitly; static dependency discovery cannot infer arbitrary runtime strings/mod content.
 - Exclude demos, source-working files, unused variants, development captures, attribution duplicates, and platform-irrelevant payloads from the export without breaking the source repository.
+- Keep QA adapters, report generators, captures and test fixtures out of the production dependency graph. Load/inject evidence adapters only from the QA process or a separate wrapper; if runtime truly needs the code, move it out of a QA namespace and document the production reason.
 - Keep required license/notice/credits files even when minimizing.
 - Validate every reachable scene, dynamic load, locale, quality tier, and platform after filters change.
+
+An export filter is not proof of absence. Selected scenes/resources are exported with their dependencies, so a `res://scripts/qa/...` script attached to a production scene can still enter the pack. After each exact shipping export, scan the PCK/embedded executable/ZIP contents for forbidden QA/report namespaces and project-specific markers:
+
+```bash
+python <skill-dir>/scripts/build_size_audit.py \
+  --artifact windows-release=build/Game.exe \
+  --forbid-marker windows-release=res://scripts/qa/ \
+  --forbid-marker windows-release=res://reports/ \
+  --summary --json-output reports/shipping-package-hygiene.json
+```
+
+Also inspect the resolved production dependency manifest before export: `res://tests/`, `res://scripts/qa/` and `res://reports/` may appear as hashed toolchain inputs, but not in the root scene's recursive/runtime dependency entries. Preserve the exact candidate hash, marker list and zero-match report. For archives, validate entry names and member bytes; for PCK or embedded executables, a binary marker scan is an admissible fail-closed check even when a friendly file listing tool is unavailable.
 
 Files/folders beginning with a period are not exported by Godot, but do not rely on hidden folders for required runtime content.
 
@@ -60,7 +73,7 @@ Files/folders beginning with a period are not exported by Godot, but do not rely
 
 Export the actual target preset and run it on the target platform. Verify cold start, all reachable/dynamically loaded content, locales, saves, network/mod/DLC paths if applicable, and visual/audio quality after compression.
 
-Record total artifact size, compressed transfer/install size where relevant, top contributors, baseline delta, budget result, export command/preset/version, and intentional tradeoffs. A smaller build that cannot load content or diagnose crashes is a regression.
+Record total artifact size, compressed transfer/install size where relevant, top contributors, baseline delta, budget result, export command/preset/version, forbidden-marker list and package-hygiene result. A smaller build that cannot load content or diagnose crashes is a regression; a successful export that still contains QA/report-only dependencies is not a shipping candidate.
 
 For a Yandex Games target, also read [yandex-games-web.md](yandex-games-web.md); its archive root, SDK loader, local-mock exclusion, lifecycle, and debug-panel checks are platform gates rather than generic Godot size advice.
 

@@ -1,0 +1,19 @@
+{
+  "fixture_id": "old-clinic-map-008-v20-floodfill-pass-visible-first-negative",
+  "base_contract": "assets/visible-first-boundary-contract.template.json",
+  "prior_gates": {
+    "streetscape_semantics_audit": "pass",
+    "boundary_reachability_pockets": 0,
+    "road_semantics_boundaries": "pass",
+    "environment_coverage_invisible_samples": 0
+  },
+  "total_sample_count": 180,
+  "spans": [
+    {"id": "north", "start": [-22, 24], "end": [22, 24], "outward_direction": [0, 1], "sample_count": 45, "invisible_first_positions": [[-4, 24], [6, 24]]},
+    {"id": "south", "start": [-22, -24], "end": [22, -24], "outward_direction": [0, -1], "sample_count": 45, "invisible_first_positions": [[-6, -24], [6, -24], [8, -24], [10, -24], [12, -24], [14, -24]]},
+    {"id": "east", "start": [24, -22], "end": [24, 22], "outward_direction": [1, 0], "sample_count": 45, "invisible_first_positions": [[24, -4], [24, 4], [24, 6], [24, 8]]},
+    {"id": "west", "start": [-24, -22], "end": [-24, 22], "outward_direction": [-1, 0], "sample_count": 45, "invisible_first_positions": []}
+  ],
+  "expected_invisible_first_count": 12,
+  "expected_gate": "high_angle_visible_first_boundary_evidence"
+}

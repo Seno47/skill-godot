@@ -27,7 +27,7 @@ These rules are informed by the [U.S. Access Board Public Right-of-Way Accessibi
 
 ## Export the final semantic scene
 
-Do not hand-type a simplified JSON that disagrees with the map. Copy/adapt `assets/godot-tests/streetscape_semantics_exporter.gd`; its scene-owned adapter interface forces the exact production `PackedScene` to be instantiated before project-specific semantic extraction. A Godot-owned exporter must wait for scene/physics setup, resolve final `global_transform` values, and emit:
+Do not hand-type a simplified JSON that disagrees with the map. Copy/adapt `assets/godot-tests/streetscape_semantics_exporter.gd`; it instantiates the exact production `PackedScene`, then injects a project-owned adapter script as a transient QA node. The adapter must never be serialized in or referenced by the production scene. Record it as a provenance `toolchain_input`, not a production dependency. A Godot-owned exporter must wait for scene/physics setup, resolve final `global_transform` values, and emit:
 
 - every semantic render surface polygon: travel lane, parking lane/bay, intersection, crosswalk, sidewalk clear path, curb, furnishing/buffer zone, frontage, median/island, closure treatment and project-specific variants;
 - lane, junction, legal-movement, approach, sidewalk and crossing graphs;
@@ -133,6 +133,8 @@ Flood-fill from player starts. A reachable cell adjacent to a safety-only wall i
 
 Use the production hero shape/radius when generating cells. In Godot, query `World3D.direct_space_state` with `PhysicsShapeQueryParameters3D` and `intersect_shape()` or an equivalent project-owned deterministic driver. Do not substitute a point ray for the character footprint.
 
+Then run the separate whole-perimeter visible-first layer from [3d-environment-integrity.md](3d-environment-integrity.md). Flood-fill answers whether a pocket is reachable; it does not answer which collider is contacted first at every continuous boundary position. The visible-first contract must cover all declared spans, including non-road edges, and reject even one sample where the safety-only wall precedes the mapped visible cause. Raw close-ups, traces and the streetscape/environment reports must share one build and resolved dependency-closure digest.
+
 ## Shipping-camera road survey and defect provenance
 
 Tile-survey the complete road/junction footprint with the shipping camera, final lighting, ordinary HUD and target build. Every junction and approach appears in at least one declared full-resolution capture. The candidate packet must include:
@@ -152,6 +154,7 @@ For every defect class discovered by audit or visual survey, preserve exact `bef
 Reject the candidate when any of these are true:
 
 - provenance, environment integrity and coverage PASS, but cars leave a reachable pocket against a safety wall;
+- flood-fill reports zero reachable pockets, but one whole-perimeter ray/capsule sample contacts a safety-only wall before visible geometry;
 - a building origin is in its parcel while its transformed support footprint occupies road/sidewalk;
 - every building node has a material but a visible floor/facade/roof/trim slot is default or unpainted;
 - dividers, stop lines, crossing stripes or parking marks do not form a connected approach/junction topology;
