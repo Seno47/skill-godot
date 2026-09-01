@@ -16,7 +16,7 @@ var _failed := false
 ## It must read the instantiated production scene's final transforms, mesh surfaces,
 ## collision/hero-radius raster, semantic resources/groups, approach-side and
 ## T-opposite sidewalk/curb continuity bands, every visible road-detail footprint,
-## schema-v5 typed lane-boundary terminations with road-end policy, query Y bounds and
+## schema-v6 typed lane-boundary terminations with road-end policy, query Y bounds and
 ## before/at/between/beyond XZ samples, vertex-resolved support contacts, source-role
 ## material masks and the raw-artifact manifest. The exporter itself injects the
 ## complete visible mesh/effective-material manifest, resolved marking-mesh chains and
@@ -97,8 +97,8 @@ func _run() -> void:
 		_fail("adapter export_streetscape_semantics must return Dictionary")
 		return
 	var contract: Dictionary = raw
-	if contract.get("schema_version") != 5:
-		_fail("adapter result schema_version must be 5")
+	if contract.get("schema_version") != 6:
+		_fail("adapter result schema_version must be 6")
 		return
 	if String(contract.get("build_id", "")) != String(options.build_id):
 		_fail("adapter result build_id does not match --build-id")

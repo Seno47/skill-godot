@@ -299,14 +299,14 @@
         {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance"]},
         {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["environment_integrity_contract", "transformed_prop_occupancy", "intentional_contact_plausibility", "semantic_surface_ownership"]},
         {"path": "evidence-artifacts/progression-model.json", "kind": "report", "states": ["render_ground_coverage_and_seams", "vertical_clearance", "detected_class_closeups_and_resolution"]},
-        {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["environment_coverage_contract", "surface_zone_topology", "shipping_camera_tiled_survey", "all_static_collider_visible_shell", "production_occluder_aliases", "surface_object_pair_relationships"]},
+        {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["environment_coverage_contract", "surface_zone_topology", "shipping_camera_tiled_survey", "all_static_collider_visible_shell", "bidirectional_expected_blocker_inventory", "non_solid_visual_effect_classification", "production_occluder_aliases", "surface_object_pair_relationships"]},
         {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["transformed_prop_occupancy", "intentional_contact_plausibility"]},
         {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["semantic_surface_ownership"]},
         {"path": "evidence-artifacts/dense.png", "kind": "image", "states": ["render_ground_coverage_and_seams"]},
         {"path": "evidence-artifacts/vfx.png", "kind": "image", "states": ["vertical_clearance"]},
         {"path": "evidence-artifacts/result.png", "kind": "image", "states": ["detected_class_closeups_and_resolution", "environment_integrity_overview"]},
         {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["surface_zone_topology"]},
-        {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["shipping_camera_tiled_survey", "all_static_collider_visible_shell"]},
+        {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["shipping_camera_tiled_survey", "all_static_collider_visible_shell", "bidirectional_expected_blocker_inventory", "non_solid_visual_effect_classification"]},
         {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["surface_object_pair_relationships"]},
         {"path": "evidence-artifacts/motion.avi", "kind": "video", "states": ["production_occluder_aliases"]}
       ]
@@ -317,7 +317,7 @@
       "reviewer": {"role": "builder", "context": "fixture builder streetscape-semantics review"},
       "artifacts": [
         {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "streetscape_semantics_contract", "road_graph_and_markings", "marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "road_end_topmost_surface_samples", "marking_vs_closure_geometry", "production_placement_rules", "exporter_failure_propagation", "primitive_mesh_exporter_compatibility", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness"]},
-        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["streetscape_semantics_audit", "facade_material_completeness", "source_role_material_separation", "rendered_facade_material_evidence", "street_furniture_placement", "support_structure_contacts", "resolved_mount_vertex_contact", "incident_closure_or_clear_route"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["streetscape_semantics_audit", "facade_material_completeness", "source_role_material_separation", "rendered_facade_material_evidence", "opposed_diagonal_role_visibility", "msaa_normalized_role_mask_exclusivity", "street_furniture_placement", "support_structure_contacts", "resolved_mount_vertex_contact", "incident_closure_or_clear_route"]},
         {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_boundary_reachability", "shipping_camera_road_junction_survey", "detected_class_resolution_or_clean_baseline"]},
         {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["road_graph_and_markings", "junction_sidewalk_curb_continuity"]},
         {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["building_road_setback", "crosswalk_road_detail_priority"]},
@@ -327,7 +327,7 @@
         {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_boundary_reachability"]},
         {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["shipping_camera_road_junction_survey", "streetscape_semantics_overview"]},
         {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["detected_class_resolution_or_clean_baseline"]},
-        {"path": "evidence-artifacts/material-same-zone.png", "kind": "image", "states": ["source_role_material_separation", "rendered_facade_material_evidence"]},
+        {"path": "evidence-artifacts/material-same-zone.png", "kind": "image", "states": ["source_role_material_separation", "rendered_facade_material_evidence", "opposed_diagonal_role_visibility", "msaa_normalized_role_mask_exclusivity"]},
         {"path": "evidence-artifacts/material-cross-zone.png", "kind": "image", "states": ["visible_mesh_inventory_completeness"]},
         {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "road_end_topmost_surface_samples", "marking_vs_closure_geometry", "production_placement_rules"]},
         {"path": "evidence-artifacts/support-contact.png", "kind": "image", "states": ["support_structure_contacts", "resolved_mount_vertex_contact"]}

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "contract_id": "old-clinic-curated-pass-whole-map-fail",
   "build_id": "shipping-build-before-map-008-v18",
   "scene_provenance": {
@@ -64,22 +64,29 @@
     {"id": "curb-fusion-b", "source_kind": "render_mesh", "source_node": "World/Ground/LongCurb", "surface_class": "curb", "material_id": "concrete", "vertices": [[2.75, 0.05, 0.5], [3.25, 0.05, 2.5], [2.75, 0.05, 2.5]]}
   ],
   "collider_shell_audit": {
+    "inventory_source_kind": "exporter_resolved_visible_physics_subjects",
     "hero_radius": 0.35,
     "hero_base_y": 0.0,
     "hero_height": 1.8,
     "sample_step": 0.25,
     "minimum_shell_overlap_ratio": 0.95,
+    "minimum_collider_overlap_ratio": 0.95,
     "max_invisible_blocked_ratio": 0.0,
     "expected_enabled_static_collider_count": 2,
-    "expected_visible_shell_count": 2,
+    "expected_visible_shell_count": 4,
+    "expected_visible_class_counts": {"pole": 2, "barrel": 1, "fire_effect": 1},
+    "required_solid_blocker_classes": ["pole", "barrel"],
+    "visual_effect_classes": ["fire_effect"],
     "static_colliders": [
       {"id": "traffic-pole-visible-collider", "source_node": "World/Traffic/Pole/StaticBody3D", "enabled": true, "blocks_hero": true, "variant_id": "traffic-active", "footprint": [[1, 1], [1.2, 1], [1.2, 1.2], [1, 1.2]], "min_y": 0, "max_y": 3, "render_shell_ids": ["traffic-pole-shell"]},
       {"id": "traffic-pole-ghost-collider", "source_node": "World/Traffic/LegacyPole/StaticBody3D", "enabled": true, "blocks_hero": true, "variant_id": "traffic-active", "footprint": [[2, 1], [2.2, 1], [2.2, 1.2], [2, 1.2]], "min_y": 0, "max_y": 3, "render_shell_ids": ["traffic-pole-shell"]},
       {"id": "traffic-alt-disabled-collider", "source_node": "World/Traffic/Alt/StaticBody3D", "enabled": false, "blocks_hero": true, "variant_id": "traffic-alt", "footprint": [[4, 1], [4.2, 1], [4.2, 1.2], [4, 1.2]], "min_y": 0, "max_y": 3, "render_shell_ids": ["traffic-alt-shell"]}
     ],
     "render_shells": [
-      {"id": "traffic-pole-shell", "source_node": "World/Traffic/Pole/Visual", "visible": true, "variant_id": "traffic-active", "footprint": [[1, 1], [1.2, 1], [1.2, 1.2], [1, 1.2]], "min_y": 0, "max_y": 3},
-      {"id": "traffic-alt-shell", "source_node": "World/Traffic/Alt/Visual", "visible": true, "variant_id": "traffic-alt", "footprint": [[4, 1], [4.2, 1], [4.2, 1.2], [4, 1.2]], "min_y": 0, "max_y": 3}
+      {"id": "traffic-pole-shell", "source_node": "World/Traffic/Pole/Visual", "visible": true, "variant_id": "traffic-active", "class": "pole", "physics_role": "solid_blocker", "collider_ids": ["traffic-pole-visible-collider", "traffic-pole-ghost-collider"], "footprint": [[1, 1], [1.2, 1], [1.2, 1.2], [1, 1.2]], "min_y": 0, "max_y": 3},
+      {"id": "traffic-alt-shell", "source_node": "World/Traffic/Alt/Visual", "visible": true, "variant_id": "traffic-alt", "class": "pole", "physics_role": "solid_blocker", "collider_ids": ["traffic-alt-disabled-collider"], "footprint": [[4, 1], [4.2, 1], [4.2, 1.2], [4, 1.2]], "min_y": 0, "max_y": 3},
+      {"id": "barrel-shell", "source_node": "World/Props/Barrel/Visual", "visible": true, "variant_id": "barrel-active", "class": "barrel", "physics_role": "solid_blocker", "collider_ids": [], "footprint": [[4.6, 4.6], [5.2, 4.6], [5.2, 5.2], [4.6, 5.2]], "min_y": 0, "max_y": 1.0},
+      {"id": "fire-effect-shell", "source_node": "World/Effects/Fire/Visual", "visible": true, "variant_id": "fire-active", "class": "fire_effect", "physics_role": "visual_effect_non_solid", "collider_ids": [], "non_solid_evidence": {"reason": "Fire billboard is non-solid visual feedback", "raw_artifact": "reports/raw/environment-coverage/fire-effect.png"}, "footprint": [[3.8, 4.4], [4.4, 4.4], [4.4, 5.0], [3.8, 5.0]], "min_y": 0.1, "max_y": 2.4}
     ]
   },
   "production_occluders": {

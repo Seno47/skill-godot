@@ -2048,7 +2048,7 @@ class AuditorSmokeTests(unittest.TestCase):
             gate["validation_failures"],
         )
 
-    def test_eval_high_angle_environment_integrity_fails_closed_without_whole_map_survey_state(self) -> None:
+    def test_eval_high_angle_environment_integrity_fails_closed_without_whole_map_bidirectional_states(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "high-angle-3d-district-complete"
         gate_evidence = source["gates"]["high_angle_environment_integrity_evidence"]
@@ -2060,6 +2060,8 @@ class AuditorSmokeTests(unittest.TestCase):
                 not in {
                     "shipping_camera_tiled_survey",
                     "resolved_dependency_closure_provenance",
+                    "bidirectional_expected_blocker_inventory",
+                    "non_solid_visual_effect_classification",
                 }
             ]
         source["gates"]["high_angle_3d_district_composition_evidence"] = {
@@ -2117,8 +2119,22 @@ class AuditorSmokeTests(unittest.TestCase):
             ),
             gate["validation_failures"],
         )
+        self.assertTrue(
+            any(
+                "bidirectional_expected_blocker_inventory" in failure
+                for failure in gate["validation_failures"]
+            ),
+            gate["validation_failures"],
+        )
+        self.assertTrue(
+            any(
+                "non_solid_visual_effect_classification" in failure
+                for failure in gate["validation_failures"]
+            ),
+            gate["validation_failures"],
+        )
 
-    def test_eval_high_angle_streetscape_fails_closed_without_v5_geometry_contact_and_exporter_states(self) -> None:
+    def test_eval_high_angle_streetscape_fails_closed_without_v6_geometry_role_and_exporter_states(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "high-angle-3d-district-complete"
         source["gates"]["high_angle_3d_district_composition_evidence"] = {
@@ -2151,6 +2167,8 @@ class AuditorSmokeTests(unittest.TestCase):
             "primitive_mesh_exporter_compatibility",
             "visible_boundary_reachability",
             "shipping_camera_road_junction_survey",
+            "opposed_diagonal_role_visibility",
+            "msaa_normalized_role_mask_exclusivity",
         }
         for artifact in gate_evidence["artifacts"]:
             artifact["states"] = [state for state in artifact["states"] if state not in removed]

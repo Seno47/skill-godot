@@ -828,6 +828,75 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] environment-coverage", completed.stdout)
 
+    def test_environment_coverage_v1_requires_bidirectional_inventory_migration(self) -> None:
+        model = load_asset_json("environment-coverage-contract.template.json")
+        model["schema_version"] = 1
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "environment-coverage-v1.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "environment_coverage_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 2, completed.stdout)
+        self.assertIn("schema_version must be 2", completed.stdout)
+        self.assertIn("bidirectional visible-solid/collider inventory", completed.stdout)
+
+    def test_environment_coverage_rejects_visible_solid_without_reciprocal_collider(self) -> None:
+        model = load_asset_json("environment-coverage-contract.template.json")
+        pole = next(
+            item
+            for item in model["collider_shell_audit"]["render_shells"]
+            if item["id"] == "traffic-pole-shell"
+        )
+        pole["collider_ids"] = []
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "missing-visible-blocker-collider.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "environment_coverage_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("visible solid blocker traffic-pole-shell has no reciprocal collider", completed.stdout)
+        self.assertIn("mapping is not reciprocal", completed.stdout)
+
+    def test_environment_coverage_excludes_explicit_visual_effects_from_physics(self) -> None:
+        model = load_asset_json("environment-coverage-contract.template.json")
+        effect = next(
+            item
+            for item in model["collider_shell_audit"]["render_shells"]
+            if item["id"] == "clinic-fire-smoke"
+        )
+        effect["collider_ids"] = ["clinic-collider"]
+        model["collider_shell_audit"]["static_colliders"][0]["render_shell_ids"].append(
+            "clinic-fire-smoke"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "solid-fire-smoke.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "environment_coverage_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("non-solid visual clinic-fire-smoke must not map gameplay colliders", completed.stdout)
+        self.assertIn("non-solid visual clinic-fire-smoke is referenced by collider", completed.stdout)
+
+    def test_environment_coverage_does_not_require_visual_effects_when_none_are_visible(self) -> None:
+        model = load_asset_json("environment-coverage-contract.template.json")
+        audit = model["collider_shell_audit"]
+        audit["render_shells"] = [
+            item for item in audit["render_shells"] if item["id"] != "clinic-fire-smoke"
+        ]
+        audit["expected_visible_shell_count"] = 2
+        audit["expected_visible_class_counts"].pop("fire_smoke_effect")
+        audit["visual_effect_classes"] = []
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "no-visible-vfx.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "environment_coverage_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+
     def test_environment_coverage_rejects_curated_pass_whole_map_fail(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             report_path = Path(directory) / "environment-coverage.json"
@@ -848,6 +917,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("fallback exposure ratio", errors)
         self.assertIn("shipping-camera tiled survey", errors)
         self.assertIn("visible-shell overlap ratio", errors)
+        self.assertIn("visible solid blocker barrel-shell has no enabled hero-blocking collider", errors)
         self.assertIn("production occluder aliases miss collision roots", errors)
         self.assertIn("surface/object pair", errors)
 
@@ -880,17 +950,18 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] streetscape-semantics", completed.stdout)
 
-    def test_streetscape_semantics_v4_requires_road_end_and_placement_migration(self) -> None:
+    def test_streetscape_semantics_v5_requires_multiview_role_migration(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
-        model["schema_version"] = 4
+        model["schema_version"] = 5
         with tempfile.TemporaryDirectory() as directory:
-            model_path = Path(directory) / "streetscape-v4.json"
+            model_path = Path(directory) / "streetscape-v5.json"
             model_path.write_text(json.dumps(model), encoding="utf-8")
             completed = run_script(
                 "streetscape_semantics_audit.py", "--model", str(model_path), "--summary"
             )
         self.assertEqual(completed.returncode, 2, completed.stdout)
-        self.assertIn("re-export closure-policy/topmost-surface evidence", completed.stdout)
+        self.assertIn("schema_version must be 6", completed.stdout)
+        self.assertIn("MSAA-normalized exclusive masks", completed.stdout)
 
     def test_streetscape_semantics_rejects_legacy_v2_candidate_before_semantic_claims(self) -> None:
         fixture = ROOT / "tests" / "fixtures" / "streetscape-semantics-old-clinic-negative.json"
@@ -911,7 +982,36 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
                 "--summary",
             )
         self.assertEqual(completed.returncode, 2, completed.stdout)
-        self.assertIn("schema_version must be 5", completed.stdout)
+        self.assertIn("schema_version must be 6", completed.stdout)
+
+    def test_streetscape_v6_requires_max_openings_opposed_view_selection(self) -> None:
+        model = load_asset_json("streetscape-semantics-contract.template.json")
+        pair = model["rendered_material_evidence"]["opposed_view_pairs"][0]
+        pair["selected_capture_id"] = pair["capture_b"]
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "wrong-opposed-view-selection.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "streetscape_semantics_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("instead of the maximum", completed.stdout)
+
+    def test_streetscape_v6_rejects_msaa_normalized_role_overlap(self) -> None:
+        model = load_asset_json("streetscape-semantics-contract.template.json")
+        capture = model["rendered_material_evidence"]["captures"][0]
+        facade = next(mask for mask in capture["role_masks"] if mask["role"] == "facade")
+        openings = next(mask for mask in capture["role_masks"] if mask["role"] == "openings")
+        openings["mask_artifact"] = facade["mask_artifact"]
+        openings["mask_sha256"] = facade["mask_sha256"]
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "overlapping-role-masks.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "streetscape_semantics_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("MSAA-normalized role masks overlap", completed.stdout)
 
     def test_streetscape_v21_evidence_shaping_false_pass_is_rejected(self) -> None:
         fixture = json.loads(
@@ -977,14 +1077,14 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("fabricates multiple semantic slots", errors)
         self.assertIn("node-wide material override", errors)
         self.assertIn("rendered mean chroma", errors)
-        self.assertIn("separation DeltaE", errors)
+        self.assertIn("DeltaE", errors)
         self.assertIn("visible mesh classifications do not exactly cover", errors)
         self.assertIn("street-furniture class inventory is incomplete", errors)
         self.assertIn("bare cutoff", errors)
         self.assertIn("lies inside building footprint", errors)
         self.assertIn("detached from its authored mount", errors)
 
-    def test_streetscape_v5_rejects_shaped_termination_flood_fill_and_synthetic_mount(self) -> None:
+    def test_streetscape_v6_rejects_shaped_termination_flood_fill_and_synthetic_mount(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
 
         west = next(
@@ -1021,9 +1121,9 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             "travel_lane_overlap_ratio": 1.0,
         }
 
-        capture = model["rendered_material_evidence"]["captures"][0]
-        capture["raw_artifact"] = "assets/streetscape-rendered-material-example/gray-material.ppm"
-        capture["raw_sha256"] = "82487a3003fb330b13e95eb07fe015b33549ed8b981f4fd50487c06066ac8670"
+        for capture in model["rendered_material_evidence"]["captures"]:
+            capture["raw_artifact"] = "assets/streetscape-rendered-material-example/gray-material.ppm"
+            capture["raw_sha256"] = "82487a3003fb330b13e95eb07fe015b33549ed8b981f4fd50487c06066ac8670"
         for envelope in model["building_style_profiles"][0]["rendered_role_envelopes"]:
             envelope["minimum_mean_value"] = 0.4
             envelope["maximum_mean_value"] = 0.6
@@ -1060,7 +1160,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("whole-mask value variation is below its flood-fill threshold", errors)
         self.assertIn("mount gap is not vertex-derived", errors)
 
-    def test_streetscape_v5_rejects_v24_road_patch_escape_solution_and_lax_placement(self) -> None:
+    def test_streetscape_v6_rejects_v24_road_patch_escape_solution_and_lax_placement(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
         east = next(
             item for item in model["lane_boundary_terminations"] if item["node_id"] == "east-exit"
@@ -1130,18 +1230,8 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("placed object class stump profile hydrant-furnishing does not forbid", errors)
         self.assertIn("placed object class stump profile hydrant-furnishing permits a protected", errors)
 
-    def test_streetscape_v5_rejects_adapter_omission_of_exported_source_role(self) -> None:
+    def test_streetscape_v6_rejects_adapter_omission_of_exported_source_role(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
-        profile = model["building_style_profiles"][0]
-        profile["required_visible_roles"].remove("openings")
-        profile["rendered_role_envelopes"] = [
-            item for item in profile["rendered_role_envelopes"] if item["role"] != "openings"
-        ]
-        profile["rendered_role_separation"] = [
-            item
-            for item in profile["rendered_role_separation"]
-            if "openings" not in {item["first_role"], item["second_role"]}
-        ]
         building = model["visible_buildings"][0]
         building["source_role_inventory"] = [
             item for item in building["source_role_inventory"] if item["role"] != "openings"
@@ -1152,10 +1242,10 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         next(
             item for item in building["visible_surface_slots"] if item["role"] == "facade"
         )["visible_area"] = 65.0
-        capture = model["rendered_material_evidence"]["captures"][0]
-        capture["role_masks"] = [
-            item for item in capture["role_masks"] if item["role"] != "openings"
-        ]
+        for capture in model["rendered_material_evidence"]["captures"]:
+            capture["role_masks"] = [
+                item for item in capture["role_masks"] if item["role"] != "openings"
+            ]
 
         with tempfile.TemporaryDirectory() as directory:
             model_path = Path(directory) / "source-role-omission.json"

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "contract_id": "example-high-angle-environment-coverage",
   "build_id": "replace-with-exact-target-build-id",
   "scene_provenance": {
@@ -98,14 +98,19 @@
     {"id": "grass-b", "source_kind": "render_mesh", "source_node": "World/Ground/Grass", "surface_class": "grass", "material_id": "clinic-grass", "vertices": [[0, 0, 4.75], [10, 0, 8], [0, 0, 8]]}
   ],
   "collider_shell_audit": {
+    "inventory_source_kind": "exporter_resolved_visible_physics_subjects",
     "hero_radius": 0.35,
     "hero_base_y": 0.0,
     "hero_height": 1.8,
     "sample_step": 0.25,
     "minimum_shell_overlap_ratio": 0.95,
+    "minimum_collider_overlap_ratio": 0.95,
     "max_invisible_blocked_ratio": 0.0,
     "expected_enabled_static_collider_count": 3,
-    "expected_visible_shell_count": 2,
+    "expected_visible_shell_count": 3,
+    "expected_visible_class_counts": {"facade": 1, "pole": 1, "fire_smoke_effect": 1},
+    "required_solid_blocker_classes": ["facade", "pole"],
+    "visual_effect_classes": ["fire_smoke_effect"],
     "static_colliders": [
       {"id": "clinic-collider", "source_node": "World/Buildings/Clinic/StaticBody3D", "enabled": true, "blocks_hero": true, "variant_id": "clinic-active", "footprint": [[6.8, 4.8], [9.2, 4.8], [9.2, 7.2], [6.8, 7.2]], "min_y": 0, "max_y": 4, "render_shell_ids": ["clinic-shell"]},
       {"id": "traffic-pole-collider", "source_node": "World/Props/TrafficLight/Pole/StaticBody3D", "enabled": true, "blocks_hero": true, "variant_id": "traffic-active", "footprint": [[3.6, 1.9], [3.8, 1.9], [3.8, 2.1], [3.6, 2.1]], "min_y": 0, "max_y": 3.2, "render_shell_ids": ["traffic-pole-shell"]},
@@ -113,9 +118,10 @@
       {"id": "camera-open-hole-proxy", "source_node": "World/CameraCollision/OpenHoleProxy", "enabled": true, "blocks_hero": false, "variant_id": "camera-proxy-open-hole", "footprint": [[8.8, 3.8], [9.2, 3.8], [9.2, 4.2], [8.8, 4.2]], "min_y": 2.5, "max_y": 4.0, "render_shell_ids": [], "visibility_exemption": {"reason": "Camera-only proxy is authored around an open facade hole and cannot block the hero", "raw_artifact": "reports/raw/environment-coverage/camera-proxy-open-hole.png"}}
     ],
     "render_shells": [
-      {"id": "clinic-shell", "source_node": "World/Buildings/Clinic/Visual", "visible": true, "variant_id": "clinic-active", "footprint": [[6.8, 4.8], [9.2, 4.8], [9.2, 7.2], [6.8, 7.2]], "min_y": 0, "max_y": 4},
-      {"id": "traffic-pole-shell", "source_node": "World/Props/TrafficLight/Pole/Visual", "visible": true, "variant_id": "traffic-active", "footprint": [[3.6, 1.9], [3.8, 1.9], [3.8, 2.1], [3.6, 2.1]], "min_y": 0, "max_y": 3.2},
-      {"id": "traffic-pole-alt-shell", "source_node": "World/Props/TrafficLightAlt/Pole/Visual", "visible": false, "variant_id": "traffic-alt", "footprint": [[4.6, 1.9], [4.8, 1.9], [4.8, 2.1], [4.6, 2.1]], "min_y": 0, "max_y": 3.2}
+      {"id": "clinic-shell", "source_node": "World/Buildings/Clinic/Visual", "visible": true, "variant_id": "clinic-active", "class": "facade", "physics_role": "solid_blocker", "collider_ids": ["clinic-collider"], "footprint": [[6.8, 4.8], [9.2, 4.8], [9.2, 7.2], [6.8, 7.2]], "min_y": 0, "max_y": 4},
+      {"id": "traffic-pole-shell", "source_node": "World/Props/TrafficLight/Pole/Visual", "visible": true, "variant_id": "traffic-active", "class": "pole", "physics_role": "solid_blocker", "collider_ids": ["traffic-pole-collider"], "footprint": [[3.6, 1.9], [3.8, 1.9], [3.8, 2.1], [3.6, 2.1]], "min_y": 0, "max_y": 3.2},
+      {"id": "traffic-pole-alt-shell", "source_node": "World/Props/TrafficLightAlt/Pole/Visual", "visible": false, "variant_id": "traffic-alt", "class": "pole", "physics_role": "solid_blocker", "collider_ids": ["traffic-pole-alt-collider"], "footprint": [[4.6, 1.9], [4.8, 1.9], [4.8, 2.1], [4.6, 2.1]], "min_y": 0, "max_y": 3.2},
+      {"id": "clinic-fire-smoke", "source_node": "World/Effects/ClinicFire", "visible": true, "variant_id": "clinic-fire-active", "class": "fire_smoke_effect", "physics_role": "visual_effect_non_solid", "collider_ids": [], "non_solid_evidence": {"reason": "Fire and smoke child meshes are visual effects, not solid environmental mass", "raw_artifact": "reports/raw/environment-coverage/clinic-fire-smoke.png"}, "footprint": [[7.4, 5.4], [8.0, 5.4], [8.0, 6.0], [7.4, 6.0]], "min_y": 0.2, "max_y": 2.8}
     ]
   },
   "production_occluders": {

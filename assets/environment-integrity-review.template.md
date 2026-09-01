@@ -23,6 +23,7 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 - Local contract schema (must be v2) / migration source if applicable:
 - Audit JSON/stdout:
 - Whole-map coverage contract JSON:
+- Whole-map coverage schema (must be v2) / migration source if applicable:
 - Whole-map coverage audit JSON/stdout:
 - Raw capture root:
 - Builder/context:
@@ -39,7 +40,9 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 | Boundary coverage (context only) | | | NOT TESTED |
 | Playable surface-zone cells | | | NOT TESTED |
 | Shipping-camera survey cells/captures | | | NOT TESTED |
-| All enabled static colliders / visible shells | | | NOT TESTED |
+| Visible solid blockers / reciprocal enabled colliders | | | NOT TESTED |
+| Enabled static colliders / reciprocal visible solid shells | | | NOT TESTED |
+| Visible non-solid effects/decorations / evidence-backed exclusions | | | NOT TESTED |
 | Production occluder collision roots / alias traces | | | NOT TESTED |
 | Root + recursive/runtime dependency entries | | | NOT TESTED |
 | Toolchain inputs (preset/project/provenance + evidence exporters) | | | NOT TESTED |
@@ -125,17 +128,35 @@ Use this builder-owned review with `references/3d-environment-integrity.md`. It 
 - Coverage ratio / required ratio:
 - Duplicate/free-camera/mismatched-build artifacts:
 
-## All enabled static colliders versus visible shells
+## Bidirectional visible-solid / collider parity
 
-| Collider ID/source | Enabled | Variant | Mapped visible shell IDs | Footprint/height overlap ratio | Hero-radius invisible samples | Raw overlay | PASS/FAIL/NOT TESTED |
+| Collider ID/source | Enabled | Variant | Reciprocal visible shell IDs | Collider→shell overlap | Hero-radius invisible samples | Raw overlay | PASS/FAIL/NOT TESTED |
 |---|---|---|---|---:|---:|---|---|
 | | | | | | | | NOT TESTED |
 
 - Enabled static colliders enumerated / expected:
-- Visible render shells enumerated / expected:
+- Visible physics subjects enumerated / expected exact class counts:
+- Required solid-blocker classes:
 - Total hero-radius blocked samples:
 - Invisible blocked samples (must be zero unless exact boundary exemption):
 - Disabled collider/hidden render variant symmetry:
+
+| Visible solid shell/class | Reciprocal collider IDs | Enabled hero-blocking match | Shell→collider overlap | Raw overlay | PASS/FAIL/NOT TESTED |
+|---|---|---|---:|---|---|
+| | | | | | NOT TESTED |
+
+- Visible solid blocker without collider count (must be zero):
+- One-way/non-reciprocal mappings (must be zero):
+
+## Explicit non-solid visual subjects
+
+| Visible subject/class | Physics role | Collider IDs (must be empty) | Reason | Raw shipping-camera artifact | PASS/FAIL/NOT TESTED |
+|---|---|---|---|---|---|
+| Fire/smoke/particle child mesh | `visual_effect_non_solid` | | | | NOT TESTED |
+
+- Declared visual-effect classes / exact visible count:
+- Non-solid subjects remain in visual evidence but are excluded from occupancy/raster:
+- Any collider references a non-solid subject (must be zero):
 
 ## Production-scene occluder alias coverage
 
@@ -180,6 +201,8 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 | `surface_zone_topology` | | | | NOT TESTED |
 | `shipping_camera_tiled_survey` | | | | NOT TESTED |
 | `all_static_collider_visible_shell` | | | | NOT TESTED |
+| `bidirectional_expected_blocker_inventory` | | | | NOT TESTED |
+| `non_solid_visual_effect_classification` | | | | NOT TESTED |
 | `production_occluder_aliases` | | | | NOT TESTED |
 | `surface_object_pair_relationships` | | | | NOT TESTED |
 | `resolved_dependency_closure_provenance` | | | | NOT TESTED |
@@ -195,6 +218,8 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 - One broad ground region accepts incompatible surface families or hides excess fallback exposure: PASS / FAIL / NOT TESTED
 - Curated raw states leave playable survey cells uncovered: PASS / FAIL / NOT TESTED
 - Enabled static collider lacks corresponding visible shell/hero-radius silhouette: PASS / FAIL / NOT TESTED
+- Visible solid barrel/fence/facade has no enabled reciprocal hero collider although every existing collider has a shell: PASS / FAIL / NOT TESTED
+- Fire/smoke/particle child mesh is omitted from the visual inventory, treated as solid occupancy, or referenced by gameplay collision: PASS / FAIL / NOT TESTED
 - Production occluder fixture passes but a resolved collision root lacks an alias/visual mapping or restoration trace: PASS / FAIL / NOT TESTED
 - Surface class is mechanically allowed but its topmost face physically fuses with a vehicle/pole/curb pair: PASS / FAIL / NOT TESTED
 - Root `.tscn` SHA is unchanged while a nested instantiated scene changes, but the candidate reuses the prior closure digest: PASS / FAIL / NOT TESTED
@@ -211,7 +236,8 @@ Use the shipping camera, ordinary HUD, final lighting and final visible assets. 
 - Detected-class before/fixed/rerun packet: PASS / FAIL / NOT TESTED
 - Whole-map semantic zones, fallback and adjacency: PASS / FAIL / NOT TESTED
 - Zero-gap shipping-camera tiled survey: PASS / FAIL / NOT TESTED
-- All-enabled collider/render-shell hero-radius parity: PASS / FAIL / NOT TESTED
+- Bidirectional visible-solid/collider overlap and hero-radius parity: PASS / FAIL / NOT TESTED
+- Explicit non-solid VFX/decorative classification: PASS / FAIL / NOT TESTED
 - Production occluder aliases and fade/restoration: PASS / FAIL / NOT TESTED
 - Topmost surface/object-pair constraints: PASS / FAIL / NOT TESTED
 - Resolved dependency-closure provenance and contract linkage: PASS / FAIL / NOT TESTED

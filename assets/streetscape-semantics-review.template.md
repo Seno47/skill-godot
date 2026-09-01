@@ -12,7 +12,7 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Streetscape exporter path + SHA-256:
 - Selected export preset + SHA-256:
 - Contract JSON / audit JSON:
-- Contract schema (must be v5) / migration source if applicable:
+- Contract schema (must be v6) / migration source if applicable:
 - Road profile: scale, traffic convention, stylization, hero radius:
 - Raw capture root:
 - Prior provenance/environment-integrity/environment-coverage results:
@@ -112,6 +112,9 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Required facade/roof/openings/trim roles present:
 - Node-wide override did not hide missing/default surfaces:
 - Hashed target-build raw frame and resolved surface-ID masks cover every visible building/role:
+- Two opposed diagonal shipping-camera views cover every visible building; view-direction dot meets the negative budget:
+- Diagnostic view is selected by maximum openings pixels (then trim/facade only when source roles require that fallback):
+- Role-ID pass is MSAA-resolved once, thresholded once and mutually exclusive after normalization:
 - Rendered value/chroma/variation/dominant-color envelopes and facade-to-opening/trim DeltaE pass under shipping lighting:
 - Whole-building mask flood-fill/monochrome detector passes:
 - Numeric completeness and rendered art-direction review both pass:
@@ -190,6 +193,8 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 | `facade_material_completeness` | | | | NOT TESTED |
 | `source_role_material_separation` | | | | NOT TESTED |
 | `rendered_facade_material_evidence` | | | | NOT TESTED |
+| `opposed_diagonal_role_visibility` | | | | NOT TESTED |
+| `msaa_normalized_role_mask_exclusivity` | | | | NOT TESTED |
 | `street_furniture_placement` | | | | NOT TESTED |
 | `support_structure_contacts` | | | | NOT TESTED |
 | `resolved_mount_vertex_contact` | | | | NOT TESTED |
@@ -227,6 +232,7 @@ Every audit- or survey-detected class needs an exact sequence. If no class was f
 - Tree/stump/rock/bush/hydrant/lamp/signal footprint occupies a travel lane, intersection, crosswalk or clear sidewalk: PASS / FAIL / NOT TESTED
 - Nested exporter collector emits an error but still writes JSON or prints `[PASS]`: PASS / FAIL / NOT TESTED
 - Facade/roof masks omit source windows/openings/trim or a building/role trips flood-fill thresholds: PASS / FAIL / NOT TESTED
+- A single favorable gable hides openings, the selected opposed view does not maximize opening pixels, or MSAA-normalized role masks overlap: PASS / FAIL / NOT TESTED
 - Awning/canopy/support exceeds the resolved support-gap budget or supplies only a scalar mount gap: PASS / FAIL / NOT TESTED
 - Incident prop blocks road/sidewalk without graph closure, cue ownership and alternate path: PASS / FAIL / NOT TESTED
 - Selected screenshots leave junctions/approaches uncovered: PASS / FAIL / NOT TESTED

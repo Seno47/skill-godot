@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "contract_id": "example-high-angle-streetscape-semantics",
   "build_id": "replace-with-exact-target-build-id",
   "scene_provenance": {
@@ -223,12 +223,22 @@
   "rendered_material_evidence": {
     "source_kind": "target_build_shipping_camera_masked_pixels",
     "required_building_ids": ["clinic-building"],
+    "mask_normalization": {"source_kind": "msaa_resolved_role_id_pass", "method": "binary_threshold_after_msaa", "threshold": 127, "maximum_cross_role_overlap_pixels": 0},
+    "opposed_view_pairs": [
+      {"building_id": "clinic-building", "capture_a": "clinic-material-diagonal-ne", "capture_b": "clinic-material-diagonal-sw", "maximum_direction_dot": -0.7, "selection_role": "openings", "selected_capture_id": "clinic-material-diagonal-ne"}
+    ],
     "captures": [
-      {"id": "clinic-material-gameplay-lighting", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "camera_node": "World/CameraRig/Camera3D", "raw_artifact": "assets/streetscape-rendered-material-example/streetscape-material.ppm", "raw_sha256": "a06bc69c7e22456273cd7c617e8f849c05f4a99611e0063c4e0c594cfb6f1c03", "role_masks": [
+      {"id": "clinic-material-diagonal-ne", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "camera_node": "World/CameraRig/Camera3D", "view_direction_xz": [0.70710678, 0.70710678], "raw_artifact": "assets/streetscape-rendered-material-example/streetscape-material.ppm", "raw_sha256": "a06bc69c7e22456273cd7c617e8f849c05f4a99611e0063c4e0c594cfb6f1c03", "role_masks": [
         {"id": "clinic-facade-pixels", "building_id": "clinic-building", "role": "facade", "source_kind": "source_texture_uv_role_render_pass", "surface_keys": ["clinic-building-mesh#0#wall-base"], "mask_artifact": "assets/streetscape-rendered-material-example/facade-mask.pgm", "mask_sha256": "2bb33d8752b21c0a05679927615520e8ba745d72648805616785fa6d5eb11c26"},
         {"id": "clinic-roof-pixels", "building_id": "clinic-building", "role": "roof", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#1#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/roof-mask.pgm", "mask_sha256": "e898960abc53817a12b6cfb110693d7101949d96be9a1d3995cd085327faf705"},
         {"id": "clinic-openings-pixels", "building_id": "clinic-building", "role": "openings", "source_kind": "source_texture_uv_role_render_pass", "surface_keys": ["clinic-building-mesh#0#window-door-openings"], "mask_artifact": "assets/streetscape-rendered-material-example/openings-mask.pgm", "mask_sha256": "da2443c0886879efb0732edf2eb72cbbfccc42662b3033b9269d75791fcdd749"},
         {"id": "clinic-trim-pixels", "building_id": "clinic-building", "role": "trim", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#2#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/trim-mask.pgm", "mask_sha256": "ca372b3bbeb3d595f7082b0401ed7504da5749674b549303673f605df6c4c855"}
+      ]},
+      {"id": "clinic-material-diagonal-sw", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "camera_node": "World/CameraRig/Camera3D", "view_direction_xz": [-0.70710678, -0.70710678], "raw_artifact": "assets/streetscape-rendered-material-example/streetscape-material-opposite.ppm", "raw_sha256": "10b089a7775a235f3338aac8851efd72057ce7faf5a081afe533ebcd789ff9c0", "role_masks": [
+        {"id": "clinic-facade-pixels-opposite", "building_id": "clinic-building", "role": "facade", "source_kind": "source_texture_uv_role_render_pass", "surface_keys": ["clinic-building-mesh#0#wall-base"], "mask_artifact": "assets/streetscape-rendered-material-example/facade-mask-opposite.pgm", "mask_sha256": "9f4d36e2a8a1780e85d70cf63a768cbc133b8d679077b260d7e9a19508f65b72"},
+        {"id": "clinic-roof-pixels-opposite", "building_id": "clinic-building", "role": "roof", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#1#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/roof-mask-opposite.pgm", "mask_sha256": "db8744060d5df25f3c500998a5a34789126bda246f2b0d94342bf2a8d568b7dd"},
+        {"id": "clinic-openings-pixels-opposite", "building_id": "clinic-building", "role": "openings", "source_kind": "source_texture_uv_role_render_pass", "surface_keys": ["clinic-building-mesh#0#window-door-openings"], "mask_artifact": "assets/streetscape-rendered-material-example/openings-mask-opposite.pgm", "mask_sha256": "350aa8eee31d13e155ec20783400b51a8f8be3dd23be191d365f2a307f5ef496"},
+        {"id": "clinic-trim-pixels-opposite", "building_id": "clinic-building", "role": "trim", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#2#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/trim-mask-opposite.pgm", "mask_sha256": "ca372b3bbeb3d595f7082b0401ed7504da5749674b549303673f605df6c4c855"}
       ]}
     ]
   },
@@ -255,7 +265,7 @@
     "captures": [
       {"id": "main-junction", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "camera_node": "World/CameraRig/Camera3D", "covered_junction_ids": ["main"], "covered_approach_ids": ["west-approach"], "covered_surface_region_ids": ["lane-west", "junction-center", "lane-east", "crosswalk-main", "sidewalk-south", "sidewalk-north", "curb-north", "furnishing-north", "frontage-north"], "raw_artifact": "reports/raw/streetscape/main-junction.png"}
     ],
-    "required_state_ids": ["road_graph_and_markings", "marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness", "facade_material_completeness", "source_role_material_separation", "rendered_facade_material_evidence", "street_furniture_placement", "support_structure_contacts", "resolved_mount_vertex_contact", "incident_closure_or_clear_route", "visible_boundary_reachability", "road_junction_overview"],
+    "required_state_ids": ["road_graph_and_markings", "marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness", "facade_material_completeness", "source_role_material_separation", "rendered_facade_material_evidence", "opposed_diagonal_role_visibility", "msaa_normalized_role_mask_exclusivity", "street_furniture_placement", "support_structure_contacts", "resolved_mount_vertex_contact", "incident_closure_or_clear_route", "visible_boundary_reachability", "road_junction_overview"],
     "candidate_states": [
       {"id": "road_graph_and_markings", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/road-graph.png"},
       {"id": "marking_mesh_endpoint_provenance", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/marking-mesh-endpoints.png"},
@@ -268,6 +278,8 @@
       {"id": "facade_material_completeness", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/facade-surfaces.png"},
       {"id": "source_role_material_separation", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/source-role-separation.png"},
       {"id": "rendered_facade_material_evidence", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/rendered-facade-materials.png"},
+      {"id": "opposed_diagonal_role_visibility", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/opposed-diagonal-role-visibility.png"},
+      {"id": "msaa_normalized_role_mask_exclusivity", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/msaa-normalized-role-mask-exclusivity.png"},
       {"id": "street_furniture_placement", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/furniture.png"},
       {"id": "support_structure_contacts", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/support-contacts.png"},
       {"id": "resolved_mount_vertex_contact", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/mount-vertex-contact.png"},

@@ -223,6 +223,40 @@ def standard_deviation(total: float, squared_total: float, count: int) -> float:
     return max(0.0, squared_total / count - mean * mean) ** 0.5
 
 
+def new_role_pixel_stats() -> dict[str, Any]:
+    return {
+        "count": 0,
+        "value": 0.0,
+        "value_squared": 0.0,
+        "chroma": 0.0,
+        "chroma_squared": 0.0,
+        "lab": [0.0, 0.0, 0.0],
+        "color_bins": {},
+    }
+
+
+def add_role_pixel(stats: dict[str, Any], pixel: tuple[int, int, int], bin_size: int) -> None:
+    value = max(pixel) / 255.0
+    chroma = (max(pixel) - min(pixel)) / 255.0
+    stats["count"] += 1
+    stats["value"] += value
+    stats["value_squared"] += value * value
+    stats["chroma"] += chroma
+    stats["chroma_squared"] += chroma * chroma
+    color_bin = tuple(channel // bin_size for channel in pixel)
+    stats["color_bins"][color_bin] = stats["color_bins"].get(color_bin, 0) + 1
+    lab = rgb_to_lab(pixel)
+    for component in range(3):
+        stats["lab"][component] += lab[component]
+
+
+def mean_lab(stats: dict[str, Any]) -> tuple[float, float, float]:
+    count = int(stats["count"])
+    if count <= 0:
+        raise ContractError("cannot calculate role color from an empty mask")
+    return tuple(component / count for component in stats["lab"])  # type: ignore[return-value]
+
+
 def sample_segment(start: Vec2, end: Vec2, step: float) -> list[Vec2]:
     length = distance(start, end)
     parts = max(1, int(ceil(length / step)))
@@ -351,10 +385,10 @@ def unique_cells(
 
 
 def audit(model: dict[str, Any]) -> dict[str, Any]:
-    if model.get("schema_version") != 5:
+    if model.get("schema_version") != 6:
         raise ContractError(
-            "schema_version must be 5; re-export closure-policy/topmost-surface evidence, "
-            "marking-cap intersections, production placement rules, and all prior schema-v4 evidence"
+            "schema_version must be 6; re-export source-owned facade/openings/trim roles, "
+            "MSAA-normalized exclusive masks, opposed shipping-camera views, and all prior schema-v5 evidence"
         )
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
@@ -2679,19 +2713,61 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     )
     if required_rendered_buildings != buildings_seen:
         errors.append("rendered material evidence does not exactly cover every visible building")
+    normalization = obj(
+        rendered.get("mask_normalization"),
+        "rendered_material_evidence.mask_normalization",
+    )
+    if text(
+        normalization.get("source_kind"),
+        "rendered_material_evidence.mask_normalization.source_kind",
+    ) != "msaa_resolved_role_id_pass":
+        raise ContractError("rendered role masks must come from an MSAA-resolved role-ID pass")
+    if text(
+        normalization.get("method"),
+        "rendered_material_evidence.mask_normalization.method",
+    ) != "binary_threshold_after_msaa":
+        raise ContractError("rendered role masks must use binary_threshold_after_msaa")
+    mask_threshold = integer(
+        normalization.get("threshold"),
+        "rendered_material_evidence.mask_normalization.threshold",
+        1,
+    )
+    if mask_threshold >= 255:
+        raise ContractError("rendered role mask normalization threshold must be < 255")
+    maximum_cross_role_overlap_pixels = integer(
+        normalization.get("maximum_cross_role_overlap_pixels"),
+        "rendered_material_evidence.mask_normalization.maximum_cross_role_overlap_pixels",
+    )
     role_stats: dict[tuple[str, str], dict[str, Any]] = {}
+    capture_role_stats: dict[tuple[str, str, str], dict[str, Any]] = {}
     building_pixel_stats: dict[str, dict[str, Any]] = {}
     rendered_role_metrics: list[dict[str, Any]] = []
     rendered_role_separation_metrics: list[dict[str, Any]] = []
     rendered_building_metrics: list[dict[str, Any]] = []
     masked_surface_keys: dict[tuple[str, str], set[str]] = {}
+    capture_ids: set[str] = set()
+    capture_directions: dict[str, Vec2] = {}
+    capture_buildings: dict[str, set[str]] = {}
+    raw_capture_artifacts: set[Path] = set()
     capture_count = 0
     mask_count = 0
+    cross_role_overlap_pixel_count = 0
     for capture_index, raw_capture in enumerate(
         array(rendered.get("captures"), "rendered_material_evidence.captures", nonempty=True)
     ):
         capture = obj(raw_capture, f"rendered_material_evidence.captures[{capture_index}]")
         capture_id = text(capture.get("id"), f"rendered material capture {capture_index}.id")
+        if capture_id in capture_ids:
+            raise ContractError(f"duplicate rendered material capture {capture_id}")
+        capture_ids.add(capture_id)
+        capture_directions[capture_id] = normalize(
+            vec2(
+                capture.get("view_direction_xz"),
+                f"rendered material capture {capture_id}.view_direction_xz",
+            ),
+            f"rendered material capture {capture_id}.view_direction_xz",
+        )
+        capture_buildings[capture_id] = set()
         capture_count += 1
         if text(capture.get("source_kind"), f"rendered material capture {capture_id}.source_kind") != "target_build_shipping_camera":
             errors.append(f"rendered material capture {capture_id} is not target-build shipping-camera evidence")
@@ -2703,6 +2779,9 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             f"rendered material capture {capture_id}.raw_artifact",
             model_directory,
         )
+        if raw_path in raw_capture_artifacts:
+            errors.append(f"rendered material capture {capture_id} reuses another view's raw artifact")
+        raw_capture_artifacts.add(raw_path)
         verify_artifact_hash(
             raw_path,
             capture.get("raw_sha256"),
@@ -2720,6 +2799,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             mask_id = text(mask.get("id"), f"rendered material mask {capture_id}/{mask_index}.id")
             building_id = text(mask.get("building_id"), f"rendered material mask {mask_id}.building_id")
             role = text(mask.get("role"), f"rendered material mask {mask_id}.role")
+            capture_buildings[capture_id].add(building_id)
             if building_id not in buildings_seen:
                 errors.append(f"rendered material mask {mask_id} references unknown building {building_id}")
             elif role not in style_profiles[building_profiles[building_id]]["required_roles"]:
@@ -2768,26 +2848,22 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             selected_indices = {
                 pixel_index
                 for pixel_index, selected in enumerate(flattened_pixels(mask_image))
-                if selected > 127
+                if selected > mask_threshold
             }
             if not selected_indices:
                 raise ContractError(f"rendered material mask {mask_id} selects no visible pixels")
             prior = occupied_pixels.setdefault(building_id, set())
-            if prior & selected_indices:
-                errors.append(f"rendered material mask {mask_id} overlaps another role mask for {building_id}")
+            overlap = prior & selected_indices
+            cross_role_overlap_pixel_count += len(overlap)
             prior |= selected_indices
             pixels = flattened_pixels(image)
             stats = role_stats.setdefault(
                 (building_id, role),
-                {
-                    "count": 0,
-                    "value": 0.0,
-                    "value_squared": 0.0,
-                    "chroma": 0.0,
-                    "chroma_squared": 0.0,
-                    "lab": [0.0, 0.0, 0.0],
-                    "color_bins": {},
-                },
+                new_role_pixel_stats(),
+            )
+            view_stats = capture_role_stats.setdefault(
+                (capture_id, building_id, role),
+                new_role_pixel_stats(),
             )
             building_stats = building_pixel_stats.setdefault(
                 building_id,
@@ -2797,18 +2873,9 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             building_bin_size = int(style_profiles[building_profiles[building_id]]["building_color_bin_size"])
             for pixel_index in selected_indices:
                 pixel = pixels[pixel_index]
+                add_role_pixel(stats, pixel, role_bin_size)
+                add_role_pixel(view_stats, pixel, role_bin_size)
                 value = max(pixel) / 255.0
-                chroma = (max(pixel) - min(pixel)) / 255.0
-                stats["count"] += 1
-                stats["value"] += value
-                stats["value_squared"] += value * value
-                stats["chroma"] += chroma
-                stats["chroma_squared"] += chroma * chroma
-                role_bin = tuple(channel // role_bin_size for channel in pixel)
-                stats["color_bins"][role_bin] = stats["color_bins"].get(role_bin, 0) + 1
-                lab = rgb_to_lab(pixel)
-                for component in range(3):
-                    stats["lab"][component] += lab[component]
                 building_stats["count"] += 1
                 building_stats["value"] += value
                 building_stats["value_squared"] += value * value
@@ -2817,6 +2884,162 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                     building_stats["color_bins"].get(building_bin, 0) + 1
                 )
             mask_count += 1
+    if cross_role_overlap_pixel_count > maximum_cross_role_overlap_pixels:
+        errors.append(
+            "MSAA-normalized role masks overlap across semantic roles: "
+            f"pixels={cross_role_overlap_pixel_count} maximum={maximum_cross_role_overlap_pixels}"
+        )
+    opposed_view_buildings: set[str] = set()
+    selected_view_metrics: list[dict[str, Any]] = []
+    for pair_index, raw_pair in enumerate(
+        array(
+            rendered.get("opposed_view_pairs"),
+            "rendered_material_evidence.opposed_view_pairs",
+            nonempty=True,
+        )
+    ):
+        pair = obj(raw_pair, f"rendered_material_evidence.opposed_view_pairs[{pair_index}]")
+        building_id = text(pair.get("building_id"), f"opposed view pair {pair_index}.building_id")
+        if building_id in opposed_view_buildings:
+            raise ContractError(f"duplicate opposed view pair for {building_id}")
+        opposed_view_buildings.add(building_id)
+        if building_id not in buildings_seen:
+            errors.append(f"opposed view pair references unknown building {building_id}")
+            continue
+        capture_a = text(pair.get("capture_a"), f"opposed view pair {building_id}.capture_a")
+        capture_b = text(pair.get("capture_b"), f"opposed view pair {building_id}.capture_b")
+        if capture_a == capture_b:
+            raise ContractError(f"opposed view pair {building_id} must use two captures")
+        if capture_a not in capture_ids or capture_b not in capture_ids:
+            errors.append(f"opposed view pair {building_id} references missing captures")
+            continue
+        maximum_direction_dot = number(
+            pair.get("maximum_direction_dot"),
+            f"opposed view pair {building_id}.maximum_direction_dot",
+        )
+        if not -1.0 <= maximum_direction_dot < 0.0:
+            raise ContractError(
+                f"opposed view pair {building_id}.maximum_direction_dot must be in [-1, 0)"
+            )
+        measured_dot = dot(capture_directions[capture_a], capture_directions[capture_b])
+        if measured_dot > maximum_direction_dot + 1e-12:
+            errors.append(
+                f"opposed view pair {building_id} directions dot={measured_dot:.4f} "
+                f"exceeds {maximum_direction_dot:.4f}"
+            )
+        for capture_id in (capture_a, capture_b):
+            if building_id not in capture_buildings[capture_id]:
+                errors.append(
+                    f"opposed view pair {building_id} capture {capture_id} contains no building role mask"
+                )
+        selection_role = text(
+            pair.get("selection_role"),
+            f"opposed view pair {building_id}.selection_role",
+        )
+        required_roles = style_profiles[building_profiles[building_id]]["required_roles"]
+        if selection_role not in required_roles:
+            errors.append(
+                f"opposed view pair {building_id} selects undeclared role {selection_role}"
+            )
+            continue
+        preferred_role = (
+            "openings"
+            if "openings" in required_roles
+            else "trim"
+            if "trim" in required_roles
+            else "facade"
+        )
+        if selection_role != preferred_role:
+            errors.append(
+                f"opposed view pair {building_id} must select visibility by {preferred_role}, not {selection_role}"
+            )
+        selected_capture_id = text(
+            pair.get("selected_capture_id"),
+            f"opposed view pair {building_id}.selected_capture_id",
+        )
+        if selected_capture_id not in {capture_a, capture_b}:
+            raise ContractError(
+                f"opposed view pair {building_id}.selected_capture_id must name one paired capture"
+            )
+        role_counts = {
+            capture_id: int(
+                capture_role_stats.get(
+                    (capture_id, building_id, selection_role),
+                    {"count": 0},
+                )["count"]
+            )
+            for capture_id in (capture_a, capture_b)
+        }
+        selected_count = role_counts[selected_capture_id]
+        if selected_count != max(role_counts.values()):
+            errors.append(
+                f"opposed view pair {building_id} selected {selected_capture_id} with "
+                f"{selected_count} {selection_role} pixels instead of the maximum {max(role_counts.values())}"
+            )
+        minimum_pixels = int(
+            style_profiles[building_profiles[building_id]]["role_envelopes"][selection_role][
+                "minimum_visible_pixels"
+            ]
+        )
+        if selected_count < minimum_pixels:
+            errors.append(
+                f"opposed view pair {building_id} selected {selection_role} mask has "
+                f"{selected_count} pixels; requires {minimum_pixels}"
+            )
+        selected_role_stats = capture_role_stats.get(
+            (selected_capture_id, building_id, selection_role)
+        )
+        selected_facade_stats = capture_role_stats.get(
+            (selected_capture_id, building_id, "facade")
+        )
+        selected_delta: float | None = None
+        if selection_role != "facade":
+            if selected_role_stats is None or selected_facade_stats is None:
+                errors.append(
+                    f"opposed view pair {building_id} selected capture lacks facade/{selection_role} masks"
+                )
+            else:
+                required_delta = next(
+                    (
+                        minimum
+                        for first, second, minimum in style_profiles[
+                            building_profiles[building_id]
+                        ]["separations"]
+                        if {first, second} == {"facade", selection_role}
+                    ),
+                    None,
+                )
+                if required_delta is None:
+                    raise ContractError(
+                        f"building {building_id} lacks facade/{selection_role} separation budget"
+                    )
+                selected_delta = delta_e(
+                    mean_lab(selected_facade_stats),
+                    mean_lab(selected_role_stats),
+                )
+                if selected_delta + 1e-12 < required_delta:
+                    errors.append(
+                        f"opposed view pair {building_id} selected facade/{selection_role} "
+                        f"DeltaE {selected_delta:.3f} is below {required_delta:.3f}"
+                    )
+        selected_view_metrics.append(
+            {
+                "building_id": building_id,
+                "capture_a": capture_a,
+                "capture_b": capture_b,
+                "measured_direction_dot": measured_dot,
+                "selection_role": selection_role,
+                "selected_capture_id": selected_capture_id,
+                "selected_visible_pixels": selected_count,
+                "selected_facade_role_delta_e": selected_delta,
+            }
+        )
+    if opposed_view_buildings != buildings_seen:
+        errors.append(
+            "opposed shipping-camera view pairs do not exactly cover visible buildings; "
+            f"missing={','.join(sorted(buildings_seen - opposed_view_buildings)) or 'none'} "
+            f"extra={','.join(sorted(opposed_view_buildings - buildings_seen)) or 'none'}"
+        )
     for building_id in buildings_seen:
         profile = style_profiles[building_profiles[building_id]]
         for role in profile["required_roles"]:
@@ -2837,7 +3060,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             value_stddev = standard_deviation(stats["value"], stats["value_squared"], count)
             chroma_stddev = standard_deviation(stats["chroma"], stats["chroma_squared"], count)
             dominant_color_ratio = max(stats["color_bins"].values()) / count
-            stats["mean_lab"] = tuple(component / count for component in stats["lab"])
+            stats["mean_lab"] = mean_lab(stats)
             rendered_role_metrics.append(
                 {
                     "building_id": building_id,
@@ -3103,6 +3326,9 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         ),
         "rendered_material_capture_count": capture_count,
         "rendered_material_mask_count": mask_count,
+        "rendered_mask_cross_role_overlap_pixel_count": cross_role_overlap_pixel_count,
+        "opposed_view_pair_count": len(opposed_view_buildings),
+        "selected_opposed_view_metrics": selected_view_metrics,
         "rendered_role_metrics": rendered_role_metrics,
         "rendered_role_separation_metrics": rendered_role_separation_metrics,
         "rendered_building_metrics": rendered_building_metrics,
@@ -3128,6 +3354,8 @@ def main() -> int:
             f"[{marker}] streetscape-semantics id={report['contract_id']} "
             f"junctions={report['junction_count']} objects={report['placed_object_count']} "
             f"meshes={report['resolved_visible_mesh_count']} buildings={report['visible_building_count']} "
+            f"opposed_views={report['opposed_view_pair_count']} "
+            f"mask_overlap={report['rendered_mask_cross_role_overlap_pixel_count']} "
             f"terminations={report['lane_boundary_termination_count']} pockets={report['reachable_safety_contact_count']} "
             f"errors={len(report['errors'])}"
         )

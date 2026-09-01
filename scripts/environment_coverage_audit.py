@@ -65,9 +65,12 @@ class RenderShell:
     source_node: str
     visible: bool
     variant_id: str
+    semantic_class: str
+    physics_role: str
     footprint: tuple[Vec2, ...]
     min_y: float
     max_y: float
+    collider_ids: tuple[str, ...]
 
 
 def parse_args() -> argparse.Namespace:
@@ -206,8 +209,11 @@ def parse_triangles(value: Any) -> list[GroundTriangle]:
 
 
 def audit(model: dict[str, Any]) -> dict[str, Any]:
-    if model.get("schema_version") != 1:
-        raise ContractError("schema_version must be 1")
+    if model.get("schema_version") != 2:
+        raise ContractError(
+            "schema_version must be 2; re-export the complete bidirectional visible-solid/collider "
+            "inventory and explicit non-solid visual classifications"
+        )
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
     raw_provenance = obj(model.get("scene_provenance"), "scene_provenance")
@@ -411,6 +417,13 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         )
 
     shell_contract = obj(model.get("collider_shell_audit"), "collider_shell_audit")
+    if text(
+        shell_contract.get("inventory_source_kind"),
+        "collider_shell_audit.inventory_source_kind",
+    ) != "exporter_resolved_visible_physics_subjects":
+        raise ContractError(
+            "collider_shell_audit inventory must come from exporter_resolved_visible_physics_subjects"
+        )
     hero_radius = number(shell_contract.get("hero_radius"), "collider_shell_audit.hero_radius", minimum=0.0)
     hero_base_y = number(shell_contract.get("hero_base_y"), "collider_shell_audit.hero_base_y")
     hero_height = number(shell_contract.get("hero_height"), "collider_shell_audit.hero_height", minimum=1e-6)
@@ -418,6 +431,10 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     min_shell_overlap_ratio = ratio(
         shell_contract.get("minimum_shell_overlap_ratio"),
         "collider_shell_audit.minimum_shell_overlap_ratio",
+    )
+    min_collider_overlap_ratio = ratio(
+        shell_contract.get("minimum_collider_overlap_ratio"),
+        "collider_shell_audit.minimum_collider_overlap_ratio",
     )
     max_invisible_ratio = ratio(
         shell_contract.get("max_invisible_blocked_ratio"),
@@ -431,6 +448,30 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         shell_contract.get("expected_visible_shell_count"),
         "collider_shell_audit.expected_visible_shell_count",
     )
+    expected_visible_class_counts = {
+        text(class_name, "collider_shell_audit.expected_visible_class_counts key"): integer(
+            count,
+            f"collider_shell_audit.expected_visible_class_counts.{class_name}",
+            1,
+        )
+        for class_name, count in obj(
+            shell_contract.get("expected_visible_class_counts"),
+            "collider_shell_audit.expected_visible_class_counts",
+        ).items()
+    }
+    if not expected_visible_class_counts:
+        raise ContractError("collider_shell_audit.expected_visible_class_counts must not be empty")
+    required_solid_classes = strings(
+        shell_contract.get("required_solid_blocker_classes"),
+        "collider_shell_audit.required_solid_blocker_classes",
+        nonempty=True,
+    )
+    visual_effect_classes = strings(
+        shell_contract.get("visual_effect_classes"),
+        "collider_shell_audit.visual_effect_classes",
+    )
+    if required_solid_classes & visual_effect_classes:
+        raise ContractError("solid blocker and visual-effect classes must be disjoint")
 
     render_shells: dict[str, RenderShell] = {}
     for index, raw in enumerate(array(shell_contract.get("render_shells"), "collider_shell_audit.render_shells", nonempty=True)):
@@ -442,14 +483,55 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         max_y = number(item.get("max_y"), f"render shell {shell_id}.max_y")
         if max_y <= min_y:
             raise ContractError(f"render shell {shell_id} max_y must exceed min_y")
+        semantic_class = text(item.get("class"), f"render shell {shell_id}.class")
+        physics_role = text(item.get("physics_role"), f"render shell {shell_id}.physics_role")
+        if physics_role not in {
+            "solid_blocker",
+            "visual_effect_non_solid",
+            "decorative_non_solid",
+        }:
+            raise ContractError(f"render shell {shell_id}.physics_role is invalid")
+        collider_ids = tuple(
+            sorted(strings(item.get("collider_ids"), f"render shell {shell_id}.collider_ids"))
+        )
+        if physics_role == "solid_blocker":
+            if semantic_class not in required_solid_classes:
+                errors.append(
+                    f"render shell {shell_id} is solid_blocker but class {semantic_class} is not in the required blocker inventory"
+                )
+            if not collider_ids:
+                errors.append(f"visible solid blocker {shell_id} has no reciprocal collider mapping")
+        else:
+            exemption = obj(
+                item.get("non_solid_evidence"),
+                f"render shell {shell_id}.non_solid_evidence",
+            )
+            text(exemption.get("reason"), f"render shell {shell_id}.non_solid_evidence.reason")
+            text(
+                exemption.get("raw_artifact"),
+                f"render shell {shell_id}.non_solid_evidence.raw_artifact",
+            )
+            if collider_ids:
+                errors.append(f"non-solid visual {shell_id} must not map gameplay colliders")
+            if physics_role == "visual_effect_non_solid" and semantic_class not in visual_effect_classes:
+                errors.append(
+                    f"render shell {shell_id} is visual_effect_non_solid but class {semantic_class} is not declared as a visual effect"
+                )
+            if physics_role != "visual_effect_non_solid" and semantic_class in visual_effect_classes:
+                errors.append(
+                    f"visual-effect class {semantic_class} must use visual_effect_non_solid"
+                )
         render_shells[shell_id] = RenderShell(
             shell_id,
             text(item.get("source_node"), f"render shell {shell_id}.source_node"),
             boolean(item.get("visible"), f"render shell {shell_id}.visible"),
             text(item.get("variant_id"), f"render shell {shell_id}.variant_id"),
+            semantic_class,
+            physics_role,
             polygon(item.get("footprint"), f"render shell {shell_id}.footprint"),
             min_y,
             max_y,
+            collider_ids,
         )
 
     colliders: list[Collider] = []
@@ -508,15 +590,40 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         errors.append(
             f"visible render-shell manifest has {len(visible_shells)}; expected {expected_visible_shells}"
         )
+    actual_visible_class_counts: dict[str, int] = {}
+    for shell in visible_shells:
+        actual_visible_class_counts[shell.semantic_class] = (
+            actual_visible_class_counts.get(shell.semantic_class, 0) + 1
+        )
+    if actual_visible_class_counts != expected_visible_class_counts:
+        errors.append(
+            "visible physics-subject class inventory differs from exporter-owned expected counts: "
+            f"actual={actual_visible_class_counts} expected={expected_visible_class_counts}"
+        )
+    for class_name in sorted(required_solid_classes):
+        if actual_visible_class_counts.get(class_name, 0) <= 0:
+            errors.append(f"required solid blocker class {class_name} has no visible subject")
+    for class_name in sorted(visual_effect_classes):
+        if actual_visible_class_counts.get(class_name, 0) <= 0:
+            errors.append(f"declared visual-effect class {class_name} has no visible subject")
 
-    variants = {item.variant_id for item in colliders} | {item.variant_id for item in render_shells.values()}
+    collider_by_id = {item.collider_id: item for item in colliders}
+    variants = {item.variant_id for item in colliders} | {
+        item.variant_id
+        for item in render_shells.values()
+        if item.physics_role == "solid_blocker"
+    }
     for variant in sorted(variants):
         collider_active = any(
             item.enabled and not item.visibility_exempt
             for item in colliders
             if item.variant_id == variant
         )
-        shell_active = any(item.visible for item in render_shells.values() if item.variant_id == variant)
+        shell_active = any(
+            item.visible and item.physics_role == "solid_blocker"
+            for item in render_shells.values()
+            if item.variant_id == variant
+        )
         if collider_active != shell_active:
             errors.append(
                 f"variant {variant} is asymmetric: collider_enabled={collider_active} render_visible={shell_active}"
@@ -541,6 +648,10 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 )
             else:
                 mapped.append(shell)
+                if collider.collider_id not in shell.collider_ids:
+                    errors.append(
+                        f"collider {collider.collider_id} -> shell {shell_id} mapping is not reciprocal"
+                    )
         collider_points = grid_samples(collider.footprint, collider_step).values()
         collider_points = list(collider_points)
         backed = 0
@@ -556,6 +667,74 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             errors.append(
                 f"enabled static collider {collider.collider_id} visible-shell overlap ratio "
                 f"{overlap_ratio:.4f} is below {min_shell_overlap_ratio:.4f}"
+            )
+
+    visible_solid_blockers = [
+        shell
+        for shell in visible_shells
+        if shell.physics_role == "solid_blocker"
+    ]
+    visible_non_solid = [
+        shell
+        for shell in visible_shells
+        if shell.physics_role != "solid_blocker"
+    ]
+    missing_blocker_colliders = 0
+    for shell in render_shells.values():
+        mapped_colliders: list[Collider] = []
+        for collider_id in shell.collider_ids:
+            collider = collider_by_id.get(collider_id)
+            if collider is None:
+                errors.append(f"render shell {shell.shell_id} maps unknown collider {collider_id}")
+                continue
+            if shell.shell_id not in collider.shell_ids:
+                errors.append(
+                    f"shell {shell.shell_id} -> collider {collider_id} mapping is not reciprocal"
+                )
+            mapped_colliders.append(collider)
+        if shell.physics_role != "solid_blocker":
+            referencing = sorted(
+                collider.collider_id
+                for collider in colliders
+                if shell.shell_id in collider.shell_ids
+            )
+            if referencing:
+                errors.append(
+                    f"non-solid visual {shell.shell_id} is referenced by collider(s): {', '.join(referencing)}"
+                )
+            continue
+        state_matched = [
+            collider
+            for collider in mapped_colliders
+            if collider.enabled == shell.visible
+        ]
+        if shell.visible:
+            state_matched = [collider for collider in state_matched if collider.blocks_hero]
+        if not state_matched:
+            if shell.visible:
+                missing_blocker_colliders += 1
+                errors.append(
+                    f"visible solid blocker {shell.shell_id} has no enabled hero-blocking collider"
+                )
+            else:
+                errors.append(
+                    f"hidden solid shell {shell.shell_id} has no disabled reciprocal collider variant"
+                )
+            continue
+        shell_points = list(grid_samples(shell.footprint, collider_step).values())
+        backed = 0
+        for point in shell_points:
+            if any(
+                point_in_polygon(point, list(collider.footprint))
+                and min(collider.max_y, shell.max_y) > max(collider.min_y, shell.min_y)
+                for collider in state_matched
+            ):
+                backed += 1
+        overlap_ratio = backed / max(1, len(shell_points))
+        if overlap_ratio + 1e-12 < min_collider_overlap_ratio:
+            errors.append(
+                f"render shell {shell.shell_id} collider overlap ratio {overlap_ratio:.4f} "
+                f"is below {min_collider_overlap_ratio:.4f}"
             )
 
     raster_cells = grid_samples(footprint, collider_step)
@@ -765,6 +944,9 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         "survey_coverage_ratio": coverage_ratio,
         "enabled_static_collider_count": len(enabled_colliders),
         "visible_shell_count": len(visible_shells),
+        "visible_solid_blocker_count": len(visible_solid_blockers),
+        "visible_non_solid_count": len(visible_non_solid),
+        "missing_blocker_collider_count": missing_blocker_colliders,
         "blocked_raster_sample_count": blocked_samples,
         "invisible_blocked_sample_count": invisible_samples,
         "production_occluder_mapping_count": len(mappings),
@@ -787,6 +969,9 @@ def main() -> int:
             f"[{marker}] environment-coverage id={report['contract_id']} "
             f"surface_cells={report['surface_cell_count']} survey={report['survey_coverage_ratio']:.4f} "
             f"colliders={report['enabled_static_collider_count']} "
+            f"solid_subjects={report['visible_solid_blocker_count']} "
+            f"non_solid_subjects={report['visible_non_solid_count']} "
+            f"missing_solid_colliders={report['missing_blocker_collider_count']} "
             f"invisible={report['invisible_blocked_sample_count']} "
             f"occluders={report['production_occluder_trace_count']} errors={len(report['errors'])}"
         )

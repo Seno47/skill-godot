@@ -51,7 +51,7 @@ python scripts/environment_coverage_audit.py \
   --summary
 ```
 
-The coverage audit prevents a curated set of good contacts or one permissive ground polygon from hiding defects elsewhere in the playable footprint.
+The coverage contract is schema v2. Migrate v1 by re-exporting the complete visible physics-subject inventory: semantic class, `physics_role`, reciprocal collider IDs, exact expected class counts and evidence-backed non-solid classifications. Renaming an old report is not a migration. The audit prevents a curated set of good contacts, a one-way collider check or one permissive ground polygon from hiding defects elsewhere in the playable footprint.
 
 ## Bind evidence to the resolved dependency closure
 
@@ -157,9 +157,9 @@ Every required grid cell must be covered by at least one raw frame; the default 
 
 Use `Camera3D.project_ray_origin()` and `project_ray_normal()` at deterministic viewport sample points, or an equivalent project-owned projection method, to derive coverage. Do not estimate coverage only from camera focus positions. For multi-level maps, declare a footprint per relevant elevation or split the contract by layer.
 
-## Compare every enabled static collider with visible render mass
+## Prove collider/render parity in both directions
 
-Known-prop collision checks are insufficient. The exporter must enumerate every resolved `StaticBody3D`/shape owner in the production scene, including instantiated and generated children, then record disabled state symmetrically with its authored visual variant.
+Known-prop collision checks are insufficient. The exporter must enumerate every resolved `StaticBody3D`/shape owner and every camera-visible physics subject in the production scene, including instantiated and generated children. The visible inventory is exporter-owned and exact by semantic class: buildings, fences, barrels, hydrants, vehicles, poles and any other visually solid obstruction cannot disappear from it merely because no collider points back to them. Record disabled state symmetrically with the authored visual variant.
 
 For each enabled collider:
 
@@ -168,6 +168,17 @@ For each enabled collider:
 - raster the playable footprint at the declared hero radius and vertical body interval;
 - require every blocked hero-center sample to have visible mass explaining the obstruction;
 - reject enabled-collider/hidden-shell and disabled-collider/visible-shell variant mismatches.
+
+Then run the reverse proof for every `physics_role: solid_blocker` render shell:
+
+- require one or more reciprocal collider IDs, with both sides naming each other;
+- require the visible state to map to enabled hero-blocking collision and the hidden state to the disabled authored variant;
+- sample the transformed render footprint/height and meet `minimum_collider_overlap_ratio` against the mapped colliders;
+- compare the exact visible semantic-class counts with the exporter-owned expected inventory.
+
+This second direction catches a visible barrel, fence section or facade that the player can walk through even when every existing collider has a valid visible shell. Collider-to-shell and shell-to-collider are separate assertions; neither implies the other.
+
+Fire, smoke, sparks, mist, particle cards and similar child meshes are visual evidence but normally not occupancy. Classify them explicitly as `visual_effect_non_solid`, declare their semantic classes in `visual_effect_classes`, keep their collider list empty and attach a reason plus raw shipping-camera artifact. Other non-solid decoration uses `decorative_non_solid` with the same evidence rule. Non-solid subjects remain in the exact visible inventory and screenshots but are excluded from collider overlap, variant parity and hero-radius occupancy; a collider referencing them fails. Do not omit effects from traversal or pretend that an effect is a solid shell to make counts agree.
 
 A duplicate traffic-light pole collider, old hidden wall or disabled visual variant therefore cannot remain as an invisible blocker merely because collision coverage is numerically complete. Overhead colliders outside the declared hero vertical interval still require render-shell parity but do not become false ground blockers. Camera-only proxies or deliberately invisible safety barriers need `blocks_hero: false` plus an exact reason/raw-artifact exemption; a hero-blocking collider can never use that exemption. Use multiple render-shell volumes for geometry with holes.
 
@@ -232,7 +243,7 @@ upper.min_y - lower.max_y >= minimum_gap
 
 Use the actual clearance needed by the lower object, its animation and the shipping camera read. A wire touching a tank, a sign entering a facade, a lamp shaft through a car or a tower frame entering a roof fails even when every prop has a correct collider.
 
-Clearance does not prove support. When roads/streetscape exist, the schema-v5 streetscape layer separately enumerates every visible canopy/awning/support mesh from the exporter-owned scene traversal. Ground contact uses resolved support vertices against topmost render surfaces; facade/suspension contact uses resolved support vertices against named mount-mesh triangles and recomputes 3D gaps. A scalar adapter value is not evidence. A floating awning can pass every overhead-clearance rule and must still fail the support-contact gate.
+Clearance does not prove support. When roads/streetscape exist, the schema-v6 streetscape layer separately enumerates every visible canopy/awning/support mesh from the exporter-owned scene traversal. Ground contact uses resolved support vertices against topmost render surfaces; facade/suspension contact uses resolved support vertices against named mount-mesh triangles and recomputes 3D gaps. A scalar adapter value is not evidence. A floating awning can pass every overhead-clearance rule and must still fail the support-contact gate.
 
 ## Raw target-build close-up matrix
 
@@ -244,16 +255,17 @@ The deterministic report and visual evidence are one gate, not alternatives. Pre
 4. vertical clearance;
 5. an ordinary environment-integrity overview.
 6. a complete shipping-camera tiled-survey contact sheet with zero uncovered cells;
-7. all-enabled-static-collider/render-shell and hero-radius raster overlays;
+7. bidirectional solid-render-shell/collider inventory, overlap and hero-radius raster overlays;
 8. production occluder alias fade/restoration motion;
 9. high-risk topmost-surface/object-pair contacts.
 10. the whole-perimeter visible-first contact sheet, exporter-owned production-capsule grid/contact sheet and exact detected-span close-ups;
 11. the visible-limiter baseline/current continuity ledger and replacement close-ups where applicable;
 12. every strict intentional-contact pair, including the undeformed-clear or authored-deformation interface state.
+13. representative non-solid fire/smoke/particle classes in the same target-build visual state, with their exclusion from physics recorded.
 
 For every defect class detected during the iteration, keep a representative before frame, the fixed after frame, and the clean rerun row. Do not crop away the contact context. If no defect was detected in a class, still capture its highest-risk representative state.
 
-The gate fails when any applicable audit has an error, a visible prop is missing required proxies, one semantic zone accepts incompatible families, fallback exceeds its zone budget, any playable/survey/perimeter sample is uncovered, an observed adjacency lacks a transition/cause, any enabled collider lacks visible shell/raster support, the production capsule reaches an unsafe-fringe cell, a limiter disappears without mapped visible replacement continuity, a safety wall is contacted before its mapped visible cause, visible-to-safety clearance is too small, a disabled/hidden variant is asymmetric, a production occluder root or trace is missing, a surface/object rule fails, a detected class lacks before/fixed/rerun evidence, an exemption is vague/stale, a strict contact exceeds its undeformed/deformed budget or lacks a plausible interface, or the raw build still shows fusion, penetration, floating contact, abrupt patchwork, roadway nature props, invisible blockers or exposed substrate.
+The gate fails when any applicable audit has an error, a visible prop is missing required proxies, a visible solid blocker lacks reciprocal enabled hero collision, a collider lacks visible shell/raster support, a non-solid effect is omitted or participates in occupancy, one semantic zone accepts incompatible families, fallback exceeds its zone budget, any playable/survey/perimeter sample is uncovered, an observed adjacency lacks a transition/cause, the production capsule reaches an unsafe-fringe cell, a limiter disappears without mapped visible replacement continuity, a safety wall is contacted before its mapped visible cause, visible-to-safety clearance is too small, a disabled/hidden variant is asymmetric, a production occluder root or trace is missing, a surface/object rule fails, a detected class lacks before/fixed/rerun evidence, an exemption is vague/stale, a strict contact exceeds its undeformed/deformed budget or lacks a plausible interface, or the raw build still shows fusion, pass-through solids, penetration, floating contact, abrupt patchwork, roadway nature props, invisible blockers or exposed substrate.
 
 ## Engine references
 
