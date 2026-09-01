@@ -201,6 +201,28 @@ def distance(first: Vec2, second: Vec2) -> float:
     return hypot(first[0] - second[0], first[1] - second[1])
 
 
+def vec3(value: Any, label: str) -> tuple[float, float, float]:
+    raw = array(value, label)
+    if len(raw) != 3:
+        raise ContractError(f"{label} must contain three numbers")
+    return (
+        number(raw[0], f"{label}[0]"),
+        number(raw[1], f"{label}[1]"),
+        number(raw[2], f"{label}[2]"),
+    )
+
+
+def distance3(first: tuple[float, float, float], second: tuple[float, float, float]) -> float:
+    return sum((left - right) ** 2 for left, right in zip(first, second)) ** 0.5
+
+
+def standard_deviation(total: float, squared_total: float, count: int) -> float:
+    if count <= 0:
+        return 0.0
+    mean = total / count
+    return max(0.0, squared_total / count - mean * mean) ** 0.5
+
+
 def sample_segment(start: Vec2, end: Vec2, step: float) -> list[Vec2]:
     length = distance(start, end)
     parts = max(1, int(ceil(length / step)))
@@ -329,10 +351,10 @@ def unique_cells(
 
 
 def audit(model: dict[str, Any]) -> dict[str, Any]:
-    if model.get("schema_version") != 3:
+    if model.get("schema_version") != 4:
         raise ContractError(
-            "schema_version must be 3; re-export resolved mesh inventory, rendered material masks, "
-            "lane terminations, and support contacts"
+            "schema_version must be 4; re-export marking mesh chains, typed termination geometry, "
+            "source-role material masks, and vertex-to-mesh support contacts"
         )
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
@@ -415,6 +437,10 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     expected_lane_terminations = integer(
         settings.get("expected_lane_boundary_termination_count"),
         "contract.expected_lane_boundary_termination_count",
+    )
+    expected_marking_chains = integer(
+        settings.get("expected_marking_mesh_chain_count"),
+        "contract.expected_marking_mesh_chain_count",
     )
     minimum_support_samples = integer(
         settings.get("minimum_support_contact_samples"),
@@ -1182,6 +1208,105 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 f"street furniture object {placed.object_id} has no resolved visible mesh classification"
             )
 
+    marking_chains: dict[str, dict[str, Any]] = {}
+    marking_mesh_coverage: set[str] = set()
+    for index, raw in enumerate(
+        array(model.get("resolved_marking_mesh_chains"), "resolved_marking_mesh_chains")
+    ):
+        item = obj(raw, f"resolved_marking_mesh_chains[{index}]")
+        chain_id = text(item.get("id"), f"resolved marking mesh chain {index}.id")
+        if chain_id in marking_chains:
+            raise ContractError(f"duplicate resolved marking mesh chain {chain_id}")
+        if text(
+            item.get("source_kind"), f"resolved marking mesh chain {chain_id}.source_kind"
+        ) != "resolved_marking_mesh_chain":
+            errors.append(f"marking chain {chain_id} is not exporter-owned resolved mesh evidence")
+        text(item.get("marking_class"), f"resolved marking mesh chain {chain_id}.marking_class")
+        chain_lane_ids = strings(
+            item.get("lane_ids"), f"resolved marking mesh chain {chain_id}.lane_ids", nonempty=True
+        )
+        if not chain_lane_ids <= set(lanes):
+            errors.append(f"marking chain {chain_id} references unknown lanes")
+        chain_mesh_ids = strings(
+            item.get("mesh_instance_ids"),
+            f"resolved marking mesh chain {chain_id}.mesh_instance_ids",
+            nonempty=True,
+        )
+        if chain_mesh_ids & marking_mesh_coverage:
+            raise ContractError(f"marking chain {chain_id} reuses a mesh owned by another chain")
+        marking_mesh_coverage |= chain_mesh_ids
+        if not chain_mesh_ids <= set(resolved_meshes):
+            errors.append(f"marking chain {chain_id} references missing resolved meshes")
+        for mesh_id in sorted(chain_mesh_ids & set(classifications)):
+            classification = classifications[mesh_id]
+            if classification["scope"] != "road_surface" or classification["class"] != "road_marking":
+                errors.append(
+                    f"marking chain {chain_id} mesh {mesh_id} is not classified as road_surface/road_marking"
+                )
+        endpoints: list[Vec2] = []
+        for segment_index, raw_segment in enumerate(
+            array(item.get("segments"), f"resolved marking mesh chain {chain_id}.segments", nonempty=True)
+        ):
+            segment = obj(raw_segment, f"resolved marking mesh chain {chain_id}.segments[{segment_index}]")
+            mesh_id = text(
+                segment.get("mesh_instance_id"),
+                f"resolved marking mesh chain {chain_id} segment {segment_index}.mesh_instance_id",
+            )
+            if mesh_id not in chain_mesh_ids:
+                errors.append(f"marking chain {chain_id} segment uses an undeclared mesh {mesh_id}")
+            if text(
+                segment.get("measurement_source_kind"),
+                f"resolved marking mesh chain {chain_id} segment {segment_index}.measurement_source_kind",
+            ) != "resolved_mesh_vertices":
+                errors.append(f"marking chain {chain_id} segment endpoints are not resolved from mesh vertices")
+            surface_index = integer(
+                segment.get("surface_index"),
+                f"resolved marking mesh chain {chain_id} segment {segment_index}.surface_index",
+            )
+            start_vertex_index = integer(
+                segment.get("start_vertex_index"),
+                f"resolved marking mesh chain {chain_id} segment {segment_index}.start_vertex_index",
+            )
+            end_vertex_index = integer(
+                segment.get("end_vertex_index"),
+                f"resolved marking mesh chain {chain_id} segment {segment_index}.end_vertex_index",
+            )
+            if start_vertex_index == end_vertex_index:
+                errors.append(f"marking chain {chain_id} segment reuses one mesh vertex as both endpoints")
+            if mesh_id in resolved_meshes and surface_index not in resolved_meshes[mesh_id]["surfaces"]:
+                errors.append(f"marking chain {chain_id} segment references an invalid mesh surface")
+            start = vec2(
+                segment.get("start"),
+                f"resolved marking mesh chain {chain_id} segment {segment_index}.start",
+            )
+            end = vec2(
+                segment.get("end"),
+                f"resolved marking mesh chain {chain_id} segment {segment_index}.end",
+            )
+            if distance(start, end) <= 1e-9:
+                errors.append(f"marking chain {chain_id} has a zero-length resolved segment")
+            endpoints.extend((start, end))
+        marking_chains[chain_id] = {
+            "lane_ids": chain_lane_ids,
+            "mesh_ids": chain_mesh_ids,
+            "endpoints": endpoints,
+        }
+    expected_marking_mesh_ids = {
+        mesh_id
+        for mesh_id, classification in classifications.items()
+        if classification["scope"] == "road_surface" and classification["class"] == "road_marking"
+    }
+    if marking_mesh_coverage != expected_marking_mesh_ids:
+        errors.append(
+            "resolved marking mesh chains do not exactly cover road-marking meshes; "
+            f"missing={','.join(sorted(expected_marking_mesh_ids - marking_mesh_coverage)) or 'none'} "
+            f"extra={','.join(sorted(marking_mesh_coverage - expected_marking_mesh_ids)) or 'none'}"
+        )
+    if len(marking_chains) != expected_marking_chains:
+        errors.append(
+            f"resolved marking mesh chain manifest has {len(marking_chains)}; expected {expected_marking_chains}"
+        )
+
     termination_nodes = {
         node_id
         for node_id, kind in node_kinds.items()
@@ -1189,6 +1314,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         and any(lane.start_node == node_id or lane.end_node == node_id for lane in lanes.values())
     }
     termination_records: set[str] = set()
+    termination_measurements: list[dict[str, Any]] = []
     for index, raw in enumerate(
         array(model.get("lane_boundary_terminations"), "lane_boundary_terminations")
     ):
@@ -1215,6 +1341,13 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         )
         if termination_kind not in {"continued_offmap", "turn", "cul_de_sac", "physical_closure"}:
             raise ContractError(f"lane boundary termination {node_id} has unsupported kind")
+        outward = normalize(
+            vec2(
+                item.get("outward_direction"),
+                f"lane boundary termination {node_id}.outward_direction",
+            ),
+            f"lane boundary termination {node_id}.outward_direction",
+        )
         declared_region_ids = strings(
             item.get("surface_region_ids"),
             f"lane boundary termination {node_id}.surface_region_ids",
@@ -1225,9 +1358,39 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             errors.append(
                 f"lane boundary termination {node_id} references unknown surfaces: {', '.join(unknown_regions)}"
             )
+        geometry = obj(
+            item.get("termination_geometry"),
+            f"lane boundary termination {node_id}.termination_geometry",
+        )
+        if text(
+            geometry.get("source_kind"),
+            f"lane boundary termination {node_id}.termination_geometry.source_kind",
+        ) != "resolved_typed_termination_geometry":
+            errors.append(f"lane boundary termination {node_id} geometry is adapter-declared")
+        profile_kind = text(
+            geometry.get("profile_kind"),
+            f"lane boundary termination {node_id}.termination_geometry.profile_kind",
+        )
+        allowed_profiles = {
+            "continued_offmap": {"offmap_corridor"},
+            "turn": {"turn_connection"},
+            "cul_de_sac": {"cul_de_sac_bulb", "cul_de_sac_hammerhead"},
+            "physical_closure": {
+                "barrier_closure",
+                "gate_closure",
+                "debris_closure",
+                "facade_closure",
+                "terrain_closure",
+            },
+        }
+        if profile_kind not in allowed_profiles[termination_kind]:
+            errors.append(
+                f"lane boundary termination {node_id} geometry profile {profile_kind} "
+                f"does not match {termination_kind}"
+            )
         cap_mesh_ids = strings(
-            item.get("cap_mesh_instance_ids"),
-            f"lane boundary termination {node_id}.cap_mesh_instance_ids",
+            geometry.get("mesh_instance_ids"),
+            f"lane boundary termination {node_id}.termination_geometry.mesh_instance_ids",
             nonempty=True,
         )
         unknown_caps = sorted(cap_mesh_ids - set(resolved_meshes))
@@ -1244,25 +1407,37 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             errors.append(
                 f"lane boundary termination {node_id} references unknown visible causes: {', '.join(unknown_causes)}"
             )
-        minimum_marking = number(
-            item.get("minimum_marking_stop_distance"),
-            f"lane boundary termination {node_id}.minimum_marking_stop_distance",
-            minimum=0.0,
+        geometry_footprint = polygon(
+            geometry.get("footprint"),
+            f"lane boundary termination {node_id}.termination_geometry.footprint",
         )
-        maximum_marking = number(
-            item.get("maximum_marking_stop_distance"),
-            f"lane boundary termination {node_id}.maximum_marking_stop_distance",
-            minimum=0.0,
+        top_surface_classes = strings(
+            geometry.get("top_surface_classes"),
+            f"lane boundary termination {node_id}.termination_geometry.top_surface_classes",
+            nonempty=True,
         )
-        marking_distance = number(
-            item.get("marking_stop_distance"),
-            f"lane boundary termination {node_id}.marking_stop_distance",
-            minimum=0.0,
+        travel_lane_overlap_ratio = ratio(
+            geometry.get("travel_lane_overlap_ratio"),
+            f"lane boundary termination {node_id}.termination_geometry.travel_lane_overlap_ratio",
         )
-        if maximum_marking < minimum_marking:
-            raise ContractError(f"lane boundary termination {node_id} marking budget is inverted")
-        if marking_distance < minimum_marking - 1e-9 or marking_distance > maximum_marking + 1e-9:
-            errors.append(f"lane boundary termination {node_id} marking stop is outside its budget")
+        marking_chain_ids = strings(
+            item.get("marking_chain_ids"),
+            f"lane boundary termination {node_id}.marking_chain_ids",
+        )
+        relevant_marking_chains = {
+            chain_id
+            for chain_id, chain in marking_chains.items()
+            if chain["lane_ids"] & associated_lanes
+        }
+        if marking_chain_ids != relevant_marking_chains:
+            errors.append(
+                f"lane boundary termination {node_id} marking chains do not exactly match incident-lane meshes"
+            )
+        if not marking_chain_ids:
+            text(
+                item.get("marking_absence_reason"),
+                f"lane boundary termination {node_id}.marking_absence_reason",
+            )
         text(item.get("raw_artifact"), f"lane boundary termination {node_id}.raw_artifact")
         endpoint = nodes[node_id]
         for placed in placed_objects.values():
@@ -1271,10 +1446,6 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                     f"lane boundary endpoint {node_id} lies inside building footprint {placed.object_id}"
                 )
         if termination_kind == "continued_offmap":
-            outward = normalize(
-                vec2(item.get("outward_direction"), f"lane boundary termination {node_id}.outward_direction"),
-                f"lane boundary termination {node_id}.outward_direction",
-            )
             continuation = number(
                 item.get("minimum_surface_continuation"),
                 f"lane boundary termination {node_id}.minimum_surface_continuation",
@@ -1294,6 +1465,96 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 errors.append(
                     f"lane boundary termination {node_id} has a bare cutoff instead of resolved off-map continuation"
                 )
+            required_continuation_classes = strings(
+                item.get("required_continuation_surface_classes"),
+                f"lane boundary termination {node_id}.required_continuation_surface_classes",
+                nonempty=True,
+            )
+            if not {"travel_lane", "sidewalk_clear", "curb"} <= required_continuation_classes:
+                errors.append(
+                    f"lane boundary termination {node_id} off-map corridor lacks road/sidewalk/curb continuation"
+                )
+            sampled_continuation_classes: set[str] = set()
+            for sample_index, raw_sample in enumerate(
+                array(
+                    item.get("continuation_surface_samples"),
+                    f"lane boundary termination {node_id}.continuation_surface_samples",
+                    nonempty=True,
+                )
+            ):
+                sample = obj(
+                    raw_sample,
+                    f"lane boundary termination {node_id}.continuation_surface_samples[{sample_index}]",
+                )
+                if text(
+                    sample.get("source_kind"),
+                    f"lane boundary termination {node_id} continuation sample {sample_index}.source_kind",
+                ) != "resolved_render_surface_sample":
+                    errors.append(f"lane boundary termination {node_id} has adapter-invented continuation samples")
+                sample_class = text(
+                    sample.get("surface_class"),
+                    f"lane boundary termination {node_id} continuation sample {sample_index}.surface_class",
+                )
+                sample_point = vec2(
+                    sample.get("point"),
+                    f"lane boundary termination {node_id} continuation sample {sample_index}.point",
+                )
+                sample_mesh_id = text(
+                    sample.get("mesh_instance_id"),
+                    f"lane boundary termination {node_id} continuation sample {sample_index}.mesh_instance_id",
+                )
+                if sample_mesh_id not in cap_mesh_ids or sample_mesh_id not in resolved_meshes:
+                    errors.append(f"lane boundary termination {node_id} continuation sample lacks resolved geometry")
+                projected = dot((sample_point[0] - endpoint[0], sample_point[1] - endpoint[1]), outward)
+                if projected + 1e-9 < continuation:
+                    errors.append(f"lane boundary termination {node_id} continuation sample stops before its budget")
+                matching_regions = [
+                    region
+                    for region in declared_regions
+                    if region.surface_class == sample_class
+                    and point_in_polygon(sample_point, list(region.shape))
+                ]
+                if not matching_regions:
+                    errors.append(
+                        f"lane boundary termination {node_id} continuation sample is not on its declared top surface"
+                    )
+                sampled_continuation_classes.add(sample_class)
+            if sampled_continuation_classes != required_continuation_classes:
+                errors.append(
+                    f"lane boundary termination {node_id} continuation samples do not exactly cover required classes"
+                )
+            for building in placed_objects.values():
+                if building.object_class == "building" and polygon_distance(
+                    building.footprint, geometry_footprint
+                ) <= 1e-9:
+                    errors.append(
+                        f"lane boundary continuation {node_id} intersects building footprint {building.object_id}"
+                    )
+            minimum_marking_continuation = number(
+                item.get("minimum_marking_continuation"),
+                f"lane boundary termination {node_id}.minimum_marking_continuation",
+                minimum=0.0,
+            )
+            for chain_id in sorted(marking_chain_ids & set(marking_chains)):
+                maximum_projection = max(
+                    dot((point[0] - endpoint[0], point[1] - endpoint[1]), outward)
+                    for point in marking_chains[chain_id]["endpoints"]
+                )
+                if maximum_projection + 1e-9 < minimum_marking_continuation:
+                    errors.append(
+                        f"lane boundary termination {node_id} marking mesh {chain_id} does not continue off-map"
+                    )
+                termination_measurements.append(
+                    {
+                        "node_id": node_id,
+                        "termination_kind": termination_kind,
+                        "profile_kind": profile_kind,
+                        "marking_chain_id": chain_id,
+                        "measurement": "outward_continuation",
+                        "measured_distance": maximum_projection,
+                        "minimum_distance": minimum_marking_continuation,
+                    }
+                )
         elif termination_kind == "turn":
             continuation_lanes = strings(
                 item.get("continuation_lane_ids"),
@@ -1302,6 +1563,9 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             )
             if not continuation_lanes <= set(lanes):
                 errors.append(f"lane boundary termination {node_id} turn references unknown lanes")
+        elif termination_kind == "cul_de_sac":
+            if not ({"travel_lane", "intersection"} & top_surface_classes):
+                errors.append(f"lane boundary termination {node_id} cul-de-sac lacks authored road turnaround")
         elif termination_kind == "physical_closure":
             if not raw_cause_ids:
                 errors.append(f"lane boundary termination {node_id} physical closure lacks a visible cause")
@@ -1312,6 +1576,63 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             ):
                 errors.append(
                     f"lane boundary termination {node_id} physical closure is detached from its visible cause"
+                )
+            cause_mesh_ids = {
+                mesh_id
+                for mesh_id, classification in classifications.items()
+                if classification["object_id"] in raw_cause_ids
+            }
+            if not cap_mesh_ids <= cause_mesh_ids:
+                errors.append(
+                    f"lane boundary termination {node_id} uses common/non-cause geometry as its physical cap"
+                )
+            if travel_lane_overlap_ratio > 0.0 and top_surface_classes & {
+                "sidewalk_clear",
+                "curb",
+                "furnishing_zone",
+            }:
+                errors.append(
+                    f"lane boundary termination {node_id} uses pedestrian slab geometry as a road closure"
+                )
+        if termination_kind in {"cul_de_sac", "physical_closure"}:
+            minimum_marking = number(
+                item.get("minimum_marking_stop_distance"),
+                f"lane boundary termination {node_id}.minimum_marking_stop_distance",
+                minimum=0.0,
+            )
+            maximum_marking = number(
+                item.get("maximum_marking_stop_distance"),
+                f"lane boundary termination {node_id}.maximum_marking_stop_distance",
+                minimum=0.0,
+            )
+            if maximum_marking < minimum_marking:
+                raise ContractError(f"lane boundary termination {node_id} marking budget is inverted")
+            for chain_id in sorted(marking_chain_ids & set(marking_chains)):
+                projections = [
+                    dot((point[0] - endpoint[0], point[1] - endpoint[1]), outward)
+                    for point in marking_chains[chain_id]["endpoints"]
+                ]
+                if any(value > node_tolerance for value in projections):
+                    errors.append(
+                        f"lane boundary termination {node_id} marking mesh {chain_id} continues through its cap"
+                    )
+                inside_distances = [-value for value in projections if value <= node_tolerance]
+                measured_stop = min(inside_distances) if inside_distances else float("inf")
+                if measured_stop < minimum_marking - 1e-9 or measured_stop > maximum_marking + 1e-9:
+                    errors.append(
+                        f"lane boundary termination {node_id} resolved marking mesh stop is outside its budget"
+                    )
+                termination_measurements.append(
+                    {
+                        "node_id": node_id,
+                        "termination_kind": termination_kind,
+                        "profile_kind": profile_kind,
+                        "marking_chain_id": chain_id,
+                        "measurement": "inward_stop",
+                        "measured_distance": measured_stop,
+                        "minimum_distance": minimum_marking,
+                        "maximum_distance": maximum_marking,
+                    }
                 )
     if termination_records != termination_nodes:
         errors.append(
@@ -1325,6 +1646,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         )
 
     support_contacts_seen: set[str] = set()
+    support_contact_measurements: list[dict[str, Any]] = []
     support_mesh_coverage: set[str] = set()
     for index, raw in enumerate(array(model.get("support_contacts"), "support_contacts")):
         item = obj(raw, f"support_contacts[{index}]")
@@ -1343,11 +1665,17 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         mode = text(item.get("support_mode"), f"support contact {contact_id}.support_mode")
         if mode not in {"ground_supported", "facade_mounted", "suspended"}:
             raise ContractError(f"support contact {contact_id} has unknown support_mode")
-        if text(
+        measurement_source_kind = text(
             item.get("measurement_source_kind"),
             f"support contact {contact_id}.measurement_source_kind",
-        ) != "resolved_mesh_vertices_to_render_surface":
-            errors.append(f"support contact {contact_id} lacks resolved render support provenance")
+        )
+        expected_measurement_source = (
+            "resolved_mesh_vertices_to_render_surface"
+            if mode == "ground_supported"
+            else "resolved_mesh_vertices_to_mount_mesh"
+        )
+        if measurement_source_kind != expected_measurement_source:
+            errors.append(f"support contact {contact_id} lacks resolved vertex contact provenance")
         allowed_gap = number(
             item.get("maximum_gap"), f"support contact {contact_id}.maximum_gap", minimum=0.0
         )
@@ -1364,6 +1692,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             if len(samples) < minimum_support_samples:
                 errors.append(f"support contact {contact_id} has too few resolved contact samples")
             support_values: list[float] = []
+            resolved_gaps: list[float] = []
             for sample_index, raw_sample in enumerate(samples):
                 sample = obj(raw_sample, f"support contact {contact_id}.contact_samples[{sample_index}]")
                 support_y = number(sample.get("support_y"), f"support contact {contact_id} sample.support_y")
@@ -1372,12 +1701,22 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                     sample.get("gap"), f"support contact {contact_id} sample.gap", minimum=0.0
                 )
                 support_values.append(support_y)
-                if abs(abs(support_y - ground_y) - measured_gap) > 1e-6:
+                resolved_gap = abs(support_y - ground_y)
+                resolved_gaps.append(resolved_gap)
+                if abs(resolved_gap - measured_gap) > 1e-6:
                     errors.append(f"support contact {contact_id} sample gap disagrees with resolved heights")
                 if measured_gap > allowed_gap + 1e-12:
                     errors.append(f"support contact {contact_id} floats above its render support")
             if support_values and abs(min(support_values) - lowest_visible_y) > 1e-6:
                 errors.append(f"support contact {contact_id} lowest visible Y is not measurement-derived")
+            support_contact_measurements.append(
+                {
+                    "id": contact_id,
+                    "support_mode": mode,
+                    "sample_count": len(samples),
+                    "maximum_measured_gap": max(resolved_gaps, default=0.0),
+                }
+            )
         else:
             mount_ids = strings(
                 item.get("mount_mesh_instance_ids"),
@@ -1391,8 +1730,80 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 f"support contact {contact_id}.measured_mount_gap",
                 minimum=0.0,
             )
+            samples = array(
+                item.get("contact_samples"),
+                f"support contact {contact_id}.contact_samples",
+                nonempty=True,
+            )
+            if len(samples) < minimum_support_samples:
+                errors.append(f"support contact {contact_id} has too few mount-contact samples")
+            resolved_gaps: list[float] = []
+            for sample_index, raw_sample in enumerate(samples):
+                sample = obj(
+                    raw_sample,
+                    f"support contact {contact_id}.contact_samples[{sample_index}]",
+                )
+                support_mesh_id = text(
+                    sample.get("support_mesh_instance_id"),
+                    f"support contact {contact_id} sample {sample_index}.support_mesh_instance_id",
+                )
+                mount_mesh_id = text(
+                    sample.get("mount_mesh_instance_id"),
+                    f"support contact {contact_id} sample {sample_index}.mount_mesh_instance_id",
+                )
+                if support_mesh_id not in mesh_ids:
+                    errors.append(f"support contact {contact_id} sample uses an undeclared support mesh")
+                if mount_mesh_id not in mount_ids:
+                    errors.append(f"support contact {contact_id} sample uses an undeclared mount mesh")
+                integer(
+                    sample.get("support_vertex_index"),
+                    f"support contact {contact_id} sample {sample_index}.support_vertex_index",
+                )
+                mount_surface_index = integer(
+                    sample.get("mount_surface_index"),
+                    f"support contact {contact_id} sample {sample_index}.mount_surface_index",
+                )
+                integer(
+                    sample.get("mount_triangle_index"),
+                    f"support contact {contact_id} sample {sample_index}.mount_triangle_index",
+                )
+                if (
+                    mount_mesh_id in resolved_meshes
+                    and mount_surface_index not in resolved_meshes[mount_mesh_id]["surfaces"]
+                ):
+                    errors.append(f"support contact {contact_id} sample references invalid mount surface")
+                support_point = vec3(
+                    sample.get("support_point"),
+                    f"support contact {contact_id} sample {sample_index}.support_point",
+                )
+                mount_point = vec3(
+                    sample.get("mount_point"),
+                    f"support contact {contact_id} sample {sample_index}.mount_point",
+                )
+                declared_gap = number(
+                    sample.get("gap"),
+                    f"support contact {contact_id} sample {sample_index}.gap",
+                    minimum=0.0,
+                )
+                resolved_gap = distance3(support_point, mount_point)
+                resolved_gaps.append(resolved_gap)
+                if abs(resolved_gap - declared_gap) > 1e-6:
+                    errors.append(f"support contact {contact_id} mount gap is not vertex-derived")
+                if resolved_gap > allowed_gap + 1e-12:
+                    errors.append(f"support contact {contact_id} is detached from its authored mount")
+            if resolved_gaps and abs(max(resolved_gaps) - measured_mount_gap) > 1e-6:
+                errors.append(f"support contact {contact_id} measured mount gap is adapter-declared")
             if measured_mount_gap > allowed_gap + 1e-12:
                 errors.append(f"support contact {contact_id} is detached from its authored mount")
+            support_contact_measurements.append(
+                {
+                    "id": contact_id,
+                    "support_mode": mode,
+                    "sample_count": len(samples),
+                    "maximum_measured_gap": max(resolved_gaps, default=0.0),
+                    "declared_aggregate_gap": measured_mount_gap,
+                }
+            )
     if support_mesh_coverage != support_mesh_ids:
         errors.append(
             "support contact manifest does not exactly cover every visible canopy/awning/support mesh"
@@ -1447,6 +1858,98 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             elif item.object_id not in closure["cue_objects"]:
                 errors.append(f"placed object {item.object_id} is not a declared visual cue for closure {item.closure_id}")
 
+    resolved_building_source_roles: dict[str, dict[str, dict[str, Any]]] = {}
+    for index, raw in enumerate(
+        array(
+            model.get("resolved_building_source_role_manifest"),
+            "resolved_building_source_role_manifest",
+            nonempty=True,
+        )
+    ):
+        item = obj(raw, f"resolved_building_source_role_manifest[{index}]")
+        building_id = text(
+            item.get("object_id"),
+            f"resolved building source-role manifest {index}.object_id",
+        )
+        if building_id in resolved_building_source_roles:
+            raise ContractError(f"duplicate resolved building source-role manifest {building_id}")
+        if text(
+            item.get("source_kind"),
+            f"resolved building source-role manifest {building_id}.source_kind",
+        ) != "resolved_scene_building_source_roles":
+            errors.append(f"resolved building source-role manifest {building_id} is adapter-declared")
+        roles: dict[str, dict[str, Any]] = {}
+        for role_index, raw_role in enumerate(
+            array(
+                item.get("roles"),
+                f"resolved building source-role manifest {building_id}.roles",
+                nonempty=True,
+            )
+        ):
+            role_item = obj(
+                raw_role,
+                f"resolved building source-role manifest {building_id}.roles[{role_index}]",
+            )
+            role = text(
+                role_item.get("role"),
+                f"resolved building source-role manifest {building_id} role {role_index}.role",
+            )
+            if role in roles:
+                raise ContractError(f"duplicate resolved source role {building_id}/{role}")
+            source_kind = text(
+                role_item.get("source_kind"),
+                f"resolved building source-role manifest {building_id}/{role}.source_kind",
+            )
+            if source_kind not in {"authored_mesh_surface", "source_texture_uv_mask"}:
+                errors.append(f"resolved building source role {building_id}/{role} has synthetic provenance")
+            mesh_surface_keys = strings(
+                role_item.get("mesh_surface_keys"),
+                f"resolved building source-role manifest {building_id}/{role}.mesh_surface_keys",
+                nonempty=True,
+            )
+            for mesh_surface_key in sorted(mesh_surface_keys):
+                mesh_id, separator, raw_surface_index = mesh_surface_key.rpartition("#")
+                if not separator or not raw_surface_index.isdigit():
+                    raise ContractError(
+                        f"resolved building source role {building_id}/{role} has invalid mesh surface key"
+                    )
+                surface_index = int(raw_surface_index)
+                classification = classifications.get(mesh_id)
+                if (
+                    mesh_id not in resolved_meshes
+                    or surface_index not in resolved_meshes[mesh_id]["surfaces"]
+                    or classification is None
+                    or classification["scope"] != "building"
+                    or classification["object_id"] != building_id
+                ):
+                    errors.append(
+                        f"resolved building source role {building_id}/{role} references an unrelated surface"
+                    )
+            source_texture_id = ""
+            source_uv_mask_id = ""
+            uv_channel = -1
+            if source_kind == "source_texture_uv_mask":
+                source_texture_id = text(
+                    role_item.get("source_texture_id"),
+                    f"resolved building source-role manifest {building_id}/{role}.source_texture_id",
+                )
+                source_uv_mask_id = text(
+                    role_item.get("source_uv_mask_id"),
+                    f"resolved building source-role manifest {building_id}/{role}.source_uv_mask_id",
+                )
+                uv_channel = integer(
+                    role_item.get("uv_channel"),
+                    f"resolved building source-role manifest {building_id}/{role}.uv_channel",
+                )
+            roles[role] = {
+                "source_kind": source_kind,
+                "mesh_surface_keys": mesh_surface_keys,
+                "source_texture_id": source_texture_id,
+                "source_uv_mask_id": source_uv_mask_id,
+                "uv_channel": uv_channel,
+            }
+        resolved_building_source_roles[building_id] = roles
+
     style_profiles: dict[str, dict[str, Any]] = {}
     for index, raw in enumerate(array(model.get("building_style_profiles"), "building_style_profiles", nonempty=True)):
         item = obj(raw, f"building_style_profiles[{index}]")
@@ -1488,7 +1991,28 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                     envelope.get("maximum_mean_chroma"),
                     f"building style {profile_id}/{role}.maximum_mean_chroma",
                 ),
+                "minimum_value_stddev": ratio(
+                    envelope.get("minimum_value_stddev"),
+                    f"building style {profile_id}/{role}.minimum_value_stddev",
+                ),
+                "minimum_chroma_stddev": ratio(
+                    envelope.get("minimum_chroma_stddev"),
+                    f"building style {profile_id}/{role}.minimum_chroma_stddev",
+                ),
+                "maximum_dominant_color_ratio": ratio(
+                    envelope.get("maximum_dominant_color_ratio"),
+                    f"building style {profile_id}/{role}.maximum_dominant_color_ratio",
+                ),
+                "dominant_color_bin_size": integer(
+                    envelope.get("dominant_color_bin_size"),
+                    f"building style {profile_id}/{role}.dominant_color_bin_size",
+                    1,
+                ),
             }
+            if role_envelopes[role]["dominant_color_bin_size"] > 255:
+                raise ContractError(
+                    f"building style {profile_id}/{role} dominant_color_bin_size exceeds 255"
+                )
             if role_envelopes[role]["maximum_mean_value"] < role_envelopes[role]["minimum_mean_value"]:
                 raise ContractError(f"building style {profile_id}/{role} value envelope is inverted")
             if role_envelopes[role]["maximum_mean_chroma"] < role_envelopes[role]["minimum_mean_chroma"]:
@@ -1518,6 +2042,21 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             raise ContractError(
                 f"building style {profile_id} must place every required role in a perceptual separation pair"
             )
+        for detail_role in {"openings", "trim"} & required_roles:
+            if not any(
+                {first_role, second_role} == {"facade", detail_role}
+                for first_role, second_role, _minimum_delta in separations
+            ):
+                raise ContractError(
+                    f"building style {profile_id} must directly separate facade from {detail_role}"
+                )
+        building_color_bin_size = integer(
+            item.get("building_color_bin_size"),
+            f"building style {profile_id}.building_color_bin_size",
+            1,
+        )
+        if building_color_bin_size > 255:
+            raise ContractError(f"building style {profile_id} building_color_bin_size exceeds 255")
         style_profiles[profile_id] = {
             "required_roles": required_roles,
             "forbidden_materials": strings(item.get("forbidden_material_ids"), f"building style {profile_id}.forbidden_material_ids", nonempty=True),
@@ -1530,10 +2069,20 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             ),
             "role_envelopes": role_envelopes,
             "separations": separations,
+            "minimum_building_value_stddev": ratio(
+                item.get("minimum_building_value_stddev"),
+                f"building style {profile_id}.minimum_building_value_stddev",
+            ),
+            "maximum_building_dominant_color_ratio": ratio(
+                item.get("maximum_building_dominant_color_ratio"),
+                f"building style {profile_id}.maximum_building_dominant_color_ratio",
+            ),
+            "building_color_bin_size": building_color_bin_size,
         }
 
     buildings_seen: set[str] = set()
     building_profiles: dict[str, str] = {}
+    building_source_roles: dict[str, dict[str, dict[str, Any]]] = {}
     building_role_surface_keys: dict[tuple[str, str], set[str]] = {}
     for index, raw in enumerate(array(model.get("visible_buildings"), "visible_buildings", nonempty=True)):
         item = obj(raw, f"visible_buildings[{index}]")
@@ -1557,12 +2106,6 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         if story_state not in profile["allowed_story_states"]:
             errors.append(f"visible building {building_id} story state {story_state} is outside its style profile")
         total_area = number(item.get("visible_surface_area"), f"visible building {building_id}.visible_surface_area", minimum=1e-9)
-        listed_area = 0.0
-        materialized_area = 0.0
-        roles: set[str] = set()
-        slots = array(item.get("visible_surface_slots"), f"visible building {building_id}.visible_surface_slots", nonempty=True)
-        slot_ids: set[str] = set()
-        claimed_surface_keys: dict[tuple[str, int], list[dict[str, Any]]] = {}
         building_mesh_ids = {
             mesh_id
             for mesh_id, classification in classifications.items()
@@ -1570,6 +2113,101 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         }
         if not building_mesh_ids:
             errors.append(f"visible building {building_id} has no resolved building mesh classification")
+        source_role_inventory: dict[str, dict[str, Any]] = {}
+        for source_role_index, raw_source_role in enumerate(
+            array(
+                item.get("source_role_inventory"),
+                f"visible building {building_id}.source_role_inventory",
+                nonempty=True,
+            )
+        ):
+            source_role = obj(
+                raw_source_role,
+                f"visible building {building_id}.source_role_inventory[{source_role_index}]",
+            )
+            source_role_name = text(
+                source_role.get("role"),
+                f"visible building {building_id} source role {source_role_index}.role",
+            )
+            if source_role_name in source_role_inventory:
+                raise ContractError(f"visible building {building_id} duplicates source role {source_role_name}")
+            source_kind = text(
+                source_role.get("source_kind"),
+                f"visible building {building_id}/{source_role_name}.source_kind",
+            )
+            if source_kind not in {"authored_mesh_surface", "source_texture_uv_mask"}:
+                errors.append(f"visible building {building_id}/{source_role_name} has synthetic source-role provenance")
+            mesh_surface_keys = strings(
+                source_role.get("mesh_surface_keys"),
+                f"visible building {building_id}/{source_role_name}.mesh_surface_keys",
+                nonempty=True,
+            )
+            for mesh_surface_key in sorted(mesh_surface_keys):
+                mesh_id, separator, raw_surface_index = mesh_surface_key.rpartition("#")
+                if not separator or not raw_surface_index.isdigit():
+                    raise ContractError(
+                        f"visible building {building_id}/{source_role_name} has invalid mesh surface key"
+                    )
+                surface_index = int(raw_surface_index)
+                if mesh_id not in building_mesh_ids or surface_index not in resolved_meshes[mesh_id]["surfaces"]:
+                    errors.append(
+                        f"visible building {building_id}/{source_role_name} source role references an unrelated surface"
+                    )
+            source_texture_id = ""
+            source_uv_mask_id = ""
+            uv_channel = -1
+            if source_kind == "source_texture_uv_mask":
+                source_texture_id = text(
+                    source_role.get("source_texture_id"),
+                    f"visible building {building_id}/{source_role_name}.source_texture_id",
+                )
+                source_uv_mask_id = text(
+                    source_role.get("source_uv_mask_id"),
+                    f"visible building {building_id}/{source_role_name}.source_uv_mask_id",
+                )
+                uv_channel = integer(
+                    source_role.get("uv_channel"),
+                    f"visible building {building_id}/{source_role_name}.uv_channel",
+                )
+            source_role_inventory[source_role_name] = {
+                "source_kind": source_kind,
+                "mesh_surface_keys": mesh_surface_keys,
+                "source_texture_id": source_texture_id,
+                "source_uv_mask_id": source_uv_mask_id,
+                "uv_channel": uv_channel,
+            }
+        for detail_role in {"openings", "trim"} & set(source_role_inventory):
+            source_entry = source_role_inventory[detail_role]
+            if source_entry["source_kind"] == "source_texture_uv_mask":
+                continue
+            if any(
+                source_entry["mesh_surface_keys"] & other_entry["mesh_surface_keys"]
+                for other_role, other_entry in source_role_inventory.items()
+                if other_role != detail_role
+            ):
+                errors.append(
+                    f"visible building {building_id}/{detail_role} is not tied to source texture/UV or a dedicated surface"
+                )
+        if not {"facade", "roof"} <= set(source_role_inventory):
+            errors.append(f"visible building {building_id} source-role inventory lacks facade or roof")
+        if set(source_role_inventory) != profile["required_roles"]:
+            errors.append(
+                f"visible building {building_id} required roles do not exactly match source mesh/atlas roles"
+            )
+        resolved_source_role_inventory = resolved_building_source_roles.get(building_id)
+        if resolved_source_role_inventory is None:
+            errors.append(f"visible building {building_id} lacks exporter-owned source-role evidence")
+        elif source_role_inventory != resolved_source_role_inventory:
+            errors.append(
+                f"visible building {building_id} source-role inventory disagrees with exporter-owned scene metadata"
+            )
+        building_source_roles[building_id] = source_role_inventory
+        listed_area = 0.0
+        materialized_area = 0.0
+        roles: set[str] = set()
+        slots = array(item.get("visible_surface_slots"), f"visible building {building_id}.visible_surface_slots", nonempty=True)
+        slot_ids: set[str] = set()
+        claimed_surface_keys: dict[tuple[str, int], list[dict[str, Any]]] = {}
         for slot_index, raw_slot in enumerate(slots):
             slot = obj(raw_slot, f"visible building {building_id}.visible_surface_slots[{slot_index}]")
             slot_id = text(slot.get("id"), f"visible building {building_id} slot {slot_index}.id")
@@ -1633,6 +2271,41 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                     slot.get("shader_mask_id"),
                     f"visible building {building_id} slot {slot_id}.shader_mask_id",
                 )
+                shader_mask_source_kind = text(
+                    slot.get("shader_mask_source_kind"),
+                    f"visible building {building_id} slot {slot_id}.shader_mask_source_kind",
+                )
+                if shader_mask_source_kind not in {"source_texture_uv_mask", "resolved_geometry_mask"}:
+                    errors.append(
+                        f"visible building {building_id} slot {slot_id} has synthetic shader subregion provenance"
+                    )
+                if role in {"openings", "trim"} and shader_mask_source_kind != "source_texture_uv_mask":
+                    errors.append(
+                        f"visible building {building_id} slot {slot_id} does not bind {role} to source texture/UV"
+                    )
+                if shader_mask_source_kind == "source_texture_uv_mask":
+                    source_texture_id = text(
+                        slot.get("source_texture_id"),
+                        f"visible building {building_id} slot {slot_id}.source_texture_id",
+                    )
+                    source_uv_mask_id = text(
+                        slot.get("source_uv_mask_id"),
+                        f"visible building {building_id} slot {slot_id}.source_uv_mask_id",
+                    )
+                    uv_channel = integer(
+                        slot.get("uv_channel"),
+                        f"visible building {building_id} slot {slot_id}.uv_channel",
+                    )
+                    source_inventory = source_role_inventory.get(role)
+                    if source_inventory is None or (
+                        source_inventory["source_kind"] != "source_texture_uv_mask"
+                        or source_inventory["source_texture_id"] != source_texture_id
+                        or source_inventory["source_uv_mask_id"] != source_uv_mask_id
+                        or source_inventory["uv_channel"] != uv_channel
+                    ):
+                        errors.append(
+                            f"visible building {building_id} slot {slot_id} shader mask disagrees with source-role inventory"
+                        )
             surface_key = (mesh_instance_id, surface_index)
             claimed_surface_keys.setdefault(surface_key, []).append(
                 {"slot_id": slot_id, "subregion_id": subregion_id, "role_source_kind": role_source_kind}
@@ -1691,6 +2364,12 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             errors.append(f"visible building {building_id} lacks required visible roles: {', '.join(missing_roles)}")
     if len(buildings_seen) != expected_buildings:
         errors.append(f"visible building manifest has {len(buildings_seen)}; expected {expected_buildings}")
+    if set(resolved_building_source_roles) != buildings_seen:
+        errors.append(
+            "exporter-owned building source-role manifest does not exactly cover visible buildings; "
+            f"missing={','.join(sorted(buildings_seen - set(resolved_building_source_roles))) or 'none'} "
+            f"extra={','.join(sorted(set(resolved_building_source_roles) - buildings_seen)) or 'none'}"
+        )
     if road_detail_count != expected_road_details:
         errors.append(f"road-detail manifest has {road_detail_count}; expected {expected_road_details}")
 
@@ -1707,6 +2386,10 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     if required_rendered_buildings != buildings_seen:
         errors.append("rendered material evidence does not exactly cover every visible building")
     role_stats: dict[tuple[str, str], dict[str, Any]] = {}
+    building_pixel_stats: dict[str, dict[str, Any]] = {}
+    rendered_role_metrics: list[dict[str, Any]] = []
+    rendered_role_separation_metrics: list[dict[str, Any]] = []
+    rendered_building_metrics: list[dict[str, Any]] = []
     masked_surface_keys: dict[tuple[str, str], set[str]] = {}
     capture_count = 0
     mask_count = 0
@@ -1747,8 +2430,24 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 errors.append(f"rendered material mask {mask_id} references unknown building {building_id}")
             elif role not in style_profiles[building_profiles[building_id]]["required_roles"]:
                 errors.append(f"rendered material mask {mask_id} references undeclared role {role}")
-            if text(mask.get("source_kind"), f"rendered material mask {mask_id}.source_kind") != "resolved_surface_id_render_pass":
-                errors.append(f"rendered material mask {mask_id} lacks resolved surface-ID render provenance")
+            mask_source_kind = text(
+                mask.get("source_kind"), f"rendered material mask {mask_id}.source_kind"
+            )
+            if mask_source_kind not in {
+                "resolved_surface_id_render_pass",
+                "source_texture_uv_role_render_pass",
+            }:
+                errors.append(f"rendered material mask {mask_id} lacks resolved role-render provenance")
+            source_role = building_source_roles.get(building_id, {}).get(role)
+            if (
+                role in {"openings", "trim"}
+                and source_role is not None
+                and source_role["source_kind"] == "source_texture_uv_mask"
+                and mask_source_kind != "source_texture_uv_role_render_pass"
+            ):
+                errors.append(
+                    f"rendered material mask {mask_id} does not prove source texture/UV ownership for {role}"
+                )
             surface_keys = strings(
                 mask.get("surface_keys"), f"rendered material mask {mask_id}.surface_keys", nonempty=True
             )
@@ -1786,16 +2485,43 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             pixels = flattened_pixels(image)
             stats = role_stats.setdefault(
                 (building_id, role),
-                {"count": 0, "value": 0.0, "chroma": 0.0, "lab": [0.0, 0.0, 0.0]},
+                {
+                    "count": 0,
+                    "value": 0.0,
+                    "value_squared": 0.0,
+                    "chroma": 0.0,
+                    "chroma_squared": 0.0,
+                    "lab": [0.0, 0.0, 0.0],
+                    "color_bins": {},
+                },
             )
+            building_stats = building_pixel_stats.setdefault(
+                building_id,
+                {"count": 0, "value": 0.0, "value_squared": 0.0, "color_bins": {}},
+            )
+            role_bin_size = int(style_profiles[building_profiles[building_id]]["role_envelopes"][role]["dominant_color_bin_size"])
+            building_bin_size = int(style_profiles[building_profiles[building_id]]["building_color_bin_size"])
             for pixel_index in selected_indices:
                 pixel = pixels[pixel_index]
+                value = max(pixel) / 255.0
+                chroma = (max(pixel) - min(pixel)) / 255.0
                 stats["count"] += 1
-                stats["value"] += max(pixel) / 255.0
-                stats["chroma"] += (max(pixel) - min(pixel)) / 255.0
+                stats["value"] += value
+                stats["value_squared"] += value * value
+                stats["chroma"] += chroma
+                stats["chroma_squared"] += chroma * chroma
+                role_bin = tuple(channel // role_bin_size for channel in pixel)
+                stats["color_bins"][role_bin] = stats["color_bins"].get(role_bin, 0) + 1
                 lab = rgb_to_lab(pixel)
                 for component in range(3):
                     stats["lab"][component] += lab[component]
+                building_stats["count"] += 1
+                building_stats["value"] += value
+                building_stats["value_squared"] += value * value
+                building_bin = tuple(channel // building_bin_size for channel in pixel)
+                building_stats["color_bins"][building_bin] = (
+                    building_stats["color_bins"].get(building_bin, 0) + 1
+                )
             mask_count += 1
     for building_id in buildings_seen:
         profile = style_profiles[building_profiles[building_id]]
@@ -1814,7 +2540,22 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             count = stats["count"]
             mean_value = stats["value"] / count
             mean_chroma = stats["chroma"] / count
+            value_stddev = standard_deviation(stats["value"], stats["value_squared"], count)
+            chroma_stddev = standard_deviation(stats["chroma"], stats["chroma_squared"], count)
+            dominant_color_ratio = max(stats["color_bins"].values()) / count
             stats["mean_lab"] = tuple(component / count for component in stats["lab"])
+            rendered_role_metrics.append(
+                {
+                    "building_id": building_id,
+                    "role": role,
+                    "visible_pixels": count,
+                    "mean_value": mean_value,
+                    "mean_chroma": mean_chroma,
+                    "value_stddev": value_stddev,
+                    "chroma_stddev": chroma_stddev,
+                    "dominant_color_ratio": dominant_color_ratio,
+                }
+            )
             if count < envelope["minimum_visible_pixels"]:
                 errors.append(f"visible building {building_id}/{role} has too few rendered pixels")
             if not envelope["minimum_mean_value"] <= mean_value <= envelope["maximum_mean_value"]:
@@ -1825,16 +2566,67 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 errors.append(
                     f"visible building {building_id}/{role} rendered mean chroma {mean_chroma:.4f} is outside its profile envelope"
                 )
+            if value_stddev + 1e-12 < envelope["minimum_value_stddev"]:
+                errors.append(
+                    f"visible building {building_id}/{role} value variation is below its flood-fill threshold"
+                )
+            if chroma_stddev + 1e-12 < envelope["minimum_chroma_stddev"]:
+                errors.append(
+                    f"visible building {building_id}/{role} chroma variation is below its flood-fill threshold"
+                )
+            if dominant_color_ratio > envelope["maximum_dominant_color_ratio"] + 1e-12:
+                errors.append(
+                    f"visible building {building_id}/{role} dominant-color ratio {dominant_color_ratio:.4f} "
+                    "looks like a flat flood fill"
+                )
         for first_role, second_role, minimum_delta in profile["separations"]:
             first = role_stats.get((building_id, first_role))
             second = role_stats.get((building_id, second_role))
             if first is None or second is None or "mean_lab" not in first or "mean_lab" not in second:
                 continue
             measured_delta = delta_e(first["mean_lab"], second["mean_lab"])
+            rendered_role_separation_metrics.append(
+                {
+                    "building_id": building_id,
+                    "first_role": first_role,
+                    "second_role": second_role,
+                    "measured_delta_e": measured_delta,
+                    "minimum_delta_e": minimum_delta,
+                }
+            )
             if measured_delta + 1e-12 < minimum_delta:
                 errors.append(
                     f"visible building {building_id} rendered {first_role}/{second_role} separation "
                     f"DeltaE {measured_delta:.3f} is below {minimum_delta:.3f}"
+                )
+        building_stats = building_pixel_stats.get(building_id)
+        if building_stats is None or building_stats["count"] <= 0:
+            errors.append(f"visible building {building_id} lacks a complete rendered building mask")
+        else:
+            building_value_stddev = standard_deviation(
+                building_stats["value"],
+                building_stats["value_squared"],
+                building_stats["count"],
+            )
+            building_dominant_ratio = (
+                max(building_stats["color_bins"].values()) / building_stats["count"]
+            )
+            rendered_building_metrics.append(
+                {
+                    "building_id": building_id,
+                    "visible_pixels": building_stats["count"],
+                    "value_stddev": building_value_stddev,
+                    "dominant_color_ratio": building_dominant_ratio,
+                }
+            )
+            if building_value_stddev + 1e-12 < profile["minimum_building_value_stddev"]:
+                errors.append(
+                    f"visible building {building_id} whole-mask value variation is below its flood-fill threshold"
+                )
+            if building_dominant_ratio > profile["maximum_building_dominant_color_ratio"] + 1e-12:
+                errors.append(
+                    f"visible building {building_id} whole-mask dominant-color ratio "
+                    f"{building_dominant_ratio:.4f} looks monochrome"
                 )
 
     raster = obj(model.get("boundary_reachability"), "boundary_reachability")
@@ -2006,10 +2798,19 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         "street_furniture_class_counts": furniture_class_counts,
         "support_structure_class_counts": support_class_counts,
         "support_contact_count": len(support_contacts_seen),
+        "support_contact_measurements": support_contact_measurements,
+        "resolved_marking_mesh_chain_count": len(marking_chains),
         "lane_boundary_termination_count": len(termination_records),
+        "lane_boundary_termination_measurements": termination_measurements,
         "visible_building_count": len(buildings_seen),
+        "resolved_building_source_role_count": sum(
+            len(roles) for roles in resolved_building_source_roles.values()
+        ),
         "rendered_material_capture_count": capture_count,
         "rendered_material_mask_count": mask_count,
+        "rendered_role_metrics": rendered_role_metrics,
+        "rendered_role_separation_metrics": rendered_role_separation_metrics,
+        "rendered_building_metrics": rendered_building_metrics,
         "incident_closure_count": len(closures),
         "reachable_cell_count": len(reachable),
         "reachable_safety_contact_count": len(safety_contacts),

@@ -11,7 +11,7 @@ python <skill-dir>/scripts/streetscape_semantics_audit.py \
 
 This is a separate builder-owned blocking gate. Passing dependency provenance, collision, environment integrity, whole-map surface coverage, navigation, or a curated screenshot does not prove that roads behave and read as roads. The streetscape report must use the same `build_id`, resolved dependency-closure manifest, selected export preset and exporter hashes as the other candidate reports. Add the streetscape exporter to the provenance manifest toolchain inputs and link this contract through `resolved_scene_provenance_audit.py --evidence-contract`.
 
-Contract schema v3 is fail-closed. A v2 report is not sufficient evidence: re-export the exact resolved scene with the exporter-owned visible-mesh manifest, classify every entry, bind building roles to real mesh surface indices or shader masks, render surface-ID masks, enumerate lane-boundary terminations and measure support contacts. Do not relabel an old report as v3 or copy its synthetic slot percentages.
+Contract schema v4 is fail-closed. A v3 report is not sufficient evidence: re-export the exact resolved scene with exporter-owned marking mesh chains, typed termination geometry, source mesh/atlas role inventory, target-build source-role masks, and vertex-to-mesh mount contacts. Do not relabel an old report as v4 or carry forward adapter-declared marking distances, generic cap meshes, normal-only facade masks, or scalar mount gaps.
 
 ## Calibrate a project road profile, not a legal claim
 
@@ -38,9 +38,10 @@ Do not hand-type a simplified JSON that disagrees with the map. Copy/adapt `asse
 - an exporter-owned traversal of every visible `MeshInstance3D`/`MultiMeshInstance3D`, with exact node path, mesh resource, real surface count, effective material and material source for every surface; the adapter classifies this manifest but cannot omit entries;
 - full transformed support footprints for buildings, vehicles, wrecks, tanks/trucks, every street-furniture subclass, canopy/awning/support structures and visible boundary causes;
 - every camera-visible building mesh surface bound to its real mesh instance and surface index, or to a resolved shader-mask subregion when one surface intentionally contains several roles;
-- target-build gameplay-lighting frames plus resolved surface-ID masks for rendered facade/roof/trim pixel measurement;
-- every lane endpoint on a boundary node, its semantic termination, resolved continuation/cap/closure geometry and marking-stop budget;
-- every visible ground-, facade- or suspension-supported canopy/awning/support contact;
+- target-build gameplay-lighting frames plus one disjoint source-role/surface-ID mask for every facade, roof, opening/window and trim role actually present in the source mesh or atlas;
+- every visible marking mesh as a resolved chain of mesh-surface vertex segments associated with exact lanes;
+- every lane endpoint on a boundary node, its semantic termination, typed continuation/cap/closure footprint, top-surface classes and exporter-derived marking endpoint/continuation measurement;
+- every visible ground-, facade- or suspension-supported canopy/awning/support contact, including exact support vertices and mount-mesh triangle points for mounted/suspended structures;
 - resolved anchor/forward vectors and approach association for street furniture;
 - hero-radius occupancy cells, visible blocker cells and safety-only collision cells;
 - exact shipping-camera junction coverage and raw candidate state paths.
@@ -72,14 +73,14 @@ Every lane endpoint must resolve to a declared node and remain on a permitted tr
 
 ### Resolve every boundary road endpoint
 
-Every boundary-kind node incident to a lane needs exactly one `lane_boundary_termination` with `termination_kind`: `continued_offmap`, `turn`, `cul_de_sac`, or `physical_closure`. Bind it to all incident lanes, exact render-surface regions, resolved cap/continuation mesh IDs, marking-stop min/max and a raw shipping-camera close-up.
+Every boundary-kind node incident to a lane needs exactly one `lane_boundary_termination` with `termination_kind`: `continued_offmap`, `turn`, `cul_de_sac`, or `physical_closure`. Bind it to all incident lanes, exact render-surface regions, one exporter-owned `resolved_typed_termination_geometry` footprint/profile, exact resolved mesh IDs, actual marking mesh chains and a raw shipping-camera close-up.
 
-- `continued_offmap` samples the road surface beyond the boundary node for the declared continuation distance; a rectangle ending exactly at the node fails.
+- `continued_offmap` proves an `offmap_corridor`: travel surface, sidewalk, curb and applicable marking meshes all continue beyond the boundary by the declared distance. Preserve exporter-owned top-surface samples for every required class. A road rectangle ending exactly at the node, a sidewalk/curb that stops early, or a building whose full transformed footprint enters the continuation corridor fails.
 - `turn` names the resolved continuation lanes and must read as a turn in the close-up.
-- `cul_de_sac` provides authored turnaround/cap geometry rather than an exposed mesh edge.
-- `physical_closure` names visible cause objects whose footprints meet the endpoint; a building may terminate the street only when the lane does not enter its footprint and the facade/closure treatment explains the stop.
+- `cul_de_sac` provides a typed bulb/hammerhead turnaround with authored road top surface rather than an exposed mesh edge.
+- `physical_closure` uses a typed barrier/gate/debris/facade/terrain closure whose exact cap meshes belong to the visible cause objects. A common RoadNetwork mesh is not closure provenance. A full-width sidewalk/curb slab painted across a travel lane is not a road cap. A building may terminate the street only when the lane and continuation corridor do not enter its full footprint and the facade/closure treatment explains the stop.
 
-No boundary endpoint may lie inside a building footprint. Stop/divider/parking markings must end within the declared distance budget rather than running into a facade, dropping at an arbitrary cut, or continuing across closure art.
+No boundary endpoint or continued corridor may intersect a building footprint. Export each dashed/continuous marking mesh chain and its actual world-space segment endpoints. The auditor derives stop/continuation distance from those mesh vertices; an adapter-supplied `marking_stop_distance` is not evidence. Stop/divider/parking markings must end within the closure/turn budget or continue through an off-map corridor as appropriate, never run beneath a cap, into a facade, across closure art, or disappear at an arbitrary cut.
 
 Every crosswalk connects two known sidewalk nodes, belongs to the relevant junction/approaches, and lies on crossing/intersection render surfaces. A stripe texture floating across an unrelated curb or ending in a prop cluster fails. Stop lines are approach-specific, approximately perpendicular to travel, upstream of the crossing/junction, and supported by the project's traffic convention. Signals/signs point at the movement they control. Parking bays/dividers must not continue through junction or crosswalk space.
 
@@ -122,18 +123,21 @@ Include ordinary street lights, work lights, utility poles, hydrants, signals, s
 
 Opaque material assignment on each building node is not facade completeness. Export every camera-visible `MeshInstance3D` surface slot, its effective material, semantic role and approximate visible area. Godot's `MeshInstance3D.get_active_material(surface)` resolves node-wide override, surface override or mesh material; record which source supplied it. A node-wide `material_override` can make every slot non-null while erasing facade/roof/trim structure, so it does not pass by itself.
 
-Each building style profile declares:
+Each building first declares an exporter-owned source-role inventory. Put every contributing production `MeshInstance3D` in `streetscape_building_source_roles`; author `streetscape_building_object_id` and `streetscape_source_roles` metadata with the exact surface indices and, for atlas roles, source texture, UV channel and authored UV-mask IDs. The bundled exporter replaces the adapter's top-level `resolved_building_source_role_manifest` from those scene-owned records. The adapter's per-building inventory must match it exactly. The inventory identifies the roles actually present in the imported mesh/atlas—at minimum facade and roof, plus openings/windows and trim when the source contains them—and binds every role to either a dedicated mesh surface or a specific source texture, UV channel and authored UV mask. World-normal classification can separate facade from roof; it cannot prove windows or trim that originate in an albedo atlas.
+
+Each building style profile then declares:
 
 - required visible roles such as facade, roof and trim/openings;
 - forbidden/default/unpainted material IDs;
 - permitted zone, function, construction and story states;
 - minimum materialized visible-area ratio, normally 1.0 for final candidate surfaces;
 - raw gameplay-lighting frames that expose upper floors, side/rear faces and roofs visible from the shipping camera.
-- project-owned rendered value/chroma envelopes for each required role and positive perceptual-separation (`DeltaE`) budgets between the roles that must remain distinct at gameplay size.
+- project-owned rendered value/chroma envelopes, minimum within-role value/chroma variation, maximum dominant-color ratio and positive perceptual-separation (`DeltaE`) budgets. Facade-to-openings and facade-to-trim pairs are mandatory when those roles exist;
+- a whole-building mask value-variation and dominant-color budget that rejects flat flood fills even when separate solid colors technically satisfy role counts.
 
 Each visible-slot record must name the exporter-owned mesh instance, real `surface_index`, effective material ID/source, authored role provenance and area derivation. Several semantic roles may share one mesh surface only through distinct resolved shader-mask subregions with mask-derived areas. IDs such as `material_id--facade/--roof/--trim` and 70/20/10 percentages created by the evidence adapter fail when they do not map to real surfaces or masks. A node-wide `material_override` is recorded as such and cannot silently masquerade as separate surface materials.
 
-The sum of listed visible areas must account for the building's exported surfaces, but structural accounting is not the visual verdict. Render the exact target build under shipping `WorldEnvironment`, lights, fog and tone mapping, save the raw frame and one hashed surface-ID mask per building/role, and run the pixel audit inside `streetscape_semantics_audit.py`. It verifies mask/image hashes, surface-key ownership, non-overlap, visible-pixel minima, value/chroma envelopes and required role-to-role `DeltaE`. Missing upper floors, gray/default facades, an unpainted rear wall or collapsed facade/roof/trim separation therefore fails even if every material resource is non-null.
+The sum of listed visible areas must account for the building's exported surfaces, but structural accounting is not the visual verdict. Render the exact target build under shipping `WorldEnvironment`, lights, fog and tone mapping, save the raw frame and one hashed mask per required source role, and run the pixel audit inside `streetscape_semantics_audit.py`. It verifies mask/image hashes, source texture/UV or mesh-surface ownership, non-overlap, visible-pixel minima, value/chroma envelopes, within-role variation, dominant-color ratios and required role-to-role `DeltaE`. Facade+roof normal masks alone cannot certify a source atlas that visibly contains windows/doors/trim. Missing upper floors, gray/default faces, monochrome windows, a flood-filled wall or collapsed role separation therefore fails even if every material resource is non-null.
 
 ## Street-furniture placement and orientation
 
@@ -155,7 +159,7 @@ Classify every visible canopy, awning, shelter and structural support from the e
 - `facade_mounted`: exact mount mesh IDs and measured contact gap prove the attachment;
 - `suspended`: exact suspension/mount mesh IDs and measured contact prove the authored suspension.
 
-The measurement source must be resolved mesh vertices against render surfaces, not the object origin, a collision floor or a prose statement. Preserve a gameplay-lighting close-up. A post, awning or canopy floating above the sidewalk fails even if it has no semantic placement error.
+The measurement source must be resolved mesh vertices against render surfaces, not the object origin, a collision floor or a prose statement. For facade-mounted or suspended structures, name existing resolved mount meshes and preserve multiple support-vertex to mount-triangle point pairs; the auditor recomputes each 3D distance and the aggregate gap. An adapter constant such as `measured_mount_gap: 0` cannot pass without those points. Preserve a gameplay-lighting close-up. A post, awning or canopy floating above the sidewalk or facade fails even if it has no semantic placement error.
 
 ## Authored incident closures
 
@@ -196,9 +200,10 @@ Tile-survey the complete road/junction footprint with the shipping camera, final
 - crosswalks together with nearby drains, repairs, covers and other road details;
 - building-to-road/sidewalk setbacks;
 - upper/lower facade, roof and trim material completeness;
-- resolved-surface ID masks and measured rendered facade/roof/trim value, chroma and separation;
+- exporter-owned marking mesh endpoints and typed road termination geometry;
+- source-role masks and measured rendered facade/roof/openings/trim value, chroma, variation, dominant-color ratio and separation;
 - hydrants, signals, signs, poles and junction approaches;
-- every declared lane-boundary termination and every canopy/awning/support contact;
+- every declared lane-boundary termination and every resolved vertex-to-ground/mount canopy/awning/support contact;
 - incident closure or intentionally clear-route states;
 - visible-boundary cause plus raster overlay;
 - representative junction overview and the densest obstruction state.
@@ -221,7 +226,9 @@ Reject the candidate when any of these are true:
 - a hydrant, pole, signal or sign uses the wrong semantic surface, setback, approach or orientation;
 - the exporter-owned visible mesh inventory has an unclassified/omitted lamp, work light, utility pole or support subclass;
 - a boundary road endpoint has no resolved continuation/turn/cul-de-sac/physical closure, ends in a bare rectangular cut, runs markings into the edge, or lies inside a building footprint;
-- a visible awning/canopy/support lacks resolved ground/mount contact or exceeds the support-gap budget;
+- a termination cites a common road mesh as cap provenance, overlays a full-width sidewalk slab on the lane, lets actual marking mesh vertices continue beneath its cap, omits off-map sidewalk/curb/markings, or lets a building footprint enter the continued corridor;
+- source facade/roof/openings/trim roles are omitted, inferred only from world normals, lack texture/UV or mesh-surface provenance, collapse below their visible-pixel/DeltaE budgets, or trip the role/building flood-fill detector;
+- a visible awning/canopy/support lacks resolved ground/mount contact, names no real mount mesh/triangle, supplies only a scalar gap, or exceeds the support-gap budget;
 - a wreck/tanker/truck/sign blocks a junction or sidewalk without a topology-changing authored closure and alternate route;
 - the deterministic audit PASS is claimed without a complete shipping-camera road survey, or screenshots look plausible without a clean audit rerun.
 

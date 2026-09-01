@@ -844,17 +844,17 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] streetscape-semantics", completed.stdout)
 
-    def test_streetscape_semantics_v2_requires_resolved_evidence_migration(self) -> None:
+    def test_streetscape_semantics_v3_requires_geometry_and_role_evidence_migration(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
-        model["schema_version"] = 2
+        model["schema_version"] = 3
         with tempfile.TemporaryDirectory() as directory:
-            model_path = Path(directory) / "streetscape-v2.json"
+            model_path = Path(directory) / "streetscape-v3.json"
             model_path.write_text(json.dumps(model), encoding="utf-8")
             completed = run_script(
                 "streetscape_semantics_audit.py", "--model", str(model_path), "--summary"
             )
         self.assertEqual(completed.returncode, 2, completed.stdout)
-        self.assertIn("re-export resolved mesh inventory", completed.stdout)
+        self.assertIn("re-export marking mesh chains", completed.stdout)
 
     def test_streetscape_semantics_rejects_legacy_v2_candidate_before_semantic_claims(self) -> None:
         fixture = ROOT / "tests" / "fixtures" / "streetscape-semantics-old-clinic-negative.json"
@@ -875,7 +875,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
                 "--summary",
             )
         self.assertEqual(completed.returncode, 2, completed.stdout)
-        self.assertIn("schema_version must be 3", completed.stdout)
+        self.assertIn("schema_version must be 4", completed.stdout)
 
     def test_streetscape_v21_evidence_shaping_false_pass_is_rejected(self) -> None:
         fixture = json.loads(
@@ -913,14 +913,14 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         east_exit = next(item for item in model["road_graph"]["nodes"] if item["id"] == "east-exit")
         east_exit["position"] = [2.5, 9.1]
         support = model["support_contacts"][0]
-        support["lowest_visible_y"] = 0.8
+        support["measured_mount_gap"] = 0.8
         support["contact_samples"] = [
-            {"support_y": 0.8, "ground_y": 0.0, "gap": 0.8},
-            {"support_y": 0.8, "ground_y": 0.0, "gap": 0.8},
+            {"support_mesh_instance_id": "clinic-awning-support-mesh", "support_vertex_index": 12, "mount_mesh_instance_id": "clinic-building-mesh", "mount_surface_index": 0, "mount_triangle_index": 44, "support_point": [4.95, 2.0, 8.45], "mount_point": [4.15, 2.0, 8.45], "gap": 0.8},
+            {"support_mesh_instance_id": "clinic-awning-support-mesh", "support_vertex_index": 18, "mount_mesh_instance_id": "clinic-building-mesh", "mount_surface_index": 0, "mount_triangle_index": 51, "support_point": [4.95, 2.5, 8.45], "mount_point": [4.15, 2.5, 8.45], "gap": 0.8},
         ]
         rendered_capture = model["rendered_material_evidence"]["captures"][0]
         rendered_capture["raw_artifact"] = "assets/streetscape-rendered-material-example/gray-material.ppm"
-        rendered_capture["raw_sha256"] = "65675a6e4be7a52244486f806d4230d604f23392c71661116a4bb514bf1a412f"
+        rendered_capture["raw_sha256"] = "82487a3003fb330b13e95eb07fe015b33549ed8b981f4fd50487c06066ac8670"
 
         with tempfile.TemporaryDirectory() as directory:
             model_path = Path(directory) / "v21-shaped-pass.json"
@@ -946,7 +946,116 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("street-furniture class inventory is incomplete", errors)
         self.assertIn("bare cutoff", errors)
         self.assertIn("lies inside building footprint", errors)
-        self.assertIn("floats above its render support", errors)
+        self.assertIn("detached from its authored mount", errors)
+
+    def test_streetscape_v4_rejects_shaped_termination_flood_fill_and_synthetic_mount(self) -> None:
+        model = load_asset_json("streetscape-semantics-contract.template.json")
+
+        west = next(
+            item for item in model["lane_boundary_terminations"] if item["node_id"] == "west-entry"
+        )
+        west["termination_geometry"]["footprint"] = model["placed_objects"][0]["footprint"]
+
+        east = next(
+            item for item in model["lane_boundary_terminations"] if item["node_id"] == "east-exit"
+        )
+        east["termination_kind"] = "physical_closure"
+        east["visible_cause_object_ids"] = ["clinic-wall"]
+        east["minimum_marking_stop_distance"] = 0.0
+        east["maximum_marking_stop_distance"] = 0.5
+        east["termination_geometry"] = {
+            "source_kind": "resolved_typed_termination_geometry",
+            "profile_kind": "barrier_closure",
+            "mesh_instance_ids": ["road-east-mesh"],
+            "footprint": [[9.4, 4], [10.6, 4], [10.6, 6], [9.4, 6]],
+            "top_surface_classes": ["sidewalk_clear"],
+            "travel_lane_overlap_ratio": 1.0,
+        }
+
+        capture = model["rendered_material_evidence"]["captures"][0]
+        capture["raw_artifact"] = "assets/streetscape-rendered-material-example/gray-material.ppm"
+        capture["raw_sha256"] = "82487a3003fb330b13e95eb07fe015b33549ed8b981f4fd50487c06066ac8670"
+        for envelope in model["building_style_profiles"][0]["rendered_role_envelopes"]:
+            envelope["minimum_mean_value"] = 0.4
+            envelope["maximum_mean_value"] = 0.6
+            envelope["minimum_mean_chroma"] = 0.0
+            envelope["maximum_mean_chroma"] = 0.1
+
+        support = model["support_contacts"][0]
+        support["measured_mount_gap"] = 0.0
+        for sample in support["contact_samples"]:
+            sample["mount_point"][0] = sample["support_point"][0] - 0.1
+            sample["gap"] = 0.0
+
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "v22-shaped-pass.json"
+            report_path = Path(directory) / "v22-shaped-pass-report.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "streetscape_semantics_audit.py",
+                "--model",
+                str(model_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            self.assertTrue(report_path.is_file(), completed.stdout)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        errors = "\n".join(report["errors"])
+        self.assertIn("continuation west-entry intersects building footprint", errors)
+        self.assertIn("uses common/non-cause geometry as its physical cap", errors)
+        self.assertIn("uses pedestrian slab geometry as a road closure", errors)
+        self.assertIn("marking mesh east-centerline-resolved continues through its cap", errors)
+        self.assertIn("value variation is below its flood-fill threshold", errors)
+        self.assertIn("whole-mask value variation is below its flood-fill threshold", errors)
+        self.assertIn("mount gap is not vertex-derived", errors)
+
+    def test_streetscape_v4_rejects_adapter_omission_of_exported_source_role(self) -> None:
+        model = load_asset_json("streetscape-semantics-contract.template.json")
+        profile = model["building_style_profiles"][0]
+        profile["required_visible_roles"].remove("openings")
+        profile["rendered_role_envelopes"] = [
+            item for item in profile["rendered_role_envelopes"] if item["role"] != "openings"
+        ]
+        profile["rendered_role_separation"] = [
+            item
+            for item in profile["rendered_role_separation"]
+            if "openings" not in {item["first_role"], item["second_role"]}
+        ]
+        building = model["visible_buildings"][0]
+        building["source_role_inventory"] = [
+            item for item in building["source_role_inventory"] if item["role"] != "openings"
+        ]
+        building["visible_surface_slots"] = [
+            item for item in building["visible_surface_slots"] if item["role"] != "openings"
+        ]
+        next(
+            item for item in building["visible_surface_slots"] if item["role"] == "facade"
+        )["visible_area"] = 65.0
+        capture = model["rendered_material_evidence"]["captures"][0]
+        capture["role_masks"] = [
+            item for item in capture["role_masks"] if item["role"] != "openings"
+        ]
+
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "source-role-omission.json"
+            report_path = Path(directory) / "source-role-omission-report.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "streetscape_semantics_audit.py",
+                "--model",
+                str(model_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn(
+            "source-role inventory disagrees with exporter-owned scene metadata",
+            "\n".join(report["errors"]),
+        )
 
     def test_old_clinic_v20_junction_and_crosswalk_gaps_fail_while_v21_passes(self) -> None:
         regression = json.loads(

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "fixture_id": "old-clinic-v22-road-facade-contact-false-pass",
+  "prior_claimed_result": {
+    "schema": 3,
+    "status": "pass",
+    "streetscape_errors": 0,
+    "environment_integrity": "pass",
+    "environment_coverage": "pass",
+    "visible_first_boundary": "pass"
+  },
+  "false_pass_inputs": [
+    "adapter-declared marking_stop_distance without resolved marking mesh endpoints",
+    "common RoadNetwork mesh named as physical cap",
+    "full-width sidewalk slab over the travel lane",
+    "continued-offmap corridor without road sidewalk curb and marking continuation",
+    "building full footprint intersecting an apparent continuation",
+    "adapter inventory plus facade and roof world-normal masks that omit exporter-resolved source openings and trim",
+    "flat facade tint with no role or whole-building variation budget",
+    "scalar measured_mount_gap without support-vertex to mount-triangle samples"
+  ],
+  "expected_schema_v4_failures": [
+    "resolved marking mesh stop/continuation",
+    "typed cause-owned termination geometry",
+    "off-map corridor class completeness and building-footprint exclusion",
+    "exporter-owned source mesh/atlas role inventory parity and role masks",
+    "role/building flood-fill thresholds",
+    "resolved vertex-to-mount contact"
+  ],
+  "expected_gate": "high_angle_streetscape_semantics_evidence"
+}

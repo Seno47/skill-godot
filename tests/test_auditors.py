@@ -2118,7 +2118,7 @@ class AuditorSmokeTests(unittest.TestCase):
             gate["validation_failures"],
         )
 
-    def test_eval_high_angle_streetscape_fails_closed_without_facade_boundary_and_junction_states(self) -> None:
+    def test_eval_high_angle_streetscape_fails_closed_without_v4_geometry_role_and_contact_states(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "high-angle-3d-district-complete"
         source["gates"]["high_angle_3d_district_composition_evidence"] = {
@@ -2144,6 +2144,10 @@ class AuditorSmokeTests(unittest.TestCase):
         gate_evidence = source["gates"]["high_angle_streetscape_semantics_evidence"]
         removed = {
             "facade_material_completeness",
+            "source_role_material_separation",
+            "marking_mesh_endpoint_provenance",
+            "typed_road_termination_geometry",
+            "resolved_mount_vertex_contact",
             "visible_boundary_reachability",
             "shipping_camera_road_junction_survey",
         }

@@ -316,8 +316,8 @@
       "evidence": ["fixture: same-closure zero-error road/junction/facade/furniture/boundary audit plus complete target-build junction survey"],
       "reviewer": {"role": "builder", "context": "fixture builder streetscape-semantics review"},
       "artifacts": [
-        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "streetscape_semantics_contract", "road_graph_and_markings", "lane_endpoint_terminations", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness"]},
-        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["streetscape_semantics_audit", "facade_material_completeness", "rendered_facade_material_evidence", "street_furniture_placement", "support_structure_contacts", "incident_closure_or_clear_route"]},
+        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "streetscape_semantics_contract", "road_graph_and_markings", "marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["streetscape_semantics_audit", "facade_material_completeness", "source_role_material_separation", "rendered_facade_material_evidence", "street_furniture_placement", "support_structure_contacts", "resolved_mount_vertex_contact", "incident_closure_or_clear_route"]},
         {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_boundary_reachability", "shipping_camera_road_junction_survey", "detected_class_resolution_or_clean_baseline"]},
         {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["road_graph_and_markings", "junction_sidewalk_curb_continuity"]},
         {"path": "evidence-artifacts/normal.png", "kind": "image", "states": ["building_road_setback", "crosswalk_road_detail_priority"]},
@@ -327,10 +327,10 @@
         {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_boundary_reachability"]},
         {"path": "evidence-artifacts/menu-interaction.png", "kind": "image", "states": ["shipping_camera_road_junction_survey", "streetscape_semantics_overview"]},
         {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["detected_class_resolution_or_clean_baseline"]},
-        {"path": "evidence-artifacts/material-same-zone.png", "kind": "image", "states": ["rendered_facade_material_evidence"]},
+        {"path": "evidence-artifacts/material-same-zone.png", "kind": "image", "states": ["source_role_material_separation", "rendered_facade_material_evidence"]},
         {"path": "evidence-artifacts/material-cross-zone.png", "kind": "image", "states": ["visible_mesh_inventory_completeness"]},
-        {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["lane_endpoint_terminations"]},
-        {"path": "evidence-artifacts/support-contact.png", "kind": "image", "states": ["support_structure_contacts"]}
+        {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry"]},
+        {"path": "evidence-artifacts/support-contact.png", "kind": "image", "states": ["support_structure_contacts", "resolved_mount_vertex_contact"]}
       ]
     },
     "high_angle_visible_first_boundary_evidence": {

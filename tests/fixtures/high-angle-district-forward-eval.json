@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "skill_commit": "post-old-clinic-v21-resolved-streetscape-evidence-contracts",
+  "skill_commit": "post-old-clinic-v22-road-termination-source-role-contracts",
   "required_contracts": [
     "high-angle-district-composition",
     "high-angle-architectural-material-direction",
@@ -9,7 +9,7 @@
     "high-angle-environment-coverage",
     "resolved-scene-dependency-provenance",
     "high-angle-road-streetscape-semantics",
-    "streetscape-resolved-evidence-v3",
+    "streetscape-resolved-evidence-v4",
     "junction-sidewalk-curb-continuity",
     "crosswalk-road-detail-priority",
     "strict-visible-contact-plausibility",
@@ -23,7 +23,7 @@
       "brief_path": "fixtures/brief-high-angle-evacuation-district.md",
       "godot_version": "4.x",
       "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
-      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera", "high-angle-environment-integrity", "high-angle-environment-coverage", "resolved-scene-dependency-provenance", "high-angle-road-streetscape-semantics", "streetscape-resolved-evidence-v3", "junction-sidewalk-curb-continuity", "crosswalk-road-detail-priority", "strict-visible-contact-plausibility", "whole-perimeter-visible-first", "ai-repeated-recovery", "shipping-package-hygiene"],
+      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera", "high-angle-environment-integrity", "high-angle-environment-coverage", "resolved-scene-dependency-provenance", "high-angle-road-streetscape-semantics", "streetscape-resolved-evidence-v4", "junction-sidewalk-curb-continuity", "crosswalk-road-detail-priority", "strict-visible-contact-plausibility", "whole-perimeter-visible-first", "ai-repeated-recovery", "shipping-package-hygiene"],
       "builder_context": "isolated builder with the district modifier, final camera and exact target-build capture packet",
       "reviewer_context": "separate raw-artifact reviewer who receives no intended landmark or prop mapping before first read",
       "first_pass_verdict": "pass",
@@ -59,9 +59,9 @@
       "brief_path": "fixtures/streetscape-v21-evidence-shaping-negative.json",
       "godot_version": "4.x",
       "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
-      "contracts": ["high-angle-road-streetscape-semantics", "streetscape-resolved-evidence-v3"],
+      "contracts": ["high-angle-road-streetscape-semantics", "streetscape-resolved-evidence-v4"],
       "builder_context": "builder whose schema-v2 adapter reports 79 buildings 105 objects six junctions and zero errors by synthesizing facade roles and omitting inconvenient visible classes",
-      "reviewer_context": "fail-closed schema-v3 audit over exporter-owned visible mesh traversal, resolved material surfaces, target-build surface-ID masks, complete class inventory, lane endpoints and support contacts",
+      "reviewer_context": "fail-closed schema-v4 audit over exporter-owned visible meshes, marking chains, typed terminations, source-role material masks, complete class inventory and vertex-resolved support contacts",
       "first_pass_verdict": "fail",
       "positive_fixture": false,
       "negative_fixture": true,
@@ -83,6 +83,36 @@
       "token_cost": 520,
       "elapsed_minutes": 7,
       "result_artifacts": ["reports/streetscape-semantics-audit-map008-v21.json", "reports/raw/streetscape/resolved-mesh-inventory.json", "reports/raw/streetscape/rendered-surface-id-masks", "reports/raw/streetscape/road-endpoint-closeups.png", "reports/raw/streetscape/support-contact-closeups.png"]
+    },
+    {
+      "id": "old-clinic-v22-adapter-shaped-road-cap-facade-and-mount-negative",
+      "brief_path": "fixtures/streetscape-v22-road-facade-contact-negative.json",
+      "godot_version": "4.x",
+      "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
+      "contracts": ["high-angle-road-streetscape-semantics", "streetscape-resolved-evidence-v4"],
+      "builder_context": "builder whose schema-v3 report passes seven declared road terminations, facade/roof masks and scalar mount gaps even though the user-visible target build contradicts them",
+      "reviewer_context": "fail-closed schema-v4 audit over resolved marking mesh endpoints, typed cause-owned termination geometry, source mesh/atlas roles, target-build role pixels and vertex-to-mount contact",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "adapter claims a 0.6 marking stop while the resolved dashed centre marking continues beneath a full-width sidewalk slab",
+        "a physical closure cites a common RoadNetwork mesh instead of typed cause-owned cap geometry",
+        "a continued-offmap road omits sidewalk curb or marking continuation and its corridor intersects a building footprint",
+        "facade and roof normal masks omit source windows openings and trim while a flat tint flood-fills the building",
+        "a floating awning passes from an adapter constant gap without resolved mount mesh triangle contact"
+      ],
+      "expected_gate_for_each_defect": {
+        "adapter claims a 0.6 marking stop while the resolved dashed centre marking continues beneath a full-width sidewalk slab": "high_angle_streetscape_semantics_evidence",
+        "a physical closure cites a common RoadNetwork mesh instead of typed cause-owned cap geometry": "high_angle_streetscape_semantics_evidence",
+        "a continued-offmap road omits sidewalk curb or marking continuation and its corridor intersects a building footprint": "high_angle_streetscape_semantics_evidence",
+        "facade and roof normal masks omit source windows openings and trim while a flat tint flood-fills the building": "high_angle_streetscape_semantics_evidence",
+        "a floating awning passes from an adapter constant gap without resolved mount mesh triangle contact": "high_angle_streetscape_semantics_evidence"
+      },
+      "false_positive_burden": "only boundary road terminations, visible building source roles and support mounts add evidence; profile thresholds remain project-scaled, while exporter-owned geometry/pixels replace adapter assertions",
+      "token_cost": 610,
+      "elapsed_minutes": 8,
+      "result_artifacts": ["reports/streetscape-semantics-audit-map008-v22.json", "reports/raw/streetscape/resolved-marking-chains.json", "reports/raw/streetscape/typed-termination-closeups.png", "reports/raw/streetscape/source-role-masks", "reports/raw/streetscape/mount-contact-closeups.png"]
     },
     {
       "id": "old-clinic-v20-junction-gap-drain-and-contact-exemption-negative",

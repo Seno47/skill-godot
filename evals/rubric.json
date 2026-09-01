@@ -883,7 +883,7 @@
     {
       "id": "high_angle_streetscape_semantics_evidence",
       "cases": ["high-angle-3d-district-complete"],
-      "description": "Builder-owned schema-v3 exact resolved-scene road/streetscape contract and raw target-build survey prove that geometry which passes provenance, collision, environment integrity and coverage also forms a coherent street system. The exporter, not the adapter, traverses every visible mesh; classifications and declared subclass counts must cover it exactly. Building roles bind to real mesh surface indices/material sources or resolved shader-mask subregions, and hashed target-build surface-ID masks prove gameplay-lighting pixel count, value/chroma envelopes and required DeltaE separation. The audit also checks lane/junction/legal-movement/approach topology; every boundary-lane continuation/turn/cul-de-sac/physical closure with resolved cap/cause geometry and marking-stop budget; continuous dividers, stop-line order, sidewalk-connected crosswalks and parking exclusions; center-and-edge sidewalk bands; full forbidden-surface footprints; crosswalk priority; complete lamp/worklight/pole/furniture subclasses; measured ground/mount contact for every visible canopy/awning/support; incident closures; and visible-boundary reachability. A deterministic shipping-camera survey covers every junction/approach, lane endpoint, material state, furniture/support contact, closure and boundary state, with before/fixed/clean-rerun artifacts for detected classes. Adapter-invented role IDs or percentage areas, resource-only palette probes, omitted visible subclasses, bare road cuts, endpoints inside facades, floating supports, root/material counts, origin legality, broad surface classes, 100% node overrides, navigation/collision PASS or zero pockets do not pass.",
+      "description": "Builder-owned schema-v4 exact resolved-scene road/streetscape contract and raw target-build survey prove that geometry which passes provenance, collision, environment integrity and coverage also forms a coherent street system. The exporter, not the adapter, traverses every visible mesh and injects the scene-authored building source-role manifest; classifications, source roles and declared subclass counts must cover the candidate exactly. Resolved marking mesh chains provide actual endpoint/continuation measurements. Every boundary road uses typed termination geometry: an off-map corridor continues road, sidewalk, curb and markings beyond the boundary without entering building footprints; a turn/cul-de-sac/physical closure uses plausible cause-owned geometry rather than a common road mesh or pedestrian slab over a lane. Building roles exactly match the exporter-owned source mesh/atlas inventory and bind facade, roof, present openings/windows and trim to real surfaces or source texture/UV masks. Hashed target-build role masks prove pixel minima, value/chroma envelopes, within-role variation, dominant-color/flood-fill budgets and required facade-to-opening/trim DeltaE separation. The audit also checks lane/junction/legal-movement/approach topology; continuous dividers, stop-line order, sidewalk-connected crosswalks and parking exclusions; center-and-edge sidewalk bands; full forbidden-surface footprints; crosswalk priority; complete lamp/worklight/pole/furniture subclasses; resolved support-vertex to ground or mount-mesh triangle contact for every canopy/awning/support; incident closures; and visible-boundary reachability. A deterministic shipping-camera survey covers every junction/approach, lane endpoint, material/source-role state, furniture/support contact, closure and boundary state, with before/fixed/clean-rerun artifacts for detected classes. Adapter-invented role IDs, percentages, marking distances or scalar mount gaps; facade/roof-only normal masks that omit source openings/trim; flat flood fills; common-mesh caps; sidewalk slabs across lanes; omitted visible subclasses; bare road cuts; buildings in continuation corridors; floating supports; root/material counts; origin legality; broad surface classes; 100% node overrides; navigation/collision PASS or zero pockets do not pass.",
       "artifact_requirements": {
         "minimum_by_kind": {"report": 3, "image": 12},
         "required_states": {
@@ -891,15 +891,19 @@
           "streetscape_semantics_contract": ["report"],
           "streetscape_semantics_audit": ["report"],
           "road_graph_and_markings": ["report", "image"],
+          "marking_mesh_endpoint_provenance": ["report", "image"],
           "lane_endpoint_terminations": ["report", "image"],
+          "typed_road_termination_geometry": ["report", "image"],
           "junction_sidewalk_curb_continuity": ["report", "image"],
           "crosswalk_road_detail_priority": ["report", "image"],
           "building_road_setback": ["report", "image"],
           "visible_mesh_inventory_completeness": ["report", "image"],
           "facade_material_completeness": ["report", "image"],
+          "source_role_material_separation": ["report", "image"],
           "rendered_facade_material_evidence": ["report", "image"],
           "street_furniture_placement": ["report", "image"],
           "support_structure_contacts": ["report", "image"],
+          "resolved_mount_vertex_contact": ["report", "image"],
           "incident_closure_or_clear_route": ["report", "image"],
           "visible_boundary_reachability": ["report", "image"],
           "shipping_camera_road_junction_survey": ["report", "image"],

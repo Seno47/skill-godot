@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "contract_id": "example-high-angle-streetscape-semantics",
   "build_id": "replace-with-exact-target-build-id",
   "scene_provenance": {
@@ -18,9 +18,9 @@
     "junction_continuity_query": "group:junction_sidewalk_continuity",
     "road_detail_query": "group:visible_road_detail",
     "visible_mesh_inventory_query": "exporter-owned traversal of every visible MeshInstance3D/MultiMeshInstance3D before adapter classification",
-    "rendered_material_query": "target-build shipping-camera raw frame plus resolved surface-ID masks",
-    "road_endpoint_query": "every boundary-kind node incident to a resolved lane",
-    "support_contact_query": "every visible canopy/awning/support mesh classified from the resolved mesh traversal"
+    "rendered_material_query": "target-build raw frame plus exporter-owned source-role inventory and surface/UV role masks",
+    "road_endpoint_query": "every boundary lane plus resolved marking mesh chains and typed termination geometry",
+    "support_contact_query": "every support plus resolved support vertices, mount mesh triangles, and measured contact points"
   },
   "contract": {
     "coordinate_system": "godot_xz_y_up",
@@ -33,12 +33,13 @@
     "expected_junction_count": 1,
     "expected_approach_count": 1,
     "expected_road_detail_count": 1,
-    "expected_visible_mesh_instance_count": 10,
-    "expected_visible_mesh_scope_counts": {"building": 1, "street_furniture": 3, "support_structure": 1, "road_surface": 2, "boundary_structure": 1, "other": 2},
+    "expected_visible_mesh_instance_count": 15,
+    "expected_visible_mesh_scope_counts": {"building": 1, "street_furniture": 3, "support_structure": 1, "road_surface": 7, "boundary_structure": 1, "other": 2},
     "expected_street_furniture_class_counts": {"hydrant": 1, "traffic_signal": 1, "street_light": 1},
     "expected_support_structure_class_counts": {"awning_support": 1},
     "expected_support_contact_count": 1,
     "expected_lane_boundary_termination_count": 2,
+    "expected_marking_mesh_chain_count": 2,
     "minimum_support_contact_samples": 2,
     "maximum_support_contact_gap": 0.03
   },
@@ -47,9 +48,9 @@
     {"id": "junction-center", "class": "intersection", "polygon": [[4.5, 4], [5.5, 4], [5.5, 6], [4.5, 6]]},
     {"id": "lane-east", "class": "travel_lane", "polygon": [[5.5, 4], [11, 4], [11, 6], [5.5, 6]]},
     {"id": "crosswalk-main", "class": "crosswalk", "polygon": [[4.6, 4], [5.4, 4], [5.4, 6], [4.6, 6]]},
-    {"id": "sidewalk-south", "class": "sidewalk_clear", "polygon": [[0, 2.5], [10, 2.5], [10, 4], [0, 4]]},
-    {"id": "sidewalk-north", "class": "sidewalk_clear", "polygon": [[0, 6], [10, 6], [10, 7], [0, 7]]},
-    {"id": "curb-north", "class": "curb", "polygon": [[0, 6], [10, 6], [10, 6.25], [0, 6.25]]},
+    {"id": "sidewalk-south", "class": "sidewalk_clear", "polygon": [[-1, 2.5], [11, 2.5], [11, 4], [-1, 4]]},
+    {"id": "sidewalk-north", "class": "sidewalk_clear", "polygon": [[-1, 6], [11, 6], [11, 7], [-1, 7]]},
+    {"id": "curb-north", "class": "curb", "polygon": [[-1, 6], [11, 6], [11, 6.25], [-1, 6.25]]},
     {"id": "furnishing-north", "class": "furnishing_zone", "polygon": [[0, 7], [10, 7], [10, 8], [0, 8]]},
     {"id": "frontage-north", "class": "frontage", "polygon": [[0, 8], [10, 8], [10, 10], [0, 10]]},
     {"id": "terrain-south", "class": "terrain", "polygon": [[0, 0], [10, 0], [10, 2.5], [0, 2.5]]}
@@ -142,7 +143,12 @@
     {"id": "clinic-wall-mesh", "node_path": "World/Boundary/ClinicWall/Mesh", "mesh_resource_id": "res://assets/buildings/wall.glb::mesh", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "wall-brick", "material_source_kind": "mesh_surface_material"}]},
     {"id": "storm-drain-east-mesh", "node_path": "World/Streets/StormDrainEast/Mesh", "mesh_resource_id": "res://assets/streets/drain.glb::mesh", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "drain-metal", "material_source_kind": "mesh_surface_material"}]},
     {"id": "road-west-mesh", "node_path": "World/Roads/West/Mesh", "mesh_resource_id": "res://assets/roads/west.tres", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "road-asphalt", "material_source_kind": "mesh_surface_material"}]},
-    {"id": "road-east-mesh", "node_path": "World/Roads/East/Mesh", "mesh_resource_id": "res://assets/roads/east.tres", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "road-asphalt", "material_source_kind": "mesh_surface_material"}]}
+    {"id": "road-east-mesh", "node_path": "World/Roads/East/Mesh", "mesh_resource_id": "res://assets/roads/east.tres", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "road-asphalt", "material_source_kind": "mesh_surface_material"}]},
+    {"id": "marking-west-mesh", "node_path": "World/Roads/Markings/WestCenterline", "mesh_resource_id": "res://assets/roads/marking-west.tres", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "road-marking", "material_source_kind": "mesh_surface_material"}]},
+    {"id": "marking-east-mesh", "node_path": "World/Roads/Markings/EastCenterline", "mesh_resource_id": "res://assets/roads/marking-east.tres", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "road-marking", "material_source_kind": "mesh_surface_material"}]},
+    {"id": "sidewalk-south-mesh", "node_path": "World/Roads/SidewalkSouth", "mesh_resource_id": "res://assets/roads/sidewalk-south.tres", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "sidewalk-concrete", "material_source_kind": "mesh_surface_material"}]},
+    {"id": "sidewalk-north-mesh", "node_path": "World/Roads/SidewalkNorth", "mesh_resource_id": "res://assets/roads/sidewalk-north.tres", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "sidewalk-concrete", "material_source_kind": "mesh_surface_material"}]},
+    {"id": "curb-north-mesh", "node_path": "World/Roads/CurbNorth", "mesh_resource_id": "res://assets/roads/curb-north.tres", "surface_count": 1, "surfaces": [{"surface_index": 0, "effective_material_id": "curb-concrete", "material_source_kind": "mesh_surface_material"}]}
   ],
   "visible_mesh_classifications": [
     {"mesh_instance_id": "clinic-building-mesh", "semantic_scope": "building", "semantic_class": "building", "object_id": "clinic-building", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#clinic-building"},
@@ -154,32 +160,62 @@
     {"mesh_instance_id": "clinic-wall-mesh", "semantic_scope": "boundary_structure", "semantic_class": "boundary_structure", "object_id": "clinic-wall", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#clinic-wall"},
     {"mesh_instance_id": "storm-drain-east-mesh", "semantic_scope": "other", "semantic_class": "storm_drain", "object_id": "storm-drain-east", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#storm-drain-east", "exclusion_reason": "road-detail placement remains covered by its dedicated profile"},
     {"mesh_instance_id": "road-west-mesh", "semantic_scope": "road_surface", "semantic_class": "road_surface", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#road-west"},
-    {"mesh_instance_id": "road-east-mesh", "semantic_scope": "road_surface", "semantic_class": "road_surface", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#road-east"}
+    {"mesh_instance_id": "road-east-mesh", "semantic_scope": "road_surface", "semantic_class": "road_surface", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#road-east"},
+    {"mesh_instance_id": "marking-west-mesh", "semantic_scope": "road_surface", "semantic_class": "road_marking", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#marking-west"},
+    {"mesh_instance_id": "marking-east-mesh", "semantic_scope": "road_surface", "semantic_class": "road_marking", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#marking-east"},
+    {"mesh_instance_id": "sidewalk-south-mesh", "semantic_scope": "road_surface", "semantic_class": "sidewalk_surface", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#sidewalk-south"},
+    {"mesh_instance_id": "sidewalk-north-mesh", "semantic_scope": "road_surface", "semantic_class": "sidewalk_surface", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#sidewalk-north"},
+    {"mesh_instance_id": "curb-north-mesh", "semantic_scope": "road_surface", "semantic_class": "curb_surface", "classification_source_kind": "production_resource_registry", "classification_source_id": "res://data/streetscape_semantics.tres#curb-north"}
+  ],
+  "resolved_marking_mesh_chains": [
+    {"id": "west-centerline-resolved", "source_kind": "resolved_marking_mesh_chain", "marking_class": "lane_divider", "lane_ids": ["west-in"], "mesh_instance_ids": ["marking-west-mesh"], "segments": [{"mesh_instance_id": "marking-west-mesh", "surface_index": 0, "measurement_source_kind": "resolved_mesh_vertices", "start_vertex_index": 0, "end_vertex_index": 3, "start": [-0.8, 5], "end": [4, 5]}]},
+    {"id": "east-centerline-resolved", "source_kind": "resolved_marking_mesh_chain", "marking_class": "lane_divider", "lane_ids": ["east-out"], "mesh_instance_ids": ["marking-east-mesh"], "segments": [{"mesh_instance_id": "marking-east-mesh", "surface_index": 0, "measurement_source_kind": "resolved_mesh_vertices", "start_vertex_index": 0, "end_vertex_index": 3, "start": [6, 5], "end": [10.8, 5]}]}
   ],
   "lane_boundary_terminations": [
-    {"node_id": "west-entry", "lane_ids": ["west-in"], "termination_kind": "continued_offmap", "surface_region_ids": ["lane-west"], "cap_mesh_instance_ids": ["road-west-mesh"], "visible_cause_object_ids": [], "outward_direction": [-1, 0], "minimum_surface_continuation": 0.8, "minimum_marking_stop_distance": 0.0, "maximum_marking_stop_distance": 0.5, "marking_stop_distance": 0.25, "raw_artifact": "reports/raw/streetscape/west-road-continuation.png"},
-    {"node_id": "east-exit", "lane_ids": ["east-out"], "termination_kind": "continued_offmap", "surface_region_ids": ["lane-east"], "cap_mesh_instance_ids": ["road-east-mesh"], "visible_cause_object_ids": [], "outward_direction": [1, 0], "minimum_surface_continuation": 0.8, "minimum_marking_stop_distance": 0.0, "maximum_marking_stop_distance": 0.5, "marking_stop_distance": 0.25, "raw_artifact": "reports/raw/streetscape/east-road-continuation.png"}
+    {"node_id": "west-entry", "lane_ids": ["west-in"], "termination_kind": "continued_offmap", "surface_region_ids": ["lane-west", "sidewalk-south", "sidewalk-north", "curb-north"], "visible_cause_object_ids": [], "outward_direction": [-1, 0], "minimum_surface_continuation": 0.8, "required_continuation_surface_classes": ["travel_lane", "sidewalk_clear", "curb"], "continuation_surface_samples": [{"source_kind": "resolved_render_surface_sample", "surface_class": "travel_lane", "mesh_instance_id": "road-west-mesh", "point": [-0.8, 5]}, {"source_kind": "resolved_render_surface_sample", "surface_class": "sidewalk_clear", "mesh_instance_id": "sidewalk-south-mesh", "point": [-0.8, 3]}, {"source_kind": "resolved_render_surface_sample", "surface_class": "curb", "mesh_instance_id": "curb-north-mesh", "point": [-0.8, 6.1]}], "marking_chain_ids": ["west-centerline-resolved"], "minimum_marking_continuation": 0.75, "termination_geometry": {"source_kind": "resolved_typed_termination_geometry", "profile_kind": "offmap_corridor", "mesh_instance_ids": ["road-west-mesh", "marking-west-mesh", "sidewalk-south-mesh", "sidewalk-north-mesh", "curb-north-mesh"], "footprint": [[-1, 2.5], [0, 2.5], [0, 7], [-1, 7]], "top_surface_classes": ["travel_lane", "sidewalk_clear", "curb"], "travel_lane_overlap_ratio": 1.0}, "raw_artifact": "reports/raw/streetscape/west-road-continuation.png"},
+    {"node_id": "east-exit", "lane_ids": ["east-out"], "termination_kind": "continued_offmap", "surface_region_ids": ["lane-east", "sidewalk-south", "sidewalk-north", "curb-north"], "visible_cause_object_ids": [], "outward_direction": [1, 0], "minimum_surface_continuation": 0.8, "required_continuation_surface_classes": ["travel_lane", "sidewalk_clear", "curb"], "continuation_surface_samples": [{"source_kind": "resolved_render_surface_sample", "surface_class": "travel_lane", "mesh_instance_id": "road-east-mesh", "point": [10.8, 5]}, {"source_kind": "resolved_render_surface_sample", "surface_class": "sidewalk_clear", "mesh_instance_id": "sidewalk-south-mesh", "point": [10.8, 3]}, {"source_kind": "resolved_render_surface_sample", "surface_class": "curb", "mesh_instance_id": "curb-north-mesh", "point": [10.8, 6.1]}], "marking_chain_ids": ["east-centerline-resolved"], "minimum_marking_continuation": 0.75, "termination_geometry": {"source_kind": "resolved_typed_termination_geometry", "profile_kind": "offmap_corridor", "mesh_instance_ids": ["road-east-mesh", "marking-east-mesh", "sidewalk-south-mesh", "sidewalk-north-mesh", "curb-north-mesh"], "footprint": [[10, 2.5], [11, 2.5], [11, 7], [10, 7]], "top_surface_classes": ["travel_lane", "sidewalk_clear", "curb"], "travel_lane_overlap_ratio": 1.0}, "raw_artifact": "reports/raw/streetscape/east-road-continuation.png"}
   ],
   "support_contacts": [
-    {"id": "clinic-awning-ground-contact", "mesh_instance_ids": ["clinic-awning-support-mesh"], "support_mode": "ground_supported", "measurement_source_kind": "resolved_mesh_vertices_to_render_surface", "lowest_visible_y": 0.0, "maximum_gap": 0.02, "contact_samples": [{"support_y": 0.0, "ground_y": 0.0, "gap": 0.0}, {"support_y": 0.0, "ground_y": 0.0, "gap": 0.0}], "raw_artifact": "reports/raw/streetscape/clinic-awning-support-contact.png"}
+    {"id": "clinic-awning-facade-contact", "mesh_instance_ids": ["clinic-awning-support-mesh"], "support_mode": "facade_mounted", "measurement_source_kind": "resolved_mesh_vertices_to_mount_mesh", "mount_mesh_instance_ids": ["clinic-building-mesh"], "maximum_gap": 0.02, "measured_mount_gap": 0.01, "contact_samples": [{"support_mesh_instance_id": "clinic-awning-support-mesh", "support_vertex_index": 12, "mount_mesh_instance_id": "clinic-building-mesh", "mount_surface_index": 0, "mount_triangle_index": 44, "support_point": [4.15, 2.0, 8.45], "mount_point": [4.14, 2.0, 8.45], "gap": 0.01}, {"support_mesh_instance_id": "clinic-awning-support-mesh", "support_vertex_index": 18, "mount_mesh_instance_id": "clinic-building-mesh", "mount_surface_index": 0, "mount_triangle_index": 51, "support_point": [4.15, 2.5, 8.45], "mount_point": [4.14, 2.5, 8.45], "gap": 0.01}], "raw_artifact": "reports/raw/streetscape/clinic-awning-support-contact.png"}
   ],
   "incident_closures": [],
   "building_style_profiles": [
-    {"id": "clinic-weathered", "required_visible_roles": ["facade", "roof", "trim"], "forbidden_material_ids": ["default", "unpainted", "missing"], "allowed_zone_ids": ["clinic-block"], "allowed_story_states": ["evacuated", "occupied"], "minimum_materialized_visible_area_ratio": 1.0, "allow_node_material_override": false,
+    {"id": "clinic-weathered", "required_visible_roles": ["facade", "roof", "openings", "trim"], "forbidden_material_ids": ["default", "unpainted", "missing"], "allowed_zone_ids": ["clinic-block"], "allowed_story_states": ["evacuated", "occupied"], "minimum_materialized_visible_area_ratio": 1.0, "allow_node_material_override": false, "minimum_building_value_stddev": 0.08, "maximum_building_dominant_color_ratio": 0.35, "building_color_bin_size": 8,
       "rendered_role_envelopes": [
-        {"role": "facade", "minimum_visible_pixels": 4, "minimum_mean_value": 0.60, "maximum_mean_value": 0.75, "minimum_mean_chroma": 0.40, "maximum_mean_chroma": 0.55},
-        {"role": "roof", "minimum_visible_pixels": 4, "minimum_mean_value": 0.30, "maximum_mean_value": 0.45, "minimum_mean_chroma": 0.10, "maximum_mean_chroma": 0.25},
-        {"role": "trim", "minimum_visible_pixels": 4, "minimum_mean_value": 0.70, "maximum_mean_value": 0.85, "minimum_mean_chroma": 0.18, "maximum_mean_chroma": 0.35}
+        {"role": "facade", "minimum_visible_pixels": 4, "minimum_mean_value": 0.58, "maximum_mean_value": 0.72, "minimum_mean_chroma": 0.40, "maximum_mean_chroma": 0.55, "minimum_value_stddev": 0.01, "minimum_chroma_stddev": 0.005, "maximum_dominant_color_ratio": 0.75, "dominant_color_bin_size": 8},
+        {"role": "roof", "minimum_visible_pixels": 4, "minimum_mean_value": 0.30, "maximum_mean_value": 0.42, "minimum_mean_chroma": 0.10, "maximum_mean_chroma": 0.25, "minimum_value_stddev": 0.01, "minimum_chroma_stddev": 0.002, "maximum_dominant_color_ratio": 0.75, "dominant_color_bin_size": 8},
+        {"role": "openings", "minimum_visible_pixels": 4, "minimum_mean_value": 0.15, "maximum_mean_value": 0.28, "minimum_mean_chroma": 0.04, "maximum_mean_chroma": 0.15, "minimum_value_stddev": 0.01, "minimum_chroma_stddev": 0.002, "maximum_dominant_color_ratio": 0.75, "dominant_color_bin_size": 8},
+        {"role": "trim", "minimum_visible_pixels": 4, "minimum_mean_value": 0.75, "maximum_mean_value": 0.90, "minimum_mean_chroma": 0.22, "maximum_mean_chroma": 0.38, "minimum_value_stddev": 0.01, "minimum_chroma_stddev": 0.002, "maximum_dominant_color_ratio": 0.75, "dominant_color_bin_size": 8}
       ],
       "rendered_role_separation": [
         {"first_role": "facade", "second_role": "roof", "minimum_delta_e": 10.0},
+        {"first_role": "facade", "second_role": "openings", "minimum_delta_e": 10.0},
+        {"first_role": "facade", "second_role": "trim", "minimum_delta_e": 10.0},
         {"first_role": "roof", "second_role": "trim", "minimum_delta_e": 10.0}
       ]
     }
   ],
+  "resolved_building_source_role_manifest": [
+    {
+      "object_id": "clinic-building",
+      "source_kind": "resolved_scene_building_source_roles",
+      "roles": [
+        {"role": "facade", "source_kind": "source_texture_uv_mask", "mesh_surface_keys": ["clinic-building-mesh#0"], "source_texture_id": "res://assets/buildings/clinic_albedo.png", "source_uv_mask_id": "wall-base", "uv_channel": 0},
+        {"role": "openings", "source_kind": "source_texture_uv_mask", "mesh_surface_keys": ["clinic-building-mesh#0"], "source_texture_id": "res://assets/buildings/clinic_albedo.png", "source_uv_mask_id": "window-door-openings", "uv_channel": 0},
+        {"role": "roof", "source_kind": "authored_mesh_surface", "mesh_surface_keys": ["clinic-building-mesh#1"]},
+        {"role": "trim", "source_kind": "authored_mesh_surface", "mesh_surface_keys": ["clinic-building-mesh#2"]}
+      ]
+    }
+  ],
   "visible_buildings": [
-    {"object_id": "clinic-building", "style_profile_id": "clinic-weathered", "zone_id": "clinic-block", "function": "medical", "story_state": "evacuated", "visible_surface_area": 100.0, "visible_surface_slots": [
-      {"id": "facade-main", "role": "facade", "visible_area": 65.0, "material_id": "clinic-plaster-weathered", "mesh_instance_id": "clinic-building-mesh", "surface_index": 0, "material_source_kind": "mesh_surface_material", "role_source_kind": "authored_mesh_surface", "role_source_id": "clinic.glb:surface-0:facade", "area_source_kind": "resolved_mesh_triangles"},
+    {"object_id": "clinic-building", "style_profile_id": "clinic-weathered", "zone_id": "clinic-block", "function": "medical", "story_state": "evacuated", "visible_surface_area": 100.0, "source_role_inventory": [
+      {"role": "facade", "source_kind": "source_texture_uv_mask", "mesh_surface_keys": ["clinic-building-mesh#0"], "source_texture_id": "res://assets/buildings/clinic_albedo.png", "source_uv_mask_id": "wall-base", "uv_channel": 0},
+      {"role": "openings", "source_kind": "source_texture_uv_mask", "mesh_surface_keys": ["clinic-building-mesh#0"], "source_texture_id": "res://assets/buildings/clinic_albedo.png", "source_uv_mask_id": "window-door-openings", "uv_channel": 0},
+      {"role": "roof", "source_kind": "authored_mesh_surface", "mesh_surface_keys": ["clinic-building-mesh#1"]},
+      {"role": "trim", "source_kind": "authored_mesh_surface", "mesh_surface_keys": ["clinic-building-mesh#2"]}
+    ], "visible_surface_slots": [
+      {"id": "facade-main", "role": "facade", "visible_area": 55.0, "material_id": "clinic-plaster-weathered", "mesh_instance_id": "clinic-building-mesh", "surface_index": 0, "material_source_kind": "mesh_surface_material", "role_source_kind": "shader_mask", "role_source_id": "clinic.glb:surface-0:wall-base", "area_source_kind": "resolved_shader_mask_pixels", "subregion_id": "wall-base", "shader_mask_id": "clinic-wall-base", "shader_mask_source_kind": "source_texture_uv_mask", "source_texture_id": "res://assets/buildings/clinic_albedo.png", "source_uv_mask_id": "wall-base", "uv_channel": 0},
+      {"id": "openings-main", "role": "openings", "visible_area": 10.0, "material_id": "clinic-plaster-weathered", "mesh_instance_id": "clinic-building-mesh", "surface_index": 0, "material_source_kind": "mesh_surface_material", "role_source_kind": "shader_mask", "role_source_id": "clinic.glb:surface-0:window-door-openings", "area_source_kind": "resolved_shader_mask_pixels", "subregion_id": "window-door-openings", "shader_mask_id": "clinic-window-door-openings", "shader_mask_source_kind": "source_texture_uv_mask", "source_texture_id": "res://assets/buildings/clinic_albedo.png", "source_uv_mask_id": "window-door-openings", "uv_channel": 0},
       {"id": "roof-main", "role": "roof", "visible_area": 25.0, "material_id": "clinic-roof-oxidized", "mesh_instance_id": "clinic-building-mesh", "surface_index": 1, "material_source_kind": "surface_override_material", "role_source_kind": "authored_surface_profile", "role_source_id": "clinic-building-style:surface-1:roof", "area_source_kind": "resolved_mesh_triangles"},
       {"id": "trim-main", "role": "trim", "visible_area": 10.0, "material_id": "clinic-trim-painted", "mesh_instance_id": "clinic-building-mesh", "surface_index": 2, "material_source_kind": "mesh_surface_material", "role_source_kind": "authored_mesh_surface", "role_source_id": "clinic.glb:surface-2:trim", "area_source_kind": "resolved_mesh_triangles"}
     ]}
@@ -188,10 +224,11 @@
     "source_kind": "target_build_shipping_camera_masked_pixels",
     "required_building_ids": ["clinic-building"],
     "captures": [
-      {"id": "clinic-material-gameplay-lighting", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "camera_node": "World/CameraRig/Camera3D", "raw_artifact": "assets/streetscape-rendered-material-example/streetscape-material.ppm", "raw_sha256": "a5f4947237a184857bc852d6a4a87fe65472683792e32b3d908ef01b15296769", "role_masks": [
-        {"id": "clinic-facade-pixels", "building_id": "clinic-building", "role": "facade", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#0#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/facade-mask.pgm", "mask_sha256": "d4bfd4ee7a20ff79def0f403abbc7d357487ba2836bc159edc12e3fcfa625322"},
-        {"id": "clinic-roof-pixels", "building_id": "clinic-building", "role": "roof", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#1#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/roof-mask.pgm", "mask_sha256": "139dbef8e1ebba23d7002b5aa0992ce127c1b6a119212ae7f5c284da33e58bff"},
-        {"id": "clinic-trim-pixels", "building_id": "clinic-building", "role": "trim", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#2#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/trim-mask.pgm", "mask_sha256": "699e217322d5060fab1fcf1638725f51b0cca3de3b43609b0e2cee4c61c4c0ac"}
+      {"id": "clinic-material-gameplay-lighting", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "camera_node": "World/CameraRig/Camera3D", "raw_artifact": "assets/streetscape-rendered-material-example/streetscape-material.ppm", "raw_sha256": "a06bc69c7e22456273cd7c617e8f849c05f4a99611e0063c4e0c594cfb6f1c03", "role_masks": [
+        {"id": "clinic-facade-pixels", "building_id": "clinic-building", "role": "facade", "source_kind": "source_texture_uv_role_render_pass", "surface_keys": ["clinic-building-mesh#0#wall-base"], "mask_artifact": "assets/streetscape-rendered-material-example/facade-mask.pgm", "mask_sha256": "2bb33d8752b21c0a05679927615520e8ba745d72648805616785fa6d5eb11c26"},
+        {"id": "clinic-roof-pixels", "building_id": "clinic-building", "role": "roof", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#1#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/roof-mask.pgm", "mask_sha256": "e898960abc53817a12b6cfb110693d7101949d96be9a1d3995cd085327faf705"},
+        {"id": "clinic-openings-pixels", "building_id": "clinic-building", "role": "openings", "source_kind": "source_texture_uv_role_render_pass", "surface_keys": ["clinic-building-mesh#0#window-door-openings"], "mask_artifact": "assets/streetscape-rendered-material-example/openings-mask.pgm", "mask_sha256": "da2443c0886879efb0732edf2eb72cbbfccc42662b3033b9269d75791fcdd749"},
+        {"id": "clinic-trim-pixels", "building_id": "clinic-building", "role": "trim", "source_kind": "resolved_surface_id_render_pass", "surface_keys": ["clinic-building-mesh#2#surface"], "mask_artifact": "assets/streetscape-rendered-material-example/trim-mask.pgm", "mask_sha256": "ca372b3bbeb3d595f7082b0401ed7504da5749674b549303673f605df6c4c855"}
       ]}
     ]
   },
@@ -218,18 +255,22 @@
     "captures": [
       {"id": "main-junction", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "camera_node": "World/CameraRig/Camera3D", "covered_junction_ids": ["main"], "covered_approach_ids": ["west-approach"], "covered_surface_region_ids": ["lane-west", "junction-center", "lane-east", "crosswalk-main", "sidewalk-south", "sidewalk-north", "curb-north", "furnishing-north", "frontage-north"], "raw_artifact": "reports/raw/streetscape/main-junction.png"}
     ],
-    "required_state_ids": ["road_graph_and_markings", "lane_endpoint_terminations", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness", "facade_material_completeness", "rendered_facade_material_evidence", "street_furniture_placement", "support_structure_contacts", "incident_closure_or_clear_route", "visible_boundary_reachability", "road_junction_overview"],
+    "required_state_ids": ["road_graph_and_markings", "marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness", "facade_material_completeness", "source_role_material_separation", "rendered_facade_material_evidence", "street_furniture_placement", "support_structure_contacts", "resolved_mount_vertex_contact", "incident_closure_or_clear_route", "visible_boundary_reachability", "road_junction_overview"],
     "candidate_states": [
       {"id": "road_graph_and_markings", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/road-graph.png"},
+      {"id": "marking_mesh_endpoint_provenance", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/marking-mesh-endpoints.png"},
       {"id": "lane_endpoint_terminations", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/lane-endpoint-terminations.png"},
+      {"id": "typed_road_termination_geometry", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/typed-road-terminations.png"},
       {"id": "junction_sidewalk_curb_continuity", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/junction-sidewalk-curb-continuity.png"},
       {"id": "crosswalk_road_detail_priority", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/crosswalk-road-detail-priority.png"},
       {"id": "building_road_setback", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/building-setback.png"},
       {"id": "visible_mesh_inventory_completeness", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/visible-mesh-inventory.png"},
       {"id": "facade_material_completeness", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/facade-surfaces.png"},
+      {"id": "source_role_material_separation", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/source-role-separation.png"},
       {"id": "rendered_facade_material_evidence", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/rendered-facade-materials.png"},
       {"id": "street_furniture_placement", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/furniture.png"},
       {"id": "support_structure_contacts", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/support-contacts.png"},
+      {"id": "resolved_mount_vertex_contact", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/mount-vertex-contact.png"},
       {"id": "incident_closure_or_clear_route", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/clear-route.png"},
       {"id": "visible_boundary_reachability", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/boundary-raster.png"},
       {"id": "road_junction_overview", "source_kind": "target_build_shipping_camera", "build_id": "replace-with-exact-target-build-id", "raw_artifact": "reports/raw/streetscape/junction-overview.png"}
