@@ -23,6 +23,7 @@
     "high-angle-environment-coverage",
     "resolved-scene-dependency-provenance",
     "streetscape-resolved-evidence-v5",
+    "streetscape-exporter-primitive-mesh-compatibility",
     "junction-sidewalk-curb-continuity",
     "crosswalk-road-detail-priority",
     "strict-visible-contact-plausibility",

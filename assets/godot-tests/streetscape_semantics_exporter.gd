@@ -25,6 +25,9 @@ var _failed := false
 ## visible render triangles. The adapter may classify meshes and declare sample points,
 ## but cannot invent marking endpoints/topmost hits or omit lamps, supports, markings,
 ## openings, trim, inconvenient mesh surfaces, or a visible road-end overlay.
+## Before adapting the exporter, run its embedded PrimitiveMesh regression fixture:
+## godot --headless --path . --script res://tests/streetscape_semantics_exporter.gd -- \
+##   --self-test-primitive-mesh true
 ##
 ## Every production marking MeshInstance3D belongs to `streetscape_marking_mesh` and
 ## carries authored metadata: `marking_chain_id`, `marking_class`, `marking_lane_ids`,
@@ -43,6 +46,9 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var options := _parse_args(OS.get_cmdline_user_args())
+	if _option_is_true(options.get("self_test_primitive_mesh", false)):
+		_run_primitive_mesh_regression()
+		return
 	for required in ["scene", "adapter_script", "build_id", "output"]:
 		if not options.has(required) or String(options[required]).is_empty():
 			_fail("missing --%s" % required.replace("_", "-"))
@@ -508,30 +514,111 @@ func _collect_visible_render_triangles(root: Node) -> Array[Dictionary]:
 		if mesh == null:
 			continue
 		var mesh_id := String(root.get_path_to(candidate))
+		if mesh is PrimitiveMesh:
+			_append_triangle_arrays(
+				result,
+				mesh_id,
+				transforms,
+				(mesh as PrimitiveMesh).get_mesh_arrays()
+			)
+			if _failed:
+				return []
+			continue
 		for surface_index in mesh.get_surface_count():
 			if mesh.surface_get_primitive_type(surface_index) != Mesh.PRIMITIVE_TRIANGLES:
 				continue
-			var arrays := mesh.surface_get_arrays(surface_index)
-			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
-			for transform in transforms:
-				if indices.is_empty():
-					for vertex_index in range(0, vertices.size() - 2, 3):
-						result.append({
-							"mesh_id": mesh_id,
-							"a": transform * vertices[vertex_index],
-							"b": transform * vertices[vertex_index + 1],
-							"c": transform * vertices[vertex_index + 2],
-						})
-				else:
-					for index_offset in range(0, indices.size() - 2, 3):
-						result.append({
-							"mesh_id": mesh_id,
-							"a": transform * vertices[indices[index_offset]],
-							"b": transform * vertices[indices[index_offset + 1]],
-							"c": transform * vertices[indices[index_offset + 2]],
-						})
+			_append_triangle_arrays(result, mesh_id, transforms, mesh.surface_get_arrays(surface_index))
+			if _failed:
+				return []
 	return result
+
+
+func _append_triangle_arrays(
+		result: Array[Dictionary],
+		mesh_id: String,
+		transforms: Array[Transform3D],
+		arrays: Array
+) -> void:
+	if arrays.size() <= Mesh.ARRAY_INDEX:
+		_fail("render mesh arrays are incomplete: %s" % mesh_id)
+		return
+	var raw_vertices: Variant = arrays[Mesh.ARRAY_VERTEX]
+	var raw_indices: Variant = arrays[Mesh.ARRAY_INDEX]
+	if not raw_vertices is PackedVector3Array:
+		_fail("render mesh has no PackedVector3Array vertices: %s" % mesh_id)
+		return
+	if raw_indices != null and not raw_indices is PackedInt32Array:
+		_fail("render mesh has unsupported index data: %s" % mesh_id)
+		return
+	var vertices: PackedVector3Array = raw_vertices
+	var indices := PackedInt32Array()
+	if raw_indices is PackedInt32Array:
+		indices = raw_indices
+	if indices.is_empty() and vertices.size() % 3 != 0:
+		_fail("non-indexed triangle mesh vertex count is not divisible by three: %s" % mesh_id)
+		return
+	if not indices.is_empty() and indices.size() % 3 != 0:
+		_fail("triangle mesh index count is not divisible by three: %s" % mesh_id)
+		return
+	for index_value in indices:
+		if index_value < 0 or index_value >= vertices.size():
+			_fail("triangle mesh index is out of bounds: %s" % mesh_id)
+			return
+	for transform in transforms:
+		if indices.is_empty():
+			for vertex_index in range(0, vertices.size(), 3):
+				result.append({
+					"mesh_id": mesh_id,
+					"a": transform * vertices[vertex_index],
+					"b": transform * vertices[vertex_index + 1],
+					"c": transform * vertices[vertex_index + 2],
+				})
+		else:
+			for index_offset in range(0, indices.size(), 3):
+				result.append({
+					"mesh_id": mesh_id,
+					"a": transform * vertices[indices[index_offset]],
+					"b": transform * vertices[indices[index_offset + 1]],
+					"c": transform * vertices[indices[index_offset + 2]],
+				})
+
+
+func _run_primitive_mesh_regression() -> void:
+	var fixture := Node3D.new()
+	fixture.name = "PrimitiveMeshRegressionFixture"
+	get_root().add_child(fixture)
+	var plane := MeshInstance3D.new()
+	plane.name = "RoadPlaneMesh"
+	plane.mesh = PlaneMesh.new()
+	fixture.add_child(plane)
+	var box := MeshInstance3D.new()
+	box.name = "ClosureBoxMesh"
+	box.mesh = BoxMesh.new()
+	box.position = Vector3(3.0, 0.5, 0.0)
+	fixture.add_child(box)
+
+	var triangles := _collect_visible_render_triangles(fixture)
+	if _failed:
+		return
+	var counts := {
+		"RoadPlaneMesh": 0,
+		"ClosureBoxMesh": 0,
+	}
+	for triangle in triangles:
+		var mesh_id := String(triangle.get("mesh_id", ""))
+		if counts.has(mesh_id):
+			counts[mesh_id] = int(counts[mesh_id]) + 1
+	if int(counts.RoadPlaneMesh) < 2:
+		_fail("PrimitiveMesh regression did not collect PlaneMesh triangles")
+		return
+	if int(counts.ClosureBoxMesh) < 12:
+		_fail("PrimitiveMesh regression did not collect BoxMesh triangles")
+		return
+	print("[PASS] streetscape-primitive-mesh-regression PlaneMesh=%d BoxMesh=%d" % [
+		int(counts.RoadPlaneMesh), int(counts.ClosureBoxMesh)
+	])
+	fixture.free()
+	quit(0)
 
 
 func _triangle_height_at_xz(point: Vector2, a: Vector3, b: Vector3, c: Vector3) -> Variant:
@@ -564,6 +651,12 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 			continue
 		index += 1
 	return result
+
+
+func _option_is_true(value: Variant) -> bool:
+	if value is bool:
+		return value
+	return str(value).to_lower() in ["1", "true", "yes", "on"]
 
 
 func _fail(message: String) -> void:

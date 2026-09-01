@@ -46,6 +46,16 @@ Do not hand-type a simplified JSON that disagrees with the map. Copy/adapt `asse
 - hero-radius occupancy cells, visible blocker cells and safety-only collision cells;
 - exact shipping-camera junction coverage and raw candidate state paths.
 
+Before trusting a copied or adapted exporter, run its engine-backed mesh-API fixture with the same Godot version used by the project:
+
+```bash
+godot --headless --path <project-dir> \
+  --script res://tests/streetscape_semantics_exporter.gd -- \
+  --self-test-primitive-mesh true
+```
+
+The bundled fixture creates real `PlaneMesh` and `BoxMesh` instances, traverses their visible triangles through the production collector, and requires both triangle sets. `PrimitiveMesh` geometry must be read with `PrimitiveMesh.get_mesh_arrays()`; reserve `surface_get_primitive_type()` and `surface_get_arrays()` for non-`PrimitiveMesh` meshes. Hash the exact exporter after this PASS. A source scan, a successful adapter import, or an `ArrayMesh`-only scene does not prove compatibility with built-in road, ground, cap, or block meshes. A crash before contract generation is a blocking exporter failure, not `NOT TESTED` evidence and not permission to reuse a stale report.
+
 Use stable groups or typed resources such as `RoadSemanticProfile`, `RoadSegmentProfile`, `StreetFurnitureProfile`, `BuildingStyle`, and `IncidentClosure`. Scene metadata may supplement them, but strings scattered across scripts are not the source of truth. `ResourceLoader.get_dependencies()` can enumerate resource dependencies; the existing provenance exporter must recursively hash them and explicit runtime loads. A root scene hash alone remains invalid.
 
 The exporter itself is evidence-shaping code. Hash it in `toolchain_inputs`. If an `@tool` road assembler or material resolver changes the emitted scene, hash that script too. A stale report generated from a different build fails even if every number looks plausible. Exporter failure is fail-closed: a nested traversal/classification/role collector that calls `_fail()` must halt the run before any output write or `[PASS]`. An error printed before a later success marker is still a failed evidence run.
@@ -239,6 +249,7 @@ Reject the candidate when any of these are true:
 - a facade/terrain termination keeps the road or markings under/through the actual mass instead of stopping before it;
 - a tree, stump, rock, bush, hydrant, lamp, pole or signal profile permits a travel lane, intersection, crosswalk or clear sidewalk footprint;
 - an exporter collector fails but the run still writes a contract or prints `[PASS]`;
+- the exact exporter has not passed its `PlaneMesh`/`BoxMesh` engine fixture, or it calls surface-only extraction APIs on `PrimitiveMesh` and crashes before auditing the resolved scene;
 - source facade/roof/openings/trim roles are omitted, inferred only from world normals, lack texture/UV or mesh-surface provenance, collapse below their visible-pixel/DeltaE budgets, or trip the role/building flood-fill detector;
 - a visible awning/canopy/support lacks resolved ground/mount contact, names no real mount mesh/triangle, supplies only a scalar gap, or exceeds the support-gap budget;
 - a wreck/tanker/truck/sign blocks a junction or sidewalk without a topology-changing authored closure and alternate route;

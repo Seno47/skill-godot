@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "skill_commit": "post-old-clinic-v24-production-physics-road-end-contracts",
+  "skill_commit": "post-old-clinic-v25-primitive-mesh-exporter-regression",
   "required_contracts": [
     "high-angle-district-composition",
     "high-angle-architectural-material-direction",
@@ -10,6 +10,7 @@
     "resolved-scene-dependency-provenance",
     "high-angle-road-streetscape-semantics",
     "streetscape-resolved-evidence-v5",
+    "streetscape-exporter-primitive-mesh-compatibility",
     "junction-sidewalk-curb-continuity",
     "crosswalk-road-detail-priority",
     "strict-visible-contact-plausibility",
@@ -25,7 +26,7 @@
       "brief_path": "fixtures/brief-high-angle-evacuation-district.md",
       "godot_version": "4.x",
       "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
-      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera", "high-angle-environment-integrity", "high-angle-environment-coverage", "resolved-scene-dependency-provenance", "high-angle-road-streetscape-semantics", "streetscape-resolved-evidence-v5", "junction-sidewalk-curb-continuity", "crosswalk-road-detail-priority", "strict-visible-contact-plausibility", "whole-perimeter-visible-first", "production-physics-boundary-reachability-v2", "visible-limiter-continuity", "ai-repeated-recovery", "shipping-package-hygiene"],
+      "contracts": ["high-angle-district-composition", "high-angle-architectural-material-direction", "high-angle-action-camera", "high-angle-environment-integrity", "high-angle-environment-coverage", "resolved-scene-dependency-provenance", "high-angle-road-streetscape-semantics", "streetscape-resolved-evidence-v5", "streetscape-exporter-primitive-mesh-compatibility", "junction-sidewalk-curb-continuity", "crosswalk-road-detail-priority", "strict-visible-contact-plausibility", "whole-perimeter-visible-first", "production-physics-boundary-reachability-v2", "visible-limiter-continuity", "ai-repeated-recovery", "shipping-package-hygiene"],
       "builder_context": "isolated builder with the district modifier, final camera and exact target-build capture packet",
       "reviewer_context": "separate raw-artifact reviewer who receives no intended landmark or prop mapping before first read",
       "first_pass_verdict": "pass",
@@ -437,6 +438,32 @@
       "token_cost": 180,
       "elapsed_minutes": 2,
       "result_artifacts": ["reports/shipping-package-hygiene.json", "builds/game.pck"]
+    },
+    {
+      "id": "old-clinic-v25-primitive-mesh-exporter-crash-negative",
+      "brief_path": "assets/godot-tests/streetscape_semantics_exporter.gd",
+      "godot_version": "4.x",
+      "composite_case": "new-extraction-complete+new-shooter-action-complete+high-angle-3d-district-complete+constrained-mobile-web",
+      "contracts": ["streetscape-exporter-primitive-mesh-compatibility"],
+      "builder_context": "builder whose copied exporter calls surface_get_primitive_type and surface_get_arrays on every Mesh including built-in PlaneMesh road surfaces and BoxMesh closure masses",
+      "reviewer_context": "isolated engine-owned regression fixture that constructs real PlaneMesh and BoxMesh instances under the exact exporter and project Godot version before any scene evidence is accepted",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "the real resolved scene crashes before audit because PrimitiveMesh is sent through surface-only extraction APIs",
+        "an ArrayMesh-only smoke or source scan is presented as exporter compatibility while built-in road and closure meshes remain unexecuted",
+        "a stale prior report is reused after the current exporter fails before writing fresh evidence"
+      ],
+      "expected_gate_for_each_defect": {
+        "the real resolved scene crashes before audit because PrimitiveMesh is sent through surface-only extraction APIs": "high_angle_streetscape_semantics_evidence",
+        "an ArrayMesh-only smoke or source scan is presented as exporter compatibility while built-in road and closure meshes remain unexecuted": "high_angle_streetscape_semantics_evidence",
+        "a stale prior report is reused after the current exporter fails before writing fresh evidence": "high_angle_streetscape_semantics_evidence"
+      },
+      "false_positive_burden": "one sub-second headless engine fixture reuses the exact copied exporter and built-in PlaneMesh/BoxMesh classes; it does not add a target-build capture or require streetscape evidence for maps without roads",
+      "token_cost": 90,
+      "elapsed_minutes": 1,
+      "result_artifacts": ["reports/streetscape-primitive-mesh-regression.log", "reports/resolved-scene-provenance.json"]
     },
     {
       "id": "static-beauty-camera-pumping-negative",

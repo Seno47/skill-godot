@@ -86,6 +86,20 @@ class RepositoryIntegrityTests(unittest.TestCase):
         self.assertIn("_failed = true\n\tpush_error(message)\n\tquit(2)", streetscape)
         self.assertIn("_failed = true\n\tpush_error(message)\n\tquit(2)", visible_first)
 
+    def test_streetscape_exporter_routes_primitive_mesh_through_mesh_arrays(self) -> None:
+        source = (
+            ROOT / "assets" / "godot-tests" / "streetscape_semantics_exporter.gd"
+        ).read_text(encoding="utf-8")
+        collector = source.index("func _collect_visible_render_triangles")
+        primitive_branch = source.index("if mesh is PrimitiveMesh:", collector)
+        primitive_arrays = source.index(".get_mesh_arrays()", primitive_branch)
+        surface_branch = source.index("mesh.surface_get_primitive_type", primitive_branch)
+        self.assertLess(primitive_branch, primitive_arrays)
+        self.assertLess(primitive_arrays, surface_branch)
+        self.assertIn("_run_primitive_mesh_regression()", source)
+        self.assertIn("PlaneMesh.new()", source)
+        self.assertIn("BoxMesh.new()", source)
+
 
 class ProgressionGraphTests(unittest.TestCase):
     def test_template_passes(self) -> None:
