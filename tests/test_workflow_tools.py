@@ -64,6 +64,28 @@ class RepositoryIntegrityTests(unittest.TestCase):
             with self.subTest(path=path.name):
                 self.assertIsInstance(json.loads(path.read_text(encoding="utf-8")), dict)
 
+    def test_godot_exporter_collector_failures_stop_before_output(self) -> None:
+        streetscape = (
+            ROOT / "assets" / "godot-tests" / "streetscape_semantics_exporter.gd"
+        ).read_text(encoding="utf-8")
+        visible_first = (
+            ROOT / "assets" / "godot-tests" / "visible_first_boundary_probe.gd"
+        ).read_text(encoding="utf-8")
+        for source, collector in (
+            (streetscape, "_collect_visible_mesh_manifest"),
+            (streetscape, "_collect_marking_mesh_chains"),
+            (streetscape, "_collect_building_source_roles"),
+            (streetscape, "_resolve_road_end_topmost_samples"),
+            (visible_first, "_collect_production_physics_reachability"),
+        ):
+            call_index = source.index(collector, source.index("func _run"))
+            guard_index = source.index("if _failed:", call_index)
+            output_index = source.index("FileAccess.open", source.index("func _run"))
+            self.assertLess(call_index, guard_index)
+            self.assertLess(guard_index, output_index)
+        self.assertIn("_failed = true\n\tpush_error(message)\n\tquit(2)", streetscape)
+        self.assertIn("_failed = true\n\tpush_error(message)\n\tquit(2)", visible_first)
+
 
 class ProgressionGraphTests(unittest.TestCase):
     def test_template_passes(self) -> None:
@@ -844,17 +866,17 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] streetscape-semantics", completed.stdout)
 
-    def test_streetscape_semantics_v3_requires_geometry_and_role_evidence_migration(self) -> None:
+    def test_streetscape_semantics_v4_requires_road_end_and_placement_migration(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
-        model["schema_version"] = 3
+        model["schema_version"] = 4
         with tempfile.TemporaryDirectory() as directory:
-            model_path = Path(directory) / "streetscape-v3.json"
+            model_path = Path(directory) / "streetscape-v4.json"
             model_path.write_text(json.dumps(model), encoding="utf-8")
             completed = run_script(
                 "streetscape_semantics_audit.py", "--model", str(model_path), "--summary"
             )
         self.assertEqual(completed.returncode, 2, completed.stdout)
-        self.assertIn("re-export marking mesh chains", completed.stdout)
+        self.assertIn("re-export closure-policy/topmost-surface evidence", completed.stdout)
 
     def test_streetscape_semantics_rejects_legacy_v2_candidate_before_semantic_claims(self) -> None:
         fixture = ROOT / "tests" / "fixtures" / "streetscape-semantics-old-clinic-negative.json"
@@ -875,7 +897,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
                 "--summary",
             )
         self.assertEqual(completed.returncode, 2, completed.stdout)
-        self.assertIn("schema_version must be 4", completed.stdout)
+        self.assertIn("schema_version must be 5", completed.stdout)
 
     def test_streetscape_v21_evidence_shaping_false_pass_is_rejected(self) -> None:
         fixture = json.loads(
@@ -948,7 +970,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("lies inside building footprint", errors)
         self.assertIn("detached from its authored mount", errors)
 
-    def test_streetscape_v4_rejects_shaped_termination_flood_fill_and_synthetic_mount(self) -> None:
+    def test_streetscape_v5_rejects_shaped_termination_flood_fill_and_synthetic_mount(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
 
         west = next(
@@ -963,6 +985,19 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         east["visible_cause_object_ids"] = ["clinic-wall"]
         east["minimum_marking_stop_distance"] = 0.0
         east["maximum_marking_stop_distance"] = 0.5
+        east["road_end_policy"] = "barrier_end"
+        east["marking_policy"] = "stop_before_cause"
+        east["termination_overlay_mesh_ids"] = []
+        east["road_substrate_relation"] = {
+            "source_kind": "exporter_resolved_topmost_render_mesh_samples",
+            "road_substrate_continues": True,
+            "ray_top_y": 8.0,
+            "ray_bottom_y": -1.0,
+            "samples": [
+                {"source_kind": "exporter_resolved_topmost_render_mesh_sample", "phase": "before_cause", "point": [9.0, 5.0], "surface_class": "travel_lane", "mesh_instance_id": "road-east-mesh", "topmost_mesh_instance_id": "road-east-mesh", "covering_mesh_instance_ids": [], "coplanar_top_mesh_instance_ids": ["road-east-mesh"]},
+                {"source_kind": "exporter_resolved_topmost_render_mesh_sample", "phase": "beyond_cause", "point": [10.8, 5.0], "surface_class": "travel_lane", "mesh_instance_id": "road-east-mesh", "topmost_mesh_instance_id": "road-east-mesh", "covering_mesh_instance_ids": [], "coplanar_top_mesh_instance_ids": ["road-east-mesh"]},
+            ],
+        }
         east["termination_geometry"] = {
             "source_kind": "resolved_typed_termination_geometry",
             "profile_kind": "barrier_closure",
@@ -1011,7 +1046,77 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertIn("whole-mask value variation is below its flood-fill threshold", errors)
         self.assertIn("mount gap is not vertex-derived", errors)
 
-    def test_streetscape_v4_rejects_adapter_omission_of_exported_source_role(self) -> None:
+    def test_streetscape_v5_rejects_v24_road_patch_escape_solution_and_lax_placement(self) -> None:
+        model = load_asset_json("streetscape-semantics-contract.template.json")
+        east = next(
+            item for item in model["lane_boundary_terminations"] if item["node_id"] == "east-exit"
+        )
+        parked_car = next(item for item in model["placed_objects"] if item["id"] == "parked-car")
+        parked_car["footprint"] = [[9.4, 4.6], [10.6, 4.6], [10.6, 5.4], [9.4, 5.4]]
+        parked_car["anchor"] = [10.0, 5.0]
+        east.update(
+            {
+                "termination_kind": "physical_closure",
+                "visible_cause_object_ids": ["parked-car"],
+                "minimum_marking_stop_distance": 0.0,
+                "maximum_marking_stop_distance": 0.5,
+                "road_end_policy": "vehicle_cordon",
+                "marking_policy": "stop_before_cause",
+                "termination_overlay_mesh_ids": ["road-east-mesh"],
+                "road_substrate_relation": {
+                    "source_kind": "exporter_resolved_topmost_render_mesh_samples",
+                    "road_substrate_continues": False,
+                    "ray_top_y": 8.0,
+                    "ray_bottom_y": -1.0,
+                    "samples": [
+                        {"source_kind": "exporter_resolved_topmost_render_mesh_sample", "phase": "before_cause", "point": [9.0, 5.0], "surface_class": "travel_lane", "mesh_instance_id": "road-east-mesh", "topmost_mesh_instance_id": "road-east-mesh", "covering_mesh_instance_ids": [], "coplanar_top_mesh_instance_ids": ["road-east-mesh"]},
+                        {"source_kind": "exporter_resolved_topmost_render_mesh_sample", "phase": "beyond_cause", "point": [10.8, 5.0], "surface_class": "travel_lane", "mesh_instance_id": "road-east-mesh", "topmost_mesh_instance_id": "road-east-mesh", "covering_mesh_instance_ids": ["road-east-mesh"], "coplanar_top_mesh_instance_ids": ["road-east-mesh", "parked-car-mesh"]},
+                    ],
+                },
+                "termination_geometry": {
+                    "source_kind": "resolved_typed_termination_geometry",
+                    "profile_kind": "vehicle_cordon",
+                    "mesh_instance_ids": ["parked-car-mesh"],
+                    "footprint": [[9.4, 4.6], [10.6, 4.6], [10.6, 5.4], [9.4, 5.4]],
+                    "top_surface_classes": ["travel_lane"],
+                    "travel_lane_overlap_ratio": 1.0,
+                },
+            }
+        )
+        lax_profile = next(
+            item for item in model["placement_profiles"] if item["id"] == "hydrant-furnishing"
+        )
+        lax_profile["allowed_surface_classes"] = ["travel_lane"]
+        lax_profile["forbidden_surface_classes"] = []
+        lax_object = next(item for item in model["placed_objects"] if item["id"] == "hydrant-west")
+        lax_object["class"] = "stump"
+        lax_object["footprint"] = [[2.0, 4.8], [2.2, 4.8], [2.2, 5.0], [2.0, 5.0]]
+        lax_object["anchor"] = [2.1, 4.9]
+
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "old-clinic-v24-shaped-pass.json"
+            report_path = Path(directory) / "old-clinic-v24-shaped-pass-report.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "streetscape_semantics_audit.py",
+                "--model",
+                str(model_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        errors = "\n".join(report["errors"])
+        self.assertIn("uses surrogate road-end overlay geometry", errors)
+        self.assertIn("road substrate must continue beneath/through the visible closure", errors)
+        self.assertIn("phase beyond_cause is covered by ad-hoc termination geometry", errors)
+        self.assertIn("ambiguous coplanar top meshes/z-fighting", errors)
+        self.assertIn("lies beneath/intersects its closure geometry", errors)
+        self.assertIn("placed object class stump profile hydrant-furnishing does not forbid", errors)
+        self.assertIn("placed object class stump profile hydrant-furnishing permits a protected", errors)
+
+    def test_streetscape_v5_rejects_adapter_omission_of_exported_source_role(self) -> None:
         model = load_asset_json("streetscape-semantics-contract.template.json")
         profile = model["building_style_profiles"][0]
         profile["required_visible_roles"].remove("openings")
@@ -1281,6 +1386,60 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] visible-first-boundary", completed.stdout)
+
+    def test_visible_first_boundary_rejects_legacy_adapter_owned_reachability(self) -> None:
+        model = load_asset_json("visible-first-boundary-contract.template.json")
+        model["schema_version"] = 1
+        model.pop("production_physics_reachability")
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "visible-first-v1.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "visible_first_boundary_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 2, completed.stdout)
+        self.assertIn("exporter-owned production-physics reachability", completed.stdout)
+
+    def test_visible_first_boundary_rejects_whole_body_escape_and_limiter_deletion(self) -> None:
+        model = load_asset_json("visible-first-boundary-contract.template.json")
+        escape_cell = next(
+            item
+            for item in model["production_physics_reachability"]["cells"]
+            if item["cell"] == [1, 2]
+        )
+        escape_cell["classification"] = "free"
+        limiter_entry = model["visible_limiter_continuity"]["entries"][0]
+        limiter_entry["disposition"] = "deleted_after_layout_rebuild"
+
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "visible-first-escape.json"
+            report_path = Path(directory) / "visible-first-escape-report.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "visible_first_boundary_audit.py",
+                "--model",
+                str(model_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertGreater(report["production_physics_reachable_unsafe_cell_count"], 0)
+        self.assertIn("production hero capsule reaches", completed.stdout)
+        self.assertIn("cannot be deleted without mapped replacement continuity", completed.stdout)
+
+    def test_visible_first_boundary_rejects_grid_coarser_than_hero_radius(self) -> None:
+        model = load_asset_json("visible-first-boundary-contract.template.json")
+        model["production_physics_reachability"]["cell_size"] = 1.25
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "visible-first-coarse-grid.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "visible_first_boundary_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("exceeds the hero-radius sampling budget", completed.stdout)
 
     def test_visible_first_boundary_rejects_exact_v20_misses_after_floodfill_pass(self) -> None:
         fixture = json.loads(

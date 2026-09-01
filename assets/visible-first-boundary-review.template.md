@@ -13,6 +13,20 @@ Use with `references/3d-environment-integrity.md` and `references/road-and-stree
 - Declared perimeter spans / total deterministic samples:
 - Raw trace / contact-sheet root:
 
+## Production-physics whole-body reachability
+
+| Production body/shape | Grid / safe polygon source | Free unsafe fringe | Reachable unsafe cells | Missing/unreachable safe cells | Raw grid/contact sheet | Verdict |
+|---|---|---:|---:|---:|---|---|
+| | | | | | | NOT TESTED |
+
+- Schema is v2 and `production_physics_reachability.source_kind` is exporter-resolved, not adapter-authored:
+- Grid uses the actual enabled production hero `CapsuleShape3D`, ground/blocker layers and resolved `World3D`:
+- Every declared cell is queried; the unsafe fringe is nonempty and covers every required side:
+- Cell size is within the production hero-radius budget; eight-neighbor flood fill cannot skip a diagonal escape:
+- Flood fill begins from every production start and reaches zero unsafe-fringe cells:
+- Visible limiter baseline/current IDs and retained/replaced disposition ledger exactly cover the perimeter:
+- Any removed limiter has mapped replacement visible causes plus before/fixed/current whole-body and visible-first proof:
+
 ## Span coverage and first-contact order
 
 | Span | Start/end | Outward direction | Spacing / samples | Probe kind / hero coverage | First visible cause mapping | Safety backstop | Minimum measured clearance | Raw overview | Verdict |
@@ -41,10 +55,13 @@ Use with `references/3d-environment-integrity.md` and `references/road-and-stree
 - A point ray is narrower than the hero and no full-width ray bundle/capsule evidence exists: PASS / FAIL / NOT TESTED
 - Visible object name exists but hit collider/render shell is unmapped or stale: PASS / FAIL / NOT TESTED
 - Safety wall is behind visible art but below the minimum clearance margin: PASS / FAIL / NOT TESTED
+- Adapter supplies hand-written `free_cells`, `blocked_cells` or `outside_cells` while the production capsule can leave the safe polygon: PASS / FAIL / NOT TESTED
+- A visible house/vehicle/wall limiter is deleted and the report calls the off-map continuation fixed without replacement-continuity evidence: PASS / FAIL / NOT TESTED
+- Point/ray evidence passes while the production capsule body reaches an unsafe fringe cell: PASS / FAIL / NOT TESTED
 
 ## Builder verdict
 
-- Deterministic audit status / invisible-first / unmapped-first counts:
+- Deterministic audit status / reachable-unsafe / invisible-first / unmapped-first counts:
 - Raw close-up/contact-sheet status:
 - Blocking defects:
 - Final gate: PASS / FAIL / NOT TESTED

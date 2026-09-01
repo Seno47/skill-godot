@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "fixture_id": "old-clinic-v24-boundary-road-regression-negative",
+  "candidate_claim": {
+    "environment_integrity_audit": "pass",
+    "environment_coverage_audit": "pass",
+    "adapter_boundary_raster": "pass",
+    "selected_visible_first_rays": "pass",
+    "claimed_outside_cells": [],
+    "claimed_status": "pass"
+  },
+  "production_failures": [
+    {
+      "id": "whole-body-offmap-escape",
+      "root_cause": "adapter hard-coded the boundary raster and supplied an empty outside set",
+      "required_negative": "the exporter-owned production CapsuleShape3D flood fill reaches at least one unsafe-fringe cell",
+      "blocking_gate": "high_angle_visible_first_boundary_evidence"
+    },
+    {
+      "id": "deleted-visible-limiter",
+      "root_cause": "the regression called removing houses or vehicles and opening the off-map route a fix",
+      "required_negative": "baseline visible limiter is absent without a mapped replacement and before/fixed/current continuity proof",
+      "blocking_gate": "high_angle_visible_first_boundary_evidence"
+    },
+    {
+      "id": "vehicle-cordon-surrogate-bed",
+      "root_cause": "a dark road-end plane hides missing authored road beneath and beyond vehicles",
+      "required_negative": "vehicle_cordon topmost samples lack real road substrate before/between/beyond or name a covering overlay",
+      "blocking_gate": "high_angle_streetscape_semantics_evidence"
+    },
+    {
+      "id": "marking-under-patch",
+      "root_cause": "mesh-derived marking segments enter the physical closure footprint",
+      "required_negative": "stop_before_cause segment samples intersect the typed termination geometry",
+      "blocking_gate": "high_angle_streetscape_semantics_evidence"
+    },
+    {
+      "id": "protected-surface-object-placement",
+      "root_cause": "vegetation and curb-furniture profiles permit road or clear-sidewalk classes",
+      "required_negative": "class-specific full-footprint rules reject travel lane intersection crosswalk and sidewalk-clear ownership",
+      "blocking_gate": "high_angle_streetscape_semantics_evidence"
+    },
+    {
+      "id": "exporter-error-then-pass",
+      "root_cause": "nested exporter collector calls fail but caller continues to output and success marker",
+      "required_negative": "failed state propagates before contract mutation output write and PASS",
+      "blocking_gate": "high_angle_streetscape_semantics_evidence"
+    }
+  ],
+  "expected_result": "fail"
+}

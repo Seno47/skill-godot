@@ -316,7 +316,7 @@
       "evidence": ["fixture: same-closure zero-error road/junction/facade/furniture/boundary audit plus complete target-build junction survey"],
       "reviewer": {"role": "builder", "context": "fixture builder streetscape-semantics review"},
       "artifacts": [
-        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "streetscape_semantics_contract", "road_graph_and_markings", "marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness"]},
+        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "streetscape_semantics_contract", "road_graph_and_markings", "marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "road_end_topmost_surface_samples", "marking_vs_closure_geometry", "production_placement_rules", "exporter_failure_propagation", "junction_sidewalk_curb_continuity", "crosswalk_road_detail_priority", "building_road_setback", "visible_mesh_inventory_completeness"]},
         {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["streetscape_semantics_audit", "facade_material_completeness", "source_role_material_separation", "rendered_facade_material_evidence", "street_furniture_placement", "support_structure_contacts", "resolved_mount_vertex_contact", "incident_closure_or_clear_route"]},
         {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_boundary_reachability", "shipping_camera_road_junction_survey", "detected_class_resolution_or_clean_baseline"]},
         {"path": "evidence-artifacts/quiet.png", "kind": "image", "states": ["road_graph_and_markings", "junction_sidewalk_curb_continuity"]},
@@ -329,7 +329,7 @@
         {"path": "evidence-artifacts/icon.png", "kind": "image", "states": ["detected_class_resolution_or_clean_baseline"]},
         {"path": "evidence-artifacts/material-same-zone.png", "kind": "image", "states": ["source_role_material_separation", "rendered_facade_material_evidence"]},
         {"path": "evidence-artifacts/material-cross-zone.png", "kind": "image", "states": ["visible_mesh_inventory_completeness"]},
-        {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry"]},
+        {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["marking_mesh_endpoint_provenance", "lane_endpoint_terminations", "typed_road_termination_geometry", "road_end_topmost_surface_samples", "marking_vs_closure_geometry", "production_placement_rules"]},
         {"path": "evidence-artifacts/support-contact.png", "kind": "image", "states": ["support_structure_contacts", "resolved_mount_vertex_contact"]}
       ]
     },
@@ -339,9 +339,9 @@
       "reviewer": {"role": "builder", "context": "fixture builder visible-first perimeter audit"},
       "artifacts": [
         {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "visible_first_boundary_contract"]},
-        {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_first_boundary_audit"]},
-        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["whole_perimeter_sample_trace"]},
-        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_first_contact_sheet"]},
+        {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_first_boundary_audit", "production_physics_whole_body_reachability", "visible_limiter_continuity"]},
+        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["whole_perimeter_sample_trace", "production_physics_whole_body_reachability"]},
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_first_contact_sheet", "production_physics_whole_body_reachability", "visible_limiter_continuity"]},
         {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["detected_span_closeups_or_clean_baseline"]}
       ]
     },

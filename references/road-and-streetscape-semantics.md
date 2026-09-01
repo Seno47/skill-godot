@@ -11,7 +11,7 @@ python <skill-dir>/scripts/streetscape_semantics_audit.py \
 
 This is a separate builder-owned blocking gate. Passing dependency provenance, collision, environment integrity, whole-map surface coverage, navigation, or a curated screenshot does not prove that roads behave and read as roads. The streetscape report must use the same `build_id`, resolved dependency-closure manifest, selected export preset and exporter hashes as the other candidate reports. Add the streetscape exporter to the provenance manifest toolchain inputs and link this contract through `resolved_scene_provenance_audit.py --evidence-contract`.
 
-Contract schema v4 is fail-closed. A v3 report is not sufficient evidence: re-export the exact resolved scene with exporter-owned marking mesh chains, typed termination geometry, source mesh/atlas role inventory, target-build source-role masks, and vertex-to-mesh mount contacts. Do not relabel an old report as v4 or carry forward adapter-declared marking distances, generic cap meshes, normal-only facade masks, or scalar mount gaps.
+Contract schema v5 is fail-closed. A v4 report is not sufficient evidence: re-export the exact resolved scene with explicit road-end policy, topmost before/at/between/beyond surface samples, marking-versus-closure geometry checks, production placement rules, exporter-owned marking mesh chains, typed termination geometry, source mesh/atlas role inventory, target-build source-role masks, and vertex-to-mesh mount contacts. Do not relabel an old report as v5 or carry forward adapter-declared marking distances, generic cap meshes, surrogate road-end planes, normal-only facade masks, or scalar mount gaps.
 
 ## Calibrate a project road profile, not a legal claim
 
@@ -40,7 +40,7 @@ Do not hand-type a simplified JSON that disagrees with the map. Copy/adapt `asse
 - every camera-visible building mesh surface bound to its real mesh instance and surface index, or to a resolved shader-mask subregion when one surface intentionally contains several roles;
 - target-build gameplay-lighting frames plus one disjoint source-role/surface-ID mask for every facade, roof, opening/window and trim role actually present in the source mesh or atlas;
 - every visible marking mesh as a resolved chain of mesh-surface vertex segments associated with exact lanes;
-- every lane endpoint on a boundary node, its semantic termination, typed continuation/cap/closure footprint, top-surface classes and exporter-derived marking endpoint/continuation measurement;
+- every lane endpoint on a boundary node, its semantic termination, typed continuation/cap/closure footprint, exporter-resolved render-triangle topmost samples and marking endpoint/continuation measurement;
 - every visible ground-, facade- or suspension-supported canopy/awning/support contact, including exact support vertices and mount-mesh triangle points for mounted/suspended structures;
 - resolved anchor/forward vectors and approach association for street furniture;
 - hero-radius occupancy cells, visible blocker cells and safety-only collision cells;
@@ -48,7 +48,7 @@ Do not hand-type a simplified JSON that disagrees with the map. Copy/adapt `asse
 
 Use stable groups or typed resources such as `RoadSemanticProfile`, `RoadSegmentProfile`, `StreetFurnitureProfile`, `BuildingStyle`, and `IncidentClosure`. Scene metadata may supplement them, but strings scattered across scripts are not the source of truth. `ResourceLoader.get_dependencies()` can enumerate resource dependencies; the existing provenance exporter must recursively hash them and explicit runtime loads. A root scene hash alone remains invalid.
 
-The exporter itself is evidence-shaping code. Hash it in `toolchain_inputs`. If an `@tool` road assembler or material resolver changes the emitted scene, hash that script too. A stale report generated from a different build fails even if every number looks plausible.
+The exporter itself is evidence-shaping code. Hash it in `toolchain_inputs`. If an `@tool` road assembler or material resolver changes the emitted scene, hash that script too. A stale report generated from a different build fails even if every number looks plausible. Exporter failure is fail-closed: a nested traversal/classification/role collector that calls `_fail()` must halt the run before any output write or `[PASS]`. An error printed before a later success marker is still a failed evidence run.
 
 ## Road, junction, pedestrian, and marking topology
 
@@ -78,7 +78,15 @@ Every boundary-kind node incident to a lane needs exactly one `lane_boundary_ter
 - `continued_offmap` proves an `offmap_corridor`: travel surface, sidewalk, curb and applicable marking meshes all continue beyond the boundary by the declared distance. Preserve exporter-owned top-surface samples for every required class. A road rectangle ending exactly at the node, a sidewalk/curb that stops early, or a building whose full transformed footprint enters the continuation corridor fails.
 - `turn` names the resolved continuation lanes and must read as a turn in the close-up.
 - `cul_de_sac` provides a typed bulb/hammerhead turnaround with authored road top surface rather than an exposed mesh edge.
-- `physical_closure` uses a typed barrier/gate/debris/facade/terrain closure whose exact cap meshes belong to the visible cause objects. A common RoadNetwork mesh is not closure provenance. A full-width sidewalk/curb slab painted across a travel lane is not a road cap. A building may terminate the street only when the lane and continuation corridor do not enter its full footprint and the facade/closure treatment explains the stop.
+- `physical_closure` names one explicit `road_end_policy`: `vehicle_cordon`, `facade_end`, `barrier_end`, `gate_end`, `debris_end`, or `terrain_end`. Its typed profile must match that policy and its exact cap meshes must belong to the visible cause objects. A common RoadNetwork mesh is not closure provenance. A full-width sidewalk/curb slab painted across a travel lane is not a road cap.
+
+Road-end policy determines the geometry, not just the label:
+
+- **Vehicle cordon:** the real road substrate remains topmost and continuous before, between and beyond the visible vehicles. Do not place a dark rectangle, asphalt bed, debug plane or generic closure patch under/around the vehicles. Markings may continue under the vehicle cause only when the policy explicitly says so; otherwise resolved marking segments stop before the cause.
+- **Facade/terrain end:** the road substrate and markings stop before the actual facade/terrain mass. The at-cause topmost sample must resolve to that real mass, not to road or a covering patch. A building may terminate the street only when the lane does not enter its full footprint and the facade treatment explains the stop.
+- **Barrier/gate/debris end:** preserve the authored road before and, when the road logically continues, beyond the visible cause. The cause itself provides the closure; a separate overlay/cap plane does not.
+
+Every physical closure supplies query Y bounds, sample X/Z points for its required phases and an explicit marking policy. The exporter traverses the exact visible `MeshInstance3D`/`MultiMeshInstance3D` triangles, excludes separately-audited road-marking detail from the substrate query, overwrites adapter-supplied base/topmost/covering/coplanar mesh IDs and fails when a sample hits no visible render triangle. Multiple coplanar top meshes fail as ambiguous/z-fighting closure geometry. `termination_overlay_mesh_ids` must be empty. The auditor samples the actual mesh-derived marking segments against the closure footprint, so a marking hidden beneath a patch or cap fails even when its endpoint distance looks plausible.
 
 No boundary endpoint or continued corridor may intersect a building footprint. Export each dashed/continuous marking mesh chain and its actual world-space segment endpoints. The auditor derives stop/continuation distance from those mesh vertices; an adapter-supplied `marking_stop_distance` is not evidence. Stop/divider/parking markings must end within the closure/turn budget or continue through an off-map corridor as appropriate, never run beneath a cap, into a facade, across closure art, or disappear at an arbitrary cut.
 
@@ -106,9 +114,9 @@ Sample the transformed full footprint of every building, vehicle and furniture i
 
 - building support/mass: never in travel lane, intersection, crosswalk or sidewalk clear path;
 - facade steps, awnings and supports: remain in frontage/apron or have an explicit designed projection that preserves clearance;
-- hydrants, poles, lights, utility cabinets and ordinary signs: furnishing/median/frontage profile, never in the travel lane or clear pedestrian route;
+- hydrants, poles, lights, utility cabinets and ordinary signs: furnishing/median/frontage profile, never in travel lanes, intersections, crosswalks or the clear pedestrian route;
 - parked vehicles: parking/travel profile but not junction/crosswalk/sidewalk;
-- trees/rocks/bushes: their environment-integrity surface profile still applies in addition to streetscape rules;
+- trees, stumps, rocks and bushes: grass/soil/landscape profile only; their complete footprints explicitly forbid travel lanes, intersections, crosswalks and the clear sidewalk band in addition to the environment-integrity surface profile;
 - wrecks, tankers, trucks and barricades: may block a road only through an `IncidentClosure` that changes topology, provides an alternate route, owns the visual cues and passes the raw review.
 
 An object's origin on concrete does not excuse a building volume over the carriageway, a hydrant in a lane, a lamp through a car, or a tanker swallowing the crossing. Broad `road_or_sidewalk` classes are too permissive: use the narrow semantic class actually intended.
@@ -187,7 +195,7 @@ The environment coverage gate proves that colliders have visible mass. It does n
 
 Flood-fill from player starts. A reachable cell adjacent to a safety-only wall is a FAIL by default: it is a playable pocket/contact against an invisible boundary. Every safety cell must be owned by exactly one visible cause and lie within the declared contact distance behind it. Two cars described as a boundary fail when the hero can walk around/between them and reach the wall. A visible building, continuous wall, cliff or dense authored closure may pass when its transformed footprint actually seals the route and the opening negative case remains open.
 
-Use the production hero shape/radius when generating cells. In Godot, query `World3D.direct_space_state` with `PhysicsShapeQueryParameters3D` and `intersect_shape()` or an equivalent project-owned deterministic driver. Do not substitute a point ray for the character footprint.
+Use the production hero shape/radius when generating cells. In Godot, query `World3D.direct_space_state` with `PhysicsShapeQueryParameters3D` and `intersect_shape()` or an equivalent project-owned deterministic driver. Do not substitute a point ray for the character footprint, and do not let the adapter supply the cell classification. The separate visible-first schema-v2 exporter owns the complete production-capsule grid and requires a nonempty unsafe fringe.
 
 Then run the separate whole-perimeter visible-first layer from [3d-environment-integrity.md](3d-environment-integrity.md). Flood-fill answers whether a pocket is reachable; it does not answer which collider is contacted first at every continuous boundary position. The visible-first contract must cover all declared spans, including non-road edges, and reject even one sample where the safety-only wall precedes the mapped visible cause. Raw close-ups, traces and the streetscape/environment reports must share one build and resolved dependency-closure digest.
 
@@ -227,6 +235,10 @@ Reject the candidate when any of these are true:
 - the exporter-owned visible mesh inventory has an unclassified/omitted lamp, work light, utility pole or support subclass;
 - a boundary road endpoint has no resolved continuation/turn/cul-de-sac/physical closure, ends in a bare rectangular cut, runs markings into the edge, or lies inside a building footprint;
 - a termination cites a common road mesh as cap provenance, overlays a full-width sidewalk slab on the lane, lets actual marking mesh vertices continue beneath its cap, omits off-map sidewalk/curb/markings, or lets a building footprint enter the continued corridor;
+- a vehicle cordon uses a dark/surrogate bed or closure patch, the authored road does not continue between/beyond vehicles, or markings remain hidden under a stop-before-cause cap;
+- a facade/terrain termination keeps the road or markings under/through the actual mass instead of stopping before it;
+- a tree, stump, rock, bush, hydrant, lamp, pole or signal profile permits a travel lane, intersection, crosswalk or clear sidewalk footprint;
+- an exporter collector fails but the run still writes a contract or prints `[PASS]`;
 - source facade/roof/openings/trim roles are omitted, inferred only from world normals, lack texture/UV or mesh-surface provenance, collapse below their visible-pixel/DeltaE budgets, or trip the role/building flood-fill detector;
 - a visible awning/canopy/support lacks resolved ground/mount contact, names no real mount mesh/triangle, supplies only a scalar gap, or exceeds the support-gap budget;
 - a wreck/tanker/truck/sign blocks a junction or sidewalk without a topology-changing authored closure and alternate route;

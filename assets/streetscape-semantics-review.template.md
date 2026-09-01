@@ -12,7 +12,7 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Streetscape exporter path + SHA-256:
 - Selected export preset + SHA-256:
 - Contract JSON / audit JSON:
-- Contract schema (must be v4) / migration source if applicable:
+- Contract schema (must be v5) / migration source if applicable:
 - Road profile: scale, traffic convention, stylization, hero radius:
 - Raw capture root:
 - Prior provenance/environment-integrity/environment-coverage results:
@@ -53,7 +53,7 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 
 ## Boundary road terminations
 
-| Boundary node / lanes | Kind + typed geometry profile | Exact continuation/cap/cause meshes | Endpoint/corridor outside buildings | Mesh-derived marking endpoint/continuation | Raw close-up | Verdict |
+| Boundary node / lanes | Kind + road-end policy | Exact cause/cap/overlay meshes | Topmost substrate before/at/between/beyond | Marking policy + mesh intersection result | Raw close-up | Verdict |
 |---|---|---|---|---|---|---|
 | | | | | | | NOT TESTED |
 
@@ -61,6 +61,9 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 - Continued-offmap travel lane, sidewalk, curb and applicable markings remain present beyond the node:
 - Physical/cul-de-sac cap is typed authored geometry, not a common RoadNetwork mesh or full-width sidewalk overlay:
 - No bare rectangular cut, lane/corridor inside a facade, or resolved marking mesh running beneath the cap:
+- Vehicle cordon: authored road substrate continues between/beyond visible vehicles; no dark bed/patch plane is used:
+- Facade/terrain end: road substrate and markings stop before the real topmost facade/terrain mass:
+- `termination_overlay_mesh_ids` is empty; the builder reconstructed the landscape instead of hiding it with a patch:
 
 ## Sidewalk/curb junction continuity
 
@@ -120,6 +123,7 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 | | | | | | | | | NOT TESTED |
 
 - Hydrants remain in declared furnishing/frontage zones:
+- Trees, stumps, rocks and bushes remain off travel lanes, intersections, crosswalks and clear sidewalk bands:
 - Signals control the correct approach and face oncoming traffic/movement:
 - Signs/poles are not camera-facing decoration detached from road semantics:
 - Damaged/fallen exceptions are exact and visually legible:
@@ -176,6 +180,9 @@ Use with `references/road-and-streetscape-semantics.md`. This is a builder-owned
 | `marking_mesh_endpoint_provenance` | | | | NOT TESTED |
 | `lane_endpoint_terminations` | | | | NOT TESTED |
 | `typed_road_termination_geometry` | | | | NOT TESTED |
+| `road_end_topmost_surface_samples` | | | | NOT TESTED |
+| `marking_vs_closure_geometry` | | | | NOT TESTED |
+| `production_placement_rules` | | | | NOT TESTED |
 | `junction_sidewalk_curb_continuity` | | | | NOT TESTED |
 | `crosswalk_road_detail_priority` | | | | NOT TESTED |
 | `building_road_setback` | | | | NOT TESTED |
@@ -215,6 +222,10 @@ Every audit- or survey-detected class needs an exact sequence. If no class was f
 - Adapter declares a marking stop distance while resolved marking meshes continue beneath a cap: PASS / FAIL / NOT TESTED
 - Continued-offmap corridor omits sidewalk/curb/markings or intersects a building footprint: PASS / FAIL / NOT TESTED
 - Physical closure uses a common road mesh or full-width sidewalk slab as cap geometry: PASS / FAIL / NOT TESTED
+- Vehicle road end is hidden by a dark surrogate plane, the road substrate does not continue between/beyond the vehicles, or a marking lies under the patch: PASS / FAIL / NOT TESTED
+- Facade road end keeps road/marking surfaces beneath or through the facade instead of stopping before it: PASS / FAIL / NOT TESTED
+- Tree/stump/rock/bush/hydrant/lamp/signal footprint occupies a travel lane, intersection, crosswalk or clear sidewalk: PASS / FAIL / NOT TESTED
+- Nested exporter collector emits an error but still writes JSON or prints `[PASS]`: PASS / FAIL / NOT TESTED
 - Facade/roof masks omit source windows/openings/trim or a building/role trips flood-fill thresholds: PASS / FAIL / NOT TESTED
 - Awning/canopy/support exceeds the resolved support-gap budget or supplies only a scalar mount gap: PASS / FAIL / NOT TESTED
 - Incident prop blocks road/sidewalk without graph closure, cue ownership and alternate path: PASS / FAIL / NOT TESTED

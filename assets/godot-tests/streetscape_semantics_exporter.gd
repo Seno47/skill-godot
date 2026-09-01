@@ -1,5 +1,7 @@
 extends SceneTree
 
+var _failed := false
+
 ## Exact resolved-scene exporter shell for the streetscape semantics contract.
 ## Copy into the game project, provide a scene-owned adapter node, then run:
 ## godot --headless --path . --script res://tests/streetscape_semantics_exporter.gd -- \
@@ -14,12 +16,15 @@ extends SceneTree
 ## It must read the instantiated production scene's final transforms, mesh surfaces,
 ## collision/hero-radius raster, semantic resources/groups, approach-side and
 ## T-opposite sidewalk/curb continuity bands, every visible road-detail footprint,
-## typed lane-boundary terminations, vertex-resolved support contacts, source-role
+## schema-v5 typed lane-boundary terminations with road-end policy, query Y bounds and
+## before/at/between/beyond XZ samples, vertex-resolved support contacts, source-role
 ## material masks and the raw-artifact manifest. The exporter itself injects the
 ## complete visible mesh/effective-material manifest, resolved marking-mesh chains and
-## scene-authored building source-role manifest after traversing the scene; the adapter
-## may classify them but cannot invent marking endpoints or omit lamps, supports,
-## markings, openings, trim, or inconvenient mesh surfaces.
+## scene-authored building source-role manifest after traversing the scene. For physical
+## closures it also overwrites sample base/topmost/covering mesh IDs from the exact
+## visible render triangles. The adapter may classify meshes and declare sample points,
+## but cannot invent marking endpoints/topmost hits or omit lamps, supports, markings,
+## openings, trim, inconvenient mesh surfaces, or a visible road-end overlay.
 ##
 ## Every production marking MeshInstance3D belongs to `streetscape_marking_mesh` and
 ## carries authored metadata: `marking_chain_id`, `marking_class`, `marking_lane_ids`,
@@ -86,8 +91,8 @@ func _run() -> void:
 		_fail("adapter export_streetscape_semantics must return Dictionary")
 		return
 	var contract: Dictionary = raw
-	if contract.get("schema_version") != 4:
-		_fail("adapter result schema_version must be 4")
+	if contract.get("schema_version") != 5:
+		_fail("adapter result schema_version must be 5")
 		return
 	if String(contract.get("build_id", "")) != String(options.build_id):
 		_fail("adapter result build_id does not match --build-id")
@@ -103,12 +108,23 @@ func _run() -> void:
 		_fail("scene_provenance.scene_path must match the instantiated production scene")
 		return
 	var visible_mesh_manifest := _collect_visible_mesh_manifest(root)
+	if _failed:
+		return
 	if visible_mesh_manifest.is_empty():
 		_fail("resolved production scene has no visible mesh instances")
 		return
 	contract["resolved_visible_mesh_manifest"] = visible_mesh_manifest
-	contract["resolved_marking_mesh_chains"] = _collect_marking_mesh_chains(root)
-	contract["resolved_building_source_role_manifest"] = _collect_building_source_roles(root)
+	var marking_mesh_chains := _collect_marking_mesh_chains(root)
+	if _failed:
+		return
+	contract["resolved_marking_mesh_chains"] = marking_mesh_chains
+	var building_source_roles := _collect_building_source_roles(root)
+	if _failed:
+		return
+	contract["resolved_building_source_role_manifest"] = building_source_roles
+	_resolve_road_end_topmost_samples(root, contract)
+	if _failed:
+		return
 
 	var output_path := String(options.output)
 	if not output_path.begins_with("res://") and not output_path.begins_with("user://"):
@@ -358,6 +374,178 @@ func _collect_building_source_roles(root: Node) -> Array[Dictionary]:
 	return result
 
 
+func _resolve_road_end_topmost_samples(root: Node, contract: Dictionary) -> void:
+	var raw_classifications: Variant = contract.get("visible_mesh_classifications", [])
+	var raw_terminations: Variant = contract.get("lane_boundary_terminations", [])
+	if not raw_classifications is Array or not raw_terminations is Array:
+		_fail("road-end topmost evidence needs classification and termination arrays")
+		return
+	var classifications := {}
+	for raw_classification in raw_classifications:
+		if not raw_classification is Dictionary:
+			_fail("visible mesh classification must be a Dictionary")
+			return
+		var classification: Dictionary = raw_classification
+		var mesh_id := String(classification.get("mesh_instance_id", ""))
+		if mesh_id.is_empty() or classifications.has(mesh_id):
+			_fail("visible mesh classification ID is empty or duplicated")
+			return
+		classifications[mesh_id] = {
+			"scope": String(classification.get("semantic_scope", "")),
+			"class": String(classification.get("semantic_class", "")),
+		}
+	var triangles := _collect_visible_render_triangles(root)
+	if _failed:
+		return
+	for raw_termination in raw_terminations:
+		if not raw_termination is Dictionary:
+			_fail("lane boundary termination must be a Dictionary")
+			return
+		var termination: Dictionary = raw_termination
+		if String(termination.get("termination_kind", "")) != "physical_closure":
+			continue
+		var raw_relation: Variant = termination.get("road_substrate_relation")
+		if not raw_relation is Dictionary:
+			_fail("physical closure lacks road_substrate_relation")
+			return
+		var relation: Dictionary = raw_relation
+		var ray_top_y := float(relation.get("ray_top_y", NAN))
+		var ray_bottom_y := float(relation.get("ray_bottom_y", NAN))
+		var raw_samples: Variant = relation.get("samples", [])
+		if is_nan(ray_top_y) or is_nan(ray_bottom_y) or ray_top_y <= ray_bottom_y \
+				or not raw_samples is Array or raw_samples.is_empty():
+			_fail("physical closure has invalid topmost render-surface query")
+			return
+		for raw_sample in raw_samples:
+			if not raw_sample is Dictionary:
+				_fail("road/substrate sample must be a Dictionary")
+				return
+			var sample: Dictionary = raw_sample
+			var raw_point: Variant = sample.get("point")
+			if not raw_point is Array or raw_point.size() != 2:
+				_fail("road/substrate sample point must contain X/Z")
+				return
+			var point := Vector2(float(raw_point[0]), float(raw_point[1]))
+			var hits: Array[Dictionary] = []
+			for triangle in triangles:
+				var triangle_classification: Dictionary = classifications.get(
+					String(triangle.mesh_id), {}
+				)
+				if String(triangle_classification.get("scope", "")) == "road_surface" \
+						and String(triangle_classification.get("class", "")) == "road_marking":
+					continue
+				var height: Variant = _triangle_height_at_xz(
+					point, triangle.a, triangle.b, triangle.c
+				)
+				if height == null or float(height) < ray_bottom_y or float(height) > ray_top_y:
+					continue
+				hits.append({"mesh_id": String(triangle.mesh_id), "height": float(height)})
+			if hits.is_empty():
+				_fail("road/substrate topmost query hit no visible render triangle")
+				return
+			hits.sort_custom(func(first: Dictionary, second: Dictionary) -> bool:
+				return float(first.height) > float(second.height)
+			)
+			var topmost_mesh_id := String(hits[0].mesh_id)
+			var topmost_height := float(hits[0].height)
+			var coplanar_top_ids: Array[String] = []
+			for hit in hits:
+				if absf(float(hit.height) - topmost_height) > 0.001:
+					break
+				var coplanar_id := String(hit.mesh_id)
+				if coplanar_id not in coplanar_top_ids:
+					coplanar_top_ids.append(coplanar_id)
+			coplanar_top_ids.sort()
+			var base_mesh_id := topmost_mesh_id
+			var base_index := 0
+			for hit_index in hits.size():
+				var hit_mesh_id := String(hits[hit_index].mesh_id)
+				var hit_classification: Dictionary = classifications.get(hit_mesh_id, {})
+				if String(hit_classification.get("scope", "")) == "road_surface" \
+						and String(hit_classification.get("class", "")) == "road_surface":
+					base_mesh_id = hit_mesh_id
+					base_index = hit_index
+					break
+			var covering_ids: Array[String] = []
+			for hit_index in base_index:
+				var covering_id := String(hits[hit_index].mesh_id)
+				if covering_id != base_mesh_id and covering_id not in covering_ids:
+					covering_ids.append(covering_id)
+			sample["source_kind"] = "exporter_resolved_topmost_render_mesh_sample"
+			sample["mesh_instance_id"] = base_mesh_id
+			sample["topmost_mesh_instance_id"] = topmost_mesh_id
+			sample["covering_mesh_instance_ids"] = covering_ids
+			sample["coplanar_top_mesh_instance_ids"] = coplanar_top_ids
+		relation["source_kind"] = "exporter_resolved_topmost_render_mesh_samples"
+		termination["road_substrate_relation"] = relation
+
+
+func _collect_visible_render_triangles(root: Node) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var candidates: Array[Node] = []
+	candidates.append_array(root.find_children("*", "MeshInstance3D", true, false))
+	candidates.append_array(root.find_children("*", "MultiMeshInstance3D", true, false))
+	for candidate in candidates:
+		if not candidate is GeometryInstance3D or not candidate.is_visible_in_tree():
+			continue
+		var mesh_instance := candidate as MeshInstance3D
+		var multi_mesh_instance := candidate as MultiMeshInstance3D
+		var mesh: Mesh = null
+		var transforms: Array[Transform3D] = []
+		if mesh_instance != null:
+			mesh = mesh_instance.mesh
+			transforms.append(mesh_instance.global_transform)
+		elif multi_mesh_instance != null and multi_mesh_instance.multimesh != null:
+			mesh = multi_mesh_instance.multimesh.mesh
+			var count := multi_mesh_instance.multimesh.visible_instance_count
+			if count < 0:
+				count = multi_mesh_instance.multimesh.instance_count
+			for instance_index in count:
+				transforms.append(
+					multi_mesh_instance.global_transform
+					* multi_mesh_instance.multimesh.get_instance_transform(instance_index)
+				)
+		if mesh == null:
+			continue
+		var mesh_id := String(root.get_path_to(candidate))
+		for surface_index in mesh.get_surface_count():
+			if mesh.surface_get_primitive_type(surface_index) != Mesh.PRIMITIVE_TRIANGLES:
+				continue
+			var arrays := mesh.surface_get_arrays(surface_index)
+			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			for transform in transforms:
+				if indices.is_empty():
+					for vertex_index in range(0, vertices.size() - 2, 3):
+						result.append({
+							"mesh_id": mesh_id,
+							"a": transform * vertices[vertex_index],
+							"b": transform * vertices[vertex_index + 1],
+							"c": transform * vertices[vertex_index + 2],
+						})
+				else:
+					for index_offset in range(0, indices.size() - 2, 3):
+						result.append({
+							"mesh_id": mesh_id,
+							"a": transform * vertices[indices[index_offset]],
+							"b": transform * vertices[indices[index_offset + 1]],
+							"c": transform * vertices[indices[index_offset + 2]],
+						})
+	return result
+
+
+func _triangle_height_at_xz(point: Vector2, a: Vector3, b: Vector3, c: Vector3) -> Variant:
+	var denominator := (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z)
+	if absf(denominator) <= 0.000001:
+		return null
+	var weight_a := ((b.z - c.z) * (point.x - c.x) + (c.x - b.x) * (point.y - c.z)) / denominator
+	var weight_b := ((c.z - a.z) * (point.x - c.x) + (a.x - c.x) * (point.y - c.z)) / denominator
+	var weight_c := 1.0 - weight_a - weight_b
+	if minf(weight_a, minf(weight_b, weight_c)) < -0.00001:
+		return null
+	return weight_a * a.y + weight_b * b.y + weight_c * c.y
+
+
 func _resource_id(resource: Resource, fallback: String) -> String:
 	if resource == null:
 		return fallback
@@ -379,5 +567,8 @@ func _parse_args(args: PackedStringArray) -> Dictionary:
 
 
 func _fail(message: String) -> void:
+	if _failed:
+		return
+	_failed = true
 	push_error(message)
 	quit(2)

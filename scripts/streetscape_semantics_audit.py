@@ -351,10 +351,10 @@ def unique_cells(
 
 
 def audit(model: dict[str, Any]) -> dict[str, Any]:
-    if model.get("schema_version") != 4:
+    if model.get("schema_version") != 5:
         raise ContractError(
-            "schema_version must be 4; re-export marking mesh chains, typed termination geometry, "
-            "source-role material masks, and vertex-to-mesh support contacts"
+            "schema_version must be 5; re-export closure-policy/topmost-surface evidence, "
+            "marking-cap intersections, production placement rules, and all prior schema-v4 evidence"
         )
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
@@ -914,9 +914,10 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         zone_id = item.get("zone_id")
         if zone_id is not None:
             zone_id = text(zone_id, f"placed object {object_id}.zone_id")
+        object_class = text(item.get("class"), f"placed object {object_id}.class")
         placed_objects[object_id] = PlacedObject(
             object_id,
-            text(item.get("class"), f"placed object {object_id}.class"),
+            object_class,
             text(item.get("source_node"), f"placed object {object_id}.source_node"),
             profile_id,
             shape,
@@ -926,6 +927,40 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             closure_id,
             zone_id,
         )
+        normalized_class = object_class.lower().replace("-", "_")
+        protected_road_surfaces = {"travel_lane", "intersection", "crosswalk", "sidewalk_clear"}
+        vegetation_class = normalized_class in {
+            "tree", "stump", "rock", "bush", "vegetation", "vegetation_tree",
+            "vegetation_stump", "vegetation_rock", "vegetation_bush",
+        }
+        curb_furniture_class = normalized_class in {
+            "hydrant", "street_light", "lamp", "lamp_post", "utility_pole",
+            "traffic_signal", "traffic_sign", "road_sign", "street_sign",
+        }
+        if vegetation_class or curb_furniture_class:
+            missing_forbidden = protected_road_surfaces - set(profile.forbidden_surface_classes)
+            if missing_forbidden:
+                errors.append(
+                    f"placed object class {object_class} profile {profile_id} does not forbid "
+                    f"road/intersection/crosswalk/sidewalk-clear surfaces: {','.join(sorted(missing_forbidden))}"
+                )
+            if set(profile.allowed_surface_classes) & protected_road_surfaces:
+                errors.append(
+                    f"placed object class {object_class} profile {profile_id} permits a protected road/pedestrian surface"
+                )
+            if profile.allow_forbidden_with_closure:
+                errors.append(
+                    f"placed object class {object_class} profile {profile_id} cannot use a closure exemption"
+                )
+        if curb_furniture_class and not profile.street_furniture:
+            errors.append(
+                f"placed object class {object_class} must use a street-furniture placement profile"
+            )
+        if normalized_class in {"traffic_signal", "traffic_sign", "road_sign", "street_sign"} \
+                and not profile.approach_required:
+            errors.append(
+                f"placed object class {object_class} must require an exact road approach"
+            )
         samples = list(grid_samples(shape, sample_step).values())
         allowed_count = 0
         forbidden_count = 0
@@ -1244,6 +1279,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                     f"marking chain {chain_id} mesh {mesh_id} is not classified as road_surface/road_marking"
                 )
         endpoints: list[Vec2] = []
+        resolved_segments: list[tuple[Vec2, Vec2, str]] = []
         for segment_index, raw_segment in enumerate(
             array(item.get("segments"), f"resolved marking mesh chain {chain_id}.segments", nonempty=True)
         ):
@@ -1286,10 +1322,12 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             if distance(start, end) <= 1e-9:
                 errors.append(f"marking chain {chain_id} has a zero-length resolved segment")
             endpoints.extend((start, end))
+            resolved_segments.append((start, end, mesh_id))
         marking_chains[chain_id] = {
             "lane_ids": chain_lane_ids,
             "mesh_ids": chain_mesh_ids,
             "endpoints": endpoints,
+            "segments": resolved_segments,
         }
     expected_marking_mesh_ids = {
         mesh_id
@@ -1315,6 +1353,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     }
     termination_records: set[str] = set()
     termination_measurements: list[dict[str, Any]] = []
+    road_end_surface_measurements: list[dict[str, Any]] = []
     for index, raw in enumerate(
         array(model.get("lane_boundary_terminations"), "lane_boundary_terminations")
     ):
@@ -1381,6 +1420,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 "debris_closure",
                 "facade_closure",
                 "terrain_closure",
+                "vehicle_cordon",
             },
         }
         if profile_kind not in allowed_profiles[termination_kind]:
@@ -1424,6 +1464,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             item.get("marking_chain_ids"),
             f"lane boundary termination {node_id}.marking_chain_ids",
         )
+        physical_marking_policy: str | None = None
         relevant_marking_chains = {
             chain_id
             for chain_id, chain in marking_chains.items()
@@ -1594,7 +1635,260 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 errors.append(
                     f"lane boundary termination {node_id} uses pedestrian slab geometry as a road closure"
                 )
-        if termination_kind in {"cul_de_sac", "physical_closure"}:
+
+            road_end_policy = text(
+                item.get("road_end_policy"),
+                f"lane boundary termination {node_id}.road_end_policy",
+            )
+            expected_policy_by_profile = {
+                "vehicle_cordon": "vehicle_cordon",
+                "facade_closure": "facade_end",
+                "barrier_closure": "barrier_end",
+                "gate_closure": "gate_end",
+                "debris_closure": "debris_end",
+                "terrain_closure": "terrain_end",
+            }
+            expected_policy = expected_policy_by_profile.get(profile_kind)
+            if road_end_policy != expected_policy:
+                errors.append(
+                    f"lane boundary termination {node_id} road-end policy {road_end_policy} "
+                    f"does not match {profile_kind}; expected {expected_policy}"
+                )
+
+            physical_marking_policy = text(
+                item.get("marking_policy"),
+                f"lane boundary termination {node_id}.marking_policy",
+            )
+            allowed_marking_policies = {
+                "vehicle_cordon": {"stop_before_cause", "continue_under_visible_vehicle_cause"},
+                "facade_end": {"stop_before_cause"},
+                "barrier_end": {"stop_before_cause"},
+                "gate_end": {"stop_before_cause"},
+                "debris_end": {"stop_before_cause"},
+                "terrain_end": {"stop_before_cause"},
+            }
+            if physical_marking_policy not in allowed_marking_policies.get(road_end_policy, set()):
+                errors.append(
+                    f"lane boundary termination {node_id} marking policy {physical_marking_policy} "
+                    f"does not match road-end policy {road_end_policy}"
+                )
+
+            overlay_mesh_ids = strings(
+                item.get("termination_overlay_mesh_ids"),
+                f"lane boundary termination {node_id}.termination_overlay_mesh_ids",
+            )
+            unknown_overlays = sorted(overlay_mesh_ids - set(resolved_meshes))
+            if unknown_overlays:
+                errors.append(
+                    f"lane boundary termination {node_id} references unknown termination overlays: "
+                    + ", ".join(unknown_overlays)
+                )
+            if overlay_mesh_ids:
+                errors.append(
+                    f"lane boundary termination {node_id} uses surrogate road-end overlay geometry; "
+                    "reconstruct the real road, facade, terrain, or visible cause instead"
+                )
+
+            relation = obj(
+                item.get("road_substrate_relation"),
+                f"lane boundary termination {node_id}.road_substrate_relation",
+            )
+            if text(
+                relation.get("source_kind"),
+                f"lane boundary termination {node_id}.road_substrate_relation.source_kind",
+            ) != "exporter_resolved_topmost_render_mesh_samples":
+                errors.append(
+                    f"lane boundary termination {node_id} road/substrate relation is adapter-declared"
+                )
+            ray_top_y = number(
+                relation.get("ray_top_y"),
+                f"lane boundary termination {node_id}.road_substrate_relation.ray_top_y",
+            )
+            ray_bottom_y = number(
+                relation.get("ray_bottom_y"),
+                f"lane boundary termination {node_id}.road_substrate_relation.ray_bottom_y",
+            )
+            if ray_top_y <= ray_bottom_y:
+                raise ContractError(
+                    f"lane boundary termination {node_id} topmost render query has inverted Y bounds"
+                )
+            road_substrate_continues = boolean(
+                relation.get("road_substrate_continues"),
+                f"lane boundary termination {node_id}.road_substrate_relation.road_substrate_continues",
+            )
+            expected_continuation = road_end_policy in {
+                "vehicle_cordon", "barrier_end", "gate_end", "debris_end"
+            }
+            if road_substrate_continues != expected_continuation:
+                verb = "continue beneath/through the visible closure" if expected_continuation else "stop before the facade/terrain"
+                errors.append(
+                    f"lane boundary termination {node_id} road substrate must {verb}"
+                )
+            required_phases = (
+                {"before_cause", "between_causes", "beyond_cause"}
+                if road_end_policy == "vehicle_cordon" and len(raw_cause_ids) >= 2
+                else {"before_cause", "beyond_cause"}
+                if road_end_policy == "vehicle_cordon"
+                else {"before_cause", "beyond_cause"}
+                if expected_continuation
+                else {"before_cause", "at_cause"}
+            )
+            observed_phases: set[str] = set()
+            forbidden_surrogate_classes = {
+                "closure_patch", "road_end_patch", "surrogate_overlay",
+                "surrogate_vehicle_bed", "dark_vehicle_bed", "debug_plane",
+            }
+            for sample_index, raw_sample in enumerate(
+                array(
+                    relation.get("samples"),
+                    f"lane boundary termination {node_id}.road_substrate_relation.samples",
+                    nonempty=True,
+                )
+            ):
+                sample = obj(
+                    raw_sample,
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}",
+                )
+                if text(
+                    sample.get("source_kind"),
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}.source_kind",
+                ) != "exporter_resolved_topmost_render_mesh_sample":
+                    errors.append(
+                        f"lane boundary termination {node_id} road/substrate sample {sample_index} is adapter-declared"
+                    )
+                phase = text(
+                    sample.get("phase"),
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}.phase",
+                )
+                if phase in observed_phases:
+                    raise ContractError(
+                        f"lane boundary termination {node_id} duplicates road/substrate phase {phase}"
+                    )
+                observed_phases.add(phase)
+                vec2(
+                    sample.get("point"),
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}.point",
+                )
+                sample_surface_class = text(
+                    sample.get("surface_class"),
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}.surface_class",
+                )
+                sample_mesh_id = text(
+                    sample.get("mesh_instance_id"),
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}.mesh_instance_id",
+                )
+                topmost_mesh_id = text(
+                    sample.get("topmost_mesh_instance_id"),
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}.topmost_mesh_instance_id",
+                )
+                covering_mesh_ids = strings(
+                    sample.get("covering_mesh_instance_ids"),
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}.covering_mesh_instance_ids",
+                )
+                coplanar_top_mesh_ids = strings(
+                    sample.get("coplanar_top_mesh_instance_ids"),
+                    f"lane boundary termination {node_id} road/substrate sample {sample_index}.coplanar_top_mesh_instance_ids",
+                    nonempty=True,
+                )
+                for mesh_id in sorted(
+                    {sample_mesh_id, topmost_mesh_id} | covering_mesh_ids | coplanar_top_mesh_ids
+                ):
+                    if mesh_id not in resolved_meshes:
+                        errors.append(
+                            f"lane boundary termination {node_id} road/substrate sample {sample_index} "
+                            f"references missing resolved mesh {mesh_id}"
+                        )
+                if topmost_mesh_id not in coplanar_top_mesh_ids:
+                    errors.append(
+                        f"lane boundary termination {node_id} road/substrate sample {sample_index} "
+                        "topmost mesh is absent from its exporter-resolved coplanar set"
+                    )
+                if len(coplanar_top_mesh_ids) > 1:
+                    errors.append(
+                        f"lane boundary termination {node_id} road/substrate sample {sample_index} "
+                        "has ambiguous coplanar top meshes/z-fighting at the road end"
+                    )
+                topmost_classification = classifications.get(topmost_mesh_id, {})
+                topmost_semantic_class = topmost_classification.get("class")
+                covering_classes = {
+                    classifications.get(mesh_id, {}).get("class") for mesh_id in covering_mesh_ids
+                }
+                road_end_surface_measurements.append(
+                    {
+                        "node_id": node_id,
+                        "road_end_policy": road_end_policy,
+                        "phase": phase,
+                        "surface_class": sample_surface_class,
+                        "base_mesh_instance_id": sample_mesh_id,
+                        "topmost_mesh_instance_id": topmost_mesh_id,
+                        "covering_mesh_instance_ids": sorted(covering_mesh_ids),
+                        "coplanar_top_mesh_instance_ids": sorted(coplanar_top_mesh_ids),
+                    }
+                )
+                if topmost_semantic_class in forbidden_surrogate_classes or covering_classes & forbidden_surrogate_classes:
+                    errors.append(
+                        f"lane boundary termination {node_id} road/substrate sample {sample_index} "
+                        "is hidden by a surrogate/dark closure plane"
+                    )
+                if phase in {"before_cause", "between_causes", "beyond_cause"} and expected_continuation:
+                    if sample_surface_class != "travel_lane":
+                        errors.append(
+                            f"lane boundary termination {node_id} phase {phase} does not preserve road substrate"
+                        )
+                    base_classification = classifications.get(sample_mesh_id, {})
+                    if base_classification.get("scope") != "road_surface" or base_classification.get("class") != "road_surface":
+                        errors.append(
+                            f"lane boundary termination {node_id} phase {phase} is not resolved from the authored road mesh"
+                        )
+                    if topmost_mesh_id != sample_mesh_id or covering_mesh_ids:
+                        errors.append(
+                            f"lane boundary termination {node_id} phase {phase} is covered by ad-hoc termination geometry"
+                        )
+                if road_end_policy in {"facade_end", "terrain_end"}:
+                    if phase == "before_cause":
+                        base_classification = classifications.get(sample_mesh_id, {})
+                        if sample_surface_class != "travel_lane" \
+                                or base_classification.get("scope") != "road_surface" \
+                                or base_classification.get("class") != "road_surface" \
+                                or topmost_mesh_id != sample_mesh_id or covering_mesh_ids:
+                            errors.append(
+                                f"lane boundary termination {node_id} lacks unobstructed authored road substrate before its semantic end"
+                            )
+                    if phase == "at_cause":
+                        if sample_surface_class == "travel_lane":
+                            errors.append(
+                                f"lane boundary termination {node_id} road substrate continues into its facade/terrain"
+                            )
+                        valid_end_mass = (
+                            topmost_classification.get("scope") in {"building", "boundary_structure"}
+                            if road_end_policy == "facade_end"
+                            else topmost_classification.get("scope") in {"boundary_structure", "other"}
+                            and topmost_classification.get("class") in {"terrain", "cliff", "landscape"}
+                        )
+                        if not valid_end_mass:
+                            errors.append(
+                                f"lane boundary termination {node_id} semantic end is not the topmost facade/terrain mass"
+                            )
+            if observed_phases != required_phases:
+                errors.append(
+                    f"lane boundary termination {node_id} road/substrate phases do not exactly cover "
+                    f"{','.join(sorted(required_phases))}"
+                )
+
+            if physical_marking_policy == "stop_before_cause":
+                for chain_id in sorted(marking_chain_ids & set(marking_chains)):
+                    if any(
+                        point_in_polygon(point, list(geometry_footprint))
+                        for start, end, _ in marking_chains[chain_id]["segments"]
+                        for point in sample_segment(start, end, graph_step)
+                    ):
+                        errors.append(
+                            f"lane boundary termination {node_id} marking mesh {chain_id} lies beneath/intersects its closure geometry"
+                        )
+
+        if termination_kind == "cul_de_sac" or (
+            termination_kind == "physical_closure" and physical_marking_policy == "stop_before_cause"
+        ):
             minimum_marking = number(
                 item.get("minimum_marking_stop_distance"),
                 f"lane boundary termination {node_id}.minimum_marking_stop_distance",
@@ -2802,6 +3096,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         "resolved_marking_mesh_chain_count": len(marking_chains),
         "lane_boundary_termination_count": len(termination_records),
         "lane_boundary_termination_measurements": termination_measurements,
+        "road_end_surface_measurements": road_end_surface_measurements,
         "visible_building_count": len(buildings_seen),
         "resolved_building_source_role_count": sum(
             len(roles) for roles in resolved_building_source_roles.values()

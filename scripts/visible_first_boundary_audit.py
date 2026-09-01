@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import deque
 from math import acos, ceil, degrees, hypot
 import json
 from pathlib import Path
@@ -18,6 +19,7 @@ from environment_integrity_audit import (
     integer,
     number,
     obj,
+    point_in_polygon,
     strings,
     text,
     vec2,
@@ -85,8 +87,11 @@ def segment_points(start: Vec2, end: Vec2, spacing: float) -> list[Vec2]:
 
 
 def audit(model: dict[str, Any]) -> dict[str, Any]:
-    if model.get("schema_version") != 1:
-        raise ContractError("schema_version must be 1")
+    if model.get("schema_version") != 2:
+        raise ContractError(
+            "schema_version must be 2; regenerate exporter-owned production-physics "
+            "reachability and visible-limiter continuity evidence"
+        )
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
     raw_provenance = obj(model.get("scene_provenance"), "scene_provenance")
@@ -148,6 +153,40 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     maximum_unmapped_first = integer(
         contract.get("maximum_unmapped_first_hits"),
         "contract.maximum_unmapped_first_hits",
+    )
+    minimum_unsafe_fringe_cells = integer(
+        contract.get("minimum_unsafe_fringe_cell_count"),
+        "contract.minimum_unsafe_fringe_cell_count",
+        1,
+    )
+    minimum_unsafe_free_cells = integer(
+        contract.get("minimum_unsafe_free_cell_count"),
+        "contract.minimum_unsafe_free_cell_count",
+        1,
+    )
+    required_unsafe_fringe_sides = strings(
+        contract.get("required_unsafe_fringe_sides"),
+        "contract.required_unsafe_fringe_sides",
+        nonempty=True,
+    )
+    if not required_unsafe_fringe_sides <= {"north", "south", "east", "west"}:
+        raise ContractError("contract.required_unsafe_fringe_sides contains an unknown side")
+    maximum_reachable_unsafe_cells = integer(
+        contract.get("maximum_reachable_unsafe_cells"),
+        "contract.maximum_reachable_unsafe_cells",
+    )
+    maximum_inside_safe_no_ground_cells = integer(
+        contract.get("maximum_inside_safe_no_ground_cells"),
+        "contract.maximum_inside_safe_no_ground_cells",
+    )
+    maximum_unreachable_inside_free_cells = integer(
+        contract.get("maximum_unreachable_inside_safe_free_cells"),
+        "contract.maximum_unreachable_inside_safe_free_cells",
+    )
+    maximum_cell_size_ratio = number(
+        contract.get("maximum_cell_size_to_hero_radius_ratio"),
+        "contract.maximum_cell_size_to_hero_radius_ratio",
+        minimum=1e-6,
     )
 
     cause_mappings: dict[str, dict[str, set[str]]] = {}
@@ -249,6 +288,360 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     probe_count = 0
     used_causes: set[str] = set()
     used_safety_colliders: set[str] = set()
+
+    reachability = obj(
+        model.get("production_physics_reachability"),
+        "production_physics_reachability",
+    )
+    if text(
+        reachability.get("source_kind"),
+        "production_physics_reachability.source_kind",
+    ) != "exporter_resolved_production_physics_grid":
+        errors.append("boundary reachability is adapter-declared rather than exporter-resolved")
+    if text(reachability.get("build_id"), "production_physics_reachability.build_id") != build_id:
+        errors.append("production physics reachability build_id does not match the candidate")
+    if text(reachability.get("scene_path"), "production_physics_reachability.scene_path") != scene_path:
+        errors.append("production physics reachability scene_path does not match provenance")
+    integer(reachability.get("physics_frame"), "production_physics_reachability.physics_frame", 1)
+    text(reachability.get("region_node_path"), "production_physics_reachability.region_node_path")
+    text(reachability.get("hero_body_path"), "production_physics_reachability.hero_body_path")
+    text(reachability.get("hero_shape_path"), "production_physics_reachability.hero_shape_path")
+    if text(
+        reachability.get("hero_shape_class"),
+        "production_physics_reachability.hero_shape_class",
+    ) != "CapsuleShape3D":
+        errors.append("production physics reachability does not use the production hero capsule")
+    measured_hero_radius = number(
+        reachability.get("hero_radius"),
+        "production_physics_reachability.hero_radius",
+        minimum=1e-6,
+    )
+    measured_hero_height = number(
+        reachability.get("hero_height"),
+        "production_physics_reachability.hero_height",
+        minimum=1e-6,
+    )
+    if abs(measured_hero_radius - hero_radius) > 1e-6 or abs(measured_hero_height - hero_height) > 1e-6:
+        errors.append("production physics reachability hero capsule disagrees with the boundary contract")
+    grid_origin = vec2(
+        reachability.get("grid_origin"),
+        "production_physics_reachability.grid_origin",
+    )
+    grid_width = integer(
+        reachability.get("grid_width"),
+        "production_physics_reachability.grid_width",
+        2,
+    )
+    grid_height = integer(
+        reachability.get("grid_height"),
+        "production_physics_reachability.grid_height",
+        2,
+    )
+    grid_cell_size = number(
+        reachability.get("cell_size"),
+        "production_physics_reachability.cell_size",
+        minimum=1e-6,
+    )
+    if grid_cell_size > measured_hero_radius * maximum_cell_size_ratio + 1e-9:
+        errors.append(
+            f"production physics grid cell size {grid_cell_size:.4f} exceeds the "
+            f"hero-radius sampling budget {measured_hero_radius * maximum_cell_size_ratio:.4f}"
+        )
+    integer(
+        reachability.get("ground_collision_mask"),
+        "production_physics_reachability.ground_collision_mask",
+        1,
+    )
+    integer(
+        reachability.get("blocker_collision_mask"),
+        "production_physics_reachability.blocker_collision_mask",
+        1,
+    )
+    number(
+        reachability.get("query_margin"),
+        "production_physics_reachability.query_margin",
+        minimum=0.0,
+    )
+    if text(
+        reachability.get("safe_region_source_kind"),
+        "production_physics_reachability.safe_region_source_kind",
+    ) != "production_scene_metadata":
+        errors.append("production physics safe region is not owned by the production scene")
+    safe_polygon = [
+        vec2(value, f"production_physics_reachability.safe_region_polygon[{index}]")
+        for index, value in enumerate(
+            array(
+                reachability.get("safe_region_polygon"),
+                "production_physics_reachability.safe_region_polygon",
+                nonempty=True,
+            )
+        )
+    ]
+    if len(safe_polygon) < 3:
+        raise ContractError("production_physics_reachability.safe_region_polygon needs 3 points")
+    cell_classes: dict[tuple[int, int], str] = {}
+    cell_inside_safe: dict[tuple[int, int], bool] = {}
+    unsafe_fringe_sides: set[str] = set()
+    unsafe_fringe_count = 0
+    unsafe_free_count = 0
+    inside_safe_no_ground_count = 0
+    for index, raw_cell in enumerate(
+        array(reachability.get("cells"), "production_physics_reachability.cells", nonempty=True)
+    ):
+        cell = obj(raw_cell, f"production_physics_reachability.cells[{index}]")
+        raw_coordinates = array(
+            cell.get("cell"), f"production_physics_reachability.cells[{index}].cell"
+        )
+        if len(raw_coordinates) != 2:
+            raise ContractError(f"production physics cell {index} needs two coordinates")
+        coordinates = (
+            integer(raw_coordinates[0], f"production physics cell {index}.x"),
+            integer(raw_coordinates[1], f"production physics cell {index}.z"),
+        )
+        if not (0 <= coordinates[0] < grid_width and 0 <= coordinates[1] < grid_height):
+            raise ContractError(f"production physics cell {coordinates} lies outside the grid")
+        if coordinates in cell_classes:
+            raise ContractError(f"duplicate production physics cell {coordinates}")
+        world_xz = vec2(
+            cell.get("world_xz"), f"production_physics_reachability.cells[{index}].world_xz"
+        )
+        expected_world = (
+            grid_origin[0] + (coordinates[0] + 0.5) * grid_cell_size,
+            grid_origin[1] + (coordinates[1] + 0.5) * grid_cell_size,
+        )
+        if distance(world_xz, expected_world) > position_tolerance + 1e-9:
+            errors.append(f"production physics cell {coordinates} has a synthetic world position")
+        declared_inside = boolean(
+            cell.get("inside_safe_region"),
+            f"production_physics_reachability.cells[{index}].inside_safe_region",
+        )
+        resolved_inside = point_in_polygon(world_xz, safe_polygon)
+        if declared_inside != resolved_inside:
+            errors.append(f"production physics cell {coordinates} safe-region flag is inconsistent")
+        classification = text(
+            cell.get("classification"),
+            f"production_physics_reachability.cells[{index}].classification",
+        )
+        if classification not in {"free", "blocked", "no_ground"}:
+            raise ContractError(f"production physics cell {coordinates} has unknown classification")
+        if classification != "no_ground":
+            number(
+                cell.get("ground_y"),
+                f"production_physics_reachability.cells[{index}].ground_y",
+            )
+            text(
+                cell.get("ground_collider_id"),
+                f"production_physics_reachability.cells[{index}].ground_collider_id",
+            )
+        cell_classes[coordinates] = classification
+        cell_inside_safe[coordinates] = resolved_inside
+        if resolved_inside and classification == "no_ground":
+            inside_safe_no_ground_count += 1
+        if not resolved_inside:
+            unsafe_fringe_count += 1
+            if classification == "free":
+                unsafe_free_count += 1
+            if coordinates[0] == 0:
+                unsafe_fringe_sides.add("west")
+            if coordinates[0] == grid_width - 1:
+                unsafe_fringe_sides.add("east")
+            if coordinates[1] == 0:
+                unsafe_fringe_sides.add("north")
+            if coordinates[1] == grid_height - 1:
+                unsafe_fringe_sides.add("south")
+    expected_cells = {(x, z) for z in range(grid_height) for x in range(grid_width)}
+    if set(cell_classes) != expected_cells:
+        errors.append("production physics grid does not exactly cover every declared cell")
+    if unsafe_fringe_count < minimum_unsafe_fringe_cells:
+        errors.append(
+            f"production physics grid has {unsafe_fringe_count} unsafe-fringe cells; "
+            f"minimum is {minimum_unsafe_fringe_cells}"
+        )
+    if unsafe_free_count < minimum_unsafe_free_cells:
+        errors.append(
+            f"production physics grid has {unsafe_free_count} free unsafe-fringe cells; "
+            f"minimum is {minimum_unsafe_free_cells}"
+        )
+    if not required_unsafe_fringe_sides <= unsafe_fringe_sides:
+        errors.append(
+            "production physics grid does not exercise every required unsafe-fringe side"
+        )
+    start_cells: set[tuple[int, int]] = set()
+    for index, raw_start in enumerate(
+        array(reachability.get("starts"), "production_physics_reachability.starts", nonempty=True)
+    ):
+        start = obj(raw_start, f"production_physics_reachability.starts[{index}]")
+        text(start.get("node_path"), f"production physics start {index}.node_path")
+        world_position = array(
+            start.get("world_position"), f"production physics start {index}.world_position"
+        )
+        if len(world_position) != 3:
+            raise ContractError(f"production physics start {index} needs a 3D world position")
+        for component_index, component in enumerate(world_position):
+            number(component, f"production physics start {index}.world_position[{component_index}]")
+        raw_cell = array(start.get("cell"), f"production physics start {index}.cell")
+        if len(raw_cell) != 2:
+            raise ContractError(f"production physics start {index} needs two cell coordinates")
+        start_cell = (
+            integer(raw_cell[0], f"production physics start {index}.cell.x"),
+            integer(raw_cell[1], f"production physics start {index}.cell.z"),
+        )
+        if cell_classes.get(start_cell) != "free" or not cell_inside_safe.get(start_cell, False):
+            errors.append(f"production physics start {index} is not free inside the safe region")
+        start_cells.add(start_cell)
+    reachable_cells = set(start_cells)
+    queue: deque[tuple[int, int]] = deque(start_cells)
+    while queue:
+        current = queue.popleft()
+        for dx, dz in (
+            (1, 0), (-1, 0), (0, 1), (0, -1),
+            (1, 1), (1, -1), (-1, 1), (-1, -1),
+        ):
+            neighbor = (current[0] + dx, current[1] + dz)
+            if (
+                neighbor in reachable_cells
+                or cell_classes.get(neighbor) != "free"
+            ):
+                continue
+            reachable_cells.add(neighbor)
+            queue.append(neighbor)
+    reachable_unsafe_cells = {
+        cell for cell in reachable_cells if not cell_inside_safe.get(cell, False)
+    }
+    unreachable_inside_free_cells = {
+        cell
+        for cell, classification in cell_classes.items()
+        if classification == "free" and cell_inside_safe.get(cell, False) and cell not in reachable_cells
+    }
+    if len(reachable_unsafe_cells) > maximum_reachable_unsafe_cells:
+        errors.append(
+            f"production hero capsule reaches {len(reachable_unsafe_cells)} unsafe-fringe cells; "
+            f"maximum is {maximum_reachable_unsafe_cells}"
+        )
+    if inside_safe_no_ground_count > maximum_inside_safe_no_ground_cells:
+        errors.append(
+            f"production safe region has {inside_safe_no_ground_count} no-ground cells; "
+            f"maximum is {maximum_inside_safe_no_ground_cells}"
+        )
+    if len(unreachable_inside_free_cells) > maximum_unreachable_inside_free_cells:
+        errors.append(
+            f"production safe region has {len(unreachable_inside_free_cells)} unreachable free cells; "
+            f"maximum is {maximum_unreachable_inside_free_cells}"
+        )
+
+    limiter_ledger = obj(
+        model.get("visible_limiter_continuity"),
+        "visible_limiter_continuity",
+    )
+    if text(
+        limiter_ledger.get("source_kind"),
+        "visible_limiter_continuity.source_kind",
+    ) != "resolved_scene_visible_limiter_ledger":
+        errors.append("visible limiter continuity ledger is not resolved-scene evidence")
+    text(limiter_ledger.get("baseline_build_id"), "visible_limiter_continuity.baseline_build_id")
+    text(
+        limiter_ledger.get("baseline_manifest_path"),
+        "visible_limiter_continuity.baseline_manifest_path",
+    )
+    baseline_manifest_sha256 = text(
+        limiter_ledger.get("baseline_manifest_sha256"),
+        "visible_limiter_continuity.baseline_manifest_sha256",
+    ).lower()
+    if len(baseline_manifest_sha256) != 64 or any(
+        value not in "0123456789abcdef" for value in baseline_manifest_sha256
+    ):
+        raise ContractError("visible_limiter_continuity.baseline_manifest_sha256 must be SHA-256")
+    baseline_limiter_ids = strings(
+        limiter_ledger.get("baseline_limiter_ids"),
+        "visible_limiter_continuity.baseline_limiter_ids",
+        nonempty=True,
+    )
+    current_limiter_ids = strings(
+        limiter_ledger.get("current_limiter_ids"),
+        "visible_limiter_continuity.current_limiter_ids",
+        nonempty=True,
+    )
+    mapped_current_limiter_ids = {
+        object_id
+        for mapping in cause_mappings.values()
+        for object_id in mapping["object_ids"]
+    }
+    if current_limiter_ids != mapped_current_limiter_ids:
+        errors.append(
+            "current visible limiter ledger does not exactly match visible-cause mappings"
+        )
+    ledger_entries: set[str] = set()
+    for index, raw_entry in enumerate(
+        array(limiter_ledger.get("entries"), "visible_limiter_continuity.entries", nonempty=True)
+    ):
+        entry = obj(raw_entry, f"visible_limiter_continuity.entries[{index}]")
+        limiter_id = text(entry.get("limiter_id"), f"visible limiter entry {index}.limiter_id")
+        if limiter_id in ledger_entries:
+            raise ContractError(f"duplicate visible limiter continuity entry {limiter_id}")
+        ledger_entries.add(limiter_id)
+        if limiter_id not in baseline_limiter_ids:
+            errors.append(f"visible limiter continuity entry {limiter_id} is absent from baseline")
+        disposition = text(
+            entry.get("disposition"), f"visible limiter entry {limiter_id}.disposition"
+        )
+        replacement_ids = strings(
+            entry.get("replacement_visible_cause_ids"),
+            f"visible limiter entry {limiter_id}.replacement_visible_cause_ids",
+        )
+        affected_spans = strings(
+            entry.get("affected_span_ids"),
+            f"visible limiter entry {limiter_id}.affected_span_ids",
+            nonempty=True,
+        )
+        if not affected_spans <= set(spans):
+            errors.append(f"visible limiter entry {limiter_id} references unknown perimeter spans")
+        if disposition == "retained":
+            if limiter_id not in current_limiter_ids or replacement_ids:
+                errors.append(f"retained visible limiter {limiter_id} is missing or names replacements")
+        elif disposition == "replaced_with_continuity_proof":
+            if limiter_id in current_limiter_ids:
+                errors.append(f"replaced visible limiter {limiter_id} still appears in current IDs")
+            if not replacement_ids or not replacement_ids <= current_limiter_ids:
+                errors.append(f"visible limiter {limiter_id} lacks current visible replacements")
+            proof = obj(
+                entry.get("continuity_proof"),
+                f"visible limiter entry {limiter_id}.continuity_proof",
+            )
+            proof_kinds = strings(
+                proof.get("proof_kinds"),
+                f"visible limiter entry {limiter_id}.continuity_proof.proof_kinds",
+                nonempty=True,
+            )
+            if not {"production_physics_reachability", "visible_first_perimeter"} <= proof_kinds:
+                errors.append(
+                    f"visible limiter {limiter_id} replacement lacks whole-body and first-hit proof"
+                )
+            for phase in ("before", "fixed", "rerun"):
+                artifact = obj(
+                    proof.get(phase),
+                    f"visible limiter entry {limiter_id}.continuity_proof.{phase}",
+                )
+                text(
+                    artifact.get("build_id"),
+                    f"visible limiter entry {limiter_id}.continuity_proof.{phase}.build_id",
+                )
+                text(
+                    artifact.get("raw_artifact"),
+                    f"visible limiter entry {limiter_id}.continuity_proof.{phase}.raw_artifact",
+                )
+            rerun = obj(proof.get("rerun"), "visible limiter continuity rerun")
+            if text(
+                rerun.get("build_id"),
+                f"visible limiter entry {limiter_id}.continuity_proof.rerun.build_id",
+            ) != build_id:
+                errors.append(f"visible limiter {limiter_id} continuity rerun is stale")
+        else:
+            errors.append(
+                f"visible limiter {limiter_id} has unsupported disposition {disposition}; "
+                "boundary limiters cannot be deleted without mapped replacement continuity"
+            )
+    if ledger_entries != baseline_limiter_ids:
+        errors.append("visible limiter continuity entries do not exactly cover baseline limiters")
 
     def inspect_hits(label: str, raw_hits: Any, span: dict[str, Any]) -> None:
         nonlocal invisible_first_count, unmapped_first_count, probe_count
@@ -429,6 +822,18 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     integer(raw_evidence.get("collision_mask"), "raw_evidence.collision_mask", 1)
     text(raw_evidence.get("raw_trace_artifact"), "raw_evidence.raw_trace_artifact")
     text(raw_evidence.get("raw_overview_artifact"), "raw_evidence.raw_overview_artifact")
+    text(
+        raw_evidence.get("production_physics_grid_artifact"),
+        "raw_evidence.production_physics_grid_artifact",
+    )
+    text(
+        raw_evidence.get("production_physics_contact_sheet_artifact"),
+        "raw_evidence.production_physics_contact_sheet_artifact",
+    )
+    text(
+        raw_evidence.get("visible_limiter_continuity_artifact"),
+        "raw_evidence.visible_limiter_continuity_artifact",
+    )
     detected = strings(
         raw_evidence.get("detected_defect_classes"),
         "raw_evidence.detected_defect_classes",
@@ -478,6 +883,20 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         "physics_probe_count": probe_count,
         "visible_cause_mapping_count": len(cause_mappings),
         "safety_boundary_collider_count": len(safety_colliders),
+        "production_physics_grid_cell_count": len(cell_classes),
+        "production_physics_free_cell_count": sum(
+            value == "free" for value in cell_classes.values()
+        ),
+        "production_physics_reachable_cell_count": len(reachable_cells),
+        "production_physics_unsafe_fringe_cell_count": unsafe_fringe_count,
+        "production_physics_unsafe_free_cell_count": unsafe_free_count,
+        "production_physics_reachable_unsafe_cell_count": len(reachable_unsafe_cells),
+        "production_physics_inside_safe_no_ground_cell_count": inside_safe_no_ground_count,
+        "production_physics_unreachable_inside_free_cell_count": len(
+            unreachable_inside_free_cells
+        ),
+        "baseline_visible_limiter_count": len(baseline_limiter_ids),
+        "current_visible_limiter_count": len(current_limiter_ids),
         "invisible_first_hit_count": invisible_first_count,
         "unmapped_first_hit_count": unmapped_first_count,
         "errors": errors,

@@ -274,7 +274,8 @@ Before owner or independent review, capture the exact target build with the ordi
 13. a gameplay-camera material-detail frame showing texture preservation, facade/roof/trim separation and localized weathering.
 14. environment-integrity close-ups for transformed prop occupancy, full-footprint semantic surface ownership, visible ground coverage/seams and vertical clearance, plus a clean deterministic rerun.
 15. a deterministic shipping-camera tiled survey covering the complete playable footprint, all-enabled-static-collider/render-shell and hero-radius overlays, production occluder fade/restoration, and high-risk topmost surface/object pairs.
-16. for streets, an exporter-owned complete visible-mesh inventory, resolved marking mesh chains, typed road-termination geometry, real source mesh/atlas role provenance, rendered facade/roof/openings/trim pixel masks with flood-fill metrics, and every visible canopy/awning/support vertex-to-ground/mount contact.
+16. exporter-owned production-capsule reachability over a nonempty outside fringe plus a baseline/current visible-limiter continuity ledger;
+17. for streets, an exporter-owned complete visible-mesh inventory, resolved marking mesh chains, typed road-end policy with before/at/between/beyond topmost-surface samples, marking-versus-cap intersections, real source mesh/atlas role provenance, rendered facade/roof/openings/trim pixel masks with flood-fill metrics, class-specific placement rules, and every visible canopy/awning/support vertex-to-ground/mount contact.
 
 Fill the template's ledgers and declare PASS/FAIL/NOT TESTED for every row. The builder must fail the gate when:
 
@@ -288,11 +289,12 @@ Fill the template's ledgers and declare PASS/FAIL/NOT TESTED for every row. The 
 - the primary landmark disappears at required decisions with no secondary wayfinding anchor;
 - a view corridor ends in map void, cloned backdrop rows or a flat billboard;
 - colliders stop the player before the visible boundary or close a visible opening;
+- the production hero body can leave the safe region although a hard-coded boundary raster says PASS, or a visible limiter is deleted without mapped replacement-continuity proof;
 - a beautiful still hides camera lag, overshoot, pressure zoom pumping, volume snapping, occlusion loss or failed restoration;
 - only prop counts, scene-tree validity, navmesh coverage, occlusion-culling statistics or editor free-camera screenshots are offered.
 - collision/boundary coverage passes while visible props penetrate one another, nature footprints cross authored road/sidewalk, a broad floor collider hides holes in the render meshes, or overhead structures lack measured clearance.
 - one broad semantic region accepts incompatible top surfaces, fallback/patchwork exceeds zone budgets, survey cells remain unseen, an enabled static collider lacks visible mass, a production collision root lacks a real visual alias/trace, or an allowed curb/concrete face still fuses with a vehicle.
-- a streetscape adapter invents facade/roof/openings/trim slots, areas, marking distances or mount gaps; omits a visible lamp/pole/support class; validates only resource colors or facade/roof normals instead of source-role target-build pixels; uses a common road mesh or sidewalk slab as a closure; lets markings continue beneath it; leaves an off-map road without sidewalk/curb/markings or inside a building footprint; or leaves an awning/support visibly floating.
+- a streetscape adapter invents facade/roof/openings/trim slots, areas, marking distances or mount gaps; omits a visible lamp/pole/support class; validates only resource colors or facade/roof normals instead of source-role target-build pixels; uses a common road mesh, dark surrogate plane or sidewalk slab as a closure; lets markings continue beneath it; fails to continue road substrate between/beyond vehicle cordons; carries road/markings into a facade end; permits vegetation/hydrants/lamps/signals on protected road/pedestrian surfaces; leaves an off-map road without sidewalk/curb/markings or inside a building footprint; leaves an awning/support visibly floating; or logs exporter failure and later emits `[PASS]`.
 
 Do not increase density until the map passes. First fix massing, hierarchy, zone function, boundary causes, route termination and variation grammar; then add only the clusters that support them.
 

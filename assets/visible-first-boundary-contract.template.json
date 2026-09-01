@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "contract_id": "example-high-angle-visible-first-boundary",
   "build_id": "replace-with-exact-target-build-id",
   "scene_provenance": {
@@ -17,8 +17,8 @@
   },
   "contract": {
     "coordinate_system": "godot_xz_y_up",
-    "hero_radius": 0.35,
-    "hero_height": 1.8,
+    "hero_radius": 1.0,
+    "hero_height": 2.4,
     "maximum_sample_spacing": 0.5,
     "maximum_ray_bundle_gap": 0.25,
     "sample_position_tolerance": 0.01,
@@ -27,7 +27,14 @@
     "expected_span_count": 1,
     "expected_sample_count": 4,
     "maximum_invisible_first_hits": 0,
-    "maximum_unmapped_first_hits": 0
+    "maximum_unmapped_first_hits": 0,
+    "minimum_unsafe_fringe_cell_count": 32,
+    "minimum_unsafe_free_cell_count": 20,
+    "required_unsafe_fringe_sides": ["north", "south", "east", "west"],
+    "maximum_reachable_unsafe_cells": 0,
+    "maximum_inside_safe_no_ground_cells": 0,
+    "maximum_unreachable_inside_safe_free_cells": 0,
+    "maximum_cell_size_to_hero_radius_ratio": 1.0
   },
   "visible_cause_mappings": [
     {
@@ -40,6 +47,22 @@
   "safety_boundary_collider_ids": [
     "World/Boundary/EastSafetyWall"
   ],
+  "visible_limiter_continuity": {
+    "source_kind": "resolved_scene_visible_limiter_ledger",
+    "baseline_build_id": "replace-with-reviewed-baseline-build-id",
+    "baseline_manifest_path": "reports/raw/boundary/baseline-visible-limiters.json",
+    "baseline_manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "baseline_limiter_ids": ["clinic-wall"],
+    "current_limiter_ids": ["clinic-wall"],
+    "entries": [
+      {
+        "limiter_id": "clinic-wall",
+        "disposition": "retained",
+        "replacement_visible_cause_ids": [],
+        "affected_span_ids": ["east-clinic"]
+      }
+    ]
+  },
   "declared_perimeter_spans": [
     {
       "id": "east-clinic",
@@ -61,8 +84,8 @@
       "origin": [8.0, 8.25],
       "direction": [1.0, 0.0],
       "probe_kind": "capsule_sweep",
-      "probe_radius": 0.35,
-      "probe_height": 1.8,
+      "probe_radius": 1.0,
+      "probe_height": 2.4,
       "ordered_hits": [
         {"distance": 0.5, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
         {"distance": 1.2, "kind": "safety_boundary", "collider_id": "World/Boundary/EastSafetyWall"}
@@ -75,8 +98,8 @@
       "origin": [8.0, 8.75],
       "direction": [1.0, 0.0],
       "probe_kind": "capsule_sweep",
-      "probe_radius": 0.35,
-      "probe_height": 1.8,
+      "probe_radius": 1.0,
+      "probe_height": 2.4,
       "ordered_hits": [
         {"distance": 0.5, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
         {"distance": 1.2, "kind": "safety_boundary", "collider_id": "World/Boundary/EastSafetyWall"}
@@ -89,8 +112,8 @@
       "origin": [8.0, 9.25],
       "direction": [1.0, 0.0],
       "probe_kind": "capsule_sweep",
-      "probe_radius": 0.35,
-      "probe_height": 1.8,
+      "probe_radius": 1.0,
+      "probe_height": 2.4,
       "ordered_hits": [
         {"distance": 0.5, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
         {"distance": 1.2, "kind": "safety_boundary", "collider_id": "World/Boundary/EastSafetyWall"}
@@ -103,14 +126,76 @@
       "origin": [8.0, 9.75],
       "direction": [1.0, 0.0],
       "probe_kind": "capsule_sweep",
-      "probe_radius": 0.35,
-      "probe_height": 1.8,
+      "probe_radius": 1.0,
+      "probe_height": 2.4,
       "ordered_hits": [
         {"distance": 0.5, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
         {"distance": 1.2, "kind": "safety_boundary", "collider_id": "World/Boundary/EastSafetyWall"}
       ]
     }
   ],
+  "production_physics_reachability": {
+    "source_kind": "exporter_resolved_production_physics_grid",
+    "build_id": "replace-with-exact-target-build-id",
+    "scene_path": "res://scenes/world/example_district.tscn",
+    "physics_frame": 4,
+    "region_node_path": "World/BoundaryReachabilityRegion",
+    "hero_body_path": "World/Player",
+    "hero_shape_path": "World/Player/CollisionShape3D",
+    "hero_shape_class": "CapsuleShape3D",
+    "hero_radius": 1.0,
+    "hero_height": 2.4,
+    "grid_origin": [0, 0],
+    "grid_width": 6,
+    "grid_height": 6,
+    "cell_size": 1.0,
+    "ground_collision_mask": 1,
+    "blocker_collision_mask": 2,
+    "query_margin": 0.01,
+    "safe_region_source_kind": "production_scene_metadata",
+    "safe_region_polygon": [[2, 2], [4, 2], [4, 4], [2, 4]],
+    "starts": [
+      {"node_path": "World/Player", "world_position": [2.5, 0.9, 2.5], "cell": [2, 2]}
+    ],
+    "cells": [
+      {"cell": [0, 0], "world_xz": [0.5, 0.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [1, 0], "world_xz": [1.5, 0.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [2, 0], "world_xz": [2.5, 0.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [3, 0], "world_xz": [3.5, 0.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [4, 0], "world_xz": [4.5, 0.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [5, 0], "world_xz": [5.5, 0.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [0, 1], "world_xz": [0.5, 1.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [1, 1], "world_xz": [1.5, 1.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [2, 1], "world_xz": [2.5, 1.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [3, 1], "world_xz": [3.5, 1.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [4, 1], "world_xz": [4.5, 1.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [5, 1], "world_xz": [5.5, 1.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [0, 2], "world_xz": [0.5, 2.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [1, 2], "world_xz": [1.5, 2.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [2, 2], "world_xz": [2.5, 2.5], "inside_safe_region": true, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [3, 2], "world_xz": [3.5, 2.5], "inside_safe_region": true, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [4, 2], "world_xz": [4.5, 2.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [5, 2], "world_xz": [5.5, 2.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [0, 3], "world_xz": [0.5, 3.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [1, 3], "world_xz": [1.5, 3.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [2, 3], "world_xz": [2.5, 3.5], "inside_safe_region": true, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [3, 3], "world_xz": [3.5, 3.5], "inside_safe_region": true, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [4, 3], "world_xz": [4.5, 3.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [5, 3], "world_xz": [5.5, 3.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [0, 4], "world_xz": [0.5, 4.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [1, 4], "world_xz": [1.5, 4.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [2, 4], "world_xz": [2.5, 4.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [3, 4], "world_xz": [3.5, 4.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [4, 4], "world_xz": [4.5, 4.5], "inside_safe_region": false, "classification": "blocked", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [5, 4], "world_xz": [5.5, 4.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [0, 5], "world_xz": [0.5, 5.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [1, 5], "world_xz": [1.5, 5.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [2, 5], "world_xz": [2.5, 5.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [3, 5], "world_xz": [3.5, 5.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [4, 5], "world_xz": [4.5, 5.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"},
+      {"cell": [5, 5], "world_xz": [5.5, 5.5], "inside_safe_region": false, "classification": "free", "ground_y": 0.0, "ground_collider_id": "World/Ground"}
+    ]
+  },
   "raw_evidence": {
     "source_kind": "resolved_production_physics",
     "build_id": "replace-with-exact-target-build-id",
@@ -119,6 +204,9 @@
     "collision_mask": 1,
     "raw_trace_artifact": "reports/raw/boundary/visible-first-trace.json",
     "raw_overview_artifact": "reports/raw/boundary/visible-first-contact-sheet.png",
+    "production_physics_grid_artifact": "reports/raw/boundary/production-physics-grid.json",
+    "production_physics_contact_sheet_artifact": "reports/raw/boundary/production-physics-contact-sheet.png",
+    "visible_limiter_continuity_artifact": "reports/raw/boundary/visible-limiter-continuity.json",
     "detected_defect_classes": [],
     "defect_resolutions": []
   }
