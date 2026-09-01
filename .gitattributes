@@ -10,3 +10,5 @@
 *.yml text eol=lf
 
 *.png binary
+*.ppm binary
+*.pgm binary
