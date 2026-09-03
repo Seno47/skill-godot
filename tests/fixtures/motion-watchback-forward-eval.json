@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "skill_commit": "motion-watchback-reader-forward-eval",
+  "required_contracts": [
+    "mjpeg-delivery-proof-watchback"
+  ],
+  "scenarios": [
+    {
+      "id": "godot-mjpeg-watchback-positive",
+      "brief_path": "fixtures/brief-motion-watchback-positive.md",
+      "godot_version": "4.x",
+      "composite_case": "new-3d-complete+desktop-hardware-release",
+      "contracts": ["mjpeg-delivery-proof-watchback"],
+      "builder_context": "isolated builder using the bundled MJPEG reader on the exact delivery-proof AVI",
+      "reviewer_context": "separate visual reviewer inspecting ordered endpoint-inclusive contact sheets",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "decoder PASS is limited to container duration frame integrity and generated visual packet; normal-speed feel and audio remain separately labeled",
+      "token_cost": 420,
+      "elapsed_minutes": 3,
+      "result_artifacts": [
+        "reports/delivery-proof-watchback.json",
+        "reports/delivery-proof-contact-sheet-001.png"
+      ]
+    },
+    {
+      "id": "avi-file-exists-without-watchback-negative",
+      "brief_path": "fixtures/brief-motion-watchback-negative.md",
+      "godot_version": "4.x",
+      "composite_case": "new-3d-complete+desktop-hardware-release",
+      "contracts": ["mjpeg-delivery-proof-watchback"],
+      "builder_context": "builder records a Godot AVI but has no ffmpeg OpenCV imageio or bundled decoder and cites only file existence",
+      "reviewer_context": "separate evidence auditor receives no decoded frames contact sheets or duration verification",
+      "first_pass_verdict": "blocked",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "mandatory full visual watchback was claimed from AVI file creation although the environment had no playback or decode path"
+      ],
+      "expected_gate_for_each_defect": {
+        "mandatory full visual watchback was claimed from AVI file creation although the environment had no playback or decode path": "delivery_proof_watchback"
+      },
+      "false_positive_burden": "existing AVI and capture runner PASS intentionally remain insufficient without a decoder report plus inspected visual artifacts",
+      "token_cost": 260,
+      "elapsed_minutes": 2,
+      "result_artifacts": [
+        "reports/delivery-proof.avi",
+        "reports/capture.json"
+      ]
+    },
+    {
+      "id": "corrupt-or-stale-mjpeg-negative",
+      "brief_path": "fixtures/brief-motion-watchback-corrupt.md",
+      "godot_version": "4.x",
+      "composite_case": "new-3d-complete+desktop-hardware-release",
+      "contracts": ["mjpeg-delivery-proof-watchback"],
+      "builder_context": "isolated builder runs the bundled reader on an AVI whose declared frame count or JPEG payload is stale",
+      "reviewer_context": "separate evidence auditor checks the fail-closed decoder report rather than trusting the filename",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "AVI header frame count disagrees with the actual MJPEG chunks"
+      ],
+      "expected_gate_for_each_defect": {
+        "AVI header frame count disagrees with the actual MJPEG chunks": "delivery_proof_watchback"
+      },
+      "false_positive_burden": "valid Godot MJPEG with its known short RIFF-size quirk remains accepted only when complete top-level chunks and every JPEG still validate",
+      "token_cost": 310,
+      "elapsed_minutes": 2,
+      "result_artifacts": [
+        "reports/stale-watchback.json"
+      ]
+    },
+    {
+      "id": "hybrid-proof-packet-positive",
+      "brief_path": "fixtures/brief-motion-watchback-hybrid-positive.md",
+      "godot_version": "4.x",
+      "composite_case": "new-2-5d-complete+localized-release-complete+desktop-hardware-release",
+      "contracts": ["mjpeg-delivery-proof-watchback"],
+      "builder_context": "isolated builder produces a decoded all-frame packet with explicit sampling cost bound",
+      "reviewer_context": "separate reviewer reads every ordered sheet and keeps audio and normal-speed limitations explicit",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "all-frame sheets establish complete visual frame exposure but do not self-award motion comfort or audio quality",
+      "token_cost": 600,
+      "elapsed_minutes": 5,
+      "result_artifacts": [
+        "reports/all-frames-watchback.json",
+        "reports/all-frames-contact-sheet-001.png"
+      ]
+    },
+    {
+      "id": "shooter-extraction-proof-packet-positive",
+      "brief_path": "fixtures/brief-motion-watchback-shooter-extraction.md",
+      "godot_version": "4.x",
+      "composite_case": "new-shooter-action-complete+extraction-complete+progression-complete",
+      "contracts": ["mjpeg-delivery-proof-watchback"],
+      "builder_context": "isolated builder validates the exact high-action proof and preserves a four-FPS diagnostic packet",
+      "reviewer_context": "separate reviewer uses normal-speed playback plus the ordered sheets for state provenance",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "contact sheets supplement rather than replace normal-speed action review",
+      "token_cost": 480,
+      "elapsed_minutes": 4,
+      "result_artifacts": [
+        "reports/action-proof-watchback.json",
+        "reports/action-proof-contact-sheet-001.png"
+      ]
+    },
+    {
+      "id": "mobile-store-proof-packet-negative",
+      "brief_path": "fixtures/brief-motion-watchback-mobile-store.md",
+      "godot_version": "4.x",
+      "composite_case": "new-2d-complete+mobile-native-release+store-release",
+      "contracts": ["mjpeg-delivery-proof-watchback"],
+      "builder_context": "builder cites uniform contact sheets as proof of audio smoothness and native-device behavior",
+      "reviewer_context": "separate reviewer rejects claims outside the decoder packet's stated evidence boundary",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "sampled MJPEG sheets were incorrectly promoted to audio smoothness and real-device acceptance"
+      ],
+      "expected_gate_for_each_defect": {
+        "sampled MJPEG sheets were incorrectly promoted to audio smoothness and real-device acceptance": "delivery_proof_watchback"
+      },
+      "false_positive_burden": "visual decode evidence remains useful while unsupported audio device and temporal claims stay NOT TESTED",
+      "token_cost": 330,
+      "elapsed_minutes": 3,
+      "result_artifacts": [
+        "reports/mobile-proof-watchback.json",
+        "reports/mobile-device-gates-not-tested.md"
+      ]
+    }
+  ]
+}

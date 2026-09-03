@@ -151,10 +151,13 @@ For a reproducible run report or rendered capture use:
 python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode run --headless --scene res://path/to/test_scene.tscn --frames 300 --summary --json-output <report.json>
 python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode capture --scene res://path/to/scene.tscn --frames 300 --output <capture.avi> --summary --json-output <report.json>
 python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode capture --scene res://path/to/scene.tscn --proof-seconds 15 --fixed-fps 30 --output <delivery-proof.avi> --summary --json-output <delivery-proof.json>
+python <skill-dir>/scripts/mjpeg_avi_watchback.py --input <delivery-proof.avi> --output-dir <watchback-dir> --expected-duration-seconds 15 --sample-fps 4 --require-temporal-change --summary
 ```
 
 `godot_capture.py` bounds execution and gathers evidence but does not synthesize player input. For complete games and vertical slices also apply [playability-and-evaluation.md](playability-and-evaluation.md).
 For `run` and `capture`, it performs a Godot version check and headless import preflight before the evaluated command. Use `--skip-import` only when the identical project state has already passed import and avoiding the repeated phase is intentional.
+
+For Godot MJPEG AVI, `mjpeg_avi_watchback.py` is the built-in no-ffmpeg inspection path. A PASS proves that headers/count/duration agree, every JPEG frame decodes, endpoints are represented, and the reported sheets exist. The builder must still inspect the sheets and, when available, normal-speed playback. Use `--all-frames` with an explicit raised safety bound when a playback-less environment needs every visual frame exposed; do not infer smooth motion or audio quality from contact sheets.
 
 ## Scene-first audit
 

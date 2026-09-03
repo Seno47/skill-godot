@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import importlib.util
+from io import BytesIO
 import json
 from pathlib import Path
+import struct
 import subprocess
 import sys
 import tempfile
@@ -60,6 +62,51 @@ def load_script_module(name: str):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def write_mjpeg_avi(path: Path, *, frame_count: int = 6, declared_frames: int | None = None) -> None:
+    from PIL import Image
+
+    def chunk(fourcc: bytes, payload: bytes) -> bytes:
+        return fourcc + struct.pack("<I", len(payload)) + payload + (b"\x00" if len(payload) & 1 else b"")
+
+    def list_chunk(list_type: bytes, payload: bytes) -> bytes:
+        return chunk(b"LIST", list_type + payload)
+
+    width, height, fps = 64, 36, 2
+    total = frame_count if declared_frames is None else declared_frames
+    avih = struct.pack(
+        "<14I",
+        1_000_000 // fps,
+        0,
+        0,
+        0x10,
+        total,
+        0,
+        1,
+        0,
+        width,
+        height,
+        0,
+        0,
+        0,
+        0,
+    )
+    strh = bytearray(48)
+    strh[0:4] = b"vids"
+    strh[4:8] = b"MJPG"
+    struct.pack_into("<I", strh, 20, 1)
+    struct.pack_into("<I", strh, 24, fps)
+    struct.pack_into("<I", strh, 32, total)
+    headers = chunk(b"avih", avih) + list_chunk(b"strl", chunk(b"strh", bytes(strh)))
+    frames: list[bytes] = []
+    for index in range(frame_count):
+        image = Image.new("RGB", (width, height), (index * 31 % 255, 70, 180))
+        encoded = BytesIO()
+        image.save(encoded, format="JPEG", quality=88)
+        frames.append(chunk(b"00dc", encoded.getvalue()))
+    payload = b"AVI " + list_chunk(b"hdrl", headers) + list_chunk(b"movi", b"".join(frames))
+    path.write_bytes(b"RIFF" + struct.pack("<I", len(payload)) + payload)
 
 
 class AuditorSmokeTests(unittest.TestCase):
@@ -158,6 +205,104 @@ class AuditorSmokeTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 2, completed.stdout)
         self.assertIn("mutually exclusive", completed.stdout)
+
+    def test_mjpeg_watchback_validates_and_builds_contact_sheet(self) -> None:
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow unavailable")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            avi = root / "proof.avi"
+            output = root / "watchback"
+            write_mjpeg_avi(avi)
+            completed = run_script(
+                "mjpeg_avi_watchback.py",
+                "--input",
+                str(avi),
+                "--output-dir",
+                str(output),
+                "--sample-count",
+                "4",
+                "--expected-duration-seconds",
+                "3",
+                "--duration-tolerance-seconds",
+                "0.01",
+                "--require-temporal-change",
+                "--summary",
+            )
+            self.assert_passes(completed)
+            report = json.loads((output / "proof-watchback.json").read_text(encoding="utf-8"))
+            self.assertTrue(report["video"]["all_mjpeg_frames_verified"])
+            self.assertEqual(report["video"]["frame_count"], 6)
+            self.assertEqual(report["sampling"]["sample_count"], 4)
+            self.assertTrue(report["sampling"]["covers_first_frame"])
+            self.assertTrue(report["sampling"]["covers_last_frame"])
+            self.assertTrue(Path(report["sampling"]["contact_sheets"][0]).is_file())
+
+    def test_mjpeg_watchback_fails_closed_on_stale_frame_header(self) -> None:
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow unavailable")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            avi = root / "stale.avi"
+            output = root / "watchback"
+            write_mjpeg_avi(avi, frame_count=5, declared_frames=6)
+            completed = run_script(
+                "mjpeg_avi_watchback.py",
+                "--input",
+                str(avi),
+                "--output-dir",
+                str(output),
+                "--sample-count",
+                "3",
+                "--summary",
+            )
+            self.assert_fails(completed)
+            self.assertIn("declares 6 frames but movi contains 5", completed.stdout)
+            report = json.loads((output / "stale-watchback.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["result"], "fail")
+
+    def test_mjpeg_watchback_all_frames_is_explicit_and_bounded(self) -> None:
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            self.skipTest("Pillow unavailable")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            avi = root / "all.avi"
+            output = root / "watchback"
+            write_mjpeg_avi(avi)
+            blocked = run_script(
+                "mjpeg_avi_watchback.py",
+                "--input",
+                str(avi),
+                "--output-dir",
+                str(output),
+                "--all-frames",
+                "--max-samples",
+                "5",
+                "--summary",
+            )
+            self.assertEqual(blocked.returncode, 1, blocked.stdout)
+            self.assertIn("exceeds --max-samples", blocked.stdout)
+            completed = run_script(
+                "mjpeg_avi_watchback.py",
+                "--input",
+                str(avi),
+                "--output-dir",
+                str(output),
+                "--all-frames",
+                "--max-samples",
+                "6",
+                "--summary",
+            )
+            self.assert_passes(completed)
+            report = json.loads((output / "all-watchback.json").read_text(encoding="utf-8"))
+            self.assertTrue(report["sampling"]["all_frames_in_visual_packet"])
+            self.assertEqual(len(report["sampling"]["frame_artifacts"]), 6)
 
     def test_capture_classifies_forced_quit_leak_noise(self) -> None:
         module = load_script_module("godot_capture.py")

@@ -138,6 +138,7 @@ Validation:
 
 - Always before completion: [references/validation.md](references/validation.md)
 - Visual deliverables: [references/visual-validation.md](references/visual-validation.md)
+- Raw Godot MJPEG AVI motion/delivery evidence: after capture, run `scripts/mjpeg_avi_watchback.py` to verify every encoded frame and duration and to produce an ordered frame/contact-sheet packet; file creation is not watchback
 - External/generated assets: [references/asset-validation.md](references/asset-validation.md)
 - Sprite sheets or generated 2D production art: sprite checks in [references/asset-generation.md](references/asset-generation.md)
 - GLB/glTF models: model checks in [references/asset-integration.md](references/asset-integration.md)
@@ -163,7 +164,7 @@ Hybrid tasks may require several references, but only after the composite case p
 ## Keep context efficient
 
 - Map the project with scoped file/path searches before opening large scenes or scripts; ignore caches, imports, generated builds, and binaries unless the task targets them.
-- Prefer Godot/CLI/project-owned input and capture evidence. Use desktop Computer Use only with explicit user opt-in or for otherwise unreachable native OS behavior, never merely to click the game or take routine screenshots.
+- Prefer Godot/CLI/project-owned input and capture evidence. Use `mjpeg_avi_watchback.py` for Godot MJPEG AVI inspection when ffmpeg/video playback is unavailable. Use desktop Computer Use only with explicit user opt-in or for otherwise unreachable native OS behavior, never merely to click the game or take routine screenshots.
 - Read the relevant scene/resource dependency chain and changed regions instead of repeatedly dumping the repository or whole large files.
 - Prefer compact console summaries with full diagnostics written to report files. Use `--summary`/`--json-output` where bundled auditors support them.
 - Preserve durable decisions in scenes, resources, manifests, budgets, or short project notes rather than restating them every turn. Never trade away verification or maintainability merely to save tokens.
@@ -177,7 +178,7 @@ Use direct `.tscn`/`.tres` edits for small understood structures; use the Godot 
 
 ## Handoff truthfully
 
-Report the scenes/resources/assets changed and how they compose; commands/tests/builds run; rendered or profiled states inspected; intentional runtime-generated content; performance/size baselines and deltas when relevant; and remaining placeholders, license obligations, dependencies, or unverified states. If the user has not watched or played the current target build, include a short deterministic proof recording that progresses through representative gameplay and that the builder watched back in full; it supplements rather than replaces the raw state matrix, playtest, or independent/human gates. For a complete game/slice, run the rubric scorecard against evidence with real reviewer provenance and structured artifact paths.
+Report the scenes/resources/assets changed and how they compose; commands/tests/builds run; rendered or profiled states inspected; intentional runtime-generated content; performance/size baselines and deltas when relevant; and remaining placeholders, license obligations, dependencies, or unverified states. If the user has not watched or played the current target build, include a short deterministic proof recording that progresses through representative gameplay and that the builder watched back in full; for Godot MJPEG AVI also retain the decoder report and ordered contact sheets. Decoding/file creation is not visual acceptance, and sampled sheets do not prove normal-speed smoothness or audio. The proof supplements rather than replaces the raw state matrix, playtest, or independent/human gates. For a complete game/slice, run the rubric scorecard against evidence with real reviewer provenance and structured artifact paths.
 
 End a successful handoff with exactly one responsibility status:
 

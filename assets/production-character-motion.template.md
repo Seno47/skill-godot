@@ -44,12 +44,15 @@ For skeletal 3D work, record which stable bones or pose features were sampled an
 - Raw idle recording:
 - Raw locomotion recording:
 - Raw context-action recording:
+- MJPEG decoder report, when the recording is Godot AVI:
+- Ordered contact sheets and whether each was inspected:
+- Normal-speed playback inspected: YES / NO / UNAVAILABLE
 - Gameplay-size pose/contact sheet:
 - Attachment-follow evidence:
 - States/resolutions/camera framing:
 - Builder observations: bind/rest/T-pose, duplicate mannequin, frozen tracks, loop pops, foot sliding, contact mismatch, detached props/effects, state-transition lag:
 
-A still image can expose a T-pose but cannot prove motion, looping, state dispatch, or attachment following. Preserve a short raw target-build recording at the real gameplay camera and inspect it at normal speed. Deterministic pose assertions support this review; they do not replace it.
+A still image can expose a T-pose but cannot prove motion, looping, state dispatch, or attachment following. Preserve a short raw target-build recording at the real gameplay camera and inspect it at normal speed. For Godot MJPEG AVI, run `scripts/mjpeg_avi_watchback.py` and retain the frame-integrity report plus ordered contact sheets; if normal-speed playback is unavailable, use `--all-frames` with an explicit bound for complete visual-frame exposure and keep the smoothness limitation visible. Deterministic pose assertions and decoder PASS support this review; they do not replace perceptual motion review.
 
 For rubric evidence, attach the concrete recording as a structured `video` artifact whose `states` cover `idle`, `locomotion`, and `context_action`, plus the completed contract as a `report` artifact. A prose evidence string that says a movie was watched cannot pass when the files are absent or empty.
 

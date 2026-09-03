@@ -32,7 +32,7 @@ Codex can also select the skill automatically when a request clearly matches its
 | Included | What it gives you |
 | --- | --- |
 | 65 focused production guides | Scene architecture, visual-style selection, 2D/3D/2.5D, high-angle district/environment/road semantics, UI, production-craft/product approval, saves, accessibility, AI, genre/network systems, difficulty/pacing, commerce/cloud/safety, resilience/upgrades, hardware, assets, performance, and release work |
-| 46 deterministic Python helpers | Project/asset audits, resolved dependency-closure provenance, local/whole-map environment, visible-first perimeter, road/junction/facade/furniture/reachability checks, visual checks, genre-aware difficulty and system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive probes, rubric composition, capture, budgets, scorecards, and build/package-hygiene checks |
+| 47 deterministic Python helpers | Project/asset audits, resolved dependency-closure provenance, local/whole-map environment, visible-first perimeter, road/junction/facade/furniture/reachability checks, visual checks, Godot MJPEG AVI watchback packets, genre-aware difficulty and system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive probes, rubric composition, capture, budgets, scorecards, and build/package-hygiene checks |
 | 8 reusable Godot probes | Touch scrolling, button composition, third-person controls/HUD mouse routing/visibility, isometric projection/navigation, and transient whole-perimeter boundary evidence |
 | Scene-first authoring rules | Persistent composition stays in `.tscn` scenes and Godot resources instead of disappearing into large runtime scripts |
 | Evidence-based completion | The scorecard verifies acceptance ownership plus concrete screenshot/video/review paths and rejects prose-only PASS claims |
@@ -85,7 +85,7 @@ Asset discovery has its own source router for 2D, 3D, UI, recorded audio, music,
 
 New complete games and production slices now use [`visual-style-selection.md`](./references/visual-style-selection.md) and [`art-direction-selection.template.md`](./assets/art-direction-selection.template.md) before bulk visual authoring. A fixed user direction is translated without performative alternatives; a materially open brief compares serious same-content directions and records the selected spatial, image-construction, shape, palette/material, lighting, motion/VFX, typography/UI, asset-source, performance, size, rights, cost, and maintenance contract. Pixel, vector, illustrated, cutout, pre-rendered, stylized/toon/voxel/retro/PBR 3D, minimalist/procedural, isometric, and hybrid routes have family-specific rejection rules. The rubric fails closed without both the decision record and raw Godot gameplay-size anchor/composition evidence.
 
-Long autonomous runs can instantiate [`project-run-state.template.md`](./assets/project-run-state.template.md) so playable truth, build IDs, commands, evidence, asset costs/jobs, and the next bounded actions survive context changes without a growing diary. Paid generation records actual cost and a resumable provider job/sidecar before polling; visual assets retain their final gameplay-size contract. Scene-authoring tools must prove in-memory, packed-instance, and disk-reloaded parity, while [`godot_capture.py`](./scripts/godot_capture.py) can derive a deterministic 15–20 second delivery proof that the builder watches back before handoff.
+Long autonomous runs can instantiate [`project-run-state.template.md`](./assets/project-run-state.template.md) so playable truth, build IDs, commands, evidence, asset costs/jobs, and the next bounded actions survive context changes without a growing diary. Paid generation records actual cost and a resumable provider job/sidecar before polling; visual assets retain their final gameplay-size contract. Scene-authoring tools must prove in-memory, packed-instance, and disk-reloaded parity, while [`godot_capture.py`](./scripts/godot_capture.py) can derive a deterministic 15–20 second delivery proof and [`mjpeg_avi_watchback.py`](./scripts/mjpeg_avi_watchback.py) can validate every Godot MJPEG frame and expose ordered contact sheets without ffmpeg before handoff.
 
 Approved UI references get a native parity workflow: formal screens remain editor-visible scenes, while [`image_compare.py`](./scripts/image_compare.py) creates same-resolution side-by-side, overlay, and diff artifacts. Progression topology and idle curves have reusable JSON models and deterministic probes; their numerical PASS still requires target-build play and human UX review.
 
@@ -201,7 +201,7 @@ Most tests require only Python 3:
 python -m unittest discover -s tests -p "test_*.py"
 ```
 
-`scripts/image_compare.py` additionally uses Pillow; its tests skip cleanly when Pillow is unavailable, and the helper reports the missing dependency instead of weakening a parity claim.
+`scripts/image_compare.py` and `scripts/mjpeg_avi_watchback.py` additionally use Pillow; their tests skip cleanly when Pillow is unavailable, and each helper reports the missing dependency instead of weakening a visual claim.
 
 The isometric smoke tests run against Godot 4 when `godot4`/`godot` is on `PATH`, or when `GODOT_BIN` points to the editor executable.
 

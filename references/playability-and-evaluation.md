@@ -88,9 +88,12 @@ If the user has not watched or played the current target build, create a short d
 
 ```bash
 python <skill-dir>/scripts/godot_capture.py --project <project-dir> --mode capture --scene res://scenes/main.tscn --proof-seconds 15 --fixed-fps 30 --output reports/delivery-proof.avi --summary --json-output reports/delivery-proof.json
+python <skill-dir>/scripts/mjpeg_avi_watchback.py --input reports/delivery-proof.avi --output-dir reports/delivery-proof-watchback --expected-duration-seconds 15 --sample-fps 4 --require-temporal-change --summary
 ```
 
-Use a project-owned driver to begin in a composed frame, progress through representative input/core interaction/feedback/result states, and avoid dead time or one repeatedly looped pose. Initialize camera and capture state before the first rendered frame. Watch the entire recording back before handoff and record the states/defects in `capture-manifest.template.json`. This clip is a compact user-facing proof, not a substitute for uncoached play, the raw screenshot/state matrix, human audio listening, performance profiling, or independent review.
+Use a project-owned driver to begin in a composed frame, progress through representative input/core interaction/feedback/result states, and avoid dead time or one repeatedly looped pose. Initialize camera and capture state before the first rendered frame. `mjpeg_avi_watchback.py` requires only Pillow: it parses Godot's MJPEG AVI directly, validates the RIFF/video headers, declared and actual frame count, duration and every JPEG frame, then extracts endpoint-inclusive uniform frames and ordered contact sheets. It does not need ffmpeg, ffprobe, OpenCV, or imageio.
+
+Watch the entire recording back before handoff and record the states/defects in `capture-manifest.template.json`. Inspect every generated sheet in order. A sampled packet makes framing, state progression and frozen/dead stretches model-visible, but it does not prove normal-speed smoothness, transient defects between samples, or audio. Prefer actual normal-speed playback when available. If playback is unavailable and full visual frame coverage is required, rerun with `--all-frames --max-samples <actual-frame-count>` and inspect every resulting sheet in order; record the absence of normal-speed/audio acceptance rather than silently promoting the packet. File creation, successful decoding, or an uninspected sheet is not watchback. This clip is a compact user-facing proof, not a substitute for uncoached play, the raw screenshot/state matrix, human audio listening, performance profiling, or independent review.
 
 The runner does not inject keyboard, mouse, or controller input. Use a project test driver or an approved UI automation layer for input-dependent flows.
 

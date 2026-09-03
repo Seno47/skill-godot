@@ -168,6 +168,16 @@
     "project_owned_driver": "unrecorded",
     "states_shown": [],
     "camera_and_state_initialized_before_first_frame": null,
+    "watchback": {
+      "decoder_report": "unrecorded",
+      "all_mjpeg_frames_verified": null,
+      "visual_packet_mode": "unrecorded: uniform_samples or all_frames",
+      "contact_sheets": [],
+      "contact_sheets_reviewed_in_order": null,
+      "normal_speed_playback_reviewed": null,
+      "audio_reviewed_separately": null,
+      "limitations": []
+    },
     "builder_watched_back_entire_recording": null,
     "dead_time_or_repeated_single-loop_frame": "not_tested",
     "defects_and_disposition": "unrecorded",

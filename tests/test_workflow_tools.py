@@ -769,6 +769,16 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] forward-eval", completed.stdout)
 
+    def test_motion_watchback_has_isolated_positive_and_negative_fixtures(self) -> None:
+        completed = run_script(
+            "forward_eval_audit.py",
+            "--matrix",
+            str(ROOT / "tests" / "fixtures" / "motion-watchback-forward-eval.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] forward-eval", completed.stdout)
+
     def test_environment_integrity_template_passes(self) -> None:
         completed = run_script(
             "environment_integrity_audit.py",
@@ -2223,6 +2233,10 @@ class GenreRubricTests(unittest.TestCase):
         self.assertIn("not watched or played", proof["required_when"])
         self.assertIsNone(proof["builder_watched_back_entire_recording"])
         self.assertEqual(proof["result"], "not_tested")
+        self.assertIsNone(proof["watchback"]["all_mjpeg_frames_verified"])
+        self.assertEqual(proof["watchback"]["contact_sheets"], [])
+        self.assertIsNone(proof["watchback"]["contact_sheets_reviewed_in_order"])
+        self.assertIsNone(proof["watchback"]["normal_speed_playback_reviewed"])
 
     def test_extended_review_templates_are_scaffolded(self) -> None:
         flags = {
