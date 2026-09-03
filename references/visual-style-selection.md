@@ -54,7 +54,7 @@ Before bulk production, the selected direction must have:
 - representative lighting/material/background response;
 - enough UI, iconography, typography, motion, and VFX to expose cross-family mismatch when those layers are material.
 
-Capture the selected anchor from the real Godot renderer and target camera. Review it against the selection contract and explicit rejection criteria. For a complete fixed-camera isometric game, the stronger early slice in `isometric-and-2-5d.md` still applies. For all complete games/slices, the later quiet/normal/dense/VFX/result production-art matrix remains required; the anchor approves a direction, not the finished game.
+Capture the selected anchor from the real Godot renderer and target camera. When visible motion is material, also record the same anchor's core input -> action/contact -> consequence/settle cycle and repeated/dense state at normal speed using [motion-and-animation.md](motion-and-animation.md); a still cannot establish that an art route animates coherently. Review it against the selection contract and explicit rejection criteria. For a complete fixed-camera isometric game, the stronger early slice in `isometric-and-2-5d.md` still applies. For all complete games/slices, the later quiet/normal/dense/VFX/result production-art matrix remains required; the anchor approves a direction, not the finished game.
 
 When later evidence invalidates the direction—unreadable dense action, unavailable animation states, unacceptable package cost, incoherent generation, or a failed independent review—stop multiplying it. Update the decision record, repair the anchor, or reopen selection. Color grading, bloom, fog, outlines, or a global shader cannot substitute for that decision.
 

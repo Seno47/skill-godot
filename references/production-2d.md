@@ -40,6 +40,8 @@ Keep the composed node tree visible in the scene. A player scene should expose i
 
 ## Animation and feedback
 
+Also apply [motion-and-animation.md](motion-and-animation.md) whenever motion materially carries interaction, travel, automation, world state, UI feedback, or game feel. The general production-motion gate covers non-character objects and full cause/contact/settle cycles; the character template below is a specialized additional contract.
+
 - Establish pivots and attachment points before creating animation variants.
 - Keep frame-based sprite animation on a consistent grid and inspect every frame in context.
 - Use `AnimationPlayer` for authored timing across transforms, modulate, audio, particles, hitboxes, or UI; use state machines when transitions genuinely need them.

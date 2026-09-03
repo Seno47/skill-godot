@@ -45,6 +45,15 @@
         {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["motion_contract"]}
       ]
     },
+    "production_motion_quality_evidence": {
+      "status": "pass",
+      "evidence": ["fixture: builder-owned motion direction, production-path trace, and normal-speed core/cycle/contact/dense/recovery watchback"],
+      "artifacts": [
+        {"path": "evidence-artifacts/motion.avi", "kind": "video", "states": ["core_input_response", "representative_system_cycle", "travel_or_contact", "dense_simultaneous_motion", "interruption_recovery"]},
+        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["core_input_response", "representative_system_cycle", "travel_or_contact", "interruption_recovery"]},
+        {"path": "evidence-artifacts/report.md", "kind": "report", "states": ["motion_direction_and_budgets", "normal_speed_builder_review"]}
+      ]
+    },
     "interactive_onboarding": {
       "status": "pass",
       "evidence": ["fixture: clean first frame, uncoached tutorial discovery, player-caused action/feedback/consequence, and normal-loop entry"],

@@ -104,6 +104,8 @@ For a complete third-person/free-orbit slice, adapt `assets/godot-tests/third_pe
 
 ## Animation and effects
 
+Also apply [motion-and-animation.md](motion-and-animation.md) whenever motion materially carries interaction, travel, turning, automation, machinery, world state, UI feedback, or game feel. The general production-motion gate covers non-character objects and full cause/contact/settle cycles; the character template below is a specialized additional contract.
+
 - Preserve named animation clips and a known rest/reset pose during import.
 - Use `AnimationTree` when blending/state transitions justify it; avoid complex graphs for a handful of direct clips.
 - Attach weapons/effects through stable skeleton or marker sockets.

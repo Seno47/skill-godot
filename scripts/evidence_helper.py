@@ -29,6 +29,7 @@ ENVIRONMENT_INTEGRITY_REVIEW_TEMPLATE = ROOT / "assets" / "environment-integrity
 STREETSCAPE_SEMANTICS_REVIEW_TEMPLATE = ROOT / "assets" / "streetscape-semantics-review.template.md"
 RESOLVED_SCENE_PROVENANCE_TEMPLATE = ROOT / "assets" / "resolved-scene-provenance.template.json"
 MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-character-motion.template.md"
+PRODUCTION_MOTION_REVIEW_TEMPLATE = ROOT / "assets" / "production-motion-review.template.md"
 HUD_REVIEW_TEMPLATE = ROOT / "assets" / "gameplay-hud-glanceability-review.template.md"
 ART_DIRECTION_SELECTION_TEMPLATE = ROOT / "assets" / "art-direction-selection.template.md"
 PROGRESSION_BALANCE_REVIEW_TEMPLATE = ROOT / "assets" / "progression-balance-review.template.md"
@@ -209,6 +210,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--motion-review-output",
         help="Also instantiate the production character motion contract.",
+    )
+    parser.add_argument(
+        "--production-motion-review-output",
+        help="Also instantiate the general builder-owned production motion quality contract.",
     )
     parser.add_argument("--yandex-checklist-output", help="Also instantiate the Yandex release checklist.")
     parser.add_argument("--force", action="store_true", help="Allow replacing explicitly named outputs.")
@@ -502,6 +507,7 @@ def main() -> int:
                 args.streetscape_semantics_review_output,
                 args.resolved_scene_provenance_output,
                 args.motion_review_output,
+                args.production_motion_review_output,
                 args.yandex_checklist_output,
             )
             if value is not None
@@ -659,6 +665,11 @@ def main() -> int:
             )
         if args.motion_review_output:
             copy_template(MOTION_REVIEW_TEMPLATE, output_path(args.motion_review_output))
+        if args.production_motion_review_output:
+            copy_template(
+                PRODUCTION_MOTION_REVIEW_TEMPLATE,
+                output_path(args.production_motion_review_output),
+            )
         if args.yandex_checklist_output:
             copy_template(YANDEX_CHECKLIST_TEMPLATE, output_path(args.yandex_checklist_output))
 

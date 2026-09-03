@@ -2,6 +2,8 @@
 
 Use this when a production player character, companion, enemy, or other focal actor is expected to move. This is a builder-owned release gate: routine animation defects must be found and fixed before optional user preference feedback.
 
+Also complete `assets/production-motion-review.template.md` for a complete game or production slice. This character contract proves production-character state/rig/attachment coverage; it does not by itself prove the quality of the full interaction, world-object, UI, camera, automation, contact, or audio/VFX motion sequence.
+
 ## Applicability and production ownership
 
 - Build/revision:

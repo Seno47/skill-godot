@@ -109,6 +109,15 @@
       "result": "not_tested"
     },
     {
+      "id": "production_motion_quality",
+      "profile": "clean_shipping",
+      "states": ["core input response", "complete representative system cycle", "travel or contact when present", "dense simultaneous motion", "interruption and recovery"],
+      "viewport_ids": ["extreme_narrow", "wide"],
+      "checks": ["normal playback speed", "declared response and settle budgets", "weight and spacing/easing", "path tangent and facing", "contact transfer and exactly-once consequence", "loop seam and phase variation", "pause restart and reduced-motion recovery", "audio VFX and camera timing"],
+      "artifacts": [],
+      "result": "not_tested"
+    },
+    {
       "id": "seeded_progression",
       "profile": "seeded_qa",
       "states": ["progression selector", "record/result", "locked and unlocked content"],

@@ -779,6 +779,16 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] forward-eval", completed.stdout)
 
+    def test_production_motion_has_isolated_positive_and_negative_fixtures(self) -> None:
+        completed = run_script(
+            "forward_eval_audit.py",
+            "--matrix",
+            str(ROOT / "tests" / "fixtures" / "production-motion-forward-eval.json"),
+            "--summary",
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+        self.assertIn("[PASS] forward-eval", completed.stdout)
+
     def test_environment_integrity_template_passes(self) -> None:
         completed = run_script(
             "environment_integrity_audit.py",
@@ -2188,6 +2198,8 @@ class GenreRubricTests(unittest.TestCase):
                 str(temp / "project-run-state.md"),
                 "--production-art-review-output",
                 str(temp / "production-art-review.md"),
+                "--production-motion-review-output",
+                str(temp / "production-motion-review.md"),
                 "--motion-review-output",
                 str(temp / "motion-review.md"),
             )
@@ -2200,10 +2212,12 @@ class GenreRubricTests(unittest.TestCase):
             direction = (temp / "art-direction-selection.md").read_text(encoding="utf-8")
             run_state = (temp / "project-run-state.md").read_text(encoding="utf-8")
             art = (temp / "production-art-review.md").read_text(encoding="utf-8")
+            production_motion = (temp / "production-motion-review.md").read_text(encoding="utf-8")
             motion = (temp / "motion-review.md").read_text(encoding="utf-8")
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("menu_identity_craft_review", evidence["gates"])
         self.assertIn("production_art_integrity_evidence", evidence["gates"])
+        self.assertIn("production_motion_quality_evidence", evidence["gates"])
         self.assertIn("gameplay_hud_glanceability_review", evidence["gates"])
         self.assertIn("art_direction_selection_evidence", evidence["gates"])
         self.assertIn("cross_surface_production_craft_review", evidence["gates"])
@@ -2223,12 +2237,20 @@ class GenreRubricTests(unittest.TestCase):
         self.assertIn("Art Direction Selection Contract", direction)
         self.assertIn("Project Run State", run_state)
         self.assertIn("Production Art State Review", art)
+        self.assertIn("Production Motion Quality Contract", production_motion)
         self.assertIn("Production Character Motion Contract", motion)
 
     def test_capture_manifest_includes_watched_delivery_proof_contract(self) -> None:
         manifest = json.loads(
             (ROOT / "assets" / "capture-manifest.template.json").read_text(encoding="utf-8")
         )
+        production_motion = next(
+            item
+            for item in manifest["capture_requirements"]
+            if item["id"] == "production_motion_quality"
+        )
+        self.assertIn("complete representative system cycle", production_motion["states"])
+        self.assertIn("normal playback speed", production_motion["checks"])
         proof = manifest["delivery_proof"]
         self.assertIn("not watched or played", proof["required_when"])
         self.assertIsNone(proof["builder_watched_back_entire_recording"])

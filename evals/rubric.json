@@ -79,6 +79,23 @@
       }
     },
     {
+      "id": "production_motion_quality_evidence",
+      "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "constrained-mobile-web"],
+      "description": "Builder-owned motion-direction, deterministic production-path and raw normal-speed target-build evidence proves that the core input response, one complete representative system cycle, applicable travel/turn/transfer/contact, dense simultaneous motion, and interruption/recovery have intentional weight, spacing/easing, paths/facing, pivots, contact/ownership, loop seams/phase variation, attention hierarchy, reduced-motion behavior and audio/VFX/camera timing. Changing transforms, Tween/AnimationPlayer/clip presence, endpoint assertions, slowed playback, selected poses, or decoded contact sheets cannot pass visible sliding, floating, generic bounce, linear-corner snap, late facing, contact miss/penetration, reward-before-cause, phase-locked repetition, state pops, drift, or over-animation.",
+      "artifact_requirements": {
+        "minimum_by_kind": {"video": 1, "report": 1, "trace": 1},
+        "required_states": {
+          "motion_direction_and_budgets": ["report"],
+          "core_input_response": ["video", "trace"],
+          "representative_system_cycle": ["video", "trace"],
+          "travel_or_contact": ["video", "trace", "report"],
+          "dense_simultaneous_motion": ["video"],
+          "interruption_recovery": ["video", "trace"],
+          "normal_speed_builder_review": ["report"]
+        }
+      }
+    },
+    {
       "id": "interactive_onboarding",
       "acceptance_owner": "independent",
       "cases": ["new-2d-provided-assets", "new-2d-generated-assets", "new-2d-fighting-complete", "new-2d-metroidvania-complete", "new-idle-clicker-complete", "new-quest-driven-complete", "new-progression-heavy-complete", "new-3d-asset-pack", "new-3d-third-person-complete", "new-isometric-fixed-camera-complete", "new-2-5d-complete", "new-networked-multiplayer-complete", "new-extraction-complete", "new-online-extraction-complete", "new-mmo-production-slice", "new-procedural-roguelike-complete", "new-strategy-simulation-complete", "new-vehicle-racing-complete", "new-shooter-action-complete", "new-narrative-complete", "new-local-multiplayer-complete", "constrained-mobile-web"],
@@ -1271,6 +1288,10 @@
       "dimensions": {"visual_coherence": 1, "asset_pipeline": 2, "playability_and_ux": 2}
     },
     {
+      "gate": "production_motion_quality_evidence",
+      "dimensions": {"visual_coherence": 1, "playability_and_ux": 2, "technical_quality": 2}
+    },
+    {
       "gate": "interactive_onboarding",
       "dimensions": {"playability_and_ux": 1}
     },
@@ -1635,7 +1656,7 @@
     {
       "id": "visual_coherence",
       "weight": 6,
-      "description": "The selected layered art direction is justified against user intent, gameplay scale, production feasibility and target constraints; semantic app/menu identity, composition, player and route visibility, cutaway/silhouette behavior and restoration, screen-space HUD occupancy and icon-family coherence, perspective-sensitive world geometry, motion, lighting, effects, and UI form a coherent game presentation."
+      "description": "The selected layered art direction is justified against user intent, gameplay scale, production feasibility and target constraints; semantic app/menu identity, composition, player and route visibility, cutaway/silhouette behavior and restoration, screen-space HUD occupancy and icon-family coherence, perspective-sensitive world geometry, production motion weight/path/contact/cadence, lighting, effects, and UI form a coherent game presentation."
     },
     {
       "id": "responsive_visual_integrity",

@@ -1458,6 +1458,51 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assertEqual(scores["asset_pipeline"]["score"], 2)
         self.assertEqual(report["verdict"], "blocked")
 
+    def test_eval_production_motion_quality_is_builder_owned_and_blocking_for_clicker(self) -> None:
+        source = load_eval_evidence()
+        source["case_id"] = "new-idle-clicker-complete"
+        source["gates"]["idle_economy_evidence"] = {
+            "status": "pass",
+            "evidence": ["fixture: exact earn purchase production offline and save model/build parity"],
+            "reviewer": {"role": "builder", "context": "fixture builder economy context"},
+        }
+        source["gates"]["production_motion_quality_evidence"] = {
+            "status": "not_tested",
+            "evidence": [
+                "fixture: tweens and endpoints exist but normal-speed cycle/contact/dense/recovery motion was not accepted"
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            evidence_path = temp / "evidence.json"
+            report_path = temp / "scorecard.json"
+            evidence_path.write_text(json.dumps(source), encoding="utf-8")
+            completed = run_script(
+                "eval_scorecard.py",
+                "--rubric",
+                str(ROOT / "evals" / "rubric.json"),
+                "--case",
+                "new-idle-clicker-complete",
+                "--evidence",
+                str(evidence_path),
+                "--json-output",
+                str(report_path),
+                "--summary",
+            )
+            self.assertTrue(report_path.exists(), completed.stdout)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        motion_gate = next(
+            item for item in report["gates"] if item["id"] == "production_motion_quality_evidence"
+        )
+        scores = {item["id"]: item for item in report["dimensions"]}
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertEqual(report["blocking_gate_count"], 1)
+        self.assertEqual(motion_gate["acceptance_owner"], "builder")
+        self.assertEqual(scores["visual_coherence"]["score"], 1)
+        self.assertEqual(scores["playability_and_ux"]["score"], 2)
+        self.assertEqual(scores["technical_quality"]["score"], 2)
+        self.assertEqual(report["responsibility_status"], "builder_work_remaining")
+
     def test_eval_progression_case_blocks_model_and_human_pacing_claims(self) -> None:
         source = load_eval_evidence()
         source["case_id"] = "new-progression-heavy-complete"

@@ -46,6 +46,34 @@ The probe checks positive/monotonic curves, event-driven best-payback simulation
 - Give the manual action authored tactile/visual/audio feedback and varied production feedback; avoid a generic stock button surrounded by dashboard cards.
 - Teach the first earn -> purchase -> visible production change through action. Do not start pressure, ads, or a wall before that loop is understood.
 
+## Build the presentation loop before scaling the economy
+
+An idle/clicker is unusually exposed to weak animation because the player watches the same actions hundreds of times. Before multiplying producers, upgrades, locations, or prestige tiers, build one representative scene-authored motion cell and pass `assets/production-motion-review.template.md`:
+
+- one click/tap or direct action responds immediately and visibly;
+- the acted-on object, worker, machine, vehicle, creature, or environment performs a readable cause -> work/contact -> result -> settle sequence;
+- the reward is emitted and booked exactly once at the visible consequence rather than before the cause or after an arbitrary delay;
+- one purchase creates an obvious visual and motion change, not only a faster number;
+- one automation cycle runs without input and a dense state shows several simultaneous producers without robotic phase lock, collisions, or attention noise;
+- pause/resume, speed-up, offline settlement, scene change, and repeated input leave every visual and transaction in a valid state.
+
+Choose 2D, 2.5D, or 3D from the intended presentation, asset/animation pipeline, device budget, and the physical clarity the loop needs. Do not choose 2D only because static images are easier to generate, or 3D merely because a reference game uses it. The user-selected dimension wins. If believable turning, approach, depth contact, articulated machinery, or spatial transformation is central, prove that exact motion in the early slice before committing to the dimension.
+
+Use [motion-and-animation.md](motion-and-animation.md) for motion direction, path/facing/contact rules, loop variation, target-build watchback, and the distinction between deterministic correctness and perceptual quality.
+
+### Click feedback and repeated production
+
+- Animate a presentation wrapper, not the authoritative economy value or container layout. Repeated clicks must accumulate economy transactions correctly without stacking uncontrolled tweens or leaving scale/rotation drift.
+- Preserve one focal beat. Press response, acted-on object, reward flight/count-up, particles, camera response, and sound should form a causal sequence rather than six unrelated effects firing at once.
+- Do not use the same scale-bounce/ease for the manual action, every producer, every purchase, every number, and every panel. Derive motion from material, weight, function, and hierarchy.
+- Make frequent loops shorter and quieter than milestones. Vary phase, route, pose, or clip within bounded families; avoid both identical synchronized workers and per-frame random jitter.
+- When production becomes fast, aggregate transactions and presentation. Blend into a continuous machine/conveyor/ambient state, batch number changes, and reserve distinct effects/audio for meaningful milestones instead of compressing one-shot animations into unreadable flashes.
+- Keep animation density within the frame-time and visual-attention budget on the weakest target. Economy correctness does not excuse dropped frames, unreadable overlap, or hundreds of transient nodes.
+
+### Travel, service, and factory loops
+
+When the clicker shows agents, resources, orders, customers, or vehicles moving between stations, author route curves and stateful approach -> align -> work/transfer -> depart behavior. Facing follows the path with bounded turning; contacts use markers/sockets/slots; visible collision, shadow, wheel/foot motion, effect origin, and ownership remain aligned. Independent X/Y/Z tweens, translation without turning, endpoint rotation, teleporting resources, and effects that miss their work field are blocking defects even if throughput arithmetic is exact.
+
 ## Save and offline integrity
 
 Save versioned primitive state: currency units, owned levels/counts, unlock/prestige state, timestamps, settings, and any deterministic seed. On load, validate ranges and IDs, migrate old schemas, compute offline gain once, record/clear the consumed interval, and save the post-award state so reloading cannot award twice.
@@ -63,4 +91,4 @@ Test:
 
 Record target time-to-first-purchase, first automation, first meaningful choice, session-end milestone, and later walls. Compare them against deterministic simulations and several human sessions. Reject the economy when one obvious purchase dominates indefinitely, progress stalls without warning, rewards change only the number's formatting, or the player can ignore the core decision loop.
 
-Community clicker demos in `evaluated-ecosystem.md` are learning fixtures, not production architecture. Their per-frame UI updates, hardcoded tiers, mixed numeric types, and absent save/offline contracts are specifically not defaults for this skill.
+Community clicker demos in `evaluated-ecosystem.md` are learning fixtures, not production architecture. Their per-frame UI updates, hardcoded tiers, mixed numeric types, generic tween feedback, and absent save/offline contracts are specifically not defaults for this skill.

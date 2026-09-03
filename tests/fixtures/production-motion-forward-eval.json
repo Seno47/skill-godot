@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "skill_commit": "production-motion-quality-forward-eval",
+  "required_contracts": [
+    "production-motion-quality"
+  ],
+  "scenarios": [
+    {
+      "id": "authored-clicker-motion-cell-positive",
+      "brief_path": "fixtures/brief-authored-clicker-motion-positive.md",
+      "godot_version": "4.x",
+      "composite_case": "new-idle-clicker-complete+constrained-mobile-web",
+      "contracts": ["production-motion-quality"],
+      "builder_context": "isolated builder captures the exact target-build tap work transfer reward and dense automation cycle with declared budgets",
+      "reviewer_context": "separate raw-motion reviewer sees normal-speed video before implementation notes",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "subtle bounded phase variation is allowed while causal contacts transaction timing and attention hierarchy remain deterministic",
+      "token_cost": 820,
+      "elapsed_minutes": 8,
+      "result_artifacts": [
+        "reports/production-motion-review.md",
+        "reports/production-motion.avi",
+        "reports/production-motion-trace.json"
+      ]
+    },
+    {
+      "id": "changing-transforms-but-unnatural-negative",
+      "brief_path": "fixtures/brief-changing-transforms-negative.md",
+      "godot_version": "4.x",
+      "composite_case": "new-idle-clicker-complete+constrained-mobile-web",
+      "contracts": ["production-motion-quality"],
+      "builder_context": "builder cites Tween completion coordinate changes and economy correctness without normal-speed perceptual review",
+      "reviewer_context": "separate raw-motion reviewer inspects the exact gameplay-size capture",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "world objects slide through turns use one generic bounce and miss their authored contact fields",
+        "all automation cycles share one phase and read as mechanical copy-paste",
+        "reward settles before the visible work contact"
+      ],
+      "expected_gate_for_each_defect": {
+        "world objects slide through turns use one generic bounce and miss their authored contact fields": "production_motion_quality_evidence",
+        "all automation cycles share one phase and read as mechanical copy-paste": "production_motion_quality_evidence",
+        "reward settles before the visible work contact": "production_motion_quality_evidence"
+      },
+      "false_positive_burden": "valid tweens and exact economy transactions intentionally remain insufficient when the rendered cause path contact and timing fail",
+      "token_cost": 540,
+      "elapsed_minutes": 5,
+      "result_artifacts": [
+        "reports/transform-assertions-pass.json",
+        "reports/normal-speed-motion-fail.avi"
+      ]
+    },
+    {
+      "id": "cross-dimension-motion-positive",
+      "brief_path": "fixtures/brief-cross-dimension-motion-positive.md",
+      "godot_version": "4.x",
+      "composite_case": "new-2-5d-complete+localized-release-complete+desktop-hardware-release",
+      "contracts": ["production-motion-quality"],
+      "builder_context": "isolated builder proves depth grounding tangent-facing contact and interruption in production scenes",
+      "reviewer_context": "separate reviewer inspects normal-speed narrow and wide target-build recordings",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "dimension-specific rows may be not applicable only with an explicit motion inventory rather than silent omission",
+      "token_cost": 900,
+      "elapsed_minutes": 9,
+      "result_artifacts": [
+        "reports/production-motion-review.md",
+        "reports/depth-contact-motion.avi"
+      ]
+    },
+    {
+      "id": "slow-motion-and-contact-sheet-only-negative",
+      "brief_path": "fixtures/brief-motion-evidence-negative.md",
+      "godot_version": "4.x",
+      "composite_case": "new-3d-third-person-complete+new-progression-heavy-complete",
+      "contracts": ["production-motion-quality"],
+      "builder_context": "builder supplies selected poses and slowed playback that hide a blend pop and weightless stop",
+      "reviewer_context": "separate evidence auditor rejects missing normal-speed full-cycle watchback",
+      "first_pass_verdict": "blocked",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "selected stills and slowed playback hide between-frame blend and settle defects"
+      ],
+      "expected_gate_for_each_defect": {
+        "selected stills and slowed playback hide between-frame blend and settle defects": "production_motion_quality_evidence"
+      },
+      "false_positive_burden": "diagnostic slow motion remains useful but cannot replace normal-speed exact-candidate motion acceptance",
+      "token_cost": 410,
+      "elapsed_minutes": 4,
+      "result_artifacts": [
+        "reports/pose-contact-sheet.png",
+        "reports/slowed-motion.mp4"
+      ]
+    }
+  ]
+}
