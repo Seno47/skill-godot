@@ -347,11 +347,11 @@
       "evidence": ["fixture: same-closure whole-perimeter production capsule trace has mapped visible first hits and safety clearance"],
       "reviewer": {"role": "builder", "context": "fixture builder visible-first perimeter audit"},
       "artifacts": [
-        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "visible_first_boundary_contract"]},
-        {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_first_boundary_audit", "production_physics_whole_body_reachability", "visible_limiter_continuity"]},
-        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["whole_perimeter_sample_trace", "production_physics_whole_body_reachability"]},
-        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_first_contact_sheet", "production_physics_whole_body_reachability", "visible_limiter_continuity"]},
-        {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["detected_span_closeups_or_clean_baseline"]}
+        {"path": "evidence-artifacts/review.md", "kind": "report", "states": ["resolved_dependency_closure_provenance", "visible_first_boundary_contract", "collision_assembly_intent_and_global_transform_parity", "solid_volume_non_entry_non_climb_or_not_applicable", "module_seam_visual_and_collision_continuity_or_not_applicable"]},
+        {"path": "evidence-artifacts/environment-coverage.json", "kind": "report", "states": ["visible_first_boundary_audit", "production_physics_whole_body_reachability", "visible_limiter_continuity", "collider_render_contact_distance_parity"]},
+        {"path": "evidence-artifacts/trace-a.json", "kind": "trace", "states": ["whole_perimeter_sample_trace", "production_physics_whole_body_reachability", "collider_render_contact_distance_parity", "edge_corner_concavity_seam_opening_matrix", "solid_volume_non_entry_non_climb_or_not_applicable"]},
+        {"path": "evidence-artifacts/menu.png", "kind": "image", "states": ["visible_first_contact_sheet", "production_physics_whole_body_reachability", "visible_limiter_continuity", "edge_corner_concavity_seam_opening_matrix"]},
+        {"path": "evidence-artifacts/material-detail.png", "kind": "image", "states": ["detected_span_closeups_or_clean_baseline", "module_seam_visual_and_collision_continuity_or_not_applicable"]}
       ]
     },
     "responsive_layout_evidence": {

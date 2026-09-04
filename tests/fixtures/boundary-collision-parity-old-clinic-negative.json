@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "case": "high-angle-3d-district-complete",
+  "candidate": "old-clinic-pre-solid-parity-fix",
+  "prior_checks": {
+    "collider_coverage": "pass",
+    "central_wall_approach": "pass",
+    "boundary_flood_fill": "pass"
+  },
+  "observed_failures": [
+    {
+      "id": "early-hidden-backstop",
+      "description": "a broad invisible backstop becomes first production-capsule contact before the visible rubble edge",
+      "expected_gate": "high_angle_visible_first_boundary_evidence"
+    },
+    {
+      "id": "concave-rubble-ramp",
+      "description": "concave surface collision lets the production character climb sloped sheets and enter gaps between vehicle bodies",
+      "expected_gate": "high_angle_visible_first_boundary_evidence"
+    },
+    {
+      "id": "parent-transform-misregistration",
+      "description": "visual and collision roots look locally aligned but their final global transforms differ",
+      "expected_gate": "high_angle_visible_first_boundary_evidence"
+    },
+    {
+      "id": "modular-seam-hole",
+      "description": "one central approach passes while a hero-width local hole remains at the joint between adjacent facade modules",
+      "expected_gate": "high_angle_visible_first_boundary_evidence"
+    }
+  ],
+  "required_acceptance": {
+    "collision_intent": ["surface_parity", "solid_volume_parity"],
+    "solid_volume_shape_policy": "convex_or_compound_solid_no_concave_skin",
+    "global_transform_parity": true,
+    "maximum_invisible_first_hits": 0,
+    "required_approach_classes": ["edge", "corner", "concavity", "module_seam", "opening_negative"],
+    "production_body_non_entry_non_climb_trials": true,
+    "module_seam_visual_and_collision_continuity": true
+  },
+  "positive_regression": {
+    "rubble_roots": 73,
+    "visible_members_per_root": 7,
+    "matching_convex_shapes_per_root": 7,
+    "hidden_backstops": 0,
+    "facade_collision": "exact static surface parity",
+    "additional_capsule_approaches": 20,
+    "human_retest": "accepted"
+  }
+}

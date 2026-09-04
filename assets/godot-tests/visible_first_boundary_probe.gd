@@ -17,7 +17,10 @@ var _failed := false
 ##   export_visible_first_boundary(build_id: String, scene_path: String) -> Dictionary
 ## It must enumerate every enabled perimeter/safety collider from the instantiated
 ## production scene and issue PhysicsDirectSpaceState3D capsule sweeps or full-width
-## ray bundles after at least one physics frame.
+## ray bundles after at least one physics frame. Schema v3 also declares collision
+## assemblies by exact root/member/shape paths. This exporter resolves those paths,
+## enabled states, shape classes and root global-transform parity itself; adapter-made
+## counts or transform measurements are overwritten.
 ##
 ## Whole-body escape reachability is not adapter-owned. The production scene must have:
 ## - exactly one `production_boundary_reachability_region` node with scene metadata
@@ -29,7 +32,8 @@ var _failed := false
 ##   `production_boundary_reachability_hero_shape`, below that body;
 ## - one or more Node3D starts in `production_boundary_reachability_start`.
 ## The exporter queries the resolved World3D itself and overwrites the adapter's
-## `production_physics_reachability`; hard-coded free/blocked/outside cell lists cannot pass.
+## `production_physics_reachability` and `collision_assemblies`; hard-coded
+## free/blocked/outside cells, shape classes or root-transform parity cannot pass.
 
 
 func _initialize() -> void:
@@ -85,8 +89,8 @@ func _run() -> void:
 		_fail("adapter export_visible_first_boundary must return Dictionary")
 		return
 	var contract: Dictionary = raw
-	if contract.get("schema_version") != 2:
-		_fail("adapter result schema_version must be 2")
+	if contract.get("schema_version") != 3:
+		_fail("adapter result schema_version must be 3")
 		return
 	if String(contract.get("build_id", "")) != String(options.build_id):
 		_fail("adapter result build_id does not match --build-id")
@@ -107,6 +111,10 @@ func _run() -> void:
 	if _failed:
 		return
 	contract["production_physics_reachability"] = production_reachability
+	var resolved_assemblies := _resolve_collision_assemblies(root, contract)
+	if _failed:
+		return
+	contract["collision_assemblies"] = resolved_assemblies
 
 	var output_path := String(options.output)
 	if not output_path.begins_with("res://") and not output_path.begins_with("user://"):
@@ -126,6 +134,105 @@ func _run() -> void:
 		String(options.build_id), scene_path, output_path
 	])
 	quit(0)
+
+
+func _resolve_collision_assemblies(root: Node, contract: Dictionary) -> Array[Dictionary]:
+	var raw_assemblies: Variant = contract.get("collision_assemblies")
+	if not raw_assemblies is Array or raw_assemblies.is_empty():
+		_fail("schema-v3 collision_assemblies must be a nonempty Array")
+		return []
+	var result: Array[Dictionary] = []
+	var seen_ids := {}
+	for raw_assembly in raw_assemblies:
+		if not raw_assembly is Dictionary:
+			_fail("every collision assembly declaration must be a Dictionary")
+			return []
+		var assembly: Dictionary = raw_assembly.duplicate(true)
+		var assembly_id := String(assembly.get("id", ""))
+		if assembly_id.is_empty() or seen_ids.has(assembly_id):
+			_fail("collision assembly IDs must be nonempty and unique")
+			return []
+		seen_ids[assembly_id] = true
+		var visible_root_path := String(assembly.get("visible_root_path", ""))
+		var collision_root_path := String(assembly.get("collision_root_path", ""))
+		var visible_root := _node_from_report_path(root, visible_root_path) as Node3D
+		var collision_root := _node_from_report_path(root, collision_root_path) as CollisionObject3D
+		if visible_root == null or collision_root == null:
+			_fail("collision assembly %s has unresolved visual/collision roots" % assembly_id)
+			return []
+		var raw_members: Variant = assembly.get("visible_member_paths")
+		var raw_shapes: Variant = assembly.get("collider_shape_paths")
+		if not raw_members is Array or raw_members.is_empty() \
+				or not raw_shapes is Array or raw_shapes.is_empty():
+			_fail("collision assembly %s needs visible members and collider shapes" % assembly_id)
+			return []
+		var resolved_members: Array[String] = []
+		for raw_member in raw_members:
+			var member_path := String(raw_member)
+			var member := _node_from_report_path(root, member_path) as VisualInstance3D
+			if member == null or not member.visible:
+				_fail("collision assembly %s has missing/hidden visual member %s" % [assembly_id, member_path])
+				return []
+			resolved_members.append(member_path)
+		var resolved_shapes: Array[Dictionary] = []
+		for raw_shape_path in raw_shapes:
+			var shape_path := String(raw_shape_path)
+			var shape_node := _node_from_report_path(root, shape_path) as CollisionShape3D
+			if shape_node == null or shape_node.disabled or shape_node.shape == null:
+				_fail("collision assembly %s has missing/disabled shape %s" % [assembly_id, shape_path])
+				return []
+			var owner: Node = shape_node.get_parent()
+			while owner != null and not owner is CollisionObject3D and owner != root:
+				owner = owner.get_parent()
+			if not owner is CollisionObject3D:
+				_fail("collision assembly %s shape %s has no CollisionObject3D owner" % [assembly_id, shape_path])
+				return []
+			resolved_shapes.append({
+				"path": shape_path,
+				"shape_class": shape_node.shape.get_class(),
+				"owner_class": owner.get_class(),
+				"disabled": shape_node.disabled,
+			})
+		var raw_parity: Variant = assembly.get("global_transform_parity")
+		if not raw_parity is Dictionary:
+			_fail("collision assembly %s needs transform-parity budgets" % assembly_id)
+			return []
+		var parity: Dictionary = raw_parity
+		var basis_error := maxf(
+			visible_root.global_basis.x.distance_to(collision_root.global_basis.x),
+			maxf(
+				visible_root.global_basis.y.distance_to(collision_root.global_basis.y),
+				visible_root.global_basis.z.distance_to(collision_root.global_basis.z)
+			)
+		)
+		assembly.erase("visible_member_paths")
+		assembly.erase("collider_shape_paths")
+		assembly["source_kind"] = "exporter_resolved_production_scene"
+		assembly["resolved_visible_member_paths"] = resolved_members
+		assembly["resolved_collider_shapes"] = resolved_shapes
+		assembly["global_transform_parity"] = {
+			"source_kind": "exporter_resolved_scene_nodes",
+			"visible_root_path": visible_root_path,
+			"collision_root_path": collision_root_path,
+			"origin_error": visible_root.global_position.distance_to(collision_root.global_position),
+			"basis_error": basis_error,
+			"maximum_origin_error": float(parity.get("maximum_origin_error", 0.001)),
+			"maximum_basis_error": float(parity.get("maximum_basis_error", 0.001)),
+		}
+		result.append(assembly)
+	return result
+
+
+func _node_from_report_path(root: Node, report_path: String) -> Node:
+	if report_path.is_empty():
+		return null
+	if report_path == String(root.name):
+		return root
+	var relative_path := report_path
+	var root_prefix := String(root.name) + "/"
+	if relative_path.begins_with(root_prefix):
+		relative_path = relative_path.trim_prefix(root_prefix)
+	return root.get_node_or_null(NodePath(relative_path))
 
 
 func _collect_production_physics_reachability(

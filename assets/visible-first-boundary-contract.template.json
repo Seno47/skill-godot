@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "contract_id": "example-high-angle-visible-first-boundary",
   "build_id": "replace-with-exact-target-build-id",
   "scene_provenance": {
@@ -24,6 +24,7 @@
     "sample_position_tolerance": 0.01,
     "direction_tolerance_degrees": 1.0,
     "minimum_visible_to_safety_clearance": 0.35,
+    "maximum_visible_contact_offset": 0.1,
     "expected_span_count": 1,
     "expected_sample_count": 4,
     "maximum_invisible_first_hits": 0,
@@ -41,7 +42,48 @@
       "id": "clinic-wall-east",
       "object_ids": ["clinic-wall"],
       "collider_ids": ["World/Boundary/ClinicWall/StaticBody3D"],
-      "render_shell_ids": ["World/Boundary/ClinicWall/MeshInstance3D"]
+      "render_shell_ids": ["World/Boundary/ClinicWall/MeshInstance3D"],
+      "collision_assembly_ids": ["clinic-wall-assembly"]
+    }
+  ],
+  "collision_assemblies": [
+    {
+      "id": "clinic-wall-assembly",
+      "source_kind": "exporter_resolved_production_scene",
+      "collision_intent": "surface_parity",
+      "composite_kind": "single_asset",
+      "visible_root_path": "World/Boundary/ClinicWall",
+      "collision_root_path": "World/Boundary/ClinicWall/StaticBody3D",
+      "expected_visible_member_count": 1,
+      "expected_collider_shape_count": 1,
+      "visible_member_paths": ["World/Boundary/ClinicWall/MeshInstance3D"],
+      "collider_shape_paths": ["World/Boundary/ClinicWall/StaticBody3D/CollisionShape3D"],
+      "resolved_visible_member_paths": ["World/Boundary/ClinicWall/MeshInstance3D"],
+      "resolved_collider_shapes": [
+        {
+          "path": "World/Boundary/ClinicWall/StaticBody3D/CollisionShape3D",
+          "shape_class": "ConcavePolygonShape3D",
+          "owner_class": "StaticBody3D",
+          "disabled": false
+        }
+      ],
+      "shape_bindings": [
+        {
+          "visible_member_path": "World/Boundary/ClinicWall/MeshInstance3D",
+          "collider_shape_paths": ["World/Boundary/ClinicWall/StaticBody3D/CollisionShape3D"]
+        }
+      ],
+      "global_transform_parity": {
+        "source_kind": "exporter_resolved_scene_nodes",
+        "visible_root_path": "World/Boundary/ClinicWall",
+        "collision_root_path": "World/Boundary/ClinicWall/StaticBody3D",
+        "origin_error": 0.0,
+        "basis_error": 0.0,
+        "maximum_origin_error": 0.001,
+        "maximum_basis_error": 0.001
+      },
+      "required_approach_classes": ["edge", "corner"],
+      "raw_closeup_artifact": "reports/raw/boundary/clinic-wall-collision-parity.png"
     }
   ],
   "safety_boundary_collider_ids": [
@@ -81,13 +123,15 @@
       "id": "east-clinic-000",
       "span_id": "east-clinic",
       "sample_index": 0,
+      "collision_assembly_id": "clinic-wall-assembly",
+      "approach_class": "corner",
       "origin": [8.0, 8.25],
       "direction": [1.0, 0.0],
       "probe_kind": "capsule_sweep",
       "probe_radius": 1.0,
       "probe_height": 2.4,
       "ordered_hits": [
-        {"distance": 0.5, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
+        {"distance": 0.5, "render_contact_distance": 0.52, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
         {"distance": 1.2, "kind": "safety_boundary", "collider_id": "World/Boundary/EastSafetyWall"}
       ]
     },
@@ -95,13 +139,15 @@
       "id": "east-clinic-001",
       "span_id": "east-clinic",
       "sample_index": 1,
+      "collision_assembly_id": "clinic-wall-assembly",
+      "approach_class": "edge",
       "origin": [8.0, 8.75],
       "direction": [1.0, 0.0],
       "probe_kind": "capsule_sweep",
       "probe_radius": 1.0,
       "probe_height": 2.4,
       "ordered_hits": [
-        {"distance": 0.5, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
+        {"distance": 0.5, "render_contact_distance": 0.52, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
         {"distance": 1.2, "kind": "safety_boundary", "collider_id": "World/Boundary/EastSafetyWall"}
       ]
     },
@@ -109,13 +155,15 @@
       "id": "east-clinic-002",
       "span_id": "east-clinic",
       "sample_index": 2,
+      "collision_assembly_id": "clinic-wall-assembly",
+      "approach_class": "edge",
       "origin": [8.0, 9.25],
       "direction": [1.0, 0.0],
       "probe_kind": "capsule_sweep",
       "probe_radius": 1.0,
       "probe_height": 2.4,
       "ordered_hits": [
-        {"distance": 0.5, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
+        {"distance": 0.5, "render_contact_distance": 0.52, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
         {"distance": 1.2, "kind": "safety_boundary", "collider_id": "World/Boundary/EastSafetyWall"}
       ]
     },
@@ -123,17 +171,21 @@
       "id": "east-clinic-003",
       "span_id": "east-clinic",
       "sample_index": 3,
+      "collision_assembly_id": "clinic-wall-assembly",
+      "approach_class": "corner",
       "origin": [8.0, 9.75],
       "direction": [1.0, 0.0],
       "probe_kind": "capsule_sweep",
       "probe_radius": 1.0,
       "probe_height": 2.4,
       "ordered_hits": [
-        {"distance": 0.5, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
+        {"distance": 0.5, "render_contact_distance": 0.52, "kind": "visible_cause", "cause_id": "clinic-wall-east", "object_id": "clinic-wall", "collider_id": "World/Boundary/ClinicWall/StaticBody3D", "render_shell_id": "World/Boundary/ClinicWall/MeshInstance3D"},
         {"distance": 1.2, "kind": "safety_boundary", "collider_id": "World/Boundary/EastSafetyWall"}
       ]
     }
   ],
+  "declared_module_seams": [],
+  "solid_volume_traversal_trials": [],
   "production_physics_reachability": {
     "source_kind": "exporter_resolved_production_physics_grid",
     "build_id": "replace-with-exact-target-build-id",

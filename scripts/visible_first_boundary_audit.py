@@ -87,10 +87,10 @@ def segment_points(start: Vec2, end: Vec2, spacing: float) -> list[Vec2]:
 
 
 def audit(model: dict[str, Any]) -> dict[str, Any]:
-    if model.get("schema_version") != 2:
+    if model.get("schema_version") != 3:
         raise ContractError(
-            "schema_version must be 2; regenerate exporter-owned production-physics "
-            "reachability and visible-limiter continuity evidence"
+            "schema_version must be 3; regenerate exporter-owned production-physics "
+            "reachability, collision-assembly parity and visible-limiter continuity evidence"
         )
     contract_id = text(model.get("contract_id"), "contract_id")
     build_id = text(model.get("build_id"), "build_id")
@@ -138,6 +138,11 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     minimum_clearance = number(
         contract.get("minimum_visible_to_safety_clearance"),
         "contract.minimum_visible_to_safety_clearance",
+        minimum=0.0,
+    )
+    maximum_visible_contact_offset = number(
+        contract.get("maximum_visible_contact_offset"),
+        "contract.maximum_visible_contact_offset",
         minimum=0.0,
     )
     expected_span_count = integer(
@@ -189,6 +194,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         minimum=1e-6,
     )
 
+    errors: list[str] = []
     cause_mappings: dict[str, dict[str, set[str]]] = {}
     for index, raw in enumerate(
         array(model.get("visible_cause_mappings"), "visible_cause_mappings", nonempty=True)
@@ -209,11 +215,201 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 f"visible cause mapping {cause_id}.render_shell_ids",
                 nonempty=True,
             ),
+            "collision_assembly_ids": strings(
+                mapping.get("collision_assembly_ids"),
+                f"visible cause mapping {cause_id}.collision_assembly_ids",
+                nonempty=True,
+            ),
         }
     safety_colliders = strings(
         model.get("safety_boundary_collider_ids"),
         "safety_boundary_collider_ids",
         nonempty=True,
+    )
+
+    collision_assemblies: dict[str, dict[str, Any]] = {}
+    for index, raw in enumerate(
+        array(model.get("collision_assemblies"), "collision_assemblies", nonempty=True)
+    ):
+        assembly = obj(raw, f"collision_assemblies[{index}]")
+        assembly_id = text(assembly.get("id"), f"collision assembly {index}.id")
+        if assembly_id in collision_assemblies:
+            raise ContractError(f"duplicate collision assembly {assembly_id}")
+        if text(
+            assembly.get("source_kind"), f"collision assembly {assembly_id}.source_kind"
+        ) != "exporter_resolved_production_scene":
+            raise ContractError(
+                f"collision assembly {assembly_id} is not exporter-resolved production-scene evidence"
+            )
+        intent = text(assembly.get("collision_intent"), f"collision assembly {assembly_id}.collision_intent")
+        if intent not in {"surface_parity", "solid_volume_parity"}:
+            raise ContractError(
+                f"collision assembly {assembly_id}.collision_intent must be "
+                "surface_parity or solid_volume_parity"
+            )
+        composite_kind = text(
+            assembly.get("composite_kind"), f"collision assembly {assembly_id}.composite_kind"
+        )
+        if composite_kind not in {"single_asset", "modular_composite"}:
+            raise ContractError(
+                f"collision assembly {assembly_id}.composite_kind must be single_asset or modular_composite"
+            )
+        visible_root_path = text(
+            assembly.get("visible_root_path"), f"collision assembly {assembly_id}.visible_root_path"
+        )
+        collision_root_path = text(
+            assembly.get("collision_root_path"), f"collision assembly {assembly_id}.collision_root_path"
+        )
+        visible_members = strings(
+            assembly.get("resolved_visible_member_paths"),
+            f"collision assembly {assembly_id}.resolved_visible_member_paths",
+            nonempty=True,
+        )
+        collider_records = array(
+            assembly.get("resolved_collider_shapes"),
+            f"collision assembly {assembly_id}.resolved_collider_shapes",
+            nonempty=True,
+        )
+        collider_shapes: set[str] = set()
+        concave_shapes: list[tuple[str, str]] = []
+        for shape_index, raw_shape in enumerate(collider_records):
+            shape = obj(
+                raw_shape,
+                f"collision assembly {assembly_id}.resolved_collider_shapes[{shape_index}]",
+            )
+            shape_path = text(shape.get("path"), f"collision assembly {assembly_id} shape path")
+            if shape_path in collider_shapes:
+                raise ContractError(f"collision assembly {assembly_id} duplicates collider shape {shape_path}")
+            collider_shapes.add(shape_path)
+            if boolean(shape.get("disabled"), f"collision assembly {assembly_id} shape {shape_path}.disabled"):
+                raise ContractError(f"collision assembly {assembly_id} includes disabled collider shape {shape_path}")
+            shape_class = text(
+                shape.get("shape_class"), f"collision assembly {assembly_id} shape {shape_path}.shape_class"
+            )
+            owner_class = text(
+                shape.get("owner_class"), f"collision assembly {assembly_id} shape {shape_path}.owner_class"
+            )
+            if shape_class == "ConcavePolygonShape3D":
+                concave_shapes.append((shape_path, owner_class))
+        if integer(
+            assembly.get("expected_visible_member_count"),
+            f"collision assembly {assembly_id}.expected_visible_member_count",
+            1,
+        ) != len(visible_members):
+            raise ContractError(f"collision assembly {assembly_id} visible-member count is stale")
+        if integer(
+            assembly.get("expected_collider_shape_count"),
+            f"collision assembly {assembly_id}.expected_collider_shape_count",
+            1,
+        ) != len(collider_shapes):
+            raise ContractError(f"collision assembly {assembly_id} collider-shape count is stale")
+        bound_visible: set[str] = set()
+        bound_shapes: set[str] = set()
+        for binding_index, raw_binding in enumerate(
+            array(
+                assembly.get("shape_bindings"),
+                f"collision assembly {assembly_id}.shape_bindings",
+                nonempty=True,
+            )
+        ):
+            binding = obj(raw_binding, f"collision assembly {assembly_id} shape binding {binding_index}")
+            visible_path = text(
+                binding.get("visible_member_path"),
+                f"collision assembly {assembly_id} shape binding {binding_index}.visible_member_path",
+            )
+            if visible_path not in visible_members:
+                raise ContractError(
+                    f"collision assembly {assembly_id} binding references unknown visible member {visible_path}"
+                )
+            bound_visible.add(visible_path)
+            binding_shapes = strings(
+                binding.get("collider_shape_paths"),
+                f"collision assembly {assembly_id} shape binding {binding_index}.collider_shape_paths",
+                nonempty=True,
+            )
+            if not binding_shapes <= collider_shapes:
+                raise ContractError(f"collision assembly {assembly_id} binding references unknown collider shape")
+            bound_shapes.update(binding_shapes)
+        if bound_visible != visible_members or bound_shapes != collider_shapes:
+            raise ContractError(
+                f"collision assembly {assembly_id} shape bindings are not bidirectionally complete"
+            )
+        transform_parity = obj(
+            assembly.get("global_transform_parity"),
+            f"collision assembly {assembly_id}.global_transform_parity",
+        )
+        if text(
+            transform_parity.get("source_kind"),
+            f"collision assembly {assembly_id}.global_transform_parity.source_kind",
+        ) != "exporter_resolved_scene_nodes":
+            raise ContractError(f"collision assembly {assembly_id} transform parity is not exporter-resolved")
+        if text(
+            transform_parity.get("visible_root_path"),
+            f"collision assembly {assembly_id}.global_transform_parity.visible_root_path",
+        ) != visible_root_path or text(
+            transform_parity.get("collision_root_path"),
+            f"collision assembly {assembly_id}.global_transform_parity.collision_root_path",
+        ) != collision_root_path:
+            raise ContractError(f"collision assembly {assembly_id} transform parity references stale roots")
+        origin_error = number(
+            transform_parity.get("origin_error"),
+            f"collision assembly {assembly_id}.global_transform_parity.origin_error",
+            minimum=0.0,
+        )
+        basis_error = number(
+            transform_parity.get("basis_error"),
+            f"collision assembly {assembly_id}.global_transform_parity.basis_error",
+            minimum=0.0,
+        )
+        maximum_origin_error = number(
+            transform_parity.get("maximum_origin_error"),
+            f"collision assembly {assembly_id}.global_transform_parity.maximum_origin_error",
+            minimum=0.0,
+        )
+        maximum_basis_error = number(
+            transform_parity.get("maximum_basis_error"),
+            f"collision assembly {assembly_id}.global_transform_parity.maximum_basis_error",
+            minimum=0.0,
+        )
+        required_approach_classes = strings(
+            assembly.get("required_approach_classes"),
+            f"collision assembly {assembly_id}.required_approach_classes",
+            nonempty=True,
+        )
+        allowed_approach_classes = {"edge", "corner", "concavity", "module_seam", "opening_negative"}
+        if not required_approach_classes <= allowed_approach_classes:
+            raise ContractError(f"collision assembly {assembly_id} has an unknown approach class")
+        text(assembly.get("raw_closeup_artifact"), f"collision assembly {assembly_id}.raw_closeup_artifact")
+        collision_assemblies[assembly_id] = {
+            "intent": intent,
+            "composite_kind": composite_kind,
+            "visible_members": visible_members,
+            "collider_shapes": collider_shapes,
+            "required_approach_classes": required_approach_classes,
+        }
+        if origin_error > maximum_origin_error + 1e-9 or basis_error > maximum_basis_error + 1e-9:
+            errors.append(f"collision assembly {assembly_id} global render/collision roots are misregistered")
+        if intent == "solid_volume_parity" and concave_shapes:
+            errors.append(
+                f"solid-volume collision assembly {assembly_id} uses concave surface collision that can be climbed or entered"
+            )
+        if intent == "surface_parity" and any(owner != "StaticBody3D" for _, owner in concave_shapes):
+            errors.append(
+                f"surface-parity collision assembly {assembly_id} uses concave collision on a non-static owner"
+            )
+
+    mapped_assembly_ids = {
+        assembly_id
+        for mapping in cause_mappings.values()
+        for assembly_id in mapping["collision_assembly_ids"]
+    }
+    if mapped_assembly_ids != set(collision_assemblies):
+        raise ContractError(
+            "visible-cause mappings do not exactly cover exporter-resolved collision assemblies"
+        )
+
+    module_seam_declarations = array(
+        model.get("declared_module_seams"), "declared_module_seams"
     )
 
     spans: dict[str, dict[str, Any]] = {}
@@ -282,7 +478,6 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             f"declared perimeter has {len(spans)} spans; expected {expected_span_count}"
         )
 
-    errors: list[str] = []
     invisible_first_count = 0
     unmapped_first_count = 0
     probe_count = 0
@@ -643,7 +838,12 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
     if ledger_entries != baseline_limiter_ids:
         errors.append("visible limiter continuity entries do not exactly cover baseline limiters")
 
-    def inspect_hits(label: str, raw_hits: Any, span: dict[str, Any]) -> None:
+    def inspect_hits(
+        label: str,
+        raw_hits: Any,
+        span: dict[str, Any],
+        sample_assembly_id: str,
+    ) -> None:
         nonlocal invisible_first_count, unmapped_first_count, probe_count
         probe_count += 1
         hits = array(raw_hits, f"{label}.ordered_hits", nonempty=True)
@@ -685,6 +885,11 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                     errors.append(f"{label} references unknown visible cause mapping {cause_id}")
                 else:
                     used_causes.add(cause_id)
+                    if sample_assembly_id not in mapping["collision_assembly_ids"]:
+                        errors.append(
+                            f"{label} visible cause {cause_id} is not bound to collision assembly "
+                            f"{sample_assembly_id}"
+                        )
                     if object_id not in mapping["object_ids"]:
                         errors.append(f"{label} visible cause object {object_id} is not mapped")
                     if collider_id not in mapping["collider_ids"]:
@@ -695,6 +900,16 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                         )
                 if first_visible_distance is None:
                     first_visible_distance = hit_distance
+                render_contact_distance = number(
+                    hit.get("render_contact_distance"),
+                    f"{label} visible cause render_contact_distance",
+                    minimum=0.0,
+                )
+                if abs(render_contact_distance - hit_distance) > maximum_visible_contact_offset + 1e-9:
+                    errors.append(
+                        f"{label} collider/render contact offset "
+                        f"{abs(render_contact_distance - hit_distance):.4f} exceeds the visible-edge budget"
+                    )
             elif hit_kind == "safety_boundary":
                 collider_id = text(hit.get("collider_id"), f"{label} safety collider_id")
                 if collider_id not in safety_colliders:
@@ -717,6 +932,10 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             errors.append(f"{label} first visible cause parsing is inconsistent")
 
     seen_sample_ids: set[str] = set()
+    sample_metadata: dict[str, tuple[str, str]] = {}
+    approaches_by_assembly: dict[str, set[str]] = {
+        assembly_id: set() for assembly_id in collision_assemblies
+    }
     samples_by_span: dict[str, dict[int, dict[str, Any]]] = {span_id: {} for span_id in spans}
     samples = array(model.get("samples"), "samples", nonempty=True)
     for index, raw in enumerate(samples):
@@ -725,6 +944,16 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         if sample_id in seen_sample_ids:
             raise ContractError(f"duplicate sample ID {sample_id}")
         seen_sample_ids.add(sample_id)
+        assembly_id = text(
+            sample.get("collision_assembly_id"), f"sample {sample_id}.collision_assembly_id"
+        )
+        if assembly_id not in collision_assemblies:
+            raise ContractError(f"sample {sample_id} references unknown collision assembly {assembly_id}")
+        approach_class = text(sample.get("approach_class"), f"sample {sample_id}.approach_class")
+        if approach_class not in {"edge", "corner", "concavity", "module_seam", "opening_negative"}:
+            raise ContractError(f"sample {sample_id} has unsupported approach class {approach_class}")
+        approaches_by_assembly[assembly_id].add(approach_class)
+        sample_metadata[sample_id] = (assembly_id, approach_class)
         span_id = text(sample.get("span_id"), f"sample {sample_id}.span_id")
         if span_id not in spans:
             raise ContractError(f"sample {sample_id} references unknown span {span_id}")
@@ -750,7 +979,9 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                 errors.append(f"sample {sample_id} capsule radius is smaller than the production hero")
             if number(sample.get("probe_height"), f"sample {sample_id}.probe_height", minimum=0.0) + 1e-9 < hero_height:
                 errors.append(f"sample {sample_id} capsule height is smaller than the production hero")
-            inspect_hits(f"sample {sample_id}", sample.get("ordered_hits"), spans[span_id])
+            inspect_hits(
+                f"sample {sample_id}", sample.get("ordered_hits"), spans[span_id], assembly_id
+            )
         elif probe_kind == "ray_bundle":
             rays = array(sample.get("ray_probes"), f"sample {sample_id}.ray_probes", nonempty=True)
             offsets: list[float] = []
@@ -765,6 +996,7 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
                     f"sample {sample_id} ray {ray_index}",
                     ray.get("ordered_hits"),
                     spans[span_id],
+                    assembly_id,
                 )
             ordered_offsets = sorted(offsets)
             if len(set(offsets)) != len(offsets):
@@ -791,6 +1023,142 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
             extra = sorted(actual_indices - expected_indices)
             errors.append(
                 f"declared perimeter span {span_id} has sample-index gaps; missing={missing} extra={extra}"
+            )
+    for assembly_id, assembly in collision_assemblies.items():
+        missing_approaches = assembly["required_approach_classes"] - approaches_by_assembly[assembly_id]
+        if missing_approaches:
+            errors.append(
+                f"collision assembly {assembly_id} lacks production-capsule approaches "
+                f"for {sorted(missing_approaches)}"
+            )
+
+    seam_ids: set[str] = set()
+    modular_assemblies_with_seams: set[str] = set()
+    for seam_index, raw_seam in enumerate(module_seam_declarations):
+        seam = obj(raw_seam, f"declared_module_seams[{seam_index}]")
+        seam_id = text(seam.get("id"), f"declared module seam {seam_index}.id")
+        if seam_id in seam_ids:
+            raise ContractError(f"duplicate declared module seam {seam_id}")
+        seam_ids.add(seam_id)
+        seam_assemblies = strings(
+            seam.get("collision_assembly_ids"),
+            f"declared module seam {seam_id}.collision_assembly_ids",
+            nonempty=True,
+        )
+        if not seam_assemblies <= set(collision_assemblies):
+            raise ContractError(f"declared module seam {seam_id} references unknown assemblies")
+        modular_assemblies_with_seams.update(seam_assemblies)
+        visible_paths = strings(
+            seam.get("visible_member_paths"),
+            f"declared module seam {seam_id}.visible_member_paths",
+            nonempty=True,
+        )
+        collider_paths = strings(
+            seam.get("collider_shape_paths"),
+            f"declared module seam {seam_id}.collider_shape_paths",
+            nonempty=True,
+        )
+        allowed_visible_paths = set().union(
+            *(collision_assemblies[value]["visible_members"] for value in seam_assemblies)
+        )
+        allowed_collider_paths = set().union(
+            *(collision_assemblies[value]["collider_shapes"] for value in seam_assemblies)
+        )
+        if not visible_paths <= allowed_visible_paths or not collider_paths <= allowed_collider_paths:
+            raise ContractError(f"declared module seam {seam_id} references unresolved members or shapes")
+        seam_samples = strings(
+            seam.get("sample_ids"), f"declared module seam {seam_id}.sample_ids", nonempty=True
+        )
+        for sample_id in seam_samples:
+            metadata = sample_metadata.get(sample_id)
+            if metadata is None:
+                errors.append(f"declared module seam {seam_id} references missing sample {sample_id}")
+            elif metadata[0] not in seam_assemblies or metadata[1] != "module_seam":
+                errors.append(
+                    f"declared module seam {seam_id} sample {sample_id} is not a matching module-seam approach"
+                )
+        if text(
+            seam.get("visual_continuity_status"),
+            f"declared module seam {seam_id}.visual_continuity_status",
+        ) != "pass":
+            errors.append(f"declared module seam {seam_id} has no passing visual-continuity result")
+        if text(
+            seam.get("collision_continuity_status"),
+            f"declared module seam {seam_id}.collision_continuity_status",
+        ) != "pass":
+            errors.append(f"declared module seam {seam_id} has no passing collision-continuity result")
+        text(seam.get("raw_closeup_artifact"), f"declared module seam {seam_id}.raw_closeup_artifact")
+    for assembly_id, assembly in collision_assemblies.items():
+        if assembly["composite_kind"] == "modular_composite" and assembly_id not in modular_assemblies_with_seams:
+            errors.append(f"modular collision assembly {assembly_id} has no declared seam coverage")
+
+    traversal_trials = array(model.get("solid_volume_traversal_trials"), "solid_volume_traversal_trials")
+    solid_trial_approaches: dict[str, set[str]] = {
+        assembly_id: set()
+        for assembly_id, assembly in collision_assemblies.items()
+        if assembly["intent"] == "solid_volume_parity"
+    }
+    trial_ids: set[str] = set()
+    for trial_index, raw_trial in enumerate(traversal_trials):
+        trial = obj(raw_trial, f"solid_volume_traversal_trials[{trial_index}]")
+        trial_id = text(trial.get("id"), f"solid-volume traversal trial {trial_index}.id")
+        if trial_id in trial_ids:
+            raise ContractError(f"duplicate solid-volume traversal trial {trial_id}")
+        trial_ids.add(trial_id)
+        assembly_id = text(
+            trial.get("collision_assembly_id"),
+            f"solid-volume traversal trial {trial_id}.collision_assembly_id",
+        )
+        if assembly_id not in solid_trial_approaches:
+            raise ContractError(
+                f"solid-volume traversal trial {trial_id} references a non-solid-volume assembly"
+            )
+        if text(
+            trial.get("source_kind"), f"solid-volume traversal trial {trial_id}.source_kind"
+        ) != "production_characterbody_motion_trace":
+            raise ContractError(f"solid-volume traversal trial {trial_id} is not production-body evidence")
+        if text(
+            trial.get("production_body_path"),
+            f"solid-volume traversal trial {trial_id}.production_body_path",
+        ) != text(
+            reachability.get("hero_body_path"), "production_physics_reachability.hero_body_path"
+        ):
+            errors.append(f"solid-volume traversal trial {trial_id} uses a different body")
+        approach_class = text(
+            trial.get("approach_class"), f"solid-volume traversal trial {trial_id}.approach_class"
+        )
+        if approach_class not in collision_assemblies[assembly_id]["required_approach_classes"]:
+            errors.append(f"solid-volume traversal trial {trial_id} has an undeclared approach class")
+        solid_trial_approaches[assembly_id].add(approach_class)
+        if not boolean(
+            trial.get("blocked_before_occupied_volume"),
+            f"solid-volume traversal trial {trial_id}.blocked_before_occupied_volume",
+        ):
+            errors.append(f"solid-volume traversal trial {trial_id} was not blocked by visible mass")
+        if boolean(
+            trial.get("entered_occupied_volume"),
+            f"solid-volume traversal trial {trial_id}.entered_occupied_volume",
+        ):
+            errors.append(f"solid-volume traversal trial {trial_id} entered the occupied volume")
+        elevation_gain = number(
+            trial.get("maximum_elevation_gain"),
+            f"solid-volume traversal trial {trial_id}.maximum_elevation_gain",
+            minimum=0.0,
+        )
+        allowed_elevation_gain = number(
+            trial.get("maximum_allowed_elevation_gain"),
+            f"solid-volume traversal trial {trial_id}.maximum_allowed_elevation_gain",
+            minimum=0.0,
+        )
+        if elevation_gain > allowed_elevation_gain + 1e-9:
+            errors.append(f"solid-volume traversal trial {trial_id} climbs the impassable assembly")
+        text(trial.get("raw_motion_artifact"), f"solid-volume traversal trial {trial_id}.raw_motion_artifact")
+    for assembly_id, approaches in solid_trial_approaches.items():
+        missing_trials = collision_assemblies[assembly_id]["required_approach_classes"] - approaches
+        if missing_trials:
+            errors.append(
+                f"solid-volume collision assembly {assembly_id} lacks production-body traversal trials "
+                f"for {sorted(missing_trials)}"
             )
     if used_causes != set(cause_mappings):
         errors.append(
@@ -882,6 +1250,13 @@ def audit(model: dict[str, Any]) -> dict[str, Any]:
         "perimeter_sample_count": len(samples),
         "physics_probe_count": probe_count,
         "visible_cause_mapping_count": len(cause_mappings),
+        "collision_assembly_count": len(collision_assemblies),
+        "solid_volume_collision_assembly_count": sum(
+            value["intent"] == "solid_volume_parity"
+            for value in collision_assemblies.values()
+        ),
+        "module_seam_count": len(seam_ids),
+        "solid_volume_traversal_trial_count": len(trial_ids),
         "safety_boundary_collider_count": len(safety_colliders),
         "production_physics_grid_cell_count": len(cell_classes),
         "production_physics_free_cell_count": sum(

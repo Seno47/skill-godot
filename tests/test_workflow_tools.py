@@ -1511,6 +1511,83 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stdout)
         self.assertIn("[PASS] visible-first-boundary", completed.stdout)
 
+    def test_visible_first_boundary_solid_volume_convex_trials_pass(self) -> None:
+        model = load_asset_json("visible-first-boundary-contract.template.json")
+        assembly = model["collision_assemblies"][0]
+        assembly["collision_intent"] = "solid_volume_parity"
+        assembly["resolved_collider_shapes"][0]["shape_class"] = "ConvexPolygonShape3D"
+        model["solid_volume_traversal_trials"] = [
+            {
+                "id": f"clinic-wall-{approach}",
+                "collision_assembly_id": "clinic-wall-assembly",
+                "source_kind": "production_characterbody_motion_trace",
+                "production_body_path": "World/Player",
+                "approach_class": approach,
+                "blocked_before_occupied_volume": True,
+                "entered_occupied_volume": False,
+                "maximum_elevation_gain": 0.01,
+                "maximum_allowed_elevation_gain": 0.05,
+                "raw_motion_artifact": f"reports/raw/boundary/clinic-wall-{approach}.mp4",
+            }
+            for approach in ("edge", "corner")
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "solid-volume-pass.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "visible_first_boundary_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 0, completed.stdout)
+
+    def test_visible_first_boundary_rejects_standoff_transform_and_concave_solid(self) -> None:
+        model = load_asset_json("visible-first-boundary-contract.template.json")
+        assembly = model["collision_assemblies"][0]
+        assembly["collision_intent"] = "solid_volume_parity"
+        assembly["global_transform_parity"]["origin_error"] = 0.4
+        model["samples"][0]["ordered_hits"][0]["render_contact_distance"] = 0.85
+        model["solid_volume_traversal_trials"] = [
+            {
+                "id": f"clinic-wall-{approach}",
+                "collision_assembly_id": "clinic-wall-assembly",
+                "source_kind": "production_characterbody_motion_trace",
+                "production_body_path": "World/Player",
+                "approach_class": approach,
+                "blocked_before_occupied_volume": approach == "corner",
+                "entered_occupied_volume": approach == "edge",
+                "maximum_elevation_gain": 0.3 if approach == "edge" else 0.01,
+                "maximum_allowed_elevation_gain": 0.05,
+                "raw_motion_artifact": f"reports/raw/boundary/clinic-wall-{approach}.mp4",
+            }
+            for approach in ("edge", "corner")
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "solid-volume-negative.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "visible_first_boundary_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("global render/collision roots are misregistered", completed.stdout)
+        self.assertIn("uses concave surface collision", completed.stdout)
+        self.assertIn("exceeds the visible-edge budget", completed.stdout)
+        self.assertIn("entered the occupied volume", completed.stdout)
+        self.assertIn("climbs the impassable assembly", completed.stdout)
+
+    def test_visible_first_boundary_rejects_unsampled_modular_seam(self) -> None:
+        model = load_asset_json("visible-first-boundary-contract.template.json")
+        assembly = model["collision_assemblies"][0]
+        assembly["composite_kind"] = "modular_composite"
+        assembly["required_approach_classes"].append("module_seam")
+        with tempfile.TemporaryDirectory() as directory:
+            model_path = Path(directory) / "modular-seam-negative.json"
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            completed = run_script(
+                "visible_first_boundary_audit.py", "--model", str(model_path), "--summary"
+            )
+        self.assertEqual(completed.returncode, 1, completed.stdout)
+        self.assertIn("lacks production-capsule approaches", completed.stdout)
+        self.assertIn("has no declared seam coverage", completed.stdout)
+
     def test_visible_first_boundary_rejects_legacy_adapter_owned_reachability(self) -> None:
         model = load_asset_json("visible-first-boundary-contract.template.json")
         model["schema_version"] = 1
@@ -1594,6 +1671,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
                 "object_ids": [object_id],
                 "collider_ids": [collider_id],
                 "render_shell_ids": [render_shell_id],
+                "collision_assembly_ids": ["clinic-wall-assembly"],
             }
         ]
         model["safety_boundary_collider_ids"] = [
@@ -1628,6 +1706,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
                 ]
                 visible_hit = {
                     "distance": 0.5,
+                    "render_contact_distance": 0.52,
                     "kind": "visible_cause",
                     "cause_id": cause_id,
                     "object_id": object_id,
@@ -1649,6 +1728,8 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
                         "id": f"{span['id']}-{index:03d}",
                         "span_id": span["id"],
                         "sample_index": index,
+                        "collision_assembly_id": "clinic-wall-assembly",
+                        "approach_class": "corner" if index in {0, sample_count - 1} else "edge",
                         "origin": origin,
                         "direction": span["outward_direction"],
                         "probe_kind": "capsule_sweep",
