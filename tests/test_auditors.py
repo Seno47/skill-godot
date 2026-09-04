@@ -16,6 +16,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "valid_project"
+EDITABLE_INSTANCE_FIXTURE = ROOT / "tests" / "fixtures" / "editable_instance_project"
 SCRIPTS = ROOT / "scripts"
 
 
@@ -2436,6 +2437,73 @@ class AuditorSmokeTests(unittest.TestCase):
             self.assert_fails(
                 run_script("scene_graph_audit.py", "--project", str(project), "--summary")
             )
+
+    def test_editable_packed_scene_internal_override_is_a_nonblocking_limitation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "scene-graph.json"
+            completed = run_script(
+                "scene_graph_audit.py",
+                "--project",
+                str(EDITABLE_INSTANCE_FIXTURE),
+                "--scene",
+                "res://wrapper.tscn",
+                "--summary",
+                "--fail-on-warnings",
+                "--json-output",
+                str(report_path),
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assert_passes(completed)
+        self.assertEqual(report["error_count"], 0)
+        self.assertEqual(report["warning_count"], 0)
+        self.assertEqual(report["editable_packed_scene_internal_reference_count"], 3)
+        references = report["scenes"][0]["editable_packed_scene_internal_references"]
+        self.assertEqual(
+            {reference["kind"] for reference in references},
+            {"override_parent", "node_path", "connection_from"},
+        )
+        self.assertEqual({reference["editable_instance"] for reference in references}, {"Source"})
+        self.assertIn("verify these paths by loading the scene in Godot", completed.stdout)
+
+    def test_missing_internal_parent_without_editable_instance_remains_blocking(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "project.godot").write_text("config_version=5\n", encoding="utf-8")
+            (project / "source.tscn").write_text(
+                '[gd_scene format=3]\n\n[node name="ImportedRoot" type="Node3D"]\n',
+                encoding="utf-8",
+            )
+            (project / "bad-wrapper.tscn").write_text(
+                '[gd_scene load_steps=2 format=3]\n\n'
+                '[ext_resource type="PackedScene" path="res://source.tscn" id="1_source"]\n\n'
+                '[node name="Wrapper" type="Node3D"]\n\n'
+                '[node name="Source" parent="." instance=ExtResource("1_source")]\n\n'
+                '[node name="Mesh" parent="Source/RootNode" index="0"]\n',
+                encoding="utf-8",
+            )
+            completed = run_script(
+                "scene_graph_audit.py", "--project", str(project), "--summary"
+            )
+        self.assert_fails(completed)
+        self.assertIn("Parent node does not exist before child", completed.stdout)
+
+    def test_editable_path_must_target_a_packed_scene_instance(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "project.godot").write_text("config_version=5\n", encoding="utf-8")
+            (project / "bad-editable.tscn").write_text(
+                '[gd_scene format=3]\n\n'
+                '[node name="Wrapper" type="Node3D"]\n\n'
+                '[node name="Source" type="Node3D" parent="."]\n\n'
+                '[editable path="Source"]\n\n'
+                '[node name="Mesh" type="MeshInstance3D" parent="Source/RootNode"]\n',
+                encoding="utf-8",
+            )
+            completed = run_script(
+                "scene_graph_audit.py", "--project", str(project), "--summary"
+            )
+        self.assert_fails(completed)
+        self.assertIn("does not target an ExtResource PackedScene instance", completed.stdout)
 
     def test_texture_rect_expand_without_aspect_mode_warns(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

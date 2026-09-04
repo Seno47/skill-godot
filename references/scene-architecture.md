@@ -56,6 +56,24 @@ Use external materials, themes, curves, gradients, and other resources when seve
 - Place gameplay scripts, collision overrides, sockets, effects, and project-specific metadata in the wrapper/inherited scene so reimport does not erase them.
 - Prefer instancing a 3D imported scene rather than extracting meshes merely to place the object. Extract resources only when independent editing or reuse requires it.
 
+Godot may serialize a wrapper override for an internal child of an instanced imported
+`PackedScene` as an `[editable path="InstanceRoot"]` section followed by a `[node]`
+whose `parent` traverses the imported tree, such as `InstanceRoot/RootNode`. That
+internal parent is not repeated as a local `[node]` declaration. This is valid when:
+
+- the editable path resolves to a locally declared node whose `instance` is an
+  `ExtResource` of type `PackedScene`;
+- the override remains below that exact instance root;
+- the affected wrapper passes import/load under the project's actual Godot version.
+
+`scene_graph_audit.py` records such paths as a nonblocking
+`editable_packed_scene_internal_references` limitation because a text-only parser
+cannot expand the imported tree. It must still fail an ordinary missing parent, a
+missing/regular node named by `[editable path]`, or a path outside the editable
+instance. Do not extract imported `ArrayMesh` resources or duplicate the source
+hierarchy solely to silence this static limitation. Run the engine check to catch a
+misspelled or reimported-away internal path.
+
 ## Direct text editing
 
 Text `.tscn` and `.tres` files are valid authoring surfaces, but they are not arbitrary config files.

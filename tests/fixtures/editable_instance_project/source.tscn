@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="BoxMesh" id="BoxMesh_source"]
+size = Vector3(1, 1, 1)
+
+[node name="ImportedRoot" type="Node3D"]
+
+[node name="RootNode" type="Node3D" parent="."]
+
+[node name="Mesh" type="MeshInstance3D" parent="RootNode"]
+mesh = SubResource("BoxMesh_source")

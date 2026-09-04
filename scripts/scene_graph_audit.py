@@ -128,6 +128,37 @@ def serialized_value_is_nonempty(value: str) -> bool:
     return value.strip() not in {"", '""', '&""', "null", "Null"}
 
 
+def packed_scene_instance_resource_id(
+    node: dict[str, Any], ext_resources: dict[str, dict[str, str]]
+) -> str | None:
+    instance = node.get("instance")
+    if not instance:
+        return None
+    match = re.fullmatch(r'ExtResource\("([^"]+)"\)', instance)
+    if not match:
+        return None
+    resource_id = match.group(1)
+    resource = ext_resources.get(resource_id)
+    if resource is None or resource.get("type") != "PackedScene":
+        return None
+    return resource_id
+
+
+def editable_packed_scene_anchor(
+    candidate_path: str,
+    paths: dict[str, dict[str, Any]],
+    editable_paths: set[str],
+    ext_resources: dict[str, dict[str, str]],
+) -> str | None:
+    for editable_path in sorted(editable_paths, key=len, reverse=True):
+        if candidate_path != editable_path and not candidate_path.startswith(editable_path + "/"):
+            continue
+        instance_node = paths.get(editable_path)
+        if instance_node and packed_scene_instance_resource_id(instance_node, ext_resources):
+            return editable_path
+    return None
+
+
 def audit_scene(root: Path, path: Path) -> dict[str, Any]:
     scene_name = path.relative_to(root).as_posix()
     text = path.read_text(encoding="utf-8-sig", errors="replace")
@@ -137,6 +168,8 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
     sub_resources: dict[str, dict[str, Any]] = {}
     nodes: list[dict[str, Any]] = []
     connections: list[dict[str, Any]] = []
+    editable_declarations: list[dict[str, Any]] = []
+    imported_internal_references: list[dict[str, Any]] = []
     current_node: dict[str, Any] | None = None
     current_sub_resource: dict[str, Any] | None = None
 
@@ -175,6 +208,10 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
             elif kind == "connection":
                 attrs["line"] = line_number
                 connections.append(attrs)
+            elif kind == "editable":
+                editable_declarations.append(
+                    {"path": attrs.get("path"), "line": line_number}
+                )
             continue
         if "=" in stripped and not stripped.startswith(";"):
             key, value = stripped.split("=", 1)
@@ -186,8 +223,21 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
 
     if not nodes:
         diagnostics.append(diagnostic("error", scene_name, 1, "Scene contains no [node] sections"))
-        return {"scene": scene_name, "nodes": 0, "resources": len(ext_resources) + len(sub_resources), "diagnostics": diagnostics}
+        return {
+            "scene": scene_name,
+            "nodes": 0,
+            "resources": len(ext_resources) + len(sub_resources),
+            "connections": len(connections),
+            "editable_packed_scene_internal_reference_count": 0,
+            "editable_packed_scene_internal_references": [],
+            "diagnostics": diagnostics,
+        }
 
+    editable_paths = {
+        normalized_node_path(str(item["path"]))
+        for item in editable_declarations
+        if item.get("path") is not None
+    }
     paths: dict[str, dict[str, Any]] = {}
     for index, node in enumerate(nodes):
         parent = node["parent"]
@@ -204,14 +254,56 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
                 node_path = node["name"] if parent_path == "." else f"{parent_path}/{node['name']}"
                 node_path = normalized_node_path(node_path)
                 if parent_path not in paths:
-                    diagnostics.append(
-                        diagnostic("error", scene_name, node["line"], f"Parent node does not exist before child: {parent}")
+                    editable_anchor = editable_packed_scene_anchor(
+                        parent_path, paths, editable_paths, ext_resources
                     )
+                    if editable_anchor is None:
+                        diagnostics.append(
+                            diagnostic("error", scene_name, node["line"], f"Parent node does not exist before child: {parent}")
+                        )
+                    else:
+                        imported_internal_references.append(
+                            {
+                                "kind": "override_parent",
+                                "path": parent_path,
+                                "editable_instance": editable_anchor,
+                                "line": node["line"],
+                            }
+                        )
         node["path"] = node_path
         if node_path in paths:
             diagnostics.append(diagnostic("error", scene_name, node["line"], f"Duplicate node path: {node_path}"))
         else:
             paths[node_path] = node
+
+    for item in editable_declarations:
+        raw_path = item.get("path")
+        line_number = int(item["line"])
+        if raw_path is None:
+            diagnostics.append(
+                diagnostic("error", scene_name, line_number, "[editable] section has no path")
+            )
+            continue
+        editable_path = normalized_node_path(str(raw_path))
+        if editable_path in {".", "<outside>"}:
+            diagnostics.append(
+                diagnostic("error", scene_name, line_number, f"Invalid editable instance path: {raw_path}")
+            )
+            continue
+        instance_node = paths.get(editable_path)
+        if instance_node is None:
+            diagnostics.append(
+                diagnostic("error", scene_name, line_number, f"Editable instance node is missing: {raw_path}")
+            )
+        elif packed_scene_instance_resource_id(instance_node, ext_resources) is None:
+            diagnostics.append(
+                diagnostic(
+                    "error",
+                    scene_name,
+                    line_number,
+                    f"Editable path does not target an ExtResource PackedScene instance: {raw_path}",
+                )
+            )
 
     for resource_id, resource in ext_resources.items():
         resource_path = resource.get("path", "")
@@ -299,14 +391,27 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
             for match in NODE_PATH_PATTERN.finditer(property_data["value"]):
                 target = resolve_from_node(node["path"], match.group("path"))
                 if target not in paths and target not in {"<absolute>", "<outside>"}:
-                    diagnostics.append(
-                        diagnostic(
-                            "warning",
-                            scene_name,
-                            property_data["line"],
-                            f"NodePath in {node['path']}:{property_name} does not resolve: {match.group('path')}",
-                        )
+                    editable_anchor = editable_packed_scene_anchor(
+                        target, paths, editable_paths, ext_resources
                     )
+                    if editable_anchor is None:
+                        diagnostics.append(
+                            diagnostic(
+                                "warning",
+                                scene_name,
+                                property_data["line"],
+                                f"NodePath in {node['path']}:{property_name} does not resolve: {match.group('path')}",
+                            )
+                        )
+                    else:
+                        imported_internal_references.append(
+                            {
+                                "kind": "node_path",
+                                "path": target,
+                                "editable_instance": editable_anchor,
+                                "line": property_data["line"],
+                            }
+                        )
 
     expanding_styleboxes: dict[str, list[str]] = {}
     expand_properties = {
@@ -393,10 +498,28 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
     for connection in connections:
         for endpoint in ("from", "to"):
             value = connection.get(endpoint)
-            if value is None or normalized_node_path(value) not in paths:
+            normalized_endpoint = normalized_node_path(value or "")
+            if value is None:
                 diagnostics.append(
                     diagnostic("error", scene_name, int(connection["line"]), f"Signal connection {endpoint} node is missing: {value}")
                 )
+            elif normalized_endpoint not in paths:
+                editable_anchor = editable_packed_scene_anchor(
+                    normalized_endpoint, paths, editable_paths, ext_resources
+                )
+                if editable_anchor is None:
+                    diagnostics.append(
+                        diagnostic("error", scene_name, int(connection["line"]), f"Signal connection {endpoint} node is missing: {value}")
+                    )
+                else:
+                    imported_internal_references.append(
+                        {
+                            "kind": f"connection_{endpoint}",
+                            "path": normalized_endpoint,
+                            "editable_instance": editable_anchor,
+                            "line": int(connection["line"]),
+                        }
+                    )
         target_path = normalized_node_path(connection.get("to", ""))
         target_node = paths.get(target_path)
         method = connection.get("method")
@@ -413,11 +536,26 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
                     )
                 )
 
+    if imported_internal_references:
+        anchors = sorted({item["editable_instance"] for item in imported_internal_references})
+        diagnostics.append(
+            diagnostic(
+                "info",
+                scene_name,
+                min(int(item["line"]) for item in imported_internal_references),
+                f"{len(imported_internal_references)} reference(s) target internal nodes below "
+                f"editable PackedScene instance(s) {', '.join(anchors)}; static hierarchy "
+                "expansion is unavailable, so verify these paths by loading the scene in Godot.",
+            )
+        )
+
     return {
         "scene": scene_name,
         "nodes": len(nodes),
         "resources": len(ext_resources) + len(sub_resources),
         "connections": len(connections),
+        "editable_packed_scene_internal_reference_count": len(imported_internal_references),
+        "editable_packed_scene_internal_references": imported_internal_references,
         "diagnostics": diagnostics,
     }
 
@@ -447,11 +585,15 @@ def main() -> int:
         "project": str(root),
         "scene_count": len(results),
         "node_count": sum(result["nodes"] for result in results),
+        "editable_packed_scene_internal_reference_count": sum(
+            result["editable_packed_scene_internal_reference_count"] for result in results
+        ),
         "error_count": errors,
         "warning_count": warnings,
         "scenes": results,
         "limitations": [
             "Static text-scene analysis cannot prove runtime-assigned values, imported-scene internals, or editor-unsaved nodes.",
+            "Paths below an explicitly editable PackedScene instance are recorded as imported-internal limitations; Godot engine load/import is authoritative for whether those internal override, NodePath, and connection targets exist.",
             "Godot import/run remains authoritative for property types, ownership, scripts, and resource compatibility.",
             "TextureRect aspect warnings are candidates for rendered review; backgrounds and deliberate stretch art may be valid.",
             "Focus StyleBox clipping warnings cover serialized in-scene SubResources; external themes and runtime overrides still need rendered focus-state review.",

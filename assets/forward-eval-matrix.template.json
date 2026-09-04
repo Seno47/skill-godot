@@ -53,7 +53,8 @@
     "localization",
     "large-world",
     "replay",
-    "runtime-authoring"
+    "runtime-authoring",
+    "editable-packed-scene-internal-overrides"
   ],
   "scenarios": [
     {

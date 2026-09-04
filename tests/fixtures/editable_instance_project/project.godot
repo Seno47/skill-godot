@@ -1,0 +1,11 @@
+; Engine configuration file.
+config_version=5
+
+[application]
+
+config/name="Editable PackedScene Audit Fixture"
+run/main_scene="res://wrapper.tscn"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"

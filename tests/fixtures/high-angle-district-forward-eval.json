@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "skill_commit": "post-old-clinic-v26-bidirectional-physics-and-facade-role-regression",
+  "skill_commit": "post-editable-packed-scene-internal-override-regression",
   "required_contracts": [
     "high-angle-district-composition",
     "high-angle-architectural-material-direction",
@@ -25,9 +25,50 @@
     "production-physics-boundary-reachability-v2",
     "visible-limiter-continuity",
     "ai-repeated-recovery",
-    "shipping-package-hygiene"
+    "shipping-package-hygiene",
+    "editable-packed-scene-internal-overrides"
   ],
   "scenarios": [
+    {
+      "id": "editable-imported-packed-scene-material-override-positive",
+      "brief_path": "fixtures/editable_instance_project/wrapper.tscn",
+      "godot_version": "4.7.2",
+      "composite_case": "new-3d-third-person-complete+high-angle-3d-district-complete",
+      "contracts": ["editable-packed-scene-internal-overrides"],
+      "builder_context": "builder authors a wrapper with an imported PackedScene instance, explicit editable path and an internal material override",
+      "reviewer_context": "isolated audit runner checks the static imported-internal limitation record and separately loads the exact wrapper with Godot 4.7.2",
+      "first_pass_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "the exception is limited to descendants of a locally declared editable ExtResource PackedScene instance and still requires exact engine load/import",
+      "token_cost": 120,
+      "elapsed_minutes": 1,
+      "result_artifacts": ["reports/scene-graph-audit.json", "reports/godot-wrapper-load.log"]
+    },
+    {
+      "id": "missing-parent-without-editable-packed-scene-negative",
+      "brief_path": "fixtures/scene-graph-editable-negative.tscn",
+      "godot_version": "4.x",
+      "composite_case": "new-3d-third-person-complete+high-angle-3d-district-complete",
+      "contracts": ["editable-packed-scene-internal-overrides"],
+      "builder_context": "builder places an override-like node below an undeclared internal parent without an editable PackedScene boundary",
+      "reviewer_context": "isolated static auditor must preserve the ordinary missing-parent blocker and reject invalid editable targets",
+      "first_pass_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [
+        "a missing parent outside an explicit editable PackedScene boundary is incorrectly downgraded"
+      ],
+      "expected_gate_for_each_defect": {
+        "a missing parent outside an explicit editable PackedScene boundary is incorrectly downgraded": "scene_authored"
+      },
+      "false_positive_burden": "ordinary local hierarchies retain the previous strict parent ordering rule; only the exact serialized editable PackedScene boundary receives limitation status",
+      "token_cost": 80,
+      "elapsed_minutes": 1,
+      "result_artifacts": ["reports/scene-graph-audit-negative.log"]
+    },
     {
       "id": "authored-evacuation-district-positive",
       "brief_path": "fixtures/brief-high-angle-evacuation-district.md",

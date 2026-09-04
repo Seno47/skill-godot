@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://source.tscn" id="1_source"]
+[ext_resource type="Script" path="res://verify_override.gd" id="2_verify"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_override"]
+albedo_color = Color(0.2, 0.7, 0.5, 1)
+
+[node name="Wrapper" type="Node3D"]
+script = ExtResource("2_verify")
+target_path = NodePath("Source/RootNode")
+
+[node name="Source" parent="." instance=ExtResource("1_source")]
+
+[editable path="Source"]
+
+[node name="Mesh" parent="Source/RootNode" index="0"]
+material_override = SubResource("StandardMaterial_override")
+
+[connection signal="tree_exiting" from="Source/RootNode" to="." method="_on_source_tree_exiting"]

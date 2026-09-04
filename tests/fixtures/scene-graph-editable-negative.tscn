@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://source.tscn" id="1_source"]
+
+[node name="Wrapper" type="Node3D"]
+
+[node name="Source" parent="." instance=ExtResource("1_source")]
+
+[node name="Mesh" parent="Source/RootNode" index="0"]
