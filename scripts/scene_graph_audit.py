@@ -144,18 +144,36 @@ def packed_scene_instance_resource_id(
     return resource_id
 
 
+def packed_scene_anchor(
+    candidate_path: str,
+    paths: dict[str, dict[str, Any]],
+    ext_resources: dict[str, dict[str, str]],
+) -> str | None:
+    candidates: list[str] = []
+    for path, node in paths.items():
+        if packed_scene_instance_resource_id(node, ext_resources) is None:
+            continue
+        if path == "." and candidate_path != ".":
+            candidates.append(path)
+        elif candidate_path == path or candidate_path.startswith(path + "/"):
+            candidates.append(path)
+    if candidates:
+        return max(candidates, key=lambda value: -1 if value == "." else len(value))
+    return None
+
+
 def editable_packed_scene_anchor(
     candidate_path: str,
     paths: dict[str, dict[str, Any]],
     editable_paths: set[str],
     ext_resources: dict[str, dict[str, str]],
 ) -> str | None:
-    for editable_path in sorted(editable_paths, key=len, reverse=True):
-        if candidate_path != editable_path and not candidate_path.startswith(editable_path + "/"):
-            continue
-        instance_node = paths.get(editable_path)
-        if instance_node and packed_scene_instance_resource_id(instance_node, ext_resources):
-            return editable_path
+    covered = any(
+        candidate_path == editable_path or candidate_path.startswith(editable_path + "/")
+        for editable_path in editable_paths
+    )
+    if covered:
+        return packed_scene_anchor(candidate_path, paths, ext_resources)
     return None
 
 
@@ -255,7 +273,7 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
                 node_path = normalized_node_path(node_path)
                 if parent_path not in paths:
                     editable_anchor = editable_packed_scene_anchor(
-                        parent_path, paths, editable_paths, ext_resources
+                        node_path, paths, editable_paths, ext_resources
                     )
                     if editable_anchor is None:
                         diagnostics.append(
@@ -290,19 +308,26 @@ def audit_scene(root: Path, path: Path) -> dict[str, Any]:
                 diagnostic("error", scene_name, line_number, f"Invalid editable instance path: {raw_path}")
             )
             continue
-        instance_node = paths.get(editable_path)
-        if instance_node is None:
-            diagnostics.append(
-                diagnostic("error", scene_name, line_number, f"Editable instance node is missing: {raw_path}")
-            )
-        elif packed_scene_instance_resource_id(instance_node, ext_resources) is None:
+        if editable_path in paths:
+            continue
+        editable_anchor = packed_scene_anchor(editable_path, paths, ext_resources)
+        if editable_anchor is None:
             diagnostics.append(
                 diagnostic(
                     "error",
                     scene_name,
                     line_number,
-                    f"Editable path does not target an ExtResource PackedScene instance: {raw_path}",
+                    f"Editable path is neither a local node nor internal to an ExtResource PackedScene instance: {raw_path}",
                 )
+            )
+        else:
+            imported_internal_references.append(
+                {
+                    "kind": "editable_declaration",
+                    "path": editable_path,
+                    "editable_instance": editable_anchor,
+                    "line": line_number,
+                }
             )
 
     for resource_id, resource in ext_resources.items():

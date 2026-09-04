@@ -56,22 +56,24 @@ Use external materials, themes, curves, gradients, and other resources when seve
 - Place gameplay scripts, collision overrides, sockets, effects, and project-specific metadata in the wrapper/inherited scene so reimport does not erase them.
 - Prefer instancing a 3D imported scene rather than extracting meshes merely to place the object. Extract resources only when independent editing or reuse requires it.
 
-Godot may serialize a wrapper override for an internal child of an instanced imported
-`PackedScene` as an `[editable path="InstanceRoot"]` section followed by a `[node]`
-whose `parent` traverses the imported tree, such as `InstanceRoot/RootNode`. That
-internal parent is not repeated as a local `[node]` declaration. This is valid when:
+Godot has several valid `[editable path]` serializations. The path may resolve to an
+ordinary node already declared in the current `.tscn`, such as a local
+`CameraRig/Camera3D`. It may instead name an internal child that is absent from the
+wrapper text because its hierarchy comes from an `ExtResource` of type
+`PackedScene`. That PackedScene boundary can be either a named child instance such
+as `InstanceRoot` or the current scene root `.` when the first `[node]` itself uses
+`instance=ExtResource(...)`. Overrides below those editable paths can likewise have
+parents such as `InstanceRoot/RootNode` that are not repeated locally.
 
-- the editable path resolves to a locally declared node whose `instance` is an
-  `ExtResource` of type `PackedScene`;
-- the override remains below that exact instance root;
-- the affected wrapper passes import/load under the project's actual Godot version.
-
-`scene_graph_audit.py` records such paths as a nonblocking
+`scene_graph_audit.py` accepts a declared local editable node directly. For a path,
+override parent, NodePath, or connection endpoint below a statically proven child or
+root `PackedScene` boundary, it records a nonblocking
 `editable_packed_scene_internal_references` limitation because a text-only parser
-cannot expand the imported tree. It must still fail an ordinary missing parent, a
-missing/regular node named by `[editable path]`, or a path outside the editable
-instance. Do not extract imported `ArrayMesh` resources or duplicate the source
-hierarchy solely to silence this static limitation. Run the engine check to catch a
+cannot expand the imported tree. Require the exact wrapper/inherited scene to pass
+import/load under the project's actual Godot version. An ordinary missing parent or
+an unknown editable path outside every local `PackedScene` boundary remains a hard
+error. Do not extract imported `ArrayMesh` resources or duplicate the source
+hierarchy solely to silence the static limitation; use the engine check to catch a
 misspelled or reimported-away internal path.
 
 ## Direct text editing

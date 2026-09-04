@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[node name="Root" type="Node3D"]
+
+[node name="CameraRig" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+
+[editable path="CameraRig/Camera3D"]

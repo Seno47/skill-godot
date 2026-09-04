@@ -2487,7 +2487,46 @@ class AuditorSmokeTests(unittest.TestCase):
         self.assert_fails(completed)
         self.assertIn("Parent node does not exist before child", completed.stdout)
 
-    def test_editable_path_must_target_a_packed_scene_instance(self) -> None:
+    def test_root_packed_scene_internal_editable_path_is_nonblocking(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "scene-graph.json"
+            completed = run_script(
+                "scene_graph_audit.py",
+                "--project",
+                str(EDITABLE_INSTANCE_FIXTURE),
+                "--scene",
+                "res://inherited_wrapper.tscn",
+                "--summary",
+                "--fail-on-warnings",
+                "--json-output",
+                str(report_path),
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assert_passes(completed)
+        self.assertEqual(report["editable_packed_scene_internal_reference_count"], 1)
+        reference = report["scenes"][0]["editable_packed_scene_internal_references"][0]
+        self.assertEqual(reference["kind"], "editable_declaration")
+        self.assertEqual(reference["editable_instance"], ".")
+
+    def test_existing_local_editable_path_is_nonblocking(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "scene-graph.json"
+            completed = run_script(
+                "scene_graph_audit.py",
+                "--project",
+                str(EDITABLE_INSTANCE_FIXTURE),
+                "--scene",
+                "res://local_camera.tscn",
+                "--summary",
+                "--fail-on-warnings",
+                "--json-output",
+                str(report_path),
+            )
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assert_passes(completed)
+        self.assertEqual(report["editable_packed_scene_internal_reference_count"], 0)
+
+    def test_unknown_editable_path_outside_packed_scene_remains_blocking(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
             (project / "project.godot").write_text("config_version=5\n", encoding="utf-8")
@@ -2495,15 +2534,14 @@ class AuditorSmokeTests(unittest.TestCase):
                 '[gd_scene format=3]\n\n'
                 '[node name="Wrapper" type="Node3D"]\n\n'
                 '[node name="Source" type="Node3D" parent="."]\n\n'
-                '[editable path="Source"]\n\n'
-                '[node name="Mesh" type="MeshInstance3D" parent="Source/RootNode"]\n',
+                '[editable path="Missing/Camera3D"]\n',
                 encoding="utf-8",
             )
             completed = run_script(
                 "scene_graph_audit.py", "--project", str(project), "--summary"
             )
         self.assert_fails(completed)
-        self.assertIn("does not target an ExtResource PackedScene instance", completed.stdout)
+        self.assertIn("is neither a local node nor internal to", completed.stdout)
 
     def test_texture_rect_expand_without_aspect_mode_warns(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
