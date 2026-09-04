@@ -10,6 +10,7 @@ import sys
 from typing import Any
 
 from rubric_case_composer import CaseCompositionError, gate_applies, resolve_case_selector
+from evidence_integrity import validate_gate_integrity
 
 
 class ScorecardError(RuntimeError):
@@ -96,6 +97,8 @@ def artifact_items(value: Any, label: str) -> list[dict[str, Any]]:
                 "path": path.strip(),
                 "kind": kind,
                 "states": states,
+                **({"sha256": item["sha256"]} if "sha256" in item else {}),
+                **({"segments": item["segments"]} if "segments" in item else {}),
                 **({"description": description.strip()} if isinstance(description, str) else {}),
             }
         )
@@ -269,6 +272,7 @@ def main() -> int:
         artifact_root = resolve_artifact_root(evidence_path, evidence.get("run_metadata", {}))
 
         gates: list[dict[str, Any]] = []
+        integrity_cache: dict = {}
         blocking = False
         for definition in rubric.get("blocking_gates", []):
             gate_id = definition.get("id")
@@ -303,6 +307,10 @@ def main() -> int:
                 artifact_root,
             )
             if status == "pass":
+                validation_failures.extend(validate_gate_integrity(
+                    gate_id, value, acceptance_owner, evidence.get("run_metadata", {}),
+                    artifact_root, integrity_cache,
+                ))
                 if reviewer_role != acceptance_owner:
                     validation_failures.append(
                         f"passing gate requires reviewer.role={acceptance_owner}; found {reviewer_role or 'missing'}"
@@ -615,6 +623,7 @@ def main() -> int:
             "dimensions": dimensions,
             "warnings": warnings,
             "artifact_root": str(artifact_root),
+            "assessment_scope": "Recorded verdicts with candidate/media/receipt validation; not an autonomous aesthetic judgment or reviewer authentication.",
             "run_metadata": evidence.get("run_metadata", {}),
             "project_disposition": project_disposition,
             "limitations": evidence.get("limitations", []),

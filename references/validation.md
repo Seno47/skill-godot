@@ -2,6 +2,8 @@
 
 Read this before claiming any Godot task is complete. Validate in proportion to the requested change and report evidence, not confidence.
 
+For scorecards, follow [evidence-integrity.md](evidence-integrity.md): bind candidate/artifact hashes, decode actual media, preserve external review receipts and distinguish coverage declarations from executed evaluations. A passing validator cannot certify aesthetics. Reuse one exact-candidate packet across applicable gates.
+
 ## Core questions
 
 1. **Structure:** Are scenes, resources, scripts, ownership, references, and imports valid and maintainable?

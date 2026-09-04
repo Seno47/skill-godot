@@ -1,0 +1,14 @@
+config_version=5
+
+[application]
+config/name="Godot Motion Lab - teaching fixture"
+run/main_scene="res://lab.tscn"
+
+[display]
+window/size/viewport_width=960
+window/size/viewport_height=620
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.045, 0.062, 0.072, 1)

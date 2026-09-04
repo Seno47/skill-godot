@@ -23,7 +23,7 @@ Use icon-first or shape/meter-first telemetry for frequently checked resources a
 
 Do not turn this into blind icon-only UI. Ambiguous symbols need an accessible name, tooltip, first-use label/legend, or expanded description. A short label may disappear after demonstrated learning. Never rely on color alone; combine it with shape, pattern, direction, value, position, motion, sound, or another suitable channel.
 
-Inventory non-text communication as explicitly as text. For each critical state or action, name the icon, meter, shape, world cue, material, motion, contact marker, sound, or spatial relationship that carries meaning before a sentence is read. Reject a complete-game surface that is mainly large panels and repeated identical labeled rectangles even when every string localizes and every touch target passes.
+Inventory non-text communication as explicitly as text. For each critical state or action, name the icon, meter, shape, world cue, material, motion, contact marker, sound, or spatial relationship that carries meaning before a sentence is read. Reject large panels/repeated identical labeled rectangles when they hide the action, obscure priorities or force unnecessary reading, even if localization and touch targets pass. Comparison-heavy strategy, simulation or upgrade flows may legitimately use tables and repeated rows; assess decision clarity rather than counting rectangles.
 
 Build one authored icon family that belongs to the game's identity: consistent stroke/fill, perspective, corner/shape language, optical weight, palette, and final-size rendering. Emoji, arbitrary Unicode glyphs, default editor icons, unexplained AI-drawn symbols, and a stylistically foreign icon pack remain placeholders.
 

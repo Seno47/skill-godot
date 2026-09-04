@@ -19,6 +19,8 @@ Preserve an explicit user reference or requested style, but translate its motion
 
 Build one representative motion cell before bulk assets/content. It should include the core input response, one complete world/system action, a visible reward or state change, and a crowded or repeated state at gameplay scale. Reject the direction early if it only looks convincing in a still, enlarged preview, isolated rig viewer, or slowed recording.
 
+Use `assets/motion-lab/` as an editable mechanism reference for press/reward, work/contact, travel/turning and panel interruption. Run its good and deliberately broken variants to calibrate observations. It is a teaching fixture, not production art or a required look. Adapt timing and geometry to the game's reference; compare matched cycles at 1x speed. Do not claim that its deterministic assertions certify naturalness. Bind the recording and actual watchback observations through [evidence-integrity.md](evidence-integrity.md).
+
 ## Use scene-authored motion ownership
 
 - Keep reusable animations, curves, state machines, markers, sockets, and effect/audio anchors in the scene or external resources that own the visual action.
@@ -99,4 +101,3 @@ Then capture raw target-build motion at the shipping camera and normal playback 
 Fail builder acceptance for visible sliding, floating, mechanical uniformity, weightless starts/stops, wrong pivots, linear path corners, late facing, contact gaps/penetration, animation-state pops, broken blends, loop seams, repetitive phase lock, over-animation, camera/VFX/audio mistiming, or movement that only looks acceptable in slow motion. Record exact timestamps and disposition in the review template.
 
 Human preference may refine personality, stylization, intensity, or taste. It must not become the discovery mechanism for the routine defects above.
-

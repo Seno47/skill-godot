@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="620" viewBox="0 0 960 620">
+<rect width="960" height="620" fill="#f4eee3"/>
+<g font-family="sans-serif" fill="#28342e">
+<text x="48" y="52" font-size="16">Workshop · composition study</text>
+<text x="744" y="52" font-size="18">240 coins</text>
+<text x="48" y="125" font-size="32" font-weight="bold">Finish the cabinet</text>
+<text x="48" y="158" font-size="18">Sand the last two panels.</text>
+<g transform="translate(165 213)">
+<path d="M0 0H255V213H0Z" fill="#926b48"/><path d="M12 12H119V201H12Z" fill="#cca373"/><path d="M136 12H243V201H136Z" fill="#d6b788"/>
+<path d="M120 0H135V213H120Z" fill="#765339"/><path d="M20 213V231M235 213V231" stroke="#634a33" stroke-width="13"/>
+<path d="M100 97V117M152 97V117" stroke="#4c4230" stroke-width="6"/>
+</g>
+<text x="600" y="240" font-size="18" font-weight="bold">Work completed</text>
+<rect x="600" y="260" width="280" height="12" rx="6" fill="#d8d1c3"/><rect x="600" y="260" width="187" height="12" rx="6" fill="#46735a"/>
+<text x="600" y="309" font-size="18">4 of 6 panels · reward 80 coins</text>
+<path d="M600 345H880" stroke="#c9c1b0"/>
+<text x="600" y="381" font-size="18" font-weight="bold">Next improvement</text>
+<text x="600" y="410" font-size="17">Wider sanding tool</text>
+<text x="600" y="437" font-size="17">2 panels per action · 120 coins</text>
+<rect x="600" y="464" width="280" height="52" rx="7" fill="none" stroke="#46735a" stroke-width="2"/>
+<text x="740" y="497" font-size="18" text-anchor="middle">Buy wider tool</text>
+<rect x="165" y="486" width="255" height="60" rx="8" fill="#355f48"/>
+<text x="292" y="524" font-size="21" fill="#fff" text-anchor="middle">Sand panel</text>
+<text x="48" y="590" font-size="13" fill="#657066">Diagnostic layout only. Evaluate hierarchy and predicted actions; not final production artwork.</text>
+</g></svg>

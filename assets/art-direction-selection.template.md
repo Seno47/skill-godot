@@ -34,6 +34,7 @@ Rationale:
 - Lighting, shadow, atmosphere, and time logic:
 - Motion, animation, camera, and VFX character:
 - Typography, icon, menu, and gameplay-UI language:
+- UI anchor record: core-play, secondary surface, component states and reference-to-runtime comparison from `ui-design-anchor.template.md`:
 - Primary asset family and adaptation rules for secondary sources:
 - Explicit visual and production exclusions:
 

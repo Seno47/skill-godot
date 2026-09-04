@@ -9,6 +9,9 @@
 
 `skill-godot` gives Codex a repeatable workflow for creating real Godot projects: authored scenes and resources, coherent assets, playable controls, deterministic checks, visual review, performance evidence, and release-ready exports. It covers 2D, 3D, 2.5D, isometric and orthographic games; procedural, strategy, vehicle, shooter and narrative systems; single-player, local/online multiplayer, extraction and honest MMO production slices; accessibility, localization, saves, replay, large worlds, LiveOps, native mobile/XR, runtime authoring, reproducible releases, crash recovery, commerce/cloud/safety, desktop hardware, modding/UGC, stores, and Yandex Games.
 
+
+The entrypoint now routes detailed contracts by task. New UI work establishes a [rendered design anchor](./references/ui-design-workflow.md) before multiplying screens. The [motion lab](./assets/motion-lab/README.md) provides editable mechanisms and deliberate failure variants; [UI calibration examples](./assets/ui-calibration/reviewer-task.md) exercise first-read hierarchy, not artistic excellence. [Evidence integrity](./references/evidence-integrity.md) now requires candidate/artifact hashes, actual media decoding and preserved external review receipts. Legacy forward-eval matrices are coverage declarations: only bound observed runs use execution mode. Synthetic unit tests do not establish visual quality.
+
 ## Quick start
 
 Ask Codex to install this repository:
@@ -31,8 +34,8 @@ Codex can also select the skill automatically when a request clearly matches its
 
 | Included | What it gives you |
 | --- | --- |
-| 65 focused production guides | Scene architecture, visual-style selection, 2D/3D/2.5D, high-angle district/environment/road semantics, UI, production-craft/product approval, saves, accessibility, AI, genre/network systems, difficulty/pacing, commerce/cloud/safety, resilience/upgrades, hardware, assets, performance, and release work |
-| 47 deterministic Python helpers | Project/asset audits, resolved dependency-closure provenance, local/whole-map environment, visible-first perimeter, road/junction/facade/furniture/reachability checks, visual checks, Godot MJPEG AVI watchback packets, genre-aware difficulty and system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive probes, rubric composition, capture, budgets, scorecards, and build/package-hygiene checks |
+| Focused production guides | Scene architecture, visual-style selection, 2D/3D/2.5D, high-angle district/environment/road semantics, UI, production-craft/product approval, saves, accessibility, AI, genre/network systems, difficulty/pacing, commerce/cloud/safety, resilience/upgrades, hardware, assets, performance, and release work |
+| Deterministic Python helpers | Project/asset audits, resolved dependency-closure provenance, local/whole-map environment, visible-first perimeter, road/junction/facade/furniture/reachability checks, visual checks, Godot MJPEG AVI watchback packets, genre-aware difficulty and system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive probes, rubric composition, capture, budgets, scorecards, and build/package-hygiene checks |
 | 8 reusable Godot probes | Touch scrolling, button composition, third-person controls/HUD mouse routing/visibility, isometric projection/navigation, and transient whole-perimeter boundary evidence |
 | Scene-first authoring rules | Persistent composition stays in `.tscn` scenes and Godot resources instead of disappearing into large runtime scripts |
 | Evidence-based completion | The scorecard verifies acceptance ownership plus concrete screenshot/video/review paths and rejects prose-only PASS claims |

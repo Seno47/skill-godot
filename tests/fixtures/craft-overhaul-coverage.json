@@ -1,0 +1,188 @@
+{
+  "schema_version": 2,
+  "scope": "focused",
+  "skill_commit": "uncommitted-craft-overhaul",
+  "record_kind": "PLANNED_COVERAGE_NOT_EXECUTION",
+  "note": "Reproducible mechanism/validator tests exist, but these independent forward tasks have NOT run. Source paths below are fixtures, not observed review results. Replace all run metadata from real responses before execution validation.",
+  "required_contracts": [
+    "ui-design-anchor",
+    "motion-mechanism-calibration",
+    "candidate-media-review-integrity"
+  ],
+  "scenarios": [
+    {
+      "id": "ui-clear-action",
+      "brief_path": "../../assets/ui-calibration/reviewer-task.md",
+      "godot_version": "4.x selected by actual evaluator",
+      "composite_case": "new-2d-complete",
+      "builder_context": "UNRESOLVED-builder-run",
+      "reviewer_context": "UNRESOLVED-independent-run",
+      "contracts": [
+        "ui-design-anchor"
+      ],
+      "first_pass_verdict": "blocked",
+      "expected_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "Not observed: this is a coverage plan, not a completed independent run.",
+      "token_cost": 0,
+      "elapsed_minutes": 0,
+      "result_artifacts": [
+        "../../assets/ui-calibration/clear-composition.svg"
+      ],
+      "brief_sha256": "UNRESOLVED",
+      "artifact_sha256": {},
+      "execution_receipt": {
+        "path": "UNRESOLVED",
+        "sha256": "UNRESOLVED"
+      }
+    },
+    {
+      "id": "ui-ornamental-confusion",
+      "brief_path": "../../assets/ui-calibration/reviewer-task.md",
+      "godot_version": "4.x selected by actual evaluator",
+      "composite_case": "new-2d-complete",
+      "builder_context": "UNRESOLVED-builder-run",
+      "reviewer_context": "UNRESOLVED-independent-run",
+      "contracts": [
+        "ui-design-anchor"
+      ],
+      "first_pass_verdict": "blocked",
+      "expected_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "Not observed: this is a coverage plan, not a completed independent run.",
+      "token_cost": 0,
+      "elapsed_minutes": 0,
+      "result_artifacts": [
+        "../../assets/ui-calibration/decorated-confusion.svg"
+      ],
+      "brief_sha256": "UNRESOLVED",
+      "artifact_sha256": {},
+      "execution_receipt": {
+        "path": "UNRESOLVED",
+        "sha256": "UNRESOLVED"
+      }
+    },
+    {
+      "id": "motion-owned-contact",
+      "brief_path": "../../assets/motion-lab/README.md",
+      "godot_version": "4.x selected by actual evaluator",
+      "composite_case": "new-2d-complete",
+      "builder_context": "UNRESOLVED-builder-run",
+      "reviewer_context": "UNRESOLVED-independent-run",
+      "contracts": [
+        "motion-mechanism-calibration"
+      ],
+      "first_pass_verdict": "blocked",
+      "expected_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "Not observed: this is a coverage plan, not a completed independent run.",
+      "token_cost": 0,
+      "elapsed_minutes": 0,
+      "result_artifacts": [
+        "../../assets/motion-lab/lab.tscn"
+      ],
+      "brief_sha256": "UNRESOLVED",
+      "artifact_sha256": {},
+      "execution_receipt": {
+        "path": "UNRESOLVED",
+        "sha256": "UNRESOLVED"
+      }
+    },
+    {
+      "id": "motion-broken-contact",
+      "brief_path": "../../assets/motion-lab/README.md",
+      "godot_version": "4.x selected by actual evaluator",
+      "composite_case": "new-2d-complete",
+      "builder_context": "UNRESOLVED-builder-run",
+      "reviewer_context": "UNRESOLVED-independent-run",
+      "contracts": [
+        "motion-mechanism-calibration"
+      ],
+      "first_pass_verdict": "blocked",
+      "expected_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "Not observed: this is a coverage plan, not a completed independent run.",
+      "token_cost": 0,
+      "elapsed_minutes": 0,
+      "result_artifacts": [
+        "../../assets/motion-lab/lab.gd"
+      ],
+      "brief_sha256": "UNRESOLVED",
+      "artifact_sha256": {},
+      "execution_receipt": {
+        "path": "UNRESOLVED",
+        "sha256": "UNRESOLVED"
+      }
+    },
+    {
+      "id": "evidence-bound-decoded",
+      "brief_path": "../../references/evidence-integrity.md",
+      "godot_version": "4.x selected by actual evaluator",
+      "composite_case": "new-2d-complete",
+      "builder_context": "UNRESOLVED-builder-run",
+      "reviewer_context": "UNRESOLVED-independent-run",
+      "contracts": [
+        "candidate-media-review-integrity"
+      ],
+      "first_pass_verdict": "blocked",
+      "expected_verdict": "pass",
+      "positive_fixture": true,
+      "negative_fixture": false,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "Not observed: this is a coverage plan, not a completed independent run.",
+      "token_cost": 0,
+      "elapsed_minutes": 0,
+      "result_artifacts": [
+        "../test_evidence_integrity.py"
+      ],
+      "brief_sha256": "UNRESOLVED",
+      "artifact_sha256": {},
+      "execution_receipt": {
+        "path": "UNRESOLVED",
+        "sha256": "UNRESOLVED"
+      }
+    },
+    {
+      "id": "evidence-fake-stale",
+      "brief_path": "../../references/evidence-integrity.md",
+      "godot_version": "4.x selected by actual evaluator",
+      "composite_case": "new-2d-complete",
+      "builder_context": "UNRESOLVED-builder-run",
+      "reviewer_context": "UNRESOLVED-independent-run",
+      "contracts": [
+        "candidate-media-review-integrity"
+      ],
+      "first_pass_verdict": "blocked",
+      "expected_verdict": "fail",
+      "positive_fixture": false,
+      "negative_fixture": true,
+      "user_found_defects": [],
+      "expected_gate_for_each_defect": {},
+      "false_positive_burden": "Not observed: this is a coverage plan, not a completed independent run.",
+      "token_cost": 0,
+      "elapsed_minutes": 0,
+      "result_artifacts": [
+        "../test_evidence_integrity.py"
+      ],
+      "brief_sha256": "UNRESOLVED",
+      "artifact_sha256": {},
+      "execution_receipt": {
+        "path": "UNRESOLVED",
+        "sha256": "UNRESOLVED"
+      }
+    }
+  ]
+}

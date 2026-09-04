@@ -7,7 +7,10 @@ import argparse
 import json
 from pathlib import Path
 import sys
+import re
+import subprocess
 from typing import Any
+from evidence_integrity import check_hash, resolve, concrete, decode_media, observations_present, finite_number
 
 
 class MatrixError(RuntimeError):
@@ -18,6 +21,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Audit skill-godot forward-eval coverage.")
     parser.add_argument("--matrix", required=True)
     parser.add_argument("--summary", action="store_true")
+    parser.add_argument("--mode", choices=("coverage", "execution"), default="coverage")
+    parser.add_argument("--skill-repo", help="Git checkout containing the evaluated immutable commit (execution mode)")
     return parser.parse_args()
 
 
@@ -45,14 +50,27 @@ def string_list(value: Any, label: str, *, allow_empty: bool = False) -> list[st
     return result
 
 
-def audit(data: dict[str, Any]) -> tuple[list[str], list[str], int]:
+def audit(data: dict[str, Any], mode: str = "coverage", root: Path | None = None, skill_repo: Path | None = None) -> tuple[list[str], list[str], int]:
     errors: list[str] = []
     warnings: list[str] = []
-    if data.get("schema_version") != 1:
-        errors.append("schema_version must be 1")
+    if data.get("schema_version") not in {1, 2}:
+        errors.append("schema_version must be 1 or 2")
+    if mode == "coverage":
+        warnings.append("Declaration coverage only: no executed task, media review or artistic improvement is established.")
+    elif data.get("schema_version") != 2:
+        errors.append("execution mode requires schema_version=2 with bound observed runs")
     commit = data.get("skill_commit")
     if not isinstance(commit, str) or len(commit.strip()) < 7 or "replace" in commit.lower():
         errors.append("skill_commit must name the tested immutable revision")
+    if mode == "execution" and (not isinstance(commit, str) or not re.fullmatch(r'[0-9a-f]{40}', commit)):
+        errors.append("execution requires a full immutable Git commit SHA")
+    elif mode == 'execution':
+        try:
+            subprocess.run(['git','-C',str(skill_repo or Path(__file__).resolve().parents[1]),'cat-file','-e',commit+'^{commit}'], capture_output=True, check=True, timeout=10)
+        except (OSError, subprocess.SubprocessError):
+            errors.append('skill commit does not resolve in --skill-repo; a plausible SHA is not provenance')
+    if data.get('scope', 'canonical') not in {'canonical', 'focused'}:
+        errors.append('scope must be canonical or focused')
     try:
         required = string_list(data.get("required_contracts"), "required_contracts")
     except MatrixError as exc:
@@ -96,6 +114,8 @@ def audit(data: dict[str, Any]) -> tuple[list[str], list[str], int]:
             errors.append(f"{label} names unknown contracts: {', '.join(unknown)}")
         positive = item.get("positive_fixture") is True
         negative = item.get("negative_fixture") is True
+        if positive and negative:
+            errors.append(f"{label} cannot be both positive and negative")
         if not positive and not negative:
             errors.append(f"{label} must contribute a positive or negative fixture")
         for contract in set(contracts) & set(required):
@@ -119,8 +139,42 @@ def audit(data: dict[str, Any]) -> tuple[list[str], list[str], int]:
             errors.append(f"{label}.false_positive_burden must be measured or explicitly observed")
         for field in ("token_cost", "elapsed_minutes"):
             value = item.get(field)
-            if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+            if not finite_number(value) or value < 0:
                 errors.append(f"{label}.{field} must be a non-negative number")
+
+        if mode == "execution":
+            try:
+                artifact_root = root or Path.cwd()
+                check_hash(resolve(artifact_root, item.get('brief_path')), item.get('brief_sha256'))
+                expected = item.get('expected_verdict')
+                if expected not in {'pass', 'fail', 'blocked'} or expected != item.get('first_pass_verdict'):
+                    raise MatrixError('expected and observed verdicts disagree or are missing')
+                if (positive and expected != 'pass') or (negative and expected == 'pass'):
+                    raise MatrixError('calibration polarity disagrees with expected verdict')
+                ref = item.get('execution_receipt', {})
+                path = resolve(artifact_root, ref.get('path'))
+                check_hash(path, ref.get('sha256'))
+                receipt = json.loads(path.read_text(encoding='utf-8-sig'))
+                if receipt.get('skill_commit') != commit or receipt.get('scenario_id') != scenario_id or receipt.get('observed_verdict') != expected:
+                    raise MatrixError('execution receipt is stale or contradicts the scenario')
+                if receipt.get('builder_context') != item['builder_context'] or receipt.get('reviewer_context') != item['reviewer_context'] or not concrete(receipt.get('source_message')):
+                    raise MatrixError('execution receipt lacks matching context/response provenance')
+                if not observations_present(receipt.get('observations')):
+                    raise MatrixError('execution receipt lacks observations')
+                hashes = item.get('artifact_sha256', {})
+                observed = receipt.get('artifact_sha256', {})
+                for name in item.get('result_artifacts', []):
+                    result_path = resolve(artifact_root, name)
+                    actual = check_hash(result_path, hashes.get(name))
+                    if observed.get(name) != actual:
+                        raise MatrixError('receipt did not observe the exact result artifact')
+                    suffix = result_path.suffix.lower()
+                    if suffix in {'.png', '.jpg', '.jpeg', '.webp'}:
+                        decode_media(result_path, 'image')
+                    elif suffix in {'.avi', '.mp4', '.webm', '.mov', '.mkv'}:
+                        decode_media(result_path, 'video')
+            except Exception as exc:
+                errors.append(f'{label}: execution evidence invalid: {exc}')
 
     for contract, states in coverage.items():
         if not states["positive"]:
@@ -131,7 +185,7 @@ def audit(data: dict[str, Any]) -> tuple[list[str], list[str], int]:
         isinstance(item, dict) and "+" in str(item.get("composite_case", ""))
         for item in scenarios
     )
-    if hybrid_count < 4:
+    if data.get('scope', 'canonical') == 'canonical' and hybrid_count < 4:
         errors.append(f"only {hybrid_count} hybrid scenario(s); canonical matrix requires at least 4")
     return errors, warnings, len(scenarios)
 
@@ -139,13 +193,13 @@ def audit(data: dict[str, Any]) -> tuple[list[str], list[str], int]:
 def main() -> int:
     args = parse_args()
     try:
-        errors, warnings, count = audit(read_json(args.matrix))
+        errors, warnings, count = audit(read_json(args.matrix), args.mode, Path(args.matrix).resolve().parent, Path(args.skill_repo) if args.skill_repo else None)
         for message in errors:
             print(f"[ERROR] {message}")
         for message in warnings:
             print(f"[WARN] {message}")
-        status = "PASS" if not errors else "FAIL"
-        print(f"[{status}] forward-eval scenarios={count} errors={len(errors)} warnings={len(warnings)}")
+        status = ("COVERAGE" if args.mode == 'coverage' else "EXECUTION_VALIDATED") if not errors else "FAIL"
+        print(f"[{status}] forward-eval mode={args.mode} scenarios={count} errors={len(errors)} warnings={len(warnings)}")
         return 0 if not errors else 1
     except MatrixError as exc:
         print(f"[ERROR] {exc}", file=sys.stderr)

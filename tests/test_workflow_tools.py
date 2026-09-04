@@ -720,7 +720,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
     def test_positive_and_negative_coverage_passes(self) -> None:
         completed = self.run_matrix(self.valid_matrix())
         self.assertEqual(completed.returncode, 0, completed.stdout)
-        self.assertIn("[PASS] forward-eval", completed.stdout)
+        self.assertIn("[COVERAGE] forward-eval", completed.stdout)
 
     def test_missing_negative_fixture_fails(self) -> None:
         model = self.valid_matrix()
@@ -737,7 +737,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             "--summary",
         )
         self.assertEqual(completed.returncode, 0, completed.stdout)
-        self.assertIn("[PASS] forward-eval", completed.stdout)
+        self.assertIn("[COVERAGE] forward-eval", completed.stdout)
 
     def test_ui_onboarding_and_progression_have_positive_and_negative_fixtures(self) -> None:
         completed = run_script(
@@ -747,7 +747,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             "--summary",
         )
         self.assertEqual(completed.returncode, 0, completed.stdout)
-        self.assertIn("[PASS] forward-eval", completed.stdout)
+        self.assertIn("[COVERAGE] forward-eval", completed.stdout)
 
     def test_product_craft_and_closure_have_positive_and_negative_fixtures(self) -> None:
         completed = run_script(
@@ -757,7 +757,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             "--summary",
         )
         self.assertEqual(completed.returncode, 0, completed.stdout)
-        self.assertIn("[PASS] forward-eval", completed.stdout)
+        self.assertIn("[COVERAGE] forward-eval", completed.stdout)
 
     def test_high_angle_district_and_camera_have_positive_and_negative_fixtures(self) -> None:
         completed = run_script(
@@ -767,7 +767,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             "--summary",
         )
         self.assertEqual(completed.returncode, 0, completed.stdout)
-        self.assertIn("[PASS] forward-eval", completed.stdout)
+        self.assertIn("[COVERAGE] forward-eval", completed.stdout)
 
     def test_motion_watchback_has_isolated_positive_and_negative_fixtures(self) -> None:
         completed = run_script(
@@ -777,7 +777,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             "--summary",
         )
         self.assertEqual(completed.returncode, 0, completed.stdout)
-        self.assertIn("[PASS] forward-eval", completed.stdout)
+        self.assertIn("[COVERAGE] forward-eval", completed.stdout)
 
     def test_production_motion_has_isolated_positive_and_negative_fixtures(self) -> None:
         completed = run_script(
@@ -787,7 +787,7 @@ class ForwardEvaluationAuditTests(unittest.TestCase):
             "--summary",
         )
         self.assertEqual(completed.returncode, 0, completed.stdout)
-        self.assertIn("[PASS] forward-eval", completed.stdout)
+        self.assertIn("[COVERAGE] forward-eval", completed.stdout)
 
     def test_environment_integrity_template_passes(self) -> None:
         completed = run_script(

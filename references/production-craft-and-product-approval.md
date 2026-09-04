@@ -17,6 +17,8 @@ An independent reviewer can judge comprehension and craft, but cannot decide whe
 
 Use `assets/cross-surface-production-craft-review.template.md`. Lock one build/source ID and review these raw states together:
 
+Reuse this packet for the menu/HUD/art-family gates when the same reviewer covered them. Bind actual artifacts and review receipts using [evidence-integrity.md](evidence-integrity.md). A declared independent role is not proof that another context reviewed the build. Include both a clear conventional design and an ornamental but confusing design in reviewer calibration; bespoke widgets receive no preference merely for being bespoke.
+
 - main menu;
 - pause or the material runtime modal that interrupts play;
 - settings with real control states;
@@ -84,7 +86,7 @@ Palette agreement is only one channel. Reject painterly or textured world art cr
 
 ## Reset the actual review modality
 
-Before an independent or product-owner handoff, fill `assets/review-profile-reset.template.md` after the last builder run. Reset and verify the exact path the reviewer will use:
+Before an independent or product-owner handoff, fill `assets/review-profile-reset.template.md` after the last builder run. Use an isolated clean profile in the exact modality where possible. Preserve user-owned progress. Reset only identified QA-owned saves or explicitly authorized saves, including recovery files, and verify the path the reviewer will use:
 
 - Godot Editor **Run Project/Scene**: the real project `user://` save envelope, primary file, backup/recovery file, tutorial flag, and relevant settings;
 - exported desktop build: its actual application data/save location and profile/slot;

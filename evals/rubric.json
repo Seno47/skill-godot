@@ -61,7 +61,11 @@
           "direction_contract": ["report"],
           "selection_rationale": ["report"],
           "style_anchor": ["image"],
-          "representative_composition": ["image"]
+          "representative_composition": ["image"],
+          "ui_core_anchor": ["image"],
+          "ui_secondary_anchor": ["image"],
+          "ui_component_states": ["image"],
+          "ui_anchor_comparison": ["report"]
         }
       }
     },

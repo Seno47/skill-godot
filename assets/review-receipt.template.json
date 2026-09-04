@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "build_id": "UNRESOLVED",
+  "candidate_sha256": "UNRESOLVED",
+  "reviewer_context": "UNRESOLVED",
+  "source_context": "UNRESOLVED",
+  "source_message": "UNRESOLVED: exact response/message locator from that context",
+  "gates": {
+    "cross_surface_production_craft_review": {
+      "verdict": "not_tested",
+      "blockers": [],
+      "observations": [],
+      "first_read_before_intent": false,
+      "first_read_observations": [],
+      "artifacts": {}
+    }
+  }
+}

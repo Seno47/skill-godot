@@ -1,8 +1,12 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "scope": "canonical",
   "skill_commit": "replace-with-tested-skill-commit",
   "required_contracts": [
     "art-direction-selection",
+    "ui-design-anchor",
+    "candidate-media-review-integrity",
+    "motion-mechanism-calibration",
     "ui-onboarding-discoverability",
     "telegraph-art-language",
     "progression-visual-comprehension",
@@ -60,12 +64,14 @@
     {
       "id": "replace-with-scenario-id",
       "brief_path": "replace-with-blind-brief",
+      "brief_sha256": "replace-with-actual-sha256",
       "godot_version": "replace-with-version",
       "composite_case": "replace-with-case-or-case+modifier",
       "contracts": ["replace-with-covered-contract"],
       "builder_context": "independent build context",
       "reviewer_context": "separate raw-artifact review context",
       "first_pass_verdict": "not_tested",
+      "expected_verdict": "replace-with-pass-fail-or-blocked",
       "positive_fixture": false,
       "negative_fixture": false,
       "user_found_defects": [],
@@ -73,7 +79,9 @@
       "false_positive_burden": "unmeasured",
       "token_cost": null,
       "elapsed_minutes": null,
-      "result_artifacts": []
+      "result_artifacts": [],
+      "artifact_sha256": {},
+      "execution_receipt": {"path": "replace-with-preserved-run-receipt", "sha256": "replace-with-actual-sha256"}
     }
   ]
 }

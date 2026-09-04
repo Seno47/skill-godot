@@ -2,6 +2,8 @@
 
 Use this for menus, HUDs, dialogs, overlays, inventories, settings, editors, and input prompts.
 
+For new UI or a substantial redesign, begin with [ui-design-workflow.md](ui-design-workflow.md) and its rendered design anchor before multiplying widgets. Conventional geometry and clear text are valid; judge hierarchy and fit instead of rewarding custom decoration. Use a shared capture packet across the applicable reviews.
+
 ## Author UI as scenes
 
 - Build persistent interface hierarchy with `Control` nodes in `.tscn` scenes.
@@ -31,8 +33,8 @@ Absolute offsets are appropriate for deliberate fixed-size elements, fine art-di
 - Put shared styling in `Theme`, `StyleBox`, font, and icon resources instead of repeating per-node overrides.
 - Use theme type variations for semantic variants. Avoid a unique style override on every control.
 - Preserve contrast and readability over every gameplay background; add a designed backdrop/scrim where necessary.
-- Do not ship default Godot controls as finished UI when the brief calls for a designed interface.
-- Inspect actual sliders, tracks, thumbs, switches, checkboxes, option buttons, scrollbars, and focus/disabled states in the target build. Native/default-looking `HSlider`, `VSlider`, `CheckButton`, `CheckBox`, or other control art remains scaffolding until the shared `Theme`/scene-authored presentation makes it one readable game-specific family; functioning values and persistence do not pass surface craft.
+- Do not leave accidental default styling that conflicts with the game's interface direction.
+- Inspect actual sliders, tracks, thumbs, switches, checkboxes, option buttons, scrollbars, and focus/disabled states in the target build. Native `HSlider`, `VSlider`, `CheckButton` and `CheckBox` are appropriate mechanisms; use the shared `Theme`/scene-authored presentation to make a coherent readable family. Functional values and persistence do not establish craft, but replacing native behavior or adding decorative art is not required.
 - Custom and scene-authored controls receive no automatic quality credit. A dashboard of repeated outlined rows/cards, obscure state glyphs, weak descriptions, inconsistent padding/weight, or unclear pressed/disabled states remains unfinished even when every value persists and no native Godot pixels remain.
 - Treat `StyleBox` content margins, expand margins, border width, theme constants, and the control's runtime minimum size as different mechanisms. An expand margin draws outside the control rect and can be clipped without increasing its hit target; do not use it as hidden layout spacing.
 
@@ -63,7 +65,7 @@ Absolute offsets are appropriate for deliberate fixed-size elements, fine art-di
 - Ensure text is real text when it needs localization, accessibility, or dynamic content; do not bake arbitrary UI copy into generated images.
 - Test interpolated counts and records with locale-representative values for zero, singular, plural, and larger numbers. Do not ship English shortcuts such as `pulse(s)` or slash-separated word forms; use the project's localization/plural rules and inspect the result at the narrowest supported width.
 
-For a complete-game main menu, separate navigation clarity from identity craft. The title must read as a deliberate wordmark or typographic composition at runtime size. Native `Label` text is valid when font, weight, spacing, line breaks, treatment, placement, and relation to the mark/background are authored; a huge default/common-font label is not automatically a wordmark. Audit every kicker, subtitle, tagline, and premise sentence for a player-facing purpose. Remove generic marketing/explanatory copy when the screen already communicates the game and choices. Apply the same anti-scaffolding standard to settings and results: a themed menu cannot excuse native sliders/checkbuttons or a result screen that is only another stack of labeled panels.
+For a complete-game main menu, separate navigation clarity from identity craft. The title must read as a deliberate wordmark or typographic composition at runtime size. Native `Label` text is valid when font, weight, spacing, line breaks, treatment, placement, and relation to the mark/background are authored; a huge default/common-font label is not automatically a wordmark. Audit every kicker, subtitle, tagline, and premise sentence for a player-facing purpose. Remove generic marketing/explanatory copy when the screen already communicates the game and choices. Apply the same anti-scaffolding standard to settings and results: a themed menu cannot excuse incoherent control states or a result screen whose panel repetition hides the result and next action.
 
 Review the whole menu for template fingerprints, especially a small badge/kicker, huge title, decorative accent line, redundant “do X / survive Y” tagline, and four identical rectangular buttons over an interchangeable dark/gradient background. Individual devices may be appropriate, but an unexplained stack is not production identity. Create a clear primary/secondary action hierarchy, integrate the background/world motif, and record the independent verdict with `assets/menu-identity-craft-review.template.md`.
 

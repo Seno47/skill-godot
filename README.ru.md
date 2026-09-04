@@ -9,6 +9,9 @@
 
 `skill-godot` задаёт Codex воспроизводимый процесс разработки настоящего проекта Godot: редактируемые сцены и ресурсы, цельные ассеты, удобное управление, детерминированные проверки, визуальная проверка, замеры производительности и готовый к публикации экспорт. Поддерживаются 2D, 3D, 2.5D, изометрические и ортографические игры; procedural, strategy, racing, action и narrative; одиночный, local/online multiplayer, extraction и честные MMO production slices; accessibility, localization, saves, replay, большие миры, LiveOps, native mobile/XR, runtime authoring, reproducible releases, crash recovery, commerce/cloud/safety, desktop hardware, modding/UGC, stores и Яндекс Игры.
 
+
+Основной файл теперь подключает подробные контракты по задаче. Новый UI начинается с [визуального образца](./references/ui-design-workflow.md) до размножения экранов. [Лаборатория движения](./assets/motion-lab/README.md) содержит редактируемые механизмы и намеренно сломанные варианты; [примеры UI](./assets/ui-calibration/reviewer-task.md) проверяют первое понимание и иерархию, а не художественное совершенство. [Проверка доказательств](./references/evidence-integrity.md) требует хешей сборки/материалов, декодирования медиа и сохранённых ответов внешнего ревьюера. Старые forward-eval матрицы считаются планами покрытия; исполненные проверки подтверждаются отдельно. Юнит-тесты не доказывают красоту игры.
+
 ## Быстрый старт
 
 Попросите Codex установить репозиторий:
@@ -31,8 +34,8 @@ Codex также может выбрать навык автоматически
 
 | Состав | Практическая польза |
 | --- | --- |
-| 65 профильных руководств | Архитектура сцен, выбор визуального стиля, 2D/3D/2.5D, high-angle районы/environment/road semantics, UI, saves, accessibility, AI, жанры/network, difficulty/pacing, commerce/cloud/safety, resilience/upgrades, hardware, ассеты, performance и release |
-| 47 детерминированных Python-утилит | Аудиты проекта/ассетов, provenance resolved dependency closure, локальные/whole-map environment, visible-first perimeter и road/junction/facade/furniture/reachability проверки, visual checks, Godot MJPEG AVI watchback-пакеты, genre-aware difficulty и system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive-пробы, композиция rubric, capture, бюджеты, scorecard и build/package hygiene |
+| Профильные руководства | Архитектура сцен, выбор визуального стиля, 2D/3D/2.5D, high-angle районы/environment/road semantics, UI, saves, accessibility, AI, жанры/network, difficulty/pacing, commerce/cloud/safety, resilience/upgrades, hardware, ассеты, performance и release |
+| Детерминированные Python-утилиты | Аудиты проекта/ассетов, provenance resolved dependency closure, локальные/whole-map environment, visible-first perimeter и road/junction/facade/furniture/reachability проверки, visual checks, Godot MJPEG AVI watchback-пакеты, genre-aware difficulty и system contracts, crash/commerce/cloud/safety/upgrade/fault/hardware/assistive-пробы, композиция rubric, capture, бюджеты, scorecard и build/package hygiene |
 | 8 переиспользуемых Godot-проб | Тач-прокрутка, компоновка кнопок, third-person управление/HUD mouse routing/видимость, изометрическая проекция/навигация и transient whole-perimeter boundary evidence |
 | Правила scene-first | Постоянная композиция хранится в `.tscn` и ресурсах Godot, а не скрывается в больших runtime-скриптах |
 | Завершение по доказательствам | Scorecard сверяет владельца приёмки и реальные пути к скриншотам, видео и review, отклоняя PASS только на словах |

@@ -80,6 +80,7 @@ Use only applicable metrics and set them before reviewing the final capture.
 - Entire recording watched at normal speed: YES / NO / UNAVAILABLE
 - Shipping FPS/playback speed confirmed:
 - Exact timestamps of defects and recaptured fixes:
+- Evidence `watchback[video_sha256]`: full duration, speed 1, and actual observations (decoder success is not this attestation):
 
 ## Perceptual rejection checklist
 
@@ -104,4 +105,3 @@ Marking a line PASS means it was inspected in motion at gameplay size.
 - Evidence limitations:
 
 A deterministic trace, valid animation resource, decoder PASS, or contact sheet alone cannot award PASS. The builder must inspect the raw exact-candidate motion and fix routine visible defects before handoff.
-

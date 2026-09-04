@@ -86,6 +86,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--capture-manifest-output", help="Also instantiate the canonical capture manifest.")
     parser.add_argument("--review-output", help="Also instantiate the independent review template.")
     parser.add_argument("--menu-review-output", help="Also instantiate the menu identity craft review.")
+    parser.add_argument("--ui-design-anchor-output", help="Also instantiate the early UI design anchor.")
     parser.add_argument(
         "--cross-surface-craft-review-output",
         help="Also instantiate the cross-surface production craft review.",
@@ -433,6 +434,8 @@ def prepare_evidence(
     metadata.setdefault("clean_profile_provenance", "unrecorded")
     metadata.setdefault("seeded_profile_provenance", "unrecorded")
     metadata.setdefault("capture_manifest", "unrecorded")
+    metadata.setdefault("candidate", {"build_id": "UNRESOLVED", "path": "UNRESOLVED", "sha256": "UNRESOLVED"})
+    metadata["evidence_integrity_version"] = 2
     metadata.setdefault(
         "artifact_root",
         ".",
@@ -464,6 +467,7 @@ def main() -> int:
                 args.capture_manifest_output,
                 args.review_output,
                 args.menu_review_output,
+                args.ui_design_anchor_output,
                 args.cross_surface_craft_review_output,
                 args.review_profile_reset_output,
                 args.product_owner_slice_output,
@@ -526,6 +530,8 @@ def main() -> int:
             copy_template(REVIEW_TEMPLATE, output_path(args.review_output))
         if args.menu_review_output:
             copy_template(MENU_REVIEW_TEMPLATE, output_path(args.menu_review_output))
+        if args.ui_design_anchor_output:
+            copy_template(ROOT / "assets/ui-design-anchor.template.md", output_path(args.ui_design_anchor_output))
         if args.cross_surface_craft_review_output:
             copy_template(
                 CROSS_SURFACE_CRAFT_REVIEW_TEMPLATE,

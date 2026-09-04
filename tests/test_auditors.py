@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
+import shutil
 from io import BytesIO
 import json
 from pathlib import Path
@@ -18,9 +20,76 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "valid_project"
 EDITABLE_INSTANCE_FIXTURE = ROOT / "tests" / "fixtures" / "editable_instance_project"
 SCRIPTS = ROOT / "scripts"
+_MEDIA_TEMP = tempfile.TemporaryDirectory(prefix="skill-godot-unit-media-")
+_MEDIA_ROOT = Path(_MEDIA_TEMP.name)
+_MEDIA_READY = False
+
+
+def bind_synthetic_fixture(source: dict) -> dict:
+    """Real codecs, explicitly synthetic content. Never an artistic forward-eval."""
+    global _MEDIA_READY
+    if not _MEDIA_READY:
+        from PIL import Image
+        target = _MEDIA_ROOT / "evidence-artifacts"
+        target.mkdir()
+        for index, original in enumerate((ROOT / 'tests/fixtures/evidence-artifacts').iterdir()):
+            if not original.is_file():
+                continue
+            destination = target / original.name
+            if original.suffix == '.png':
+                Image.new('RGB', (64, 36), (index * 7 % 255, 90, 120)).save(destination)
+            elif original.suffix == '.avi':
+                write_mjpeg_avi(destination)
+            else:
+                shutil.copyfile(original, destination)
+        (_MEDIA_ROOT / 'candidate.json').write_text('{"synthetic_unit_fixture":true}', encoding='utf-8')
+        _MEDIA_READY = True
+    digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+    candidate = _MEDIA_ROOT / 'candidate.json'
+    metadata = source.setdefault('run_metadata', {})
+    metadata['artifact_root'] = str(_MEDIA_ROOT)
+    metadata['builder_context'] = 'synthetic-builder-session'
+    metadata['candidate'] = {'build_id':'synthetic-unit-build', 'path':str(candidate), 'sha256':digest(candidate)}
+    for gate_id, gate in source['gates'].items():
+        gate['build_id'] = 'synthetic-unit-build'
+        gate['candidate_sha256'] = digest(candidate)
+        observed = {}
+        for item in gate.get('artifacts', []):
+            path = _MEDIA_ROOT / item['path']
+            if path.is_file():
+                item['sha256'] = digest(path)
+                observed.setdefault(item['sha256'], []).extend(item.get('states', []))
+                if item['kind'] == 'video':
+                    item['segments'] = {state:[0, 3] for state in item.get('states', [])}
+                    gate.setdefault('watchback', {})[item['sha256']] = {'playback_speed':1,'start_seconds':0,'end_seconds':3,'observations':['Synthetic validator input only.']}
+        reviewer = gate.get('reviewer', {})
+        if reviewer.get('role', 'builder') != 'builder':
+            context = reviewer.get('context', 'synthetic-independent-session')
+            receipt = {'schema_version':1, 'build_id':gate['build_id'], 'candidate_sha256':gate['candidate_sha256'],
+                       'reviewer_context':context, 'source_context':context, 'source_message':'synthetic-unit-response',
+                       'gates':{gate_id:{'verdict':'pass', 'blockers':[], 'observations':['Synthetic validator input, not a visual evaluation.'],
+                                        'artifacts':observed, 'first_read_before_intent':True, 'first_read_observations':['Synthetic observation.']}}}
+            receipt_path = _MEDIA_ROOT / (gate_id + '-receipt.json')
+            receipt_path.write_text(json.dumps(receipt), encoding='utf-8')
+            reviewer['receipt'] = {'path':str(receipt_path), 'sha256':digest(receipt_path)}
+    return source
 
 
 def run_script(name: str, *arguments: str) -> subprocess.CompletedProcess[str]:
+    # Legacy tests isolate state/owner/floor behavior. Dedicated integrity tests
+    # bypass this fixture rebinding so stale bytes and receipts remain testable.
+    if name == 'eval_scorecard.py' and '--evidence' in arguments:
+        fixture_path = Path(arguments[arguments.index('--evidence') + 1])
+        fixture_data = json.loads(fixture_path.read_text(encoding='utf-8'))
+        with tempfile.TemporaryDirectory(prefix='skill-scorecard-input-') as folder:
+            isolated = Path(folder) / 'evidence.json'
+            isolated.write_text(json.dumps(bind_synthetic_fixture(fixture_data)), encoding='utf-8')
+            isolated_args = list(arguments)
+            isolated_args[isolated_args.index('--evidence') + 1] = str(isolated)
+            return subprocess.run(
+                [sys.executable, '-B', str(SCRIPTS / name), *isolated_args], cwd=ROOT,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors='replace', check=False,
+            )
     return subprocess.run(
         [sys.executable, "-B", str(SCRIPTS / name), *arguments],
         cwd=ROOT,
@@ -53,6 +122,13 @@ def load_eval_evidence() -> dict:
     source.setdefault("run_metadata", {})["artifact_root"] = str(
         ROOT / "tests" / "fixtures"
     )
+    anchor = source['gates']['art_direction_selection_evidence']['artifacts']
+    anchor[0]['states'].append('ui_anchor_comparison')
+    anchor[2]['states'].append('ui_core_anchor')
+    anchor.extend([
+        {'path':'evidence-artifacts/menu.png', 'kind':'image', 'states':['ui_secondary_anchor']},
+        {'path':'evidence-artifacts/icon.png', 'kind':'image', 'states':['ui_component_states']},
+    ])
     return source
 
 
